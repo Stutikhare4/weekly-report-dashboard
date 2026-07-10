@@ -1,0 +1,19 @@
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Hi Stuti app icon">
+  <defs>
+    <linearGradient id="bg" x1="64" y1="40" x2="448" y2="472" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0f172a"/>
+      <stop offset="1" stop-color="#07111f"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="124" y1="120" x2="388" y2="392" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#fde68a"/>
+      <stop offset="1" stop-color="#f97316"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="120" fill="url(#bg)"/>
+  <circle cx="372" cy="138" r="72" fill="#38bdf8" fill-opacity="0.2"/>
+  <circle cx="124" cy="386" r="100" fill="#f97316" fill-opacity="0.14"/>
+  <rect x="108" y="116" width="96" height="280" rx="36" fill="url(#accent)"/>
+  <text x="156" y="278" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="160" font-weight="700" fill="#07111f">H</text>
+  <text x="248" y="332" font-family="Georgia, 'Times New Roman', serif" font-size="90" font-weight="700" fill="#eef4ff">i,</text>
+  <text x="248" y="404" font-family="Georgia, 'Times New Roman', serif" font-size="76" font-weight="700" fill="#eef4ff">Stuti</text>
+</svg>

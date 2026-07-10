@@ -1,0 +1,213 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Weekly Report Dashboard</title>
+    <meta name="theme-color" content="#07111f" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Weekly Status" />
+    <link rel="manifest" href="manifest.webmanifest" />
+    <link rel="icon" href="icon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="styles.css" />
+    <script defer src="app.js"></script>
+  </head>
+  <body>
+    <div class="shell">
+      <aside class="sidebar">
+        <div class="brand">
+          <div class="brand-mark">S</div>
+          <div>
+            <p class="eyebrow">Weekly status</p>
+            <h1 id="greetingTitle">Hi</h1>
+            <p class="brand-subtitle">Weekly report dashboard</p>
+          </div>
+        </div>
+
+        <div class="sidebar-copy">
+          <p>Open the project folder, choose current or closed work, then click a project name to see its page.</p>
+        </div>
+
+        <div class="stats">
+          <article>
+            <span id="projectCount">0</span>
+            <small>projects</small>
+          </article>
+          <article>
+            <span id="currentCount">0</span>
+            <small>current</small>
+          </article>
+          <article>
+            <span id="closedCount">0</span>
+            <small>closed</small>
+          </article>
+          <article>
+            <span id="updateCount">0</span>
+            <small>weekly updates</small>
+          </article>
+        </div>
+
+        <div class="sidebar-actions">
+          <button id="sidebarAddProject" class="primary-button sidebar-button" type="button" style="margin-bottom: 8px;">+ New Project</button>
+          <button id="resetAll" class="ghost-button sidebar-button" type="button">Reset all data</button>
+        </div>
+      </aside>
+
+      <main class="content">
+        <section class="card screen screen-home" id="homeScreen">
+          <div class="card-head">
+            <div>
+              <p class="eyebrow">Home</p>
+              <h2>Projects</h2>
+            </div>
+            <div class="actions" style="align-items: center;">
+              <button id="homeAddProject" class="primary-button" type="button" style="padding: 8px 14px; font-size: 0.85rem; border-radius: 10px;">+ New Project</button>
+              <span class="pill">Folder view</span>
+            </div>
+          </div>
+
+          <div class="home-grid">
+            <button class="folder-button folder-button-warm" id="openCurrent" type="button">
+              <span class="folder-label">Current projects</span>
+              <span id="currentProjectCount" class="folder-count">0</span>
+              <small>Open active work</small>
+            </button>
+
+            <button class="folder-button folder-button-cool" id="openClosed" type="button">
+              <span class="folder-label">Closed projects</span>
+              <span id="closedProjectCount" class="folder-count">0</span>
+              <small>Review completed work</small>
+            </button>
+          </div>
+        </section>
+
+        <section class="card screen" id="categoryScreen" hidden>
+          <div class="screen-head">
+            <button id="backToHome" class="ghost-button" type="button">Back</button>
+            <div class="screen-title">
+              <p class="eyebrow">Folder</p>
+              <h2 id="categoryTitle">Projects</h2>
+            </div>
+            <span id="categoryBadge" class="pill pill-dark">0</span>
+          </div>
+
+          <div id="categoryList" class="project-name-list"></div>
+        </section>
+
+        <section class="card screen" id="projectScreen" hidden>
+          <div class="screen-head">
+            <button id="backToCategory" class="ghost-button" type="button">Back</button>
+            <div class="screen-title">
+              <p class="eyebrow">Project page</p>
+              <h2 id="projectTitle">Project</h2>
+            </div>
+            <span id="projectStatusBadge" class="pill pill-dark">Current</span>
+          </div>
+
+          <div class="project-detail-grid">
+            <section class="detail-panel">
+              <h3>Overview</h3>
+              <div id="projectOverview" class="detail-text"></div>
+            </section>
+
+            <section class="detail-panel">
+              <div class="card-head" style="margin-bottom: 12px; align-items: center;">
+                <h3 style="margin: 0;">Weekly updates</h3>
+                <button id="addWeeklyUpdate" class="primary-button" type="button" style="padding: 8px 12px; font-size: 0.85rem; border-radius: 10px;">+ Add Update</button>
+              </div>
+              <div id="projectUpdates" class="log-list"></div>
+            </section>
+          </div>
+
+          <section class="detail-panel report-panel">
+            <div class="card-head">
+              <div>
+                <p class="eyebrow">Project report</p>
+                <h3>Generated summary</h3>
+              </div>
+              <span id="projectReportState" class="pill pill-dark">Waiting</span>
+            </div>
+            <div id="projectReportOutput" class="report-output">
+              <p class="muted">Open a project name to generate a report for that project only.</p>
+            </div>
+            <div class="actions report-actions">
+              <button id="generateReport" class="secondary-button" type="button">Generate report</button>
+              <button id="downloadReport" class="ghost-button" type="button">Download report</button>
+            </div>
+          </section>
+        </section>
+
+        <section class="card screen" id="addProjectScreen" hidden>
+          <div class="screen-head">
+            <button id="cancelAddProject" class="ghost-button" type="button">Back</button>
+            <div class="screen-title">
+              <p class="eyebrow">New project</p>
+              <h2>Add Project</h2>
+            </div>
+          </div>
+          <form id="addProjectForm" class="form-grid">
+            <label class="span-2">
+              Project Name *
+              <input type="text" id="newProjectName" required placeholder="e.g. Mobile App" />
+            </label>
+            <label class="span-2">
+              Status *
+              <select id="newProjectStatus" required>
+                <option value="current">Current</option>
+                <option value="closed">Closed</option>
+              </select>
+            </label>
+            <label class="span-2">
+              Notes
+              <textarea id="newProjectNotes" placeholder="Describe the project overview and goals..."></textarea>
+            </label>
+            <div class="actions span-2">
+              <button type="submit" class="primary-button">Save Project</button>
+              <button type="button" id="btnCancelAddProject" class="ghost-button">Cancel</button>
+            </div>
+          </form>
+        </section>
+
+        <section class="card screen" id="addUpdateScreen" hidden>
+          <div class="screen-head">
+            <button id="cancelAddUpdate" class="ghost-button" type="button">Back</button>
+            <div class="screen-title">
+              <p class="eyebrow">New status update</p>
+              <h2 id="addUpdateProjectTitle">Add Weekly Update</h2>
+            </div>
+          </div>
+          <form id="addUpdateForm" class="form-grid">
+            <label class="span-2">
+              Week Start Date *
+              <input type="date" id="newUpdateWeekStart" required />
+            </label>
+            <label class="span-2">
+              Overall Status *
+              <select id="newUpdateStatus" required>
+                <option value="on track">On Track</option>
+                <option value="needs attention">Needs Attention</option>
+                <option value="blocked">Blocked</option>
+              </select>
+            </label>
+            
+            <div class="tasks-container span-2" style="margin-top: 10px; padding: 18px; border-radius: 18px; background: rgba(4, 10, 21, 0.3); border: 1px solid var(--border);">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                <h3 style="margin: 0; font-family: Georgia, 'Times New Roman', serif;">Tasks & Sub-tasks</h3>
+                <button type="button" id="btnAddTask" class="secondary-button" style="padding: 8px 12px; font-size: 0.85rem; border-radius: 10px;">+ Add Task</button>
+              </div>
+              <div id="formTasksList" style="display: grid; gap: 18px;">
+                <!-- Tasks dynamically inserted here -->
+              </div>
+            </div>
+
+            <div class="actions span-2" style="margin-top: 12px;">
+              <button type="submit" class="primary-button">Save Update</button>
+              <button type="button" id="btnCancelAddUpdate" class="ghost-button">Cancel</button>
+            </div>
+          </form>
+        </section>
+      </main>
+    </div>
+  </body>
+</html>
