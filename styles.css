@@ -693,6 +693,22 @@ p {
   gap: 20px;
 }
 
+/* Grid and flex children default to min-width:auto, so the 720px-wide report table stops
+   its column shrinking and pushes the page sideways instead of scrolling inside
+   .table-scroll. Every ancestor between the grid and the scroller needs min-width: 0. */
+.project-detail-grid > *,
+.log-list,
+.log-card,
+.report-output,
+.report-block,
+.sheet-report,
+.table-scroll,
+.log-card .summary,
+.log-card .summary > *,
+.sheet-report > * {
+  min-width: 0;
+}
+
 .detail-panel {
   padding: 18px;
   border-radius: 20px;
