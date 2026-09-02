@@ -728,13 +728,31 @@ function clearResetFlagFromUrl() {
   }
 }
 
-function showAppError(message) {
+/* One banner, three tones. Errors are red and say what to do about it; confirmations are
+   green; neutral notices are blue. Everything is click-to-dismiss. */
+function showAppBanner(message, tone = "error") {
   if (!nodes.appError) {
     return;
   }
 
-  nodes.appError.textContent = `⚠ ${message} — reload the page; click here to dismiss.`;
+  const icon = tone === "error" ? "⚠" : (tone === "success" ? "✓" : "ℹ");
+  const suffix = tone === "error" ? " — reload the page, or click to dismiss." : " — click to dismiss.";
+
+  nodes.appError.className = `app-banner app-banner-${tone}`;
+  nodes.appError.textContent = `${icon} ${message}${suffix}`;
   nodes.appError.hidden = false;
+}
+
+function showAppError(message) {
+  showAppBanner(message, "error");
+}
+
+function showAppInfo(message) {
+  showAppBanner(message, "info");
+}
+
+function showAppSuccess(message) {
+  showAppBanner(message, "success");
 }
 
 /* ---------- Debug panel (Ctrl/Cmd+Shift+D, or add ?debug to the URL) ---------- */
@@ -1613,7 +1631,7 @@ async function copyReportHtml() {
       "text/html": new Blob([html], { type: "text/html" }),
       "text/plain": new Blob([html], { type: "text/plain" }),
     })]);
-    showAppError("Report copied — paste straight into your email. The raw HTML is shown below too.");
+    showAppSuccess("Report copied — paste straight into your email. The raw HTML is shown below too.");
   } catch (error) {
     debugLog(`clipboard copy failed: ${error.message}`);
     showAppError("Could not reach the clipboard — select the HTML below and copy it manually.");
@@ -2935,7 +2953,7 @@ async function seedTemplatesFromFile({ silent } = {}) {
     saveState();
     renderTemplatesScreen();
     debugLog(`templates seeded from week-templates.json (${state.weekTemplates.length} weeks)`);
-    if (!silent) showAppError(`Master plan reloaded from week-templates.json — ${state.weekTemplates.length} weeks, ${state.weekTemplates.reduce((total, week) => total + week.tasks.length, 0)} tasks.`);
+    if (!silent) showAppSuccess(`Master plan reloaded from week-templates.json — ${state.weekTemplates.length} weeks, ${state.weekTemplates.reduce((total, week) => total + week.tasks.length, 0)} tasks.`);
     return true;
   } catch (error) {
     debugLog(`week-templates.json load failed: ${error.message}`);
@@ -3058,7 +3076,7 @@ async function loadDemoData(file) {
     state = ensureDefaults(state);
     saveState();
     openProject(project.id);
-    showAppError(`Loaded demo “${project.name}”: ${data.weeks.length} weeks, ${data.weeks.reduce((total, week) => total + (week.tasks || []).length, 0)} tasks. Delete it like any other project.`);
+    showAppSuccess(`Loaded demo “${project.name}”: ${data.weeks.length} weeks, ${data.weeks.reduce((total, week) => total + (week.tasks || []).length, 0)} tasks. Delete it like any other project.`);
   } catch (error) {
     showAppError(`Could not load demo (${error.message}).`);
   }
@@ -3096,7 +3114,7 @@ function can(permission) {
 /* Guard for the action itself, so a hidden button is not the only thing stopping it. */
 function requirePermission(permission, what) {
   if (can(permission)) return true;
-  showAppError(`Your role (${ROLE_LABELS[currentRole()]}) cannot ${what}.`);
+  showAppInfo(`Your role (${ROLE_LABELS[currentRole()]}) cannot ${what}.`);
   return false;
 }
 
@@ -3768,7 +3786,7 @@ function clearAllData({ keepTemplates = true, confirmFirst = true } = {}) {
 
   saveState();
   openDashboard();
-  showAppError(`Cleared ${summary}.${keepTemplates ? " Master template and settings kept." : " Master template reset from week-templates.json."}`);
+  showAppInfo(`Cleared ${summary}.${keepTemplates ? " Master template and settings kept." : " Master template reset from week-templates.json."}`);
   return true;
 }
 
@@ -3806,7 +3824,7 @@ function importBackup(file) {
       saveState();
       applyTheme(state.settings.theme);
       renderAll();
-      showAppError(`Backup restored: ${state.projects.length} projects, ${state.updates.length} weekly reports.`);
+      showAppSuccess(`Backup restored: ${state.projects.length} projects, ${state.updates.length} weekly reports.`);
     } catch (error) {
       showAppError(`Could not import that file (${error.message}).`);
     }
@@ -3836,7 +3854,7 @@ function deleteProject(projectId) {
   uiState.projectId = null;
   saveState();
   openDashboard();
-  showAppError(`Deleted “${project.name}” and ${reports.length} weekly report(s).`);
+  showAppInfo(`Deleted “${project.name}” and ${reports.length} weekly report(s).`);
 }
 
 function deleteUpdate(updateId) {
@@ -3975,7 +3993,7 @@ function applyProjectTimeline(projectId) {
   project.cycleWeeks = updates.length || project.cycleWeeks;
   saveState();
   renderAll();
-  showAppError(`Timeline re-aligned: ${updates.length} week(s) now run from ${formatSummaryDate(firstMonday)}.`);
+  showAppSuccess(`Timeline re-aligned: ${updates.length} week(s) now run from ${formatSummaryDate(firstMonday)}.`);
 }
 
 function renderProjectTimeline(project) {

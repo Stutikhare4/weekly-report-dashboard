@@ -2682,19 +2682,50 @@ button {
   word-break: break-word;
 }
 
-.app-error {
+/* Shared banner. `.app-banner-error` is red and actionable; success and info are not,
+   because a confirmation dressed as an error trains people to ignore the real ones. */
+.app-error,
+.app-banner {
   position: fixed;
   inset: auto 16px 16px 16px;
   z-index: 200;
   padding: 14px 18px;
   border-radius: 14px;
-  color: #fff;
-  background: #b91c1c;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  box-shadow: 0 18px 50px rgba(2, 6, 23, 0.5);
+  border: 1px solid transparent;
+  box-shadow: 0 18px 50px rgba(2, 6, 23, 0.28);
   font-size: 0.88rem;
   font-weight: 600;
   cursor: pointer;
+}
+
+.app-banner-error {
+  color: #fff;
+  background: #b91c1c;
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.app-banner-success {
+  color: #052e1b;
+  background: #86efac;
+  border-color: #4ade80;
+}
+
+.app-banner-info {
+  color: #06283d;
+  background: #bae6fd;
+  border-color: #7dd3fc;
+}
+
+:root:not([data-theme="light"]) .app-banner-success {
+  color: #dcfce7;
+  background: #14532d;
+  border-color: #166534;
+}
+
+:root:not([data-theme="light"]) .app-banner-info {
+  color: #e0f2fe;
+  background: #0c4a6e;
+  border-color: #075985;
 }
 
 .wizard-error {
