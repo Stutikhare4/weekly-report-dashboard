@@ -1,0 +1,10 @@
+{
+  "$comment": "Lists the demo datasets offered in Settings -> Demo data. Add a file here and drop the JSON alongside it to offer another demo.",
+  "demos": [
+    {
+      "file": "salad-days.json",
+      "name": "Salad Days",
+      "description": "Real 6-week website integration: kickoff through production movement, with live blockers on SMS/WhatsApp templates and the payment gateway."
+    }
+  ]
+}

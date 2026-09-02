@@ -1,3 +1,3409 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Weekly Report Dashboard</title>
+    <meta name="theme-color" content="#07111f" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Weekly Status" />
+    <link rel="icon" href="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTEyIiBoZWlnaHQ9IjUxMiIgdmlld0JveD0iMCAwIDUxMiA1MTIiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgcm9sZT0iaW1nIiBhcmlhLWxhYmVsPSJIaSBTdHV0aSBhcHAgaWNvbiI+CiAgPGRlZnM+CiAgICA8bGluZWFyR3JhZGllbnQgaWQ9ImJnIiB4MT0iNjQiIHkxPSI0MCIgeDI9IjQ0OCIgeTI9IjQ3MiIgZ3JhZGllbnRVbml0cz0idXNlclNwYWNlT25Vc2UiPgogICAgICA8c3RvcCBzdG9wLWNvbG9yPSIjMGYxNzJhIi8+CiAgICAgIDxzdG9wIG9mZnNldD0iMSIgc3RvcC1jb2xvcj0iIzA3MTExZiIvPgogICAgPC9saW5lYXJHcmFkaWVudD4KICAgIDxsaW5lYXJHcmFkaWVudCBpZD0iYWNjZW50IiB4MT0iMTI0IiB5MT0iMTIwIiB4Mj0iMzg4IiB5Mj0iMzkyIiBncmFkaWVudFVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+CiAgICAgIDxzdG9wIHN0b3AtY29sb3I9IiNmZGU2OGEiLz4KICAgICAgPHN0b3Agb2Zmc2V0PSIxIiBzdG9wLWNvbG9yPSIjZjk3MzE2Ii8+CiAgICA8L2xpbmVhckdyYWRpZW50PgogIDwvZGVmcz4KICA8cmVjdCB3aWR0aD0iNTEyIiBoZWlnaHQ9IjUxMiIgcng9IjEyMCIgZmlsbD0idXJsKCNiZykiLz4KICA8Y2lyY2xlIGN4PSIzNzIiIGN5PSIxMzgiIHI9IjcyIiBmaWxsPSIjMzhiZGY4IiBmaWxsLW9wYWNpdHk9IjAuMiIvPgogIDxjaXJjbGUgY3g9IjEyNCIgY3k9IjM4NiIgcj0iMTAwIiBmaWxsPSIjZjk3MzE2IiBmaWxsLW9wYWNpdHk9IjAuMTQiLz4KICA8cmVjdCB4PSIxMDgiIHk9IjExNiIgd2lkdGg9Ijk2IiBoZWlnaHQ9IjI4MCIgcng9IjM2IiBmaWxsPSJ1cmwoI2FjY2VudCkiLz4KICA8dGV4dCB4PSIxNTYiIHk9IjI3OCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1mYW1pbHk9Ikdlb3JnaWEsICdUaW1lcyBOZXcgUm9tYW4nLCBzZXJpZiIgZm9udC1zaXplPSIxNjAiIGZvbnQtd2VpZ2h0PSI3MDAiIGZpbGw9IiMwNzExMWYiPkg8L3RleHQ+CiAgPHRleHQgeD0iMjQ4IiB5PSIzMzIiIGZvbnQtZmFtaWx5PSJHZW9yZ2lhLCAnVGltZXMgTmV3IFJvbWFuJywgc2VyaWYiIGZvbnQtc2l6ZT0iOTAiIGZvbnQtd2VpZ2h0PSI3MDAiIGZpbGw9IiNlZWY0ZmYiPmksPC90ZXh0PgogIDx0ZXh0IHg9IjI0OCIgeT0iNDA0IiBmb250LWZhbWlseT0iR2VvcmdpYSwgJ1RpbWVzIE5ldyBSb21hbicsIHNlcmlmIiBmb250LXNpemU9Ijc2IiBmb250LXdlaWdodD0iNzAwIiBmaWxsPSIjZWVmNGZmIj5TdHV0aTwvdGV4dD4KPC9zdmc+Cg==" />
+    <style>
+:root {
+  --bg: #07111f;
+  --bg-grad-1: #050b15;
+  --bg-grad-2: #07111f;
+  --bg-grad-3: #0b1627;
+  --bg-wash-1: rgba(249, 115, 22, 0.2);
+  --bg-wash-2: rgba(56, 189, 248, 0.18);
+  --grid-line: rgba(255, 255, 255, 0.03);
+
+  --panel: rgba(10, 18, 33, 0.8);
+  --panel-strong: rgba(11, 23, 44, 0.92);
+
+  --surface-1: rgba(4, 10, 21, 0.42);
+  --surface-2: rgba(8, 15, 28, 0.72);
+  --surface-3: rgba(15, 23, 42, 0.45);
+  --surface-4: rgba(4, 10, 21, 0.6);
+  --surface-5: rgba(4, 10, 21, 0.3);
+  --surface-6: rgba(4, 10, 21, 0.5);
+  --surface-7: rgba(8, 15, 28, 0.75);
+
+  --topbar-bg: rgba(7, 17, 31, 0.92);
+  --sidebar-grad-1: rgba(10, 18, 33, 0.95);
+  --sidebar-grad-2: rgba(5, 11, 21, 0.82);
+
+  --border: rgba(148, 163, 184, 0.16);
+  --border-soft: rgba(148, 163, 184, 0.12);
+  --border-strong: rgba(148, 163, 184, 0.18);
+
+  --text: #eef4ff;
+  --text-soft: #dbeafe;
+  --text-strong-cool: #e2e8f0;
+  --muted: #9fb0c7;
+  --range-color: #bae6fd;
+  --folder-count-text: #fff7ed;
+  --stat-tile-value-text: #fff6e8;
+  --active-nav-text: #e0f2fe;
+
+  --accent: #f97316;
+  --accent-2: #38bdf8;
+  --accent-3: #34d399;
+
+  --shadow: 0 24px 80px rgba(2, 6, 23, 0.44);
+  --radius: 24px;
+
+  --status-fill-not-started: #64748b;
+  --status-fill-in-progress: #38bdf8;
+  --status-fill-delayed: #fb923c;
+  --status-fill-blocked: #f87171;
+  --status-fill-completed: #34d399;
+}
+
+:root[data-theme="light"] {
+  --bg: #eef2f8;
+  --bg-grad-1: #f7f9fc;
+  --bg-grad-2: #eef2f8;
+  --bg-grad-3: #e4eaf3;
+  --bg-wash-1: rgba(249, 115, 22, 0.1);
+  --bg-wash-2: rgba(56, 189, 248, 0.12);
+  --grid-line: rgba(15, 23, 42, 0.035);
+
+  --panel: rgba(255, 255, 255, 0.82);
+  --panel-strong: rgba(255, 255, 255, 0.97);
+
+  --surface-1: rgba(255, 255, 255, 0.55);
+  --surface-2: rgba(255, 255, 255, 0.85);
+  --surface-3: rgba(226, 232, 240, 0.6);
+  --surface-4: #ffffff;
+  --surface-5: rgba(226, 232, 240, 0.45);
+  --surface-6: rgba(255, 255, 255, 0.7);
+  --surface-7: rgba(255, 255, 255, 0.9);
+
+  --topbar-bg: rgba(255, 255, 255, 0.88);
+  --sidebar-grad-1: rgba(255, 255, 255, 0.92);
+  --sidebar-grad-2: rgba(241, 245, 249, 0.85);
+
+  --border: rgba(15, 23, 42, 0.14);
+  --border-soft: rgba(15, 23, 42, 0.1);
+  --border-strong: rgba(15, 23, 42, 0.16);
+
+  --text: #101828;
+  --text-soft: #1e293b;
+  --text-strong-cool: #1e293b;
+  --muted: #64748b;
+  --range-color: #0369a1;
+  --folder-count-text: #1f2937;
+  --stat-tile-value-text: #0f172a;
+  --active-nav-text: #0369a1;
+
+  --shadow: 0 24px 60px rgba(15, 23, 42, 0.12);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+/* Several layout rules below set `display`, which would otherwise beat the
+   UA `[hidden]` rule and leave hidden panels/fields on screen. */
+[hidden] {
+  display: none !important;
+}
+
+html,
+body {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  color: var(--text);
+  font-family: "Segoe UI", "Trebuchet MS", system-ui, sans-serif;
+  background:
+    radial-gradient(circle at top left, var(--bg-wash-1), transparent 28%),
+    radial-gradient(circle at top right, var(--bg-wash-2), transparent 26%),
+    linear-gradient(135deg, var(--bg-grad-1) 0%, var(--bg-grad-2) 50%, var(--bg-grad-3) 100%);
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(var(--grid-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+  background-size: 52px 52px;
+  mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.8), transparent 95%);
+}
+
+h1,
+h2,
+h3 {
+  margin: 0;
+  font-family: Georgia, "Times New Roman", serif;
+  line-height: 1.05;
+}
+
+h1 {
+  font-size: clamp(1.6rem, 3vw, 2.2rem);
+}
+
+h2 {
+  font-size: 1.65rem;
+}
+
+h3 {
+  font-size: 1rem;
+}
+
+p {
+  margin: 0;
+}
+
+/* ---------- App shell + top header ---------- */
+
+.app-shell {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 14px 32px;
+  border-bottom: 1px solid var(--border);
+  background: var(--topbar-bg);
+  backdrop-filter: blur(18px);
+}
+
+.topbar-brand {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.topbar-title {
+  font-size: 1.3rem;
+}
+
+.topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  position: relative;
+}
+
+.icon {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+.icon-chevron {
+  width: 16px;
+  height: 16px;
+}
+
+.icon-button {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: rgba(148, 163, 184, 0.12);
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  color: var(--text);
+}
+
+.icon-button:hover {
+  background: rgba(148, 163, 184, 0.2);
+}
+
+.icon-moon {
+  display: none;
+}
+
+:root[data-theme="light"] .icon-sun {
+  display: none;
+}
+
+:root[data-theme="light"] .icon-moon {
+  display: block;
+}
+
+.search-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.search-icon {
+  position: absolute;
+  left: 12px;
+  width: 16px;
+  height: 16px;
+  color: var(--muted);
+  pointer-events: none;
+}
+
+.search-input {
+  width: 240px;
+  max-width: 40vw;
+  padding: 10px 14px 10px 36px;
+  border-radius: 999px;
+  border: 1px solid var(--border-strong);
+  background: var(--surface-4);
+  color: var(--text);
+  font: inherit;
+  font-size: 0.88rem;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: rgba(56, 189, 248, 0.58);
+  box-shadow: 0 0 0 4px rgba(56, 189, 248, 0.16);
+}
+
+.search-dropdown {
+  width: 300px;
+  left: 0;
+  right: auto;
+}
+
+.search-result {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  width: 100%;
+  text-align: left;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(148, 163, 184, 0.08);
+  color: var(--text);
+}
+
+.search-result:hover {
+  background: rgba(148, 163, 184, 0.16);
+}
+
+.search-result-name {
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.notif-wrap {
+  position: relative;
+}
+
+.notif-badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  border-radius: 999px;
+  background: #f87171;
+  color: #3f0d0d;
+  font-size: 0.68rem;
+  font-weight: 800;
+  display: grid;
+  place-items: center;
+}
+
+.dropdown-panel {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  width: 320px;
+  max-height: 360px;
+  overflow-y: auto;
+  padding: 14px;
+  border-radius: 16px;
+  background: var(--panel-strong);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+  z-index: 40;
+}
+
+.dropdown-panel-right {
+  width: 200px;
+}
+
+.dropdown-heading {
+  margin-bottom: 10px;
+  color: var(--muted);
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.dropdown-list {
+  display: grid;
+  gap: 8px;
+}
+
+.notif-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  text-align: left;
+  padding: 10px;
+  border-radius: 12px;
+  background: rgba(148, 163, 184, 0.08);
+  color: var(--text);
+}
+
+.notif-item:hover {
+  background: rgba(148, 163, 184, 0.16);
+}
+
+.notif-item-text {
+  font-size: 0.85rem;
+}
+
+.dropdown-link {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 10px 12px;
+  border-radius: 10px;
+  color: var(--text);
+  background: transparent;
+}
+
+.dropdown-link:hover {
+  background: rgba(148, 163, 184, 0.12);
+}
+
+.user-widget {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 10px 6px 6px;
+  border-radius: 999px;
+  background: rgba(148, 163, 184, 0.1);
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  color: var(--text);
+}
+
+.avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(135deg, #f8fafc, #fdba74);
+  color: #08101c;
+  font-weight: 800;
+}
+
+.user-widget-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+  text-align: left;
+}
+
+.user-widget-name {
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.user-widget-role {
+  font-size: 0.72rem;
+  color: var(--muted);
+}
+
+/* ---------- Shell (sidebar + content) ---------- */
+
+.shell {
+  display: grid;
+  grid-template-columns: 260px minmax(0, 1fr);
+  flex: 1;
+}
+
+.sidebar {
+  position: sticky;
+  top: 69px;
+  height: calc(100vh - 69px);
+  padding: 24px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  justify-content: space-between;
+  border-right: 1px solid var(--border);
+  background: linear-gradient(180deg, var(--sidebar-grad-1), var(--sidebar-grad-2));
+  backdrop-filter: blur(18px);
+}
+
+.brand-mark {
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border-radius: 12px;
+  color: #08101c;
+  font-size: 1.15rem;
+  font-weight: 800;
+  font-family: Georgia, "Times New Roman", serif;
+  background: linear-gradient(135deg, #f8fafc, #fdba74);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.14), 0 16px 30px rgba(249, 115, 22, 0.22);
+}
+
+.eyebrow {
+  margin-bottom: 4px;
+  color: var(--accent-2);
+  font-size: 0.72rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.nav-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  color: var(--muted);
+  background: transparent;
+  text-align: left;
+  width: 100%;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.nav-item:hover {
+  background: rgba(148, 163, 184, 0.1);
+  color: var(--text);
+}
+
+.nav-item.active {
+  background: linear-gradient(135deg, rgba(56, 189, 248, 0.22), rgba(56, 189, 248, 0.08));
+  color: var(--active-nav-text);
+  box-shadow: inset 0 0 0 1px rgba(56, 189, 248, 0.35);
+}
+
+.sidebar-button {
+  width: 100%;
+  padding: 15px 18px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, rgba(148, 163, 184, 0.14), rgba(8, 15, 28, 0.2));
+}
+
+.sidebar-actions {
+  display: grid;
+  gap: 12px;
+}
+
+.sidebar-button:hover {
+  background: linear-gradient(135deg, rgba(148, 163, 184, 0.22), rgba(8, 15, 28, 0.28));
+}
+
+.content {
+  display: grid;
+  gap: 24px;
+  padding: 32px;
+  align-content: start;
+}
+
+.card {
+  padding: 24px;
+  border-radius: var(--radius);
+  background: var(--panel);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(18px);
+}
+
+.screen {
+  scroll-margin-top: 24px;
+}
+
+.card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 12px;
+  border-radius: 999px;
+  font-size: 0.84rem;
+  font-weight: 700;
+  color: #fde68a;
+  background: rgba(251, 191, 36, 0.12);
+  border: 1px solid rgba(251, 191, 36, 0.18);
+}
+
+:root[data-theme="light"] .pill {
+  color: #92400e;
+  background: rgba(217, 119, 6, 0.12);
+  border-color: rgba(217, 119, 6, 0.2);
+}
+
+.pill-dark {
+  color: #dbeafe;
+  background: rgba(148, 163, 184, 0.08);
+  border-color: rgba(148, 163, 184, 0.14);
+}
+
+:root[data-theme="light"] .pill-dark {
+  color: #1e293b;
+  background: rgba(15, 23, 42, 0.05);
+  border-color: rgba(15, 23, 42, 0.1);
+}
+
+.project-grid,
+.grid-two {
+  display: grid;
+  gap: 20px;
+}
+
+.project-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.project-list,
+.log-list,
+.report-output {
+  display: grid;
+  gap: 14px;
+}
+
+.home-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+}
+
+.folder-button {
+  padding: 24px;
+  border-radius: 22px;
+  text-align: left;
+  color: var(--text);
+  border: 1px solid var(--border-soft);
+  background: var(--surface-1);
+  display: grid;
+  gap: 10px;
+  min-height: 170px;
+}
+
+.folder-button-warm {
+  background: linear-gradient(180deg, rgba(249, 115, 22, 0.18), var(--surface-1));
+}
+
+.folder-button-cool {
+  background: linear-gradient(180deg, rgba(56, 189, 248, 0.18), var(--surface-1));
+}
+
+.folder-label {
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 1.35rem;
+  font-weight: 700;
+}
+
+.folder-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: fit-content;
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: var(--surface-7);
+  border: 1px solid var(--border);
+  color: var(--folder-count-text);
+  font-weight: 800;
+}
+
+.folder-button small {
+  color: var(--muted);
+}
+
+.folder-button:hover,
+.project-card-button:hover,
+.project-name-card:hover {
+  transform: translateY(-2px);
+}
+
+.folder-button:focus-visible,
+.project-card-button:focus-visible,
+.project-name-card:focus-visible,
+.ghost-button:focus-visible,
+.primary-button:focus-visible,
+.secondary-button:focus-visible,
+.nav-item:focus-visible {
+  outline: 2px solid rgba(56, 189, 248, 0.7);
+  outline-offset: 3px;
+}
+
+.screen-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.screen-title {
+  text-align: center;
+}
+
+.project-name-list {
+  display: grid;
+  gap: 12px;
+}
+
+.project-name-card {
+  padding: 18px 20px;
+  border-radius: 18px;
+  border: 1px solid var(--border-soft);
+  background: var(--surface-2);
+  color: var(--text);
+  text-align: left;
+  display: grid;
+  gap: 6px;
+}
+
+.project-name {
+  font-size: 1.1rem;
+  font-weight: 800;
+}
+
+.project-card-button {
+  width: 100%;
+  text-align: left;
+  display: grid;
+}
+
+.project-detail-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  gap: 20px;
+}
+
+.detail-panel {
+  padding: 18px;
+  border-radius: 20px;
+  background: var(--surface-1);
+  border: 1px solid var(--border-soft);
+}
+
+.detail-panel h3 {
+  margin-bottom: 12px;
+}
+
+.detail-text {
+  display: grid;
+  gap: 10px;
+  line-height: 1.6;
+  color: var(--text-soft);
+}
+
+.project-card,
+.log-card,
+.report-block {
+  padding: 16px;
+  border-radius: 18px;
+  background: var(--surface-2);
+  border: 1px solid var(--border-soft);
+}
+
+.project-card header,
+.log-card header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.project-card h4,
+.log-card h4 {
+  margin: 0 0 4px;
+  font-size: 1rem;
+}
+
+.meta {
+  color: var(--muted);
+  font-size: 0.88rem;
+}
+
+.range {
+  color: var(--range-color);
+  font-size: 0.9rem;
+}
+
+.summary {
+  display: grid;
+  gap: 8px;
+  color: var(--text-soft);
+  line-height: 1.55;
+  font-size: 0.93rem;
+}
+
+button {
+  appearance: none;
+  border: 0;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 700;
+}
+
+.primary-button,
+.secondary-button,
+.ghost-button {
+  padding: 13px 18px;
+  border-radius: 14px;
+  transition: transform 0.2s ease, opacity 0.2s ease, background 0.2s ease;
+}
+
+.primary-button:hover,
+.secondary-button:hover,
+.ghost-button:hover {
+  transform: translateY(-1px);
+}
+
+.primary-button {
+  color: #08101c;
+  background: linear-gradient(135deg, #fdba74, #f97316);
+}
+
+.secondary-button {
+  color: #05253f;
+  background: linear-gradient(135deg, #7dd3fc, #38bdf8);
+}
+
+.ghost-button {
+  color: var(--text-strong-cool);
+  background: rgba(148, 163, 184, 0.12);
+  border: 1px solid rgba(148, 163, 184, 0.16);
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.form-grid label {
+  display: grid;
+  gap: 8px;
+  color: var(--text-strong-cool);
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.form-grid input,
+.form-grid select,
+.form-grid textarea {
+  width: 100%;
+  padding: 14px 16px;
+  border-radius: 16px;
+  border: 1px solid var(--border-strong);
+  color: var(--text);
+  background: var(--surface-4);
+  font: inherit;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.form-grid input:focus,
+.form-grid select:focus,
+.form-grid textarea:focus {
+  outline: none;
+  border-color: rgba(56, 189, 248, 0.58);
+  box-shadow: 0 0 0 4px rgba(56, 189, 248, 0.16);
+}
+
+.form-grid textarea {
+  resize: vertical;
+  min-height: 102px;
+}
+
+.span-2 {
+  grid-column: span 2;
+}
+
+.integration-scope {
+  padding: 18px;
+  border-radius: 18px;
+  background: var(--surface-5);
+  border: 1px solid var(--border);
+}
+
+.week-section {
+  padding: 18px;
+  border-radius: 20px;
+  background: var(--surface-5);
+  border: 1px solid var(--border);
+}
+
+.week-section-title {
+  margin-bottom: 14px;
+  font-family: Georgia, "Times New Roman", serif;
+}
+
+.week-section-title .meta {
+  font-family: "Segoe UI", "Trebuchet MS", system-ui, sans-serif;
+  font-weight: 400;
+}
+
+.checkbox-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.checkbox-group .checkbox-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  border: 1px solid var(--border-strong);
+  background: var(--surface-6);
+  color: var(--text-strong-cool);
+  font-size: 0.88rem;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.checkbox-item input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  padding: 0;
+  accent-color: var(--accent-2);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.grid-two {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.muted {
+  color: var(--muted);
+}
+
+.report-output {
+  line-height: 1.7;
+}
+
+.report-block h3 {
+  margin-bottom: 8px;
+}
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: capitalize;
+}
+
+.status-on-track {
+  color: #bbf7d0;
+  background: rgba(52, 211, 153, 0.12);
+}
+
+.status-needs-attention {
+  color: #fde68a;
+  background: rgba(251, 191, 36, 0.12);
+}
+
+.status-blocked {
+  color: #fecaca;
+  background: rgba(248, 113, 113, 0.12);
+}
+
+.status-delayed {
+  color: #fdba74;
+  background: rgba(251, 146, 60, 0.12);
+}
+
+.status-not-started {
+  color: #cbd5e1;
+  background: rgba(148, 163, 184, 0.14);
+}
+
+.status-in-progress {
+  color: #bae6fd;
+  background: rgba(56, 189, 248, 0.14);
+}
+
+.status-closed {
+  color: #c7d2fe;
+  background: rgba(99, 102, 241, 0.12);
+}
+
+:root[data-theme="light"] .status-on-track {
+  color: #15803d;
+  background: rgba(22, 163, 74, 0.12);
+}
+
+:root[data-theme="light"] .status-needs-attention {
+  color: #92400e;
+  background: rgba(217, 119, 6, 0.14);
+}
+
+:root[data-theme="light"] .status-blocked {
+  color: #b91c1c;
+  background: rgba(239, 68, 68, 0.12);
+}
+
+:root[data-theme="light"] .status-delayed {
+  color: #c2410c;
+  background: rgba(251, 146, 60, 0.16);
+}
+
+:root[data-theme="light"] .status-not-started {
+  color: #334155;
+  background: rgba(100, 116, 139, 0.14);
+}
+
+:root[data-theme="light"] .status-in-progress {
+  color: #0369a1;
+  background: rgba(56, 189, 248, 0.16);
+}
+
+:root[data-theme="light"] .status-closed {
+  color: #4338ca;
+  background: rgba(99, 102, 241, 0.12);
+}
+
+.priority-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 9px;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+
+.priority-low {
+  color: #bbf7d0;
+  background: rgba(52, 211, 153, 0.12);
+}
+
+.priority-medium {
+  color: #fde68a;
+  background: rgba(251, 191, 36, 0.12);
+}
+
+.priority-high {
+  color: #fecaca;
+  background: rgba(248, 113, 113, 0.12);
+}
+
+:root[data-theme="light"] .priority-low {
+  color: #15803d;
+  background: rgba(22, 163, 74, 0.12);
+}
+
+:root[data-theme="light"] .priority-medium {
+  color: #92400e;
+  background: rgba(217, 119, 6, 0.14);
+}
+
+:root[data-theme="light"] .priority-high {
+  color: #b91c1c;
+  background: rgba(239, 68, 68, 0.12);
+}
+
+.empty-state {
+  color: var(--muted);
+  padding: 8px 4px;
+}
+
+/* ---------- Stat tiles ---------- */
+
+.stat-tile-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+}
+
+.stat-tile {
+  min-height: 92px;
+  padding: 16px 16px 14px;
+  border-radius: 18px;
+  background: linear-gradient(180deg, var(--surface-3), var(--surface-2));
+  border: 1px solid var(--border);
+  display: grid;
+  gap: 4px;
+  align-content: start;
+}
+
+.stat-tile-label {
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+.stat-tile-value {
+  font-size: 1.7rem;
+  font-weight: 800;
+  color: var(--stat-tile-value-text);
+}
+
+.stat-tile-value.tone-completed {
+  color: #6ee7b7;
+}
+
+.stat-tile-value.tone-in-progress {
+  color: #7dd3fc;
+}
+
+.stat-tile-value.tone-delayed {
+  color: #fdba74;
+}
+
+.stat-tile-value.tone-blocked {
+  color: #fca5a5;
+}
+
+.stat-tile-value.tone-not-started {
+  color: #cbd5e1;
+}
+
+:root[data-theme="light"] .stat-tile-value.tone-completed {
+  color: #15803d;
+}
+
+:root[data-theme="light"] .stat-tile-value.tone-in-progress {
+  color: #0369a1;
+}
+
+:root[data-theme="light"] .stat-tile-value.tone-delayed {
+  color: #c2410c;
+}
+
+:root[data-theme="light"] .stat-tile-value.tone-blocked {
+  color: #b91c1c;
+}
+
+:root[data-theme="light"] .stat-tile-value.tone-not-started {
+  color: #334155;
+}
+
+.stat-tile-pct {
+  color: var(--muted);
+  font-size: 0.75rem;
+}
+
+/* ---------- Subtask table ---------- */
+
+.table-scroll {
+  overflow-x: auto;
+  border-radius: 14px;
+}
+
+.subtask-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 760px;
+}
+
+.subtask-table th {
+  text-align: left;
+  padding: 8px 10px;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+
+.subtask-table td {
+  padding: 6px;
+  border-bottom: 1px solid var(--border-soft);
+  vertical-align: middle;
+}
+
+.subtask-table input,
+.subtask-table select {
+  width: 100%;
+  padding: 8px 10px;
+  border-radius: 10px;
+  border: 1px solid var(--border-strong);
+  background: var(--surface-4);
+  color: var(--text);
+  font: inherit;
+  font-size: 0.85rem;
+}
+
+.subtask-table input:focus,
+.subtask-table select:focus {
+  outline: none;
+  border-color: rgba(56, 189, 248, 0.58);
+}
+
+.subtask-table td:first-child input {
+  min-width: 160px;
+}
+
+.subtask-table td:last-child {
+  width: 36px;
+}
+
+/* ---------- Calendar ---------- */
+
+.calendar-head {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 8px;
+  margin-bottom: 8px;
+  color: var(--muted);
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  text-align: center;
+}
+
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 8px;
+}
+
+.calendar-day {
+  position: relative;
+  aspect-ratio: 1;
+  border-radius: 12px;
+  background: var(--surface-1);
+  border: 1px solid var(--border-soft);
+  color: var(--text);
+  font-size: 0.85rem;
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+  padding: 8px;
+}
+
+.calendar-day-empty {
+  background: transparent;
+  border-color: transparent;
+}
+
+.calendar-day.has-update {
+  border-color: rgba(56, 189, 248, 0.4);
+}
+
+.calendar-day.today {
+  box-shadow: inset 0 0 0 2px rgba(249, 115, 22, 0.7);
+}
+
+.calendar-day.selected {
+  background: rgba(56, 189, 248, 0.18);
+}
+
+.calendar-dot {
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--accent-2);
+}
+
+/* ---------- Team ---------- */
+
+.team-roster-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 14px 16px;
+  border-radius: 16px;
+  background: var(--surface-2);
+  border: 1px solid var(--border-soft);
+}
+
+.team-roster-name {
+  font-weight: 700;
+}
+
+.team-roster-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+/* ---------- Sheet-style report tables ----------
+   Intentionally always light/paper-like in both themes, since this
+   mimics a printed or exported spreadsheet excerpt, not app chrome. */
+
+.sheet-report {
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid #d1d5db;
+}
+
+.sheet-report-banner {
+  background: #fde047;
+  color: #1f2937;
+  font-weight: 800;
+  text-align: center;
+  padding: 10px;
+  font-size: 0.95rem;
+}
+
+.sheet-report-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #ffffff;
+  color: #111827;
+  min-width: 720px;
+}
+
+.sheet-report-table th {
+  background: #fef9c3;
+  color: #1f2937;
+  padding: 8px 10px;
+  border: 1px solid #d1d5db;
+  font-size: 0.76rem;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.sheet-report-table td {
+  padding: 8px 10px;
+  border: 1px solid #d1d5db;
+  font-size: 0.82rem;
+  vertical-align: top;
+}
+
+.sheet-scope-cell {
+  font-weight: 700;
+  background: #f9fafb;
+  vertical-align: middle;
+}
+
+/* ---------- Dynamic Tasks and Sub-tasks Form Styling ---------- */
+
+.form-task-card {
+  padding: 16px;
+  border-radius: 16px;
+  background: var(--surface-3);
+  border: 1px solid var(--border-soft);
+  display: grid;
+  gap: 12px;
+}
+
+.form-task-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.delete-button {
+  padding: 8px 12px;
+  border-radius: 10px;
+  font-size: 0.85rem;
+  color: #fca5a5;
+  background: rgba(239, 68, 68, 0.12);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  transition: all 0.2s ease;
+}
+
+.delete-button:hover {
+  color: #ffffff;
+  background: rgba(239, 68, 68, 0.7);
+  border-color: rgba(239, 68, 68, 0.8);
+  transform: translateY(-1px);
+}
+
+:root[data-theme="light"] .delete-button {
+  color: #b91c1c;
+  background: rgba(239, 68, 68, 0.1);
+  border-color: rgba(239, 68, 68, 0.18);
+}
+
+.form-subtasks-list {
+  display: table-row-group;
+}
+
+@media (max-width: 1100px) {
+  .shell {
+    grid-template-columns: 1fr;
+  }
+
+  .sidebar {
+    position: relative;
+    top: 0;
+    height: auto;
+    border-right: 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .project-detail-grid,
+  .home-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 820px) {
+  .content,
+  .sidebar {
+    padding: 20px;
+  }
+
+  .project-grid,
+  .grid-two,
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .screen-head {
+    flex-direction: column;
+  }
+
+  .span-2 {
+    grid-column: auto;
+  }
+
+  .topbar {
+    padding: 12px 16px;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .user-widget-text {
+    display: none;
+  }
+}
+
+/* ---- Task checklist picker (modal) ---- */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(2, 6, 23, 0.62);
+  backdrop-filter: blur(6px);
+}
+
+.modal-overlay[hidden] {
+  display: none;
+}
+
+.modal-card {
+  width: min(720px, 100%);
+  max-height: 86vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--panel-strong);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+
+.modal-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 20px 24px 12px;
+}
+
+.modal-head h2 {
+  margin: 2px 0 0;
+}
+
+.modal-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 24px 12px;
+}
+
+.modal-toolbar input[type="search"] {
+  flex: 1;
+}
+
+.modal-body {
+  padding: 4px 24px;
+  overflow-y: auto;
+  display: grid;
+  gap: 14px;
+}
+
+.modal-foot {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 14px 24px 20px;
+  border-top: 1px solid var(--border-soft);
+}
+
+.template-group {
+  border: 1px solid var(--border-soft);
+  border-radius: 14px;
+  padding: 12px 14px;
+  background: var(--surface-5);
+}
+
+.template-group-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.template-group-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  color: var(--accent-2);
+  cursor: pointer;
+}
+
+.template-items {
+  display: grid;
+  gap: 4px;
+}
+
+.template-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 8px;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.template-item:hover {
+  background: var(--surface-3);
+}
+
+.template-item[hidden] {
+  display: none;
+}
+
+.template-item-title {
+  flex: 1;
+  font-size: 0.9rem;
+}
+
+.template-item input[type="checkbox"],
+.template-group-toggle input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+
+/* ---- Phase + team badges ---- */
+.phase-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 9px;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  border-radius: 999px;
+  color: var(--accent-2);
+  background: rgba(56, 189, 248, 0.14);
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  white-space: nowrap;
+}
+
+.team-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 9px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  border-radius: 999px;
+  color: #e2e8f0;
+  background: rgba(148, 163, 184, 0.16);
+  border: 1px solid var(--border);
+  white-space: nowrap;
+}
+
+.team-badge.team-obm { color: #fdba74; background: rgba(249, 115, 22, 0.16); border-color: rgba(249, 115, 22, 0.32); }
+.team-badge.team-ops { color: #a5b4fc; background: rgba(129, 140, 248, 0.16); border-color: rgba(129, 140, 248, 0.32); }
+.team-badge.team-tss { color: #7dd3fc; background: rgba(56, 189, 248, 0.16); border-color: rgba(56, 189, 248, 0.32); }
+.team-badge.team-gc { color: #6ee7b7; background: rgba(52, 211, 153, 0.16); border-color: rgba(52, 211, 153, 0.32); }
+.team-badge.team-client { color: #f9a8d4; background: rgba(236, 72, 153, 0.16); border-color: rgba(236, 72, 153, 0.32); }
+
+/* ---- Create Project wizard ---- */
+.wizard-steps {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 22px;
+  padding: 14px 16px;
+  list-style: none;
+  border-radius: 18px;
+  background: var(--surface-5);
+  border: 1px solid var(--border-soft);
+  overflow-x: auto;
+}
+
+.wizard-step {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1 1 0;
+  min-width: max-content;
+  color: var(--muted);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.wizard-step + .wizard-step::before {
+  content: "";
+  flex: 1 1 24px;
+  min-width: 18px;
+  height: 1px;
+  background: var(--border);
+}
+
+.wizard-step-dot {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  flex: 0 0 26px;
+  border-radius: 999px;
+  border: 1px solid var(--border-strong);
+  background: var(--surface-4);
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.wizard-step.active {
+  color: var(--accent-2);
+}
+
+.wizard-step.active .wizard-step-dot {
+  color: #05253f;
+  background: linear-gradient(135deg, #7dd3fc, #38bdf8);
+  border-color: transparent;
+}
+
+.wizard-step.done {
+  color: var(--accent-3);
+}
+
+.wizard-step.done .wizard-step-dot {
+  color: #04231a;
+  background: var(--accent-3);
+  border-color: transparent;
+}
+
+.wizard-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 290px;
+  align-items: start;
+  gap: 20px;
+}
+
+.wizard-main {
+  display: grid;
+  gap: 16px;
+  min-width: 0;
+}
+
+.wizard-panel {
+  display: grid;
+  gap: 16px;
+}
+
+.wizard-section {
+  height: 100%;
+  padding: 16px 18px;
+  border-radius: 18px;
+  background: var(--surface-5);
+  border: 1px solid var(--border);
+}
+
+/* The sticky topbar would otherwise cover the screen heading on scrollIntoView. */
+.screen {
+  scroll-margin-top: 92px;
+}
+
+.wizard-section + .wizard-section {
+  margin-top: 0;
+}
+
+.wizard-section-title {
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 0.98rem;
+  margin: 0 0 12px;
+}
+
+.wizard-section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  padding: 0;
+  margin-bottom: 14px;
+  background: none;
+  border: 0;
+  color: var(--text);
+  text-align: left;
+}
+
+.wizard-section-head .wizard-section-title {
+  margin: 0;
+}
+
+.wizard-section-head.static {
+  cursor: default;
+}
+
+.platform-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+}
+
+.platform-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 16px;
+  border-radius: 16px;
+  border: 1px solid var(--border-strong);
+  background: var(--surface-6);
+  color: var(--text-strong-cool);
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.platform-card:has(input:checked) {
+  border-color: rgba(56, 189, 248, 0.6);
+  background: rgba(56, 189, 248, 0.1);
+}
+
+.platform-card-icon {
+  font-size: 1.15rem;
+}
+
+.platform-card-name {
+  flex: 1;
+}
+
+.platform-card input[type="checkbox"] {
+  width: 17px;
+  height: 17px;
+  accent-color: var(--accent-2);
+}
+
+.tool-columns {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 18px;
+}
+
+.tool-column-title {
+  margin: 0 0 10px;
+  color: var(--muted);
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+/* Wrap into columns instead of one tall list — the tools section was the worst offender. */
+.check-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(148px, 1fr));
+  gap: 2px 12px;
+}
+
+.check-list .checkbox-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 0;
+  border: 0;
+  background: none;
+  color: var(--text-strong-cool);
+  font-size: 0.86rem;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.check-list .checkbox-item input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--accent-2);
+}
+
+.form-grid .inline-check,
+.inline-check {
+  display: inline-flex;
+  width: fit-content;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  border: 1px solid var(--border-strong);
+  background: var(--surface-6);
+  color: var(--text-strong-cool);
+  font-size: 0.88rem;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.inline-input {
+  width: 100%;
+  margin-top: 10px;
+  padding: 11px 14px;
+  border-radius: 12px;
+  border: 1px solid var(--border-strong);
+  color: var(--text);
+  background: var(--surface-4);
+  font: inherit;
+  font-size: 0.88rem;
+}
+
+.inline-input:focus {
+  outline: none;
+  border-color: rgba(56, 189, 248, 0.58);
+  box-shadow: 0 0 0 4px rgba(56, 189, 248, 0.16);
+}
+
+.radio-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+}
+
+.radio-field {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  color: var(--text-strong-cool);
+  font-size: 0.86rem;
+  font-weight: 600;
+}
+
+.radio-field legend {
+  padding: 0;
+  margin-bottom: 8px;
+  color: var(--muted);
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.radio-field select {
+  width: 100%;
+  padding: 11px 14px;
+  border-radius: 12px;
+  border: 1px solid var(--border-strong);
+  color: var(--text);
+  background: var(--surface-4);
+  font: inherit;
+  font-size: 0.88rem;
+}
+
+.radio-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin-right: 14px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.radio-item input[type="radio"] {
+  width: 15px;
+  height: 15px;
+  accent-color: var(--accent-2);
+}
+
+.form-grid-3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.form-grid-3 .span-full {
+  grid-column: 1 / -1;
+}
+
+.row-list {
+  display: grid;
+  gap: 10px;
+}
+
+.detail-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr) minmax(0, 1.2fr) auto;
+  gap: 10px;
+  align-items: center;
+}
+
+.detail-row input,
+.detail-row select {
+  width: 100%;
+  padding: 11px 14px;
+  border-radius: 12px;
+  border: 1px solid var(--border-strong);
+  color: var(--text);
+  background: var(--surface-4);
+  font: inherit;
+  font-size: 0.88rem;
+}
+
+.detail-row input:focus,
+.detail-row select:focus {
+  outline: none;
+  border-color: rgba(56, 189, 248, 0.58);
+  box-shadow: 0 0 0 4px rgba(56, 189, 248, 0.16);
+}
+
+.poc-row {
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1.4fr) auto;
+}
+
+.row-remove {
+  padding: 9px 13px;
+  border-radius: 12px;
+  background: rgba(248, 113, 113, 0.12);
+  border: 1px solid rgba(248, 113, 113, 0.28);
+  color: #f87171;
+  font-size: 0.85rem;
+}
+
+.small-button {
+  padding: 8px 14px;
+  font-size: 0.82rem;
+}
+
+.small-note {
+  margin-top: 10px;
+  font-size: 0.82rem;
+}
+
+/* Step 2 is long — keep the actions reachable without scrolling to the bottom. */
+.wizard-nav {
+  position: sticky;
+  bottom: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 4px -4px -4px;
+  padding: 12px 16px;
+  border-radius: 16px;
+  background: var(--panel-strong);
+  border: 1px solid var(--border);
+  backdrop-filter: blur(14px);
+  box-shadow: 0 -8px 28px rgba(2, 6, 23, 0.18);
+}
+
+.wizard-progress {
+  flex: 1;
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.wizard-nav-right {
+  display: flex;
+  gap: 12px;
+}
+
+/* Pairs two related sections side by side so step 2 reads as ~half the scroll. */
+.wizard-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: start;
+  gap: 16px;
+}
+
+.wizard-summary {
+  position: sticky;
+  top: 20px;
+  display: grid;
+  gap: 14px;
+  padding: 18px;
+  border-radius: 18px;
+  background: var(--surface-5);
+  border: 1px solid var(--border);
+}
+
+.summary-group {
+  padding-top: 12px;
+  border-top: 1px solid var(--border-soft);
+}
+
+.summary-group:first-child {
+  padding-top: 0;
+  border-top: 0;
+}
+
+.summary-group-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.summary-group-title {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.summary-edit {
+  padding: 0;
+  background: none;
+  border: 0;
+  color: var(--accent-2);
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.summary-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 3px 0;
+  font-size: 0.8rem;
+}
+
+.summary-row dt {
+  color: var(--muted);
+}
+
+.summary-row dd {
+  margin: 0;
+  color: var(--text-soft);
+  font-weight: 600;
+  text-align: right;
+}
+
+.summary-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.summary-chip {
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.74rem;
+  font-weight: 600;
+  color: var(--accent-3);
+  background: rgba(52, 211, 153, 0.14);
+  border: 1px solid rgba(52, 211, 153, 0.28);
+}
+
+.summary-chip.off {
+  color: var(--muted);
+  background: rgba(148, 163, 184, 0.1);
+  border-color: var(--border);
+}
+
+.summary-hint {
+  display: grid;
+  gap: 10px;
+  padding: 14px;
+  border-radius: 14px;
+  background: rgba(56, 189, 248, 0.08);
+  border: 1px solid rgba(56, 189, 248, 0.2);
+  font-size: 0.8rem;
+}
+
+.full-width {
+  width: 100%;
+}
+
+.review-body {
+  display: grid;
+  gap: 16px;
+}
+
+.review-group h4 {
+  margin: 0 0 8px;
+  font-size: 0.95rem;
+}
+
+.review-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 8px 18px;
+  font-size: 0.88rem;
+  color: var(--text-soft);
+}
+
+.review-grid strong {
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.confirmation-block {
+  display: grid;
+  gap: 12px;
+  justify-items: center;
+  text-align: center;
+  padding: 36px 18px;
+}
+
+.confirmation-mark {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 58px;
+  height: 58px;
+  border-radius: 999px;
+  color: #04231a;
+  background: var(--accent-3);
+  font-size: 1.7rem;
+  font-weight: 800;
+}
+
+.field-error {
+  border-color: rgba(248, 113, 113, 0.6) !important;
+}
+
+/* ---- Templates screen ---- */
+.templates-list {
+  display: grid;
+  gap: 14px;
+}
+
+.template-week {
+  padding: 14px 16px;
+  border-radius: 16px;
+  background: var(--surface-5);
+  border: 1px solid var(--border);
+}
+
+.template-week-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+
+.template-week-badge {
+  padding: 4px 12px;
+  border-radius: 999px;
+  color: #05253f;
+  background: linear-gradient(135deg, #7dd3fc, #38bdf8);
+  font-size: 0.76rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.template-week-label {
+  flex: 1;
+  min-width: 160px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--border-strong);
+  color: var(--text);
+  background: var(--surface-4);
+  font: inherit;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.template-rows {
+  display: grid;
+  gap: 8px;
+}
+
+.template-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.7fr) auto 108px auto;
+  gap: 8px;
+  align-items: center;
+}
+
+.template-row input,
+.template-row select {
+  width: 100%;
+  padding: 9px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--border-strong);
+  color: var(--text);
+  background: var(--surface-4);
+  font: inherit;
+  font-size: 0.85rem;
+}
+
+.template-row input:focus,
+.template-row select:focus {
+  outline: none;
+  border-color: rgba(56, 189, 248, 0.58);
+  box-shadow: 0 0 0 4px rgba(56, 189, 248, 0.16);
+}
+
+@media (max-width: 900px) {
+  .template-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+.reports-index {
+  margin-bottom: 20px;
+  padding: 16px 18px;
+  border-radius: 18px;
+  background: var(--surface-5);
+  border: 1px solid var(--border);
+}
+
+.reports-index-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+
+.reports-index-picker {
+  display: grid;
+  gap: 6px;
+  flex: 1;
+  min-width: 220px;
+  color: var(--text-strong-cool);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.reports-index-picker select {
+  width: 100%;
+  padding: 11px 14px;
+  border-radius: 12px;
+  border: 1px solid var(--border-strong);
+  color: var(--text);
+  background: var(--surface-4);
+  font: inherit;
+  font-size: 0.9rem;
+}
+
+.reports-index-list {
+  display: grid;
+  gap: 8px;
+}
+
+.report-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: var(--surface-2);
+  border: 1px solid var(--border-soft);
+}
+
+.report-row-week {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.report-row-range {
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+
+.report-row-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.project-summary-card .project-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 6px 20px;
+  margin-top: 8px;
+  font-size: 0.88rem;
+  line-height: 1.6;
+}
+
+.log-card .sheet-report {
+  margin-top: 4px;
+}
+
+/* Sign-in page. Deliberately dark and self-contained rather than theme-aware — it is the
+   product's front door and should look the same for everyone. */
+.auth-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 400;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 20px;
+  overflow-y: auto;
+  color: #e6ebf5;
+  background:
+    radial-gradient(circle at 50% 0%, rgba(99, 102, 241, 0.16), transparent 45%),
+    #0a0a12;
+}
+
+.auth-shell {
+  width: min(430px, 100%);
+  text-align: center;
+}
+
+.auth-mark {
+  display: inline-grid;
+  place-items: center;
+  width: 74px;
+  height: 74px;
+  margin-bottom: 22px;
+  border-radius: 20px;
+  color: #a5b4fc;
+  background: #1e1b4b;
+  border: 1px solid rgba(129, 140, 248, 0.35);
+}
+
+.auth-mark svg {
+  width: 34px;
+  height: 34px;
+}
+
+.auth-wordmark {
+  margin: 0 0 6px;
+  font-family: "Segoe UI", "Trebuchet MS", system-ui, sans-serif;
+  font-size: 2rem;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  background: linear-gradient(100deg, #93c5fd, #a78bfa);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.auth-tagline {
+  margin-bottom: 34px;
+  color: #9aa4b8;
+  font-size: 0.94rem;
+}
+
+.auth-card {
+  display: grid;
+  gap: 14px;
+  padding: 28px;
+  text-align: left;
+  border-radius: 16px;
+  background: #12131c;
+  border: 1px solid rgba(148, 163, 184, 0.14);
+}
+
+.auth-card h2 {
+  margin: 0;
+  font-family: "Segoe UI", "Trebuchet MS", system-ui, sans-serif;
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #f1f5f9;
+}
+
+.auth-sub {
+  margin: -6px 0 4px;
+  color: #94a3b8;
+  font-size: 0.88rem;
+}
+
+.auth-card label {
+  display: grid;
+  gap: 6px;
+  color: #cbd5e1;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.auth-card input {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  background: #0c0d15;
+  color: #e6ebf5;
+  font: inherit;
+  font-size: 0.92rem;
+}
+
+.auth-card input::placeholder {
+  color: #64748b;
+}
+
+.auth-card input:focus {
+  outline: none;
+  border-color: rgba(129, 140, 248, 0.7);
+  box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.18);
+}
+
+.auth-google {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  padding: 13px;
+  border-radius: 10px;
+  border: 0;
+  background: #ffffff;
+  color: #1f2937;
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+.auth-google:hover {
+  background: #f1f5f9;
+}
+
+.auth-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: #64748b;
+  font-size: 0.78rem;
+}
+
+.auth-divider::before,
+.auth-divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: rgba(148, 163, 184, 0.18);
+}
+
+.auth-card .primary-button {
+  padding: 13px;
+  border-radius: 10px;
+  color: #0b1020;
+  background: linear-gradient(100deg, #93c5fd, #a78bfa);
+  font-size: 0.95rem;
+}
+
+.auth-link {
+  padding: 4px;
+  background: none;
+  border: 0;
+  color: #93c5fd;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.auth-error {
+  padding: 10px 12px;
+  border-radius: 10px;
+  color: #fca5a5;
+  background: rgba(248, 113, 113, 0.12);
+  border: 1px solid rgba(248, 113, 113, 0.32);
+  font-size: 0.84rem;
+}
+
+.auth-fineprint {
+  margin-top: 2px;
+  color: #64748b;
+  font-size: 0.76rem;
+  line-height: 1.5;
+  text-align: center;
+}
+
+.auth-footer {
+  margin-top: 26px;
+  color: #4b5563;
+  font-size: 0.78rem;
+}
+
+.auth-note {
+  margin-top: 12px;
+  font-size: 0.78rem;
+}
+
+.report-html-source {
+  width: 100%;
+  min-height: 180px;
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid var(--border-strong);
+  background: var(--surface-4);
+  color: var(--text);
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 0.72rem;
+  line-height: 1.5;
+  resize: vertical;
+  white-space: pre;
+}
+
+.timeline-editor {
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border-soft);
+}
+
+.timeline-editor h4 {
+  margin: 0 0 4px;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 0.95rem;
+}
+
+.timeline-editor .muted {
+  font-size: 0.8rem;
+  line-height: 1.5;
+}
+
+.timeline-fields {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin: 12px 0 8px;
+}
+
+.timeline-fields label {
+  display: grid;
+  gap: 5px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-strong-cool);
+}
+
+.timeline-fields input {
+  padding: 9px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--border-strong);
+  color: var(--text);
+  background: var(--surface-4);
+  font: inherit;
+  font-size: 0.85rem;
+}
+
+.platform-chips {
+  display: flex;
+  gap: 4px;
+}
+
+.platform-chip {
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.platform-chip input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.platform-chip span {
+  display: inline-block;
+  padding: 6px 9px;
+  border-radius: 8px;
+  border: 1px solid var(--border-strong);
+  background: var(--surface-4);
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 700;
+  line-height: 1;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.platform-chip input:checked + span {
+  color: #05253f;
+  background: linear-gradient(135deg, #7dd3fc, #38bdf8);
+  border-color: transparent;
+}
+
+.platform-chip input:focus-visible + span {
+  outline: 2px solid rgba(56, 189, 248, 0.7);
+  outline-offset: 2px;
+}
+
+.project-head-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.demo-loader {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 16px;
+}
+
+.storage-warning {
+  margin: 0;
+  padding: 12px 16px;
+  border-radius: 12px;
+  color: var(--text-soft);
+  background: rgba(251, 146, 60, 0.1);
+  border: 1px solid rgba(251, 146, 60, 0.32);
+  font-size: 0.84rem;
+  line-height: 1.6;
+}
+
+.storage-warning code {
+  padding: 1px 5px;
+  border-radius: 5px;
+  background: rgba(148, 163, 184, 0.18);
+  font-size: 0.92em;
+}
+
+.debug-panel {
+  position: fixed;
+  top: 12px;
+  right: 12px;
+  z-index: 300;
+  width: min(440px, calc(100vw - 24px));
+  max-height: 70vh;
+  display: flex;
+  flex-direction: column;
+  border-radius: 12px;
+  color: #d1fae5;
+  background: rgba(2, 6, 23, 0.96);
+  border: 1px solid rgba(52, 211, 153, 0.35);
+  box-shadow: 0 18px 50px rgba(2, 6, 23, 0.6);
+}
+
+.debug-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+  font-size: 0.8rem;
+}
+
+.debug-head strong {
+  flex: 1;
+}
+
+.debug-btn {
+  padding: 4px 10px;
+  border-radius: 8px;
+  color: #d1fae5;
+  background: rgba(52, 211, 153, 0.16);
+  border: 1px solid rgba(52, 211, 153, 0.3);
+  font-size: 0.72rem;
+}
+
+.debug-panel pre {
+  margin: 0;
+  padding: 10px;
+  overflow: auto;
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 0.7rem;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.app-error {
+  position: fixed;
+  inset: auto 16px 16px 16px;
+  z-index: 200;
+  padding: 14px 18px;
+  border-radius: 14px;
+  color: #fff;
+  background: #b91c1c;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 18px 50px rgba(2, 6, 23, 0.5);
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.wizard-error {
+  margin: 0;
+  padding: 12px 16px;
+  border-radius: 14px;
+  color: #f87171;
+  background: rgba(248, 113, 113, 0.1);
+  border: 1px solid rgba(248, 113, 113, 0.3);
+  font-size: 0.88rem;
+  font-weight: 600;
+}
+
+@media (max-width: 1250px) {
+  .wizard-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .wizard-summary {
+    position: relative;
+    top: 0;
+    order: -1;
+  }
+
+  .wizard-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 820px) {
+  .form-grid-3,
+  .detail-row {
+    grid-template-columns: 1fr;
+  }
+
+  .wizard-nav {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .wizard-nav-right {
+    flex-direction: column;
+  }
+}
+
+    </style>
+    <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+    </head>
+  <body>
+    <div id="appError" class="app-error" role="alert" hidden></div>
+
+    <div id="authOverlay" class="auth-overlay" hidden>
+      <div class="auth-shell">
+        <div class="auth-mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="m8.5 12.5 2.5 2.5 4.5-5"/></svg>
+        </div>
+        <h1 class="auth-wordmark">Weekly Report</h1>
+        <p class="auth-tagline">WebEngage Project Status Platform</p>
+
+        <div class="auth-card">
+          <h2 id="authTitle">Sign in to your account</h2>
+          <p class="auth-sub" id="authIntro">Access is restricted to company accounts only.</p>
+
+          <button type="button" id="authGoogle" class="auth-google">
+            <svg viewBox="0 0 18 18" width="18" height="18" aria-hidden="true"><path fill="#4285F4" d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84a4.14 4.14 0 0 1-1.8 2.72v2.26h2.92c1.7-1.57 2.68-3.88 2.68-6.62z"/><path fill="#34A853" d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.92-2.26c-.8.54-1.84.86-3.04.86-2.34 0-4.32-1.58-5.03-3.7H.96v2.33A9 9 0 0 0 9 18z"/><path fill="#FBBC05" d="M3.97 10.72a5.4 5.4 0 0 1 0-3.44V4.95H.96a9 9 0 0 0 0 8.1l3.01-2.33z"/><path fill="#EA4335" d="M9 3.58c1.32 0 2.5.45 3.44 1.35l2.58-2.58C13.46.89 11.43 0 9 0A9 9 0 0 0 .96 4.95l3.01 2.33C4.68 5.16 6.66 3.58 9 3.58z"/></svg>
+            <span>Continue with Google</span>
+          </button>
+
+          <p class="auth-error" id="authError" hidden></p>
+
+          <p class="auth-fineprint">By signing in, you agree to use this platform for authorized WebEngage project reporting only.</p>
+        </div>
+
+        <p class="auth-footer">Weekly Report v1.0 · Internal Tool</p>
+        <p class="muted auth-note" id="authLocalNote" hidden></p>
+      </div>
+    </div>
+
+    <div id="debugPanel" class="debug-panel" hidden>
+      <div class="debug-head">
+        <strong>Debug</strong>
+        <button type="button" id="debugCopy" class="debug-btn">Copy</button>
+        <button type="button" id="debugClose" class="debug-btn">Close</button>
+      </div>
+      <pre id="debugBody"></pre>
+    </div>
+    <div class="app-shell">
+      <header class="topbar">
+        <div class="topbar-brand">
+          <div class="brand-mark">S</div>
+          <div>
+            <p class="eyebrow">Weekly status</p>
+            <h1 class="topbar-title">Weekly Report</h1>
+          </div>
+        </div>
+        <div class="topbar-actions">
+          <div class="search-wrap">
+            <svg class="icon search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+            <input id="searchInput" class="search-input" type="text" placeholder="Search projects…" autocomplete="off" aria-label="Search projects" />
+            <div id="searchDropdown" class="dropdown-panel search-dropdown" hidden>
+              <div id="searchResults" class="dropdown-list"></div>
+            </div>
+          </div>
+          <button id="themeToggle" class="icon-button" type="button" aria-label="Toggle light/dark theme">
+            <svg class="icon icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+            <svg class="icon icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></svg>
+          </button>
+          <div class="notif-wrap">
+            <button id="notifBell" class="icon-button" type="button" aria-label="Notifications">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+              <span id="notifBadge" class="notif-badge" hidden>0</span>
+            </button>
+            <div id="notifDropdown" class="dropdown-panel" hidden>
+              <p class="dropdown-heading">Blocked &amp; delayed items</p>
+              <div id="notifDropdownList" class="dropdown-list"></div>
+            </div>
+          </div>
+          <button id="userWidget" class="user-widget" type="button">
+            <span id="headerAvatar" class="avatar">S</span>
+            <span class="user-widget-text">
+              <span id="headerDisplayName" class="user-widget-name">Stuti</span>
+              <span id="headerRole" class="user-widget-role">Admin</span>
+            </span>
+            <svg class="icon icon-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+          </button>
+          <div id="userDropdown" class="dropdown-panel dropdown-panel-right" hidden>
+            <button id="userDropdownSettingsLink" class="dropdown-link" type="button">Settings</button>
+          </div>
+        </div>
+      </header>
+
+      <div class="shell">
+        <aside class="sidebar">
+          <nav class="nav-list">
+            <button class="nav-item" type="button" data-nav-key="dashboard">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+              <span>Dashboard</span>
+            </button>
+            <button class="nav-item" type="button" data-nav-key="create-report">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg>
+              <span>Project Reports</span>
+            </button>
+            <button class="nav-item" type="button" data-nav-key="templates">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M9 9v11"/></svg>
+              <span>Templates</span>
+            </button>
+            <button class="nav-item" type="button" data-nav-key="calendar">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>
+              <span>Calendar</span>
+            </button>
+            <button class="nav-item" type="button" data-nav-key="team">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.2"/><path d="M2.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6"/><circle cx="17.5" cy="9" r="2.6"/><path d="M15.7 14.3c2.9.4 5.3 2.5 5.3 5.7"/></svg>
+              <span>Team</span>
+            </button>
+            <button class="nav-item" type="button" data-nav-key="settings">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6V21a2 2 0 1 1-4 0v-.2a1.7 1.7 0 0 0-1-1.5 1.7 1.7 0 0 0-1.9.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.6-1H3a2 2 0 1 1 0-4h.2a1.7 1.7 0 0 0 1.5-1 1.7 1.7 0 0 0-.3-1.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.9.3H9a1.7 1.7 0 0 0 1-1.6V3a2 2 0 1 1 4 0v.2a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.9-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.9V9a1.7 1.7 0 0 0 1.6 1H21a2 2 0 1 1 0 4h-.2a1.7 1.7 0 0 0-1.5 1z"/></svg>
+              <span>Settings</span>
+            </button>
+          </nav>
+          <div class="sidebar-actions">
+            <button id="sidebarAddProject" class="primary-button sidebar-button" type="button" data-requires="project.create">+ New Project</button>
+          </div>
+        </aside>
+
+        <main class="content">
+          <section class="card screen" id="dashboardScreen">
+            <div class="card-head">
+              <div>
+                <p class="eyebrow">Home</p>
+                <h2>Dashboard</h2>
+              </div>
+              <div class="actions" style="align-items: center;">
+                <button id="homeAddProject" data-requires="project.create" class="primary-button" type="button" style="padding: 8px 14px; font-size: 0.85rem; border-radius: 10px;">+ New Project</button>
+              </div>
+            </div>
+            <div class="stat-tile-row">
+              <article class="stat-tile"><span class="stat-tile-label">Total Projects</span><span class="stat-tile-value" id="dashProjectCount">0</span></article>
+              <article class="stat-tile"><span class="stat-tile-label">Ongoing</span><span class="stat-tile-value" id="dashCurrentCount">0</span></article>
+              <article class="stat-tile"><span class="stat-tile-label">Completed</span><span class="stat-tile-value" id="dashClosedCount">0</span></article>
+              <article class="stat-tile"><span class="stat-tile-label">Weekly Updates</span><span class="stat-tile-value" id="dashUpdateCount">0</span></article>
+              <article class="stat-tile"><span class="stat-tile-label">Blocked/Delayed</span><span class="stat-tile-value tone-blocked" id="dashAlertCount">0</span></article>
+            </div>
+
+            <h3 style="margin-top: 24px; margin-bottom: 14px;">Weekly Reports</h3>
+            <div class="home-grid">
+              <button class="folder-button folder-button-warm" id="openCurrent" type="button">
+                <span class="folder-label">Ongoing projects</span>
+                <span id="currentProjectCount" class="folder-count">0</span>
+                <small>Open active work</small>
+              </button>
+
+              <button class="folder-button folder-button-cool" id="openClosed" type="button">
+                <span class="folder-label">Completed projects</span>
+                <span id="closedProjectCount" class="folder-count">0</span>
+                <small>Review completed work</small>
+              </button>
+            </div>
+
+            <div class="detail-panel" style="margin-top: 24px;">
+              <h3>Recent updates</h3>
+              <div id="dashRecentList" class="project-name-list"></div>
+            </div>
+          </section>
+
+          <section class="card screen" id="categoryScreen" hidden>
+            <div class="screen-head">
+              <button id="backToHome" class="ghost-button" type="button">Back</button>
+              <div class="screen-title">
+                <p class="eyebrow">Folder</p>
+                <h2 id="categoryTitle">Projects</h2>
+              </div>
+              <span id="categoryBadge" class="pill pill-dark">0</span>
+            </div>
+
+            <div id="categoryList" class="project-name-list"></div>
+          </section>
+
+          <section class="card screen" id="projectScreen" hidden>
+            <div class="screen-head">
+              <button id="backToCategory" class="ghost-button" type="button">Back</button>
+              <div class="screen-title">
+                <p class="eyebrow">Project page</p>
+                <h2 id="projectTitle">Project</h2>
+              </div>
+              <div class="project-head-actions">
+                <span id="projectStatusBadge" class="pill pill-dark">Ongoing</span>
+                <button id="deleteProjectBtn" class="row-remove" type="button" data-requires="project.delete">Delete project</button>
+              </div>
+            </div>
+
+            <div class="project-detail-grid">
+              <section class="detail-panel">
+                <h3>Overview</h3>
+                <div id="projectOverview" class="detail-text"></div>
+
+                <div class="timeline-editor">
+                  <h4>Project timeline</h4>
+                  <p class="muted">Week dates are derived from these. Changing them re-dates every weekly report for this project.</p>
+                  <div class="timeline-fields">
+                    <label>Kickoff<input type="date" id="projKickoff" /></label>
+                    <label>Target go-live<input type="date" id="projGoLive" /></label>
+                    <button type="button" id="projApplyTimeline" class="secondary-button small-button">Re-align weeks</button>
+                  </div>
+                  <p class="muted" id="projTimelineNote"></p>
+                </div>
+              </section>
+
+              <section class="detail-panel">
+                <div class="card-head" style="margin-bottom: 12px; align-items: center;">
+                  <h3 style="margin: 0;">Weekly updates</h3>
+                  <button id="addWeekFromTemplate" data-requires="report.create" class="secondary-button" type="button" style="padding: 8px 12px; font-size: 0.85rem; border-radius: 10px;">+ Add week from template</button>
+                  <button id="addWeeklyUpdate" data-requires="report.create" class="primary-button" type="button" style="padding: 8px 12px; font-size: 0.85rem; border-radius: 10px;">+ Add Update</button>
+                </div>
+                <div id="projectUpdates" class="log-list"></div>
+              </section>
+            </div>
+
+            <section class="detail-panel" id="projectSummary"></section>
+
+
+            <section class="detail-panel report-panel">
+              <div class="card-head">
+                <div>
+                  <p class="eyebrow">Project report</p>
+                  <h3>Generated summary</h3>
+                </div>
+                <span id="projectReportState" class="pill pill-dark">Waiting</span>
+              </div>
+              <div id="projectReportOutput" class="report-output">
+                <p class="muted">Open a project name to generate a report for that project only.</p>
+              </div>
+              <div class="actions report-actions">
+                <button id="generateReport" class="secondary-button" type="button">Generate report (PDF)</button>
+                <button id="downloadReport" class="ghost-button" type="button">Copy HTML for email</button>
+              </div>
+            </section>
+          </section>
+
+          <section class="card screen" id="addProjectScreen" hidden>
+            <div class="screen-head">
+              <button id="cancelAddProject" class="ghost-button" type="button">Back</button>
+              <div class="screen-title">
+                <p class="eyebrow">New project</p>
+                <h2>Create New Project</h2>
+              </div>
+            </div>
+
+            <ol class="wizard-steps" id="wizardSteps">
+              <li class="wizard-step" data-step="1"><span class="wizard-step-dot">1</span><span class="wizard-step-label">Basic Details</span></li>
+              <li class="wizard-step" data-step="2"><span class="wizard-step-dot">2</span><span class="wizard-step-label">Platform Integration</span></li>
+              <li class="wizard-step" data-step="3"><span class="wizard-step-dot">3</span><span class="wizard-step-label">Review &amp; Summary</span></li>
+              <li class="wizard-step" data-step="4"><span class="wizard-step-dot">4</span><span class="wizard-step-label">Confirmation</span></li>
+            </ol>
+
+            <div class="wizard-layout">
+              <form id="addProjectForm" class="wizard-main" novalidate>
+
+                <!-- Step 1 : Basic Details -->
+                <div class="wizard-panel" data-panel="1">
+                  <div class="wizard-section">
+                    <h3 class="wizard-section-title">Project &amp; Client</h3>
+                    <div class="form-grid">
+                      <label>
+                        Project Name *
+                        <input type="text" id="npName" required placeholder="e.g. LuxeStore" />
+                      </label>
+                      <label>
+                        Client Name
+                        <input type="text" id="npClientName" placeholder="e.g. LuxeStore Pvt. Ltd." />
+                      </label>
+                      <label>
+                        CSM
+                        <input type="text" id="npCsm" placeholder="Customer success manager" />
+                      </label>
+                      <label>
+                        Project Owner
+                        <input type="text" id="npImplOwner" placeholder="Implementation lead" />
+                      </label>
+                      <label>
+                        Sales Owner
+                        <input type="text" id="npSalesOwner" placeholder="Account owner" />
+                      </label>
+                      <label>
+                        Kickoff Date
+                        <input type="date" id="npKickoffDate" />
+                      </label>
+                      <label>
+                        Target Go-Live Date
+                        <input type="date" id="npGoLiveDate" />
+                      </label>
+                      <label>
+                        Cycle Length (weeks)
+                        <select id="npCycleWeeks">
+                                                    <option value="2">2 weeks</option>
+                          <option value="3">3 weeks</option>
+                          <option value="4">4 weeks</option>
+                          <option value="5">5 weeks</option>
+                          <option value="6" selected>6 weeks</option>
+                          <option value="7">7 weeks</option>
+                          <option value="8">8 weeks</option>
+                          <option value="9">9 weeks</option>
+                          <option value="10">10 weeks</option>
+                          <option value="11">11 weeks</option>
+                          <option value="12">12 weeks</option>
+                        </select>
+                        <span class="muted" id="npCycleHint" style="font-weight:400;font-size:0.78rem;"></span>
+                      </label>
+                      <label>
+                        Technical Team
+                        <select id="npTechTeam">
+                          <option value="in-house">In-house</option>
+                          <option value="outsourced">Outsourced (third-party vendor)</option>
+                        </select>
+                      </label>
+                      <label class="span-2" id="npVendorNameField" hidden>
+                        Vendor Name
+                        <input type="text" id="npVendorName" placeholder="e.g. Acme Dev Studio" />
+                      </label>
+                      <div class="span-2">
+                        <div class="wizard-section-head static" style="margin-bottom: 10px;">
+                          <span class="wizard-section-title" style="font-size: 0.95rem;">Client Points of Contact</span>
+                          <button type="button" id="npAddPoc" class="ghost-button small-button">+ Add POC</button>
+                        </div>
+                        <div class="row-list" id="npPocList"></div>
+                        <p class="muted small-note">People on the client side for this project. They appear in the owner dropdown when assigning tasks in this project’s weekly reports, and any new name typed there is added back to this list.</p>
+                      </div>
+                      <label class="span-2">
+                        Notes
+                        <textarea id="npNotes" placeholder="Describe the project overview and goals..."></textarea>
+                      </label>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Step 2 : Platform Integration -->
+                <div class="wizard-panel" data-panel="2" hidden>
+                  <div class="wizard-section">
+                    <h3 class="wizard-section-title">Select Platforms to Integrate with WebEngage</h3>
+                    <div class="platform-cards" id="npPlatforms">
+                      <label class="platform-card"><span class="platform-card-icon">🌐</span><span class="platform-card-name">Website</span><input type="checkbox" value="Website" /></label>
+                      <label class="platform-card"><span class="platform-card-icon">🤖</span><span class="platform-card-name">Android</span><input type="checkbox" value="Android" /></label>
+                      <label class="platform-card"><span class="platform-card-icon">🍎</span><span class="platform-card-name">iOS</span><input type="checkbox" value="iOS" /></label>
+                      <label class="platform-card"><span class="platform-card-icon">🖥️</span><span class="platform-card-name">Web App</span><input type="checkbox" value="Web App" /></label>
+                      <label class="platform-card"><span class="platform-card-icon">🗂️</span><span class="platform-card-name">CRM</span><input type="checkbox" value="REST API" /></label>
+                    </div>
+                    <input type="text" id="npPlatformLink" class="inline-input" placeholder="Platform link(s) — e.g. https://www.example.com, https://app.example.com" />
+                  </div>
+
+
+                  <div class="wizard-row">
+                  <div class="wizard-section">
+                    <h3 class="wizard-section-title">Communication Channels Required</h3>
+                    <div class="checkbox-group" id="npChannels">
+                      <label class="checkbox-item"><input type="checkbox" value="Push" /> Push</label>
+                      <label class="checkbox-item"><input type="checkbox" value="Email" /> Email</label>
+                      <label class="checkbox-item"><input type="checkbox" value="SMS" /> SMS</label>
+                      <label class="checkbox-item"><input type="checkbox" value="WhatsApp" /> WhatsApp</label>
+                      <label class="checkbox-item"><input type="checkbox" value="In-App" /> In-App</label>
+                      <label class="checkbox-item"><input type="checkbox" value="Web Push" /> Web Push</label>
+                      <label class="checkbox-item"><input type="checkbox" value="On-site Notification" /> On-site Notification</label>
+                    </div>
+                  </div>
+
+                  <div class="wizard-section">
+                    <h3 class="wizard-section-title">Data Requirements</h3>
+                    <div class="radio-row">
+                      <fieldset class="radio-field">
+                        <legend>Historical Data Migration</legend>
+                        <label class="radio-item"><input type="radio" name="npHistorical" value="yes" /> Yes</label>
+                        <label class="radio-item"><input type="radio" name="npHistorical" value="no" checked /> No</label>
+                      </fieldset>
+                      <label class="radio-field">
+                        User Identifier
+                        <select id="npUserIdentifier">
+                          <option>Email</option>
+                          <option>Phone</option>
+                          <option>User ID</option>
+                          <option>Custom</option>
+                        </select>
+                      </label>
+                    </div>
+                  </div>
+                  </div>
+
+                  <div class="wizard-section">
+                    <h3 class="wizard-section-title">Additional Information</h3>
+                    <div class="form-grid form-grid-3">
+                      <label>
+                        Special Client Requirements
+                        <textarea id="npSpecialRequirements" placeholder="Enter requirements..."></textarea>
+                      </label>
+                      <label>
+                        Known Blockers
+                        <textarea id="npKnownBlockers" placeholder="Enter blockers..."></textarea>
+                      </label>
+                      <label>
+                        Dependencies
+                        <textarea id="npDependencies" placeholder="Enter dependencies..."></textarea>
+                      </label>
+                      <label class="span-full">
+                        Additional Comments (Optional)
+                        <textarea id="npAdditionalComments" placeholder="Enter any additional comments..."></textarea>
+                      </label>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Step 3 : Review & Summary -->
+                <div class="wizard-panel" data-panel="3" hidden>
+                  <div class="wizard-section">
+                    <h3 class="wizard-section-title">Review &amp; Summary</h3>
+                    <div id="npReviewBody" class="review-body"></div>
+                  </div>
+                </div>
+
+                <!-- Step 4 : Confirmation -->
+                <div class="wizard-panel" data-panel="4" hidden>
+                  <div class="wizard-section confirmation-block">
+                    <div class="confirmation-mark">✓</div>
+                    <h3 class="wizard-section-title" id="npConfirmTitle">Project created</h3>
+                    <p class="muted" id="npConfirmText"></p>
+                    <div class="actions" style="justify-content: center;">
+                      <button type="button" id="npGoToProject" class="primary-button">Open project</button>
+                      <button type="button" id="npCreateAnother" class="ghost-button">Create another</button>
+                    </div>
+                  </div>
+                </div>
+
+                <p class="wizard-error" id="npError" role="alert" hidden></p>
+
+                <div class="wizard-nav" id="npNav">
+                  <button type="button" id="npBack" class="ghost-button">Back</button>
+                  <span class="wizard-progress" id="npProgress">Step 1 of 5</span>
+                  <div class="wizard-nav-right">
+                    <button type="button" id="btnCancelAddProject" class="ghost-button">Cancel</button>
+                    <button type="submit" id="npNext" class="primary-button">Next: Platform Integration</button>
+                  </div>
+                </div>
+              </form>
+
+              <aside class="wizard-summary" id="npSummaryPanel">
+                <h3 class="wizard-section-title">Project Summary</h3>
+                <div id="npSummary"></div>
+                <div class="summary-hint">
+                  <p class="muted">You can save the project and continue later from Projects.</p>
+                  <button type="button" id="npSaveDraft" class="secondary-button full-width">Save as Draft</button>
+                </div>
+              </aside>
+            </div>
+          </section>
+
+          <section class="card screen" id="createReportScreen" hidden>
+            <div class="screen-head">
+              <button id="cancelCreateReport" class="ghost-button" type="button">Back</button>
+              <div class="screen-title">
+                <p class="eyebrow">Weekly reports</p>
+                <h2 id="createReportTitle">Project Reports</h2>
+              </div>
+            </div>
+
+            <section class="reports-index">
+              <div class="reports-index-head">
+                <label class="reports-index-picker">
+                  Project
+                  <select id="reportsIndexProject"></select>
+                </label>
+                <button id="reportsNewBtn" class="primary-button" type="button" data-requires="report.create">+ New report</button>
+              </div>
+              <div id="reportsIndexList" class="reports-index-list"></div>
+            </section>
+
+            <form id="createReportForm" class="form-grid" hidden>
+              <label class="span-2">
+                Project *
+                <select id="createReportProjectSelect" required></select>
+              </label>
+
+              <div class="span-2 week-section">
+                <h3 class="week-section-title">Last Week <span class="meta">(completed work)</span></h3>
+                <div class="form-grid">
+                  <label>
+                    Week Start Date
+                    <input type="date" id="lastWeekDate" />
+                  </label>
+                  <label>
+                    Overall Status
+                    <select id="lastWeekStatus">
+                      <option value="on track">On Track</option>
+                      <option value="needs attention">Needs Attention</option>
+                      <option value="blocked">Blocked</option>
+                    </select>
+                  </label>
+                </div>
+                <div id="lastWeekStats" style="margin-top: 14px;"></div>
+                <div class="tasks-container" style="margin-top: 14px; padding: 18px; border-radius: 18px; background: rgba(4, 10, 21, 0.3); border: 1px solid var(--border);">
+                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 12px;">
+                    <h4 style="margin: 0; font-family: Georgia, 'Times New Roman', serif;">Tasks & Sub-tasks</h4>
+                    <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                      <button type="button" id="btnChecklistLastWeek" class="primary-button" style="padding: 8px 12px; font-size: 0.85rem; border-radius: 10px;">📋 Add from checklist</button>
+                      <button type="button" id="btnAddLastWeekTask" class="secondary-button" style="padding: 8px 12px; font-size: 0.85rem; border-radius: 10px;">+ Add Task</button>
+                    </div>
+                  </div>
+                  <div id="lastWeekTasksList" style="display: grid; gap: 18px;"></div>
+                </div>
+              </div>
+
+              <div class="span-2 week-section">
+                <h3 class="week-section-title">Upcoming / Running Week <span class="meta">(this week's plan)</span></h3>
+                <div class="form-grid">
+                  <label>
+                    Week Start Date
+                    <input type="date" id="thisWeekDate" />
+                  </label>
+                  <label>
+                    Overall Status
+                    <select id="thisWeekStatus">
+                      <option value="on track">On Track</option>
+                      <option value="needs attention">Needs Attention</option>
+                      <option value="blocked">Blocked</option>
+                    </select>
+                  </label>
+                </div>
+                <div id="thisWeekStats" style="margin-top: 14px;"></div>
+                <div class="tasks-container" style="margin-top: 14px; padding: 18px; border-radius: 18px; background: rgba(4, 10, 21, 0.3); border: 1px solid var(--border);">
+                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 12px;">
+                    <h4 style="margin: 0; font-family: Georgia, 'Times New Roman', serif;">Tasks & Sub-tasks</h4>
+                    <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                      <button type="button" id="btnChecklistThisWeek" class="primary-button" style="padding: 8px 12px; font-size: 0.85rem; border-radius: 10px;">📋 Add from checklist</button>
+                      <button type="button" id="btnAddThisWeekTask" class="secondary-button" style="padding: 8px 12px; font-size: 0.85rem; border-radius: 10px;">+ Add Task</button>
+                    </div>
+                  </div>
+                  <div id="thisWeekTasksList" style="display: grid; gap: 18px;"></div>
+                </div>
+              </div>
+
+              <div class="actions span-2" style="margin-top: 12px;">
+                <button type="submit" class="primary-button">Save Report</button>
+                <button type="button" id="btnCancelCreateReport" class="ghost-button">Cancel</button>
+              </div>
+            </form>
+          </section>
+
+          <section class="card screen" id="calendarScreen" hidden>
+            <div class="card-head">
+              <div>
+                <p class="eyebrow">Calendar</p>
+                <h2>Weekly Update Calendar</h2>
+              </div>
+              <div class="actions" style="align-items: center;">
+                <button id="calendarPrev" class="ghost-button" type="button" style="padding: 8px 12px;">‹</button>
+                <span id="calendarMonthLabel" class="pill pill-dark"></span>
+                <button id="calendarNext" class="ghost-button" type="button" style="padding: 8px 12px;">›</button>
+              </div>
+            </div>
+            <div class="calendar-head">
+              <span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span>
+            </div>
+            <div id="calendarGrid" class="calendar-grid"></div>
+            <div class="detail-panel" style="margin-top: 20px;">
+              <h3>Updates covering the selected date</h3>
+              <div id="calendarSelectedList" class="project-name-list"></div>
+            </div>
+          </section>
+
+          <section class="card screen" id="teamScreen" hidden>
+            <div class="card-head">
+              <div>
+                <p class="eyebrow">Team</p>
+                <h2>Project Team</h2>
+              </div>
+            </div>
+
+            <section class="wizard-section">
+              <div class="reports-index-head">
+                <label class="reports-index-picker">
+                  Project
+                  <select id="teamProjectSelect"></select>
+                </label>
+                <button id="teamAddMember" class="secondary-button" type="button" data-requires="team.manage">+ Add member</button>
+              </div>
+              <div id="teamMemberList" class="row-list"></div>
+              <p class="muted small-note">
+                The delivery team for this project. These names are offered when assigning tasks in
+                this project&rsquo;s weekly reports, alongside the client POCs. Scoped to this project only.
+              </p>
+            </section>
+
+            <section class="wizard-section">
+              <h3 class="wizard-section-title">Workload</h3>
+              <div id="teamList" style="display: grid; gap: 10px;"></div>
+            </section>
+          </section>
+
+          <section class="card screen" id="templatesScreen" hidden>
+            <div class="card-head">
+              <div>
+                <p class="eyebrow">Master plan</p>
+                <h2>Week-wise Task Templates</h2>
+              </div>
+              <div class="actions">
+                <button id="templatesAddWeek" class="secondary-button" type="button" data-requires="template.edit">+ Add week</button>
+                <button id="templatesReloadFile" class="ghost-button" type="button" data-requires="template.edit">Reload from file</button>
+                <button id="templatesReset" class="ghost-button" type="button" data-requires="template.edit">Reset to built-in</button>
+              </div>
+            </div>
+            <p class="muted" style="margin-bottom: 12px;">
+              Every new project pre-creates one report per week from this plan. Edits here apply to
+              projects created afterwards — existing projects keep the tasks they already have.
+              The default plan is read from <code>week-templates.json</code> in the project folder.
+            </p>
+            <p class="storage-warning">
+              <strong>Stored in this browser only.</strong> Edits and deletions here save to
+              <code>localStorage</code> immediately and cannot be undone. A normal or hard reload keeps
+              your data — but clearing site data, using a private window, or opening the app from a
+              different address will show an empty or different set. Use <strong>Export backup</strong>
+              in Settings before making large deletions.
+            </p>
+            <div id="templatesList" class="templates-list"></div>
+          </section>
+
+          <section class="card screen" id="settingsScreen" hidden>
+            <div class="card-head">
+              <div>
+                <p class="eyebrow">Settings</p>
+                <h2>Profile</h2>
+              </div>
+            </div>
+            <form id="settingsForm" class="form-grid" style="max-width: 480px;">
+              <label class="span-2">
+                Display Name *
+                <input type="text" id="settingsDisplayName" required placeholder="e.g. Stuti" />
+              </label>
+              <label class="span-2">
+                Role
+                <input type="text" id="settingsRole" placeholder="e.g. Admin" />
+              </label>
+              <div class="actions span-2" style="align-items: center;">
+                <button type="submit" class="primary-button">Save</button>
+                <span id="settingsSavedNote" class="pill" hidden>Saved!</span>
+              </div>
+            </form>
+
+            <div style="margin-top: 26px; padding-top: 20px; border-top: 1px solid var(--border-soft);">
+              <h3 style="font-family: Georgia, 'Times New Roman', serif; margin-bottom: 8px;">Account</h3>
+              <div id="settingsAccount"></div>
+
+              <div id="settingsRolesBlock" data-requires="users.manage">
+                <h3 style="font-family: Georgia, 'Times New Roman', serif; margin: 24px 0 8px;">Users &amp; Roles</h3>
+                <div id="settingsRoles"></div>
+              </div>
+
+              <h3 style="font-family: Georgia, 'Times New Roman', serif; margin: 24px 0 8px;">Data &amp; Backup</h3>
+              <p class="storage-warning">
+                <strong>Everything lives in this browser.</strong> Projects, weekly reports and the
+                master template are stored in <code>localStorage</code> for
+                <span id="settingsOrigin">this address</span> only — there is no server copy.
+                Reloading the page (even a hard reload) is safe. You will lose data if you clear
+                site data / browsing history, use a private window, switch browser or device, or
+                open the app from a different address. Deletions inside the app are immediate and
+                cannot be undone. Export regularly.
+              </p>
+              <div class="demo-loader">
+                <label class="reports-index-picker">
+                  Demo data
+                  <select id="settingsDemoSelect"></select>
+                </label>
+                <button id="settingsDemoLoad" class="secondary-button" type="button" data-requires="project.create">Load demo project</button>
+              </div>
+              <p class="muted" id="settingsDemoNote" style="margin-top: 8px; font-size: 0.82rem;"></p>
+
+              <div class="actions" style="margin-top: 14px;">
+                <button id="settingsExport" class="secondary-button" type="button">Export backup (.json)</button>
+                <button id="settingsImport" data-requires="data.manage" class="ghost-button" type="button">Import backup</button>
+                <button id="settingsClear" data-requires="data.manage" class="row-remove" type="button" style="padding: 13px 18px; border-radius: 14px;">Clear all test data</button>
+                <input type="file" id="settingsImportFile" accept="application/json,.json" hidden />
+              </div>
+              <p class="muted" id="settingsDataStats" style="margin-top: 10px; font-size: 0.82rem;"></p>
+            </div>
+          </section>
+        </main>
+      </div>
+    </div>
+
+    <div id="templatePickerOverlay" class="modal-overlay" hidden>
+      <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="templatePickerTitle">
+        <div class="modal-head">
+          <div>
+            <p class="eyebrow">Quick add</p>
+            <h2 id="templatePickerTitle">Add tasks from checklist</h2>
+          </div>
+          <button type="button" id="templatePickerClose" class="ghost-button" style="padding: 8px 12px;">✕</button>
+        </div>
+        <div class="modal-toolbar">
+          <input type="search" id="templateSearch" placeholder="Search tasks…" autocomplete="off" />
+          <span id="templateSelectedCount" class="pill pill-dark">0 selected</span>
+        </div>
+        <div id="templatePickerBody" class="modal-body"></div>
+        <div class="modal-foot">
+          <button type="button" id="templatePickerCancel" class="ghost-button">Cancel</button>
+          <button type="button" id="templatePickerAdd" class="primary-button">Add selected</button>
+        </div>
+      </div>
+    </div>
+    <script>window.__BUNDLED_DATA__ = {"supabaseConfig": {"$comment": "Paste your Supabase project URL and anon (public) key here, then reload. Leave them empty to keep the app in local-only mode with no login. Find both in Supabase -> Project Settings -> API. The anon key is safe in client code; row-level security is what protects the data. Sign-in is Google only, so also enable Authentication -> Providers -> Google.", "url": "", "anonKey": ""}, "weekTemplates": {"$comment": "Master week-wise plan. `platforms` scopes a task to the platforms a project selected; an empty list means the task applies to every project. Platforms: Website, Web App, Android, iOS, REST API. Edit here, then use Templates -> Reload from file.", "weeks": [{"week": 1, "label": "Kickoff & Discovery", "tasks": [{"scope": "Kickoff call", "title": "Onboarding mail thread initiated", "owner": "", "priority": "medium", "platforms": []}, {"scope": "Kickoff call", "title": "Channel form", "owner": "", "priority": "medium", "platforms": []}, {"scope": "Kickoff call", "title": "Tech doc", "owner": "", "priority": "medium", "platforms": []}, {"scope": "Kickoff call", "title": "Scope of Work", "owner": "", "priority": "medium", "platforms": []}, {"scope": "Tech Team connect", "title": "Tech team connect - Website", "owner": "", "priority": "high", "platforms": ["Website"]}, {"scope": "Tech Team connect", "title": "Tech team connect - Android", "owner": "", "priority": "high", "platforms": ["Android"]}, {"scope": "Tech Team connect", "title": "Tech team connect - iOS", "owner": "", "priority": "high", "platforms": ["iOS"]}, {"scope": "Tech Team connect", "title": "Tech team connect - Web App", "owner": "", "priority": "high", "platforms": ["Web App"]}, {"scope": "Tech Team connect", "title": "Tech team connect - REST API", "owner": "", "priority": "high", "platforms": ["REST API"]}, {"scope": "User Id", "title": "Finalise the unique user identifier", "owner": "", "priority": "high", "platforms": []}, {"scope": "Data Model", "title": "Data model - Website", "owner": "", "priority": "high", "platforms": ["Website"]}, {"scope": "Data Model", "title": "Data model - Android", "owner": "", "priority": "high", "platforms": ["Android"]}, {"scope": "Data Model", "title": "Data model - iOS", "owner": "", "priority": "high", "platforms": ["iOS"]}, {"scope": "Data Model", "title": "Data model - Web App", "owner": "", "priority": "high", "platforms": ["Web App"]}, {"scope": "Data Model", "title": "Data model - REST API", "owner": "", "priority": "high", "platforms": ["REST API"]}]}, {"week": 2, "label": "Staging Setup", "tasks": [{"scope": "Data Model", "title": "Data model finalisation & sign-off", "owner": "", "priority": "high", "platforms": []}, {"scope": "Staging", "title": "SDK setup - Website", "owner": "", "priority": "high", "platforms": ["Website"]}, {"scope": "Staging", "title": "SDK setup - Android", "owner": "", "priority": "high", "platforms": ["Android"]}, {"scope": "Staging", "title": "SDK setup - iOS", "owner": "", "priority": "high", "platforms": ["iOS"]}, {"scope": "Staging", "title": "SDK setup - Web App", "owner": "", "priority": "high", "platforms": ["Web App"]}, {"scope": "Staging", "title": "User tracking setup - Website", "owner": "", "priority": "high", "platforms": ["Website"]}, {"scope": "Staging", "title": "User tracking setup - Android", "owner": "", "priority": "high", "platforms": ["Android"]}, {"scope": "Staging", "title": "User tracking setup - iOS", "owner": "", "priority": "high", "platforms": ["iOS"]}, {"scope": "Staging", "title": "User tracking setup - Web App", "owner": "", "priority": "high", "platforms": ["Web App"]}, {"scope": "Historic Data", "title": "Preparation of CSV containing historical user and transactional data", "owner": "", "priority": "high", "platforms": []}, {"scope": "Website", "title": "User Identification", "owner": "", "priority": "high", "platforms": ["Website"]}, {"scope": "Website", "title": "User Attributes", "owner": "", "priority": "high", "platforms": ["Website"]}, {"scope": "Website", "title": "Custom Events", "owner": "", "priority": "high", "platforms": ["Website"]}, {"scope": "Website", "title": "Event Attributes", "owner": "", "priority": "high", "platforms": ["Website"]}, {"scope": "Website", "title": "Login / Logout", "owner": "", "priority": "high", "platforms": ["Website"]}, {"scope": "Website", "title": "Signup", "owner": "", "priority": "high", "platforms": ["Website"]}, {"scope": "Android", "title": "SDK Initialization", "owner": "", "priority": "high", "platforms": ["Android"]}, {"scope": "Android", "title": "User Identification", "owner": "", "priority": "high", "platforms": ["Android"]}, {"scope": "Android", "title": "User Attributes", "owner": "", "priority": "high", "platforms": ["Android"]}, {"scope": "Android", "title": "Custom Events", "owner": "", "priority": "high", "platforms": ["Android"]}, {"scope": "Android", "title": "Event Attributes", "owner": "", "priority": "high", "platforms": ["Android"]}, {"scope": "Android", "title": "Login / Logout", "owner": "", "priority": "high", "platforms": ["Android"]}, {"scope": "Android", "title": "Signup", "owner": "", "priority": "high", "platforms": ["Android"]}, {"scope": "iOS", "title": "SDK Initialization", "owner": "", "priority": "high", "platforms": ["iOS"]}, {"scope": "iOS", "title": "User Identification", "owner": "", "priority": "high", "platforms": ["iOS"]}, {"scope": "iOS", "title": "User Attributes", "owner": "", "priority": "high", "platforms": ["iOS"]}, {"scope": "iOS", "title": "Custom Events", "owner": "", "priority": "high", "platforms": ["iOS"]}, {"scope": "iOS", "title": "Event Attributes", "owner": "", "priority": "high", "platforms": ["iOS"]}, {"scope": "iOS", "title": "Login / Logout", "owner": "", "priority": "high", "platforms": ["iOS"]}, {"scope": "iOS", "title": "Signup", "owner": "", "priority": "high", "platforms": ["iOS"]}, {"scope": "REST API", "title": "API authentication", "owner": "", "priority": "high", "platforms": ["REST API"]}, {"scope": "REST API", "title": "API key configuration", "owner": "", "priority": "high", "platforms": ["REST API"]}, {"scope": "REST API", "title": "User creation / update", "owner": "", "priority": "high", "platforms": ["REST API"]}, {"scope": "REST API", "title": "User attribute updates", "owner": "", "priority": "high", "platforms": ["REST API"]}, {"scope": "REST API", "title": "User identification", "owner": "", "priority": "high", "platforms": ["REST API"]}]}, {"week": 3, "label": "Event Tracking & Channels", "tasks": [{"scope": "Staging", "title": "Event tracking setup - Website", "owner": "", "priority": "high", "platforms": ["Website"]}, {"scope": "Staging", "title": "Event tracking setup - Android", "owner": "", "priority": "high", "platforms": ["Android"]}, {"scope": "Staging", "title": "Event tracking setup - iOS", "owner": "", "priority": "high", "platforms": ["iOS"]}, {"scope": "Staging", "title": "Event tracking setup - Web App", "owner": "", "priority": "high", "platforms": ["Web App"]}, {"scope": "App Implementation", "title": "Screen tracking - Android", "owner": "", "priority": "high", "platforms": ["Android"]}, {"scope": "App Implementation", "title": "Screen tracking - iOS", "owner": "", "priority": "high", "platforms": ["iOS"]}, {"scope": "Channels - Staging", "title": "Email channel setup", "owner": "", "priority": "medium", "platforms": []}, {"scope": "Channels - Staging", "title": "SMS channel setup", "owner": "", "priority": "high", "platforms": []}, {"scope": "Channels - Staging", "title": "WhatsApp channel setup", "owner": "", "priority": "high", "platforms": []}, {"scope": "Channels - Staging", "title": "Web Push setup", "owner": "", "priority": "medium", "platforms": ["Website", "Web App"]}, {"scope": "Channels - Staging", "title": "On-site Notification setup", "owner": "", "priority": "medium", "platforms": ["Website", "Web App"]}, {"scope": "Channels - Staging", "title": "Push setup - FCM", "owner": "", "priority": "high", "platforms": ["Android"]}, {"scope": "Channels - Staging", "title": "Push setup - APNS certificate", "owner": "", "priority": "high", "platforms": ["iOS"]}, {"scope": "Channels - Staging", "title": "In-App setup", "owner": "", "priority": "high", "platforms": ["Android", "iOS"]}, {"scope": "Channels - Staging", "title": "Rich Push setup", "owner": "", "priority": "medium", "platforms": ["iOS"]}, {"scope": "REST API", "title": "Custom event API", "owner": "", "priority": "high", "platforms": ["REST API"]}, {"scope": "REST API", "title": "Backend event tracking", "owner": "", "priority": "high", "platforms": ["REST API"]}, {"scope": "REST API", "title": "Historical user data migration", "owner": "", "priority": "high", "platforms": ["REST API"]}, {"scope": "REST API", "title": "Historical event migration", "owner": "", "priority": "high", "platforms": ["REST API"]}, {"scope": "Android", "title": "Push Token Registration", "owner": "", "priority": "high", "platforms": ["Android"]}, {"scope": "Android", "title": "Firebase / FCM Setup", "owner": "", "priority": "high", "platforms": ["Android"]}, {"scope": "Android", "title": "Push Notification Setup", "owner": "", "priority": "high", "platforms": ["Android"]}, {"scope": "Android", "title": "Rich Push", "owner": "", "priority": "high", "platforms": ["Android"]}, {"scope": "Android", "title": "In-App Setup", "owner": "", "priority": "high", "platforms": ["Android"]}, {"scope": "Android", "title": "In-App Testing", "owner": "", "priority": "high", "platforms": ["Android"]}, {"scope": "Android", "title": "App Inline", "owner": "", "priority": "high", "platforms": ["Android"]}, {"scope": "iOS", "title": "Push Token Registration", "owner": "", "priority": "high", "platforms": ["iOS"]}, {"scope": "iOS", "title": "APNs Setup", "owner": "", "priority": "high", "platforms": ["iOS"]}, {"scope": "iOS", "title": "Push Notification Setup", "owner": "", "priority": "high", "platforms": ["iOS"]}, {"scope": "iOS", "title": "Rich Push", "owner": "", "priority": "high", "platforms": ["iOS"]}, {"scope": "iOS", "title": "In-App Setup", "owner": "", "priority": "high", "platforms": ["iOS"]}, {"scope": "iOS", "title": "In-App Testing", "owner": "", "priority": "high", "platforms": ["iOS"]}, {"scope": "iOS", "title": "App Inline", "owner": "", "priority": "high", "platforms": ["iOS"]}, {"scope": "Channels - Email", "title": "Email Provider Setup", "owner": "", "priority": "medium", "platforms": []}, {"scope": "Channels - SMS", "title": "SMS Provider Setup", "owner": "", "priority": "high", "platforms": []}, {"scope": "Channels - WhatsApp", "title": "WhatsApp Business Setup", "owner": "", "priority": "high", "platforms": []}, {"scope": "Channels - Push", "title": "Push Token", "owner": "", "priority": "high", "platforms": []}, {"scope": "Channels - Push", "title": "Notification Permission", "owner": "", "priority": "high", "platforms": []}, {"scope": "Channels - Push", "title": "Push Templates", "owner": "", "priority": "medium", "platforms": []}, {"scope": "Channels - Push", "title": "Rich Push", "owner": "", "priority": "medium", "platforms": []}, {"scope": "Channels - Push", "title": "Deep Links", "owner": "", "priority": "medium", "platforms": []}, {"scope": "Channels - Push", "title": "CTA", "owner": "", "priority": "medium", "platforms": []}, {"scope": "Channels - Push", "title": "Test Push", "owner": "", "priority": "medium", "platforms": []}, {"scope": "Channels - Push", "title": "Delivery Validation", "owner": "", "priority": "high", "platforms": []}, {"scope": "Channels - Web Push", "title": "Web Push Configuration", "owner": "", "priority": "medium", "platforms": []}, {"scope": "Channels - RCS", "title": "RCS Provider Setup", "owner": "", "priority": "medium", "platforms": []}, {"scope": "Channels - In-App", "title": "SDK Configuration", "owner": "", "priority": "high", "platforms": []}, {"scope": "Channels - On-site", "title": "On-site Notification", "owner": "", "priority": "medium", "platforms": []}, {"scope": "Channels - On-site", "title": "On-site Survey", "owner": "", "priority": "medium", "platforms": []}, {"scope": "Channels - On-site", "title": "On-site Feedback", "owner": "", "priority": "medium", "platforms": []}]}, {"week": 4, "label": "Audit & Templates", "tasks": [{"scope": "Staging Audit", "title": "Website audit", "owner": "", "priority": "high", "platforms": ["Website"]}, {"scope": "Staging Audit", "title": "Android app audit", "owner": "", "priority": "high", "platforms": ["Android"]}, {"scope": "Staging Audit", "title": "iOS app audit", "owner": "", "priority": "high", "platforms": ["iOS"]}, {"scope": "Staging Audit", "title": "Web App audit", "owner": "", "priority": "high", "platforms": ["Web App"]}, {"scope": "Staging Audit", "title": "Changes shared with dev team and actioned", "owner": "", "priority": "high", "platforms": []}, {"scope": "Email Warmup", "title": "Warmup content ready", "owner": "", "priority": "high", "platforms": []}, {"scope": "SMS template", "title": "Share template for provider testing", "owner": "", "priority": "high", "platforms": []}, {"scope": "WhatsApp Template", "title": "Add template on the dashboard for testing", "owner": "", "priority": "high", "platforms": []}, {"scope": "Historic Data", "title": "Historical transactional data uploaded", "owner": "", "priority": "high", "platforms": []}, {"scope": "Website", "title": "Website Testing & QA", "owner": "", "priority": "high", "platforms": ["Website"]}, {"scope": "Android", "title": "Android Testing & QA", "owner": "", "priority": "high", "platforms": ["Android"]}, {"scope": "iOS", "title": "iOS Testing & QA", "owner": "", "priority": "high", "platforms": ["iOS"]}, {"scope": "REST API", "title": "REST API testing", "owner": "", "priority": "high", "platforms": ["REST API"]}]}, {"week": 5, "label": "Production Movement", "tasks": [{"scope": "Production", "title": "Move integration to production - Website", "owner": "", "priority": "high", "platforms": ["Website"]}, {"scope": "Production", "title": "Move integration to production - Android", "owner": "", "priority": "high", "platforms": ["Android"]}, {"scope": "Production", "title": "Move integration to production - iOS", "owner": "", "priority": "high", "platforms": ["iOS"]}, {"scope": "Production", "title": "Move integration to production - Web App", "owner": "", "priority": "high", "platforms": ["Web App"]}, {"scope": "Production", "title": "Play Store release with SDK", "owner": "", "priority": "high", "platforms": ["Android"]}, {"scope": "Production", "title": "App Store release with SDK", "owner": "", "priority": "high", "platforms": ["iOS"]}, {"scope": "Production", "title": "Production testing", "owner": "", "priority": "high", "platforms": []}, {"scope": "Channels - Production", "title": "Channels enabled on production", "owner": "", "priority": "high", "platforms": []}, {"scope": "Email Warmup", "title": "Warmup journey live", "owner": "", "priority": "high", "platforms": []}, {"scope": "Production", "title": "Production API testing", "owner": "", "priority": "high", "platforms": ["REST API"]}, {"scope": "Website", "title": "Production Validation", "owner": "", "priority": "high", "platforms": ["Website"]}, {"scope": "Android", "title": "Production Validation", "owner": "", "priority": "high", "platforms": ["Android"]}, {"scope": "iOS", "title": "Production Validation", "owner": "", "priority": "high", "platforms": ["iOS"]}]}, {"week": 6, "label": "Go-Live", "tasks": [{"scope": "Go-Live", "title": "Demo dashboard walkthrough with client", "owner": "", "priority": "medium", "platforms": []}, {"scope": "Go-Live", "title": "2 or more recurring campaigns / journeys live", "owner": "", "priority": "high", "platforms": []}, {"scope": "Go-Live", "title": "Key events and attributes verified on production", "owner": "", "priority": "high", "platforms": []}, {"scope": "Go-Live", "title": "Confirmation from client on billing start", "owner": "", "priority": "high", "platforms": []}, {"scope": "Go-Live", "title": "Handover to CSM", "owner": "", "priority": "medium", "platforms": []}]}]}, "demoIndex": {"$comment": "Lists the demo datasets offered in Settings -> Demo data. Add a file here and drop the JSON alongside it to offer another demo.", "demos": [{"file": "salad-days.json", "name": "Salad Days", "description": "Real 6-week website integration: kickoff through production movement, with live blockers on SMS/WhatsApp templates and the payment gateway."}]}, "demos": {"salad-days.json": {"$comment": "Demo project generated from 'Weekly status - Salad Days.xlsx'. Loaded on demand from Settings -> Demo data. Safe to delete this file; also remove its entry from demo-data/index.json.", "name": "Salad Days", "description": "Real 6-week website integration: kickoff through production movement, with live blockers on SMS/WhatsApp templates and the payment gateway.", "source": "Weekly status - Salad Days.xlsx", "project": {"name": "Salad Days", "clientName": "Salad Days Pvt. Ltd.", "status": "current", "csm": "Stuti", "implementationOwner": "Alisha", "salesOwner": "Vikram Kapoor", "kickoffDate": "2026-04-27", "goLiveDate": "2026-06-05", "cycleWeeks": 6, "techTeam": "outsourced", "vendorName": "Devx Team", "clientPocs": [{"name": "Ajwanda", "email": "", "addedFrom": "project"}, {"name": "Alisha", "email": "", "addedFrom": "project"}, {"name": "Channel Team", "email": "", "addedFrom": "project"}, {"name": "Devx Team", "email": "", "addedFrom": "project"}, {"name": "Keshav", "email": "", "addedFrom": "project"}, {"name": "Stuti", "email": "", "addedFrom": "project"}], "platforms": ["Website"], "platformLink": "https://www.saladdays.in", "channels": ["Email", "SMS", "WhatsApp", "Web Push"], "dataRequirements": {"historicalMigration": "yes", "userIdentifier": "Phone"}, "knownBlockers": "Gupshup SMS credentials failing; Razorpay checkout migration stalled.", "dependencies": "Devx Team for SDK/backend changes; Gupshup for SMS/WhatsApp; Razorpay for checkout events.", "notes": "Website-only WebEngage integration. Phone number is the unique identifier."}, "weeks": [{"weekStart": "2026-04-27", "templateWeek": 1, "templateLabel": "Kickoff & Discovery", "statusTag": "in progress", "tasks": [{"title": "Onboarding mail thread initiated", "phase": "Kickoff call", "owner": "Stuti", "status": "completed", "date": "2026-04-27", "blocker": "", "priority": "medium", "comments": "", "subtasks": []}, {"title": "Channel form Shared", "phase": "Kickoff call", "owner": "", "status": "not started", "date": "", "blocker": "", "priority": "medium", "comments": "", "subtasks": []}, {"title": "Tech doc shared", "phase": "Kickoff call", "owner": "", "status": "not started", "date": "", "blocker": "", "priority": "medium", "comments": "", "subtasks": []}, {"title": "Website", "phase": "Tech Team connect", "owner": "Alisha", "status": "completed", "date": "2026-04-27", "blocker": "", "priority": "medium", "comments": "", "subtasks": []}, {"title": "Phone number will be the finalized unique identifier", "phase": "User Id", "owner": "Keshav", "status": "completed", "date": "2026-04-27", "blocker": "", "priority": "high", "comments": "", "subtasks": []}, {"title": "Creation of data model", "phase": "Data Model", "owner": "Ajwanda", "status": "completed", "date": "2026-04-27", "blocker": "", "priority": "high", "comments": "", "subtasks": []}, {"title": "Data model Finalisation - Website", "phase": "Data Model", "owner": "Alisha", "status": "completed", "date": "2026-04-27", "blocker": "", "priority": "high", "comments": "", "subtasks": []}]}, {"weekStart": "2026-05-04", "templateWeek": 2, "templateLabel": "Staging Setup", "statusTag": "in progress", "tasks": [{"title": "SDK setup", "phase": "Website - Staging", "owner": "Devx Team", "status": "completed", "date": "2026-05-04", "blocker": "", "priority": "high", "comments": "", "subtasks": []}, {"title": "User setup", "phase": "Website - Staging", "owner": "", "status": "not started", "date": "", "blocker": "", "priority": "high", "comments": "", "subtasks": []}, {"title": "Event setup", "phase": "Website - Staging", "owner": "", "status": "not started", "date": "", "blocker": "", "priority": "high", "comments": "", "subtasks": []}, {"title": "Email Channel form", "phase": "Channels Set Up - Staging", "owner": "Alisha", "status": "completed", "date": "2026-05-04", "blocker": "", "priority": "high", "comments": "", "subtasks": []}]}, {"weekStart": "2026-05-11", "templateWeek": 3, "templateLabel": "Channels & Integrations", "statusTag": "completed", "tasks": [{"title": "Preparation of CSV file containing historical user and transactional event data", "phase": "Historic Data", "owner": "Alisha", "status": "completed", "date": "2026-05-11", "blocker": "", "priority": "high", "comments": "", "subtasks": []}, {"title": "setup finalised on the dashboard", "phase": "Events", "owner": "Devx Team", "status": "completed", "date": "2026-05-11", "blocker": "", "priority": "high", "comments": "", "subtasks": []}, {"title": "Website Audit", "phase": "Staging Audit", "owner": "Ajwanda", "status": "completed", "date": "2026-05-11", "blocker": "", "priority": "high", "comments": "", "subtasks": []}, {"title": "Email Channel - WE", "phase": "Channels Set Up - Staging", "owner": "Channel Team", "status": "completed", "date": "2026-05-11", "blocker": "", "priority": "medium", "comments": "", "subtasks": []}, {"title": "SMS channel - Gupshup", "phase": "Channels Set Up - Staging", "owner": "Alisha", "status": "completed", "date": "2026-05-11", "blocker": "", "priority": "high", "comments": "", "subtasks": []}, {"title": "Whatsapp Channel - Gupshup", "phase": "Channels Set Up - Staging", "owner": "Alisha", "status": "completed", "date": "2026-05-11", "blocker": "", "priority": "high", "comments": "", "subtasks": []}, {"title": "WebPush Channel", "phase": "Channels Set Up - Staging", "owner": "Devx Team", "status": "completed", "date": "2026-05-11", "blocker": "", "priority": "medium", "comments": "", "subtasks": []}, {"title": "Setup a call with team, and initiased the mail thread", "phase": "Razorpay", "owner": "Alisha", "status": "completed", "date": "2026-05-11", "blocker": "", "priority": "high", "comments": "", "subtasks": []}]}, {"weekStart": "2026-05-18", "templateWeek": 4, "templateLabel": "Audit & Templates", "statusTag": "blocked", "tasks": [{"title": "Preparation of CSV file containing historical transactional event data", "phase": "Historic Data", "owner": "Alisha", "status": "blocked", "date": "", "blocker": "Cluttered data", "priority": "high", "comments": "", "subtasks": []}, {"title": "Changes shared by webengage team, devx team to work on it.", "phase": "Staging audit", "owner": "Devx Team", "status": "completed", "date": "2026-05-18", "blocker": "", "priority": "high", "comments": "", "subtasks": []}, {"title": "Content ready", "phase": "Email Warmup", "owner": "Alisha", "status": "delayed", "date": "", "blocker": "", "priority": "high", "comments": "", "subtasks": []}, {"title": "share template to test Gupshup", "phase": "SMS template", "owner": "Alisha", "status": "completed", "date": "2026-05-18", "blocker": "", "priority": "high", "comments": "", "subtasks": []}, {"title": "Add template on the dashboard to test Gupshup", "phase": "Whatsapp Template", "owner": "Alisha", "status": "completed", "date": "2026-05-18", "blocker": "", "priority": "high", "comments": "", "subtasks": []}, {"title": "Moving from standard checkout to Razorpay Magic checkout", "phase": "Razorpay", "owner": "Alisha", "status": "blocked", "date": "", "blocker": "Razorpay team is not responding", "priority": "high", "comments": "", "subtasks": []}]}, {"weekStart": "2026-05-25", "templateWeek": 5, "templateLabel": "Carry-overs & Fixes", "statusTag": "in progress", "tasks": [{"title": "Preparation of CSV file containing historical transactional event data", "phase": "Historic Data", "owner": "Alisha", "status": "delayed", "date": "", "blocker": "", "priority": "high", "comments": "", "subtasks": []}, {"title": "Devx team shared confirmation on the open pointers; WebEngage team will perform the audit", "phase": "Staging audit", "owner": "Ajwanda", "status": "completed", "date": "2026-05-25", "blocker": "27th May", "priority": "high", "comments": "", "subtasks": []}, {"title": "Content ready", "phase": "Email Warmup", "owner": "Alisha", "status": "delayed", "date": "", "blocker": "", "priority": "high", "comments": "", "subtasks": []}, {"title": "Gupshup updated the Credentials", "phase": "SMS template", "owner": "Alisha", "status": "delayed", "date": "", "blocker": "", "priority": "high", "comments": "", "subtasks": []}, {"title": "Gupshup updated the Credentials", "phase": "Whatsapp Template", "owner": "", "status": "delayed", "date": "", "blocker": "", "priority": "high", "comments": "", "subtasks": []}, {"title": "Will continue with the Standard Checkout, for which we will connect with the Devx Team for the setup", "phase": "Razorpay", "owner": "Ajwanda", "status": "completed", "date": "2026-05-25", "blocker": "27th May", "priority": "high", "comments": "", "subtasks": []}]}, {"weekStart": "2026-06-01", "templateWeek": 6, "templateLabel": "Production Movement", "statusTag": "not started", "tasks": [{"title": "Preparation of CSV file containing historical transactional event data", "phase": "Historic Data", "owner": "Alisha", "status": "not started", "date": "", "blocker": "", "priority": "high", "comments": "Alisha will work on cleaning the cluttered data and then upload it to the dashboard. We need to complete this by Wednesday.", "subtasks": []}, {"title": "Will move the integration on production by 2nd june", "phase": "Production Movement", "owner": "Devx Team", "status": "not started", "date": "", "blocker": "", "priority": "high", "comments": "Dependence on the code base.", "subtasks": []}, {"title": "Content ready", "phase": "Email Warmup", "owner": "Alisha", "status": "not started", "date": "", "blocker": "", "priority": "high", "comments": "Will make it Live by 2nd June.", "subtasks": []}, {"title": "Connect with gupshup support team", "phase": "SMS template", "owner": "Alisha", "status": "not started", "date": "", "blocker": "", "priority": "high", "comments": "Gupshup support ticket has been raised. Please take this on priority.", "subtasks": []}, {"title": "Connect with gupshup support team", "phase": "Whatsapp Template", "owner": "", "status": "not started", "date": "", "blocker": "", "priority": "high", "comments": "", "subtasks": []}, {"title": "DevX Team will implement the events from backend.", "phase": "Razorpay", "owner": "Devx Team", "status": "not started", "date": "", "blocker": "", "priority": "high", "comments": "", "subtasks": []}]}]}}};</script>
+    <script>
 const LEGACY_STORAGE_KEY = "multi-project-weekly-dashboard";
 const USER_DATA_PREFIX = "multi-project-dashboard-state:";
 const STATE_KEY = "multi-project-dashboard-state";
@@ -100,35 +3506,6 @@ const TASK_TEMPLATES = [
    sheet there pairs a completed table with a "This Week" table, both grouped by an
    "Integration Scope" column. That scope maps onto a task's `phase` field here.
    This is only the SEED — the editable copy lives in state.weekTemplates (Templates screen). */
-const ROLES = ["admin", "manager", "member", "viewer"];
-
-const ROLE_LABELS = {
-  admin: "Admin",
-  manager: "Manager",
-  member: "Member",
-  viewer: "Viewer",
-};
-
-const ROLE_DESCRIPTIONS = {
-  admin: "Everything, plus managing users and roles.",
-  manager: "Create and delete projects, edit the master template, manage teams.",
-  member: "Create and edit weekly reports. Cannot delete projects or edit templates.",
-  viewer: "Read-only. Can generate and export reports.",
-};
-
-const PERMISSIONS = {
-  "project.create": ["admin", "manager"],
-  "project.delete": ["admin", "manager"],
-  "project.edit": ["admin", "manager", "member"],
-  "report.create": ["admin", "manager", "member"],
-  "report.edit": ["admin", "manager", "member"],
-  "report.delete": ["admin", "manager"],
-  "template.edit": ["admin", "manager"],
-  "team.manage": ["admin", "manager"],
-  "data.manage": ["admin"],
-  "users.manage": ["admin"],
-};
-
 const TEMPLATE_PRIORITIES = ["high", "medium", "low"];
 const DEFAULT_CYCLE_WEEKS = 5;
 const MIN_CYCLE_WEEKS = 2;
@@ -3048,6 +6425,35 @@ function ensureDemoProjectShape(project) {
    Client-side checks are convenience, not security — anything that must be enforced is
    also enforced by row-level security and the SECURITY DEFINER functions in
    supabase/schema.sql. */
+const ROLES = ["admin", "manager", "member", "viewer"];
+
+const ROLE_LABELS = {
+  admin: "Admin",
+  manager: "Manager",
+  member: "Member",
+  viewer: "Viewer",
+};
+
+const ROLE_DESCRIPTIONS = {
+  admin: "Everything, plus managing users and roles.",
+  manager: "Create and delete projects, edit the master template, manage teams.",
+  member: "Create and edit weekly reports. Cannot delete projects or edit templates.",
+  viewer: "Read-only. Can generate and export reports.",
+};
+
+const PERMISSIONS = {
+  "project.create": ["admin", "manager"],
+  "project.delete": ["admin", "manager"],
+  "project.edit": ["admin", "manager", "member"],
+  "report.create": ["admin", "manager", "member"],
+  "report.edit": ["admin", "manager", "member"],
+  "report.delete": ["admin", "manager"],
+  "template.edit": ["admin", "manager"],
+  "team.manage": ["admin", "manager"],
+  "data.manage": ["admin"],
+  "users.manage": ["admin"],
+};
+
 function currentRole() {
   const role = String(state.settings.role || "").toLowerCase();
   return ROLES.includes(role) ? role : "admin";
@@ -4279,3 +7685,7 @@ function syncOwnersIntoProjectPocs(project, tasks) {
       debugLog(`POC "${name}" added to project ${project.name} from a task owner`);
     });
 }
+
+    </script>
+  </body>
+</html>

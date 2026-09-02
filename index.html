@@ -11,203 +11,703 @@
     <link rel="manifest" href="manifest.webmanifest" />
     <link rel="icon" href="icon.svg" type="image/svg+xml" />
     <link rel="stylesheet" href="styles.css" />
+    <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
     <script defer src="app.js"></script>
   </head>
   <body>
-    <div class="shell">
-      <aside class="sidebar">
-        <div class="brand">
+    <div id="appError" class="app-error" role="alert" hidden></div>
+
+    <div id="authOverlay" class="auth-overlay" hidden>
+      <div class="auth-shell">
+        <div class="auth-mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="m8.5 12.5 2.5 2.5 4.5-5"/></svg>
+        </div>
+        <h1 class="auth-wordmark">Weekly Report</h1>
+        <p class="auth-tagline">WebEngage Project Status Platform</p>
+
+        <div class="auth-card">
+          <h2 id="authTitle">Sign in to your account</h2>
+          <p class="auth-sub" id="authIntro">Access is restricted to company accounts only.</p>
+
+          <button type="button" id="authGoogle" class="auth-google">
+            <svg viewBox="0 0 18 18" width="18" height="18" aria-hidden="true"><path fill="#4285F4" d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84a4.14 4.14 0 0 1-1.8 2.72v2.26h2.92c1.7-1.57 2.68-3.88 2.68-6.62z"/><path fill="#34A853" d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.92-2.26c-.8.54-1.84.86-3.04.86-2.34 0-4.32-1.58-5.03-3.7H.96v2.33A9 9 0 0 0 9 18z"/><path fill="#FBBC05" d="M3.97 10.72a5.4 5.4 0 0 1 0-3.44V4.95H.96a9 9 0 0 0 0 8.1l3.01-2.33z"/><path fill="#EA4335" d="M9 3.58c1.32 0 2.5.45 3.44 1.35l2.58-2.58C13.46.89 11.43 0 9 0A9 9 0 0 0 .96 4.95l3.01 2.33C4.68 5.16 6.66 3.58 9 3.58z"/></svg>
+            <span>Continue with Google</span>
+          </button>
+
+          <p class="auth-error" id="authError" hidden></p>
+
+          <p class="auth-fineprint">By signing in, you agree to use this platform for authorized WebEngage project reporting only.</p>
+        </div>
+
+        <p class="auth-footer">Weekly Report v1.0 · Internal Tool</p>
+        <p class="muted auth-note" id="authLocalNote" hidden></p>
+      </div>
+    </div>
+
+    <div id="debugPanel" class="debug-panel" hidden>
+      <div class="debug-head">
+        <strong>Debug</strong>
+        <button type="button" id="debugCopy" class="debug-btn">Copy</button>
+        <button type="button" id="debugClose" class="debug-btn">Close</button>
+      </div>
+      <pre id="debugBody"></pre>
+    </div>
+    <div class="app-shell">
+      <header class="topbar">
+        <div class="topbar-brand">
           <div class="brand-mark">S</div>
           <div>
             <p class="eyebrow">Weekly status</p>
-            <h1 id="greetingTitle">Hi</h1>
-            <p class="brand-subtitle">Weekly report dashboard</p>
+            <h1 class="topbar-title">Weekly Report</h1>
           </div>
         </div>
-
-        <div class="sidebar-copy">
-          <p>Open the project folder, choose current or closed work, then click a project name to see its page.</p>
-        </div>
-
-        <div class="stats">
-          <article>
-            <span id="projectCount">0</span>
-            <small>projects</small>
-          </article>
-          <article>
-            <span id="currentCount">0</span>
-            <small>current</small>
-          </article>
-          <article>
-            <span id="closedCount">0</span>
-            <small>closed</small>
-          </article>
-          <article>
-            <span id="updateCount">0</span>
-            <small>weekly updates</small>
-          </article>
-        </div>
-
-        <div class="sidebar-actions">
-          <button id="sidebarAddProject" class="primary-button sidebar-button" type="button" style="margin-bottom: 8px;">+ New Project</button>
-          <button id="resetAll" class="ghost-button sidebar-button" type="button">Reset all data</button>
-        </div>
-      </aside>
-
-      <main class="content">
-        <section class="card screen screen-home" id="homeScreen">
-          <div class="card-head">
-            <div>
-              <p class="eyebrow">Home</p>
-              <h2>Projects</h2>
-            </div>
-            <div class="actions" style="align-items: center;">
-              <button id="homeAddProject" class="primary-button" type="button" style="padding: 8px 14px; font-size: 0.85rem; border-radius: 10px;">+ New Project</button>
-              <span class="pill">Folder view</span>
+        <div class="topbar-actions">
+          <div class="search-wrap">
+            <svg class="icon search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+            <input id="searchInput" class="search-input" type="text" placeholder="Search projects…" autocomplete="off" aria-label="Search projects" />
+            <div id="searchDropdown" class="dropdown-panel search-dropdown" hidden>
+              <div id="searchResults" class="dropdown-list"></div>
             </div>
           </div>
-
-          <div class="home-grid">
-            <button class="folder-button folder-button-warm" id="openCurrent" type="button">
-              <span class="folder-label">Current projects</span>
-              <span id="currentProjectCount" class="folder-count">0</span>
-              <small>Open active work</small>
+          <button id="themeToggle" class="icon-button" type="button" aria-label="Toggle light/dark theme">
+            <svg class="icon icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+            <svg class="icon icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></svg>
+          </button>
+          <div class="notif-wrap">
+            <button id="notifBell" class="icon-button" type="button" aria-label="Notifications">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+              <span id="notifBadge" class="notif-badge" hidden>0</span>
             </button>
+            <div id="notifDropdown" class="dropdown-panel" hidden>
+              <p class="dropdown-heading">Blocked &amp; delayed items</p>
+              <div id="notifDropdownList" class="dropdown-list"></div>
+            </div>
+          </div>
+          <button id="userWidget" class="user-widget" type="button">
+            <span id="headerAvatar" class="avatar">S</span>
+            <span class="user-widget-text">
+              <span id="headerDisplayName" class="user-widget-name">Stuti</span>
+              <span id="headerRole" class="user-widget-role">Admin</span>
+            </span>
+            <svg class="icon icon-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+          </button>
+          <div id="userDropdown" class="dropdown-panel dropdown-panel-right" hidden>
+            <button id="userDropdownSettingsLink" class="dropdown-link" type="button">Settings</button>
+          </div>
+        </div>
+      </header>
 
-            <button class="folder-button folder-button-cool" id="openClosed" type="button">
-              <span class="folder-label">Closed projects</span>
-              <span id="closedProjectCount" class="folder-count">0</span>
-              <small>Review completed work</small>
+      <div class="shell">
+        <aside class="sidebar">
+          <nav class="nav-list">
+            <button class="nav-item" type="button" data-nav-key="dashboard">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+              <span>Dashboard</span>
             </button>
+            <button class="nav-item" type="button" data-nav-key="create-report">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg>
+              <span>Project Reports</span>
+            </button>
+            <button class="nav-item" type="button" data-nav-key="templates">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M9 9v11"/></svg>
+              <span>Templates</span>
+            </button>
+            <button class="nav-item" type="button" data-nav-key="calendar">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>
+              <span>Calendar</span>
+            </button>
+            <button class="nav-item" type="button" data-nav-key="team">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.2"/><path d="M2.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6"/><circle cx="17.5" cy="9" r="2.6"/><path d="M15.7 14.3c2.9.4 5.3 2.5 5.3 5.7"/></svg>
+              <span>Team</span>
+            </button>
+            <button class="nav-item" type="button" data-nav-key="settings">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6V21a2 2 0 1 1-4 0v-.2a1.7 1.7 0 0 0-1-1.5 1.7 1.7 0 0 0-1.9.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.6-1H3a2 2 0 1 1 0-4h.2a1.7 1.7 0 0 0 1.5-1 1.7 1.7 0 0 0-.3-1.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.9.3H9a1.7 1.7 0 0 0 1-1.6V3a2 2 0 1 1 4 0v.2a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.9-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.9V9a1.7 1.7 0 0 0 1.6 1H21a2 2 0 1 1 0 4h-.2a1.7 1.7 0 0 0-1.5 1z"/></svg>
+              <span>Settings</span>
+            </button>
+          </nav>
+          <div class="sidebar-actions">
+            <button id="sidebarAddProject" class="primary-button sidebar-button" type="button" data-requires="project.create">+ New Project</button>
           </div>
-        </section>
+        </aside>
 
-        <section class="card screen" id="categoryScreen" hidden>
-          <div class="screen-head">
-            <button id="backToHome" class="ghost-button" type="button">Back</button>
-            <div class="screen-title">
-              <p class="eyebrow">Folder</p>
-              <h2 id="categoryTitle">Projects</h2>
-            </div>
-            <span id="categoryBadge" class="pill pill-dark">0</span>
-          </div>
-
-          <div id="categoryList" class="project-name-list"></div>
-        </section>
-
-        <section class="card screen" id="projectScreen" hidden>
-          <div class="screen-head">
-            <button id="backToCategory" class="ghost-button" type="button">Back</button>
-            <div class="screen-title">
-              <p class="eyebrow">Project page</p>
-              <h2 id="projectTitle">Project</h2>
-            </div>
-            <span id="projectStatusBadge" class="pill pill-dark">Current</span>
-          </div>
-
-          <div class="project-detail-grid">
-            <section class="detail-panel">
-              <h3>Overview</h3>
-              <div id="projectOverview" class="detail-text"></div>
-            </section>
-
-            <section class="detail-panel">
-              <div class="card-head" style="margin-bottom: 12px; align-items: center;">
-                <h3 style="margin: 0;">Weekly updates</h3>
-                <button id="addWeeklyUpdate" class="primary-button" type="button" style="padding: 8px 12px; font-size: 0.85rem; border-radius: 10px;">+ Add Update</button>
-              </div>
-              <div id="projectUpdates" class="log-list"></div>
-            </section>
-          </div>
-
-          <section class="detail-panel report-panel">
+        <main class="content">
+          <section class="card screen" id="dashboardScreen">
             <div class="card-head">
               <div>
-                <p class="eyebrow">Project report</p>
-                <h3>Generated summary</h3>
+                <p class="eyebrow">Home</p>
+                <h2>Dashboard</h2>
               </div>
-              <span id="projectReportState" class="pill pill-dark">Waiting</span>
+              <div class="actions" style="align-items: center;">
+                <button id="homeAddProject" data-requires="project.create" class="primary-button" type="button" style="padding: 8px 14px; font-size: 0.85rem; border-radius: 10px;">+ New Project</button>
+              </div>
             </div>
-            <div id="projectReportOutput" class="report-output">
-              <p class="muted">Open a project name to generate a report for that project only.</p>
+            <div class="stat-tile-row">
+              <article class="stat-tile"><span class="stat-tile-label">Total Projects</span><span class="stat-tile-value" id="dashProjectCount">0</span></article>
+              <article class="stat-tile"><span class="stat-tile-label">Ongoing</span><span class="stat-tile-value" id="dashCurrentCount">0</span></article>
+              <article class="stat-tile"><span class="stat-tile-label">Completed</span><span class="stat-tile-value" id="dashClosedCount">0</span></article>
+              <article class="stat-tile"><span class="stat-tile-label">Weekly Updates</span><span class="stat-tile-value" id="dashUpdateCount">0</span></article>
+              <article class="stat-tile"><span class="stat-tile-label">Blocked/Delayed</span><span class="stat-tile-value tone-blocked" id="dashAlertCount">0</span></article>
             </div>
-            <div class="actions report-actions">
-              <button id="generateReport" class="secondary-button" type="button">Generate report</button>
-              <button id="downloadReport" class="ghost-button" type="button">Download report</button>
+
+            <h3 style="margin-top: 24px; margin-bottom: 14px;">Weekly Reports</h3>
+            <div class="home-grid">
+              <button class="folder-button folder-button-warm" id="openCurrent" type="button">
+                <span class="folder-label">Ongoing projects</span>
+                <span id="currentProjectCount" class="folder-count">0</span>
+                <small>Open active work</small>
+              </button>
+
+              <button class="folder-button folder-button-cool" id="openClosed" type="button">
+                <span class="folder-label">Completed projects</span>
+                <span id="closedProjectCount" class="folder-count">0</span>
+                <small>Review completed work</small>
+              </button>
+            </div>
+
+            <div class="detail-panel" style="margin-top: 24px;">
+              <h3>Recent updates</h3>
+              <div id="dashRecentList" class="project-name-list"></div>
             </div>
           </section>
-        </section>
 
-        <section class="card screen" id="addProjectScreen" hidden>
-          <div class="screen-head">
-            <button id="cancelAddProject" class="ghost-button" type="button">Back</button>
-            <div class="screen-title">
-              <p class="eyebrow">New project</p>
-              <h2>Add Project</h2>
-            </div>
-          </div>
-          <form id="addProjectForm" class="form-grid">
-            <label class="span-2">
-              Project Name *
-              <input type="text" id="newProjectName" required placeholder="e.g. Mobile App" />
-            </label>
-            <label class="span-2">
-              Status *
-              <select id="newProjectStatus" required>
-                <option value="current">Current</option>
-                <option value="closed">Closed</option>
-              </select>
-            </label>
-            <label class="span-2">
-              Notes
-              <textarea id="newProjectNotes" placeholder="Describe the project overview and goals..."></textarea>
-            </label>
-            <div class="actions span-2">
-              <button type="submit" class="primary-button">Save Project</button>
-              <button type="button" id="btnCancelAddProject" class="ghost-button">Cancel</button>
-            </div>
-          </form>
-        </section>
-
-        <section class="card screen" id="addUpdateScreen" hidden>
-          <div class="screen-head">
-            <button id="cancelAddUpdate" class="ghost-button" type="button">Back</button>
-            <div class="screen-title">
-              <p class="eyebrow">New status update</p>
-              <h2 id="addUpdateProjectTitle">Add Weekly Update</h2>
-            </div>
-          </div>
-          <form id="addUpdateForm" class="form-grid">
-            <label class="span-2">
-              Week Start Date *
-              <input type="date" id="newUpdateWeekStart" required />
-            </label>
-            <label class="span-2">
-              Overall Status *
-              <select id="newUpdateStatus" required>
-                <option value="on track">On Track</option>
-                <option value="needs attention">Needs Attention</option>
-                <option value="blocked">Blocked</option>
-              </select>
-            </label>
-            
-            <div class="tasks-container span-2" style="margin-top: 10px; padding: 18px; border-radius: 18px; background: rgba(4, 10, 21, 0.3); border: 1px solid var(--border);">
-              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-                <h3 style="margin: 0; font-family: Georgia, 'Times New Roman', serif;">Tasks & Sub-tasks</h3>
-                <button type="button" id="btnAddTask" class="secondary-button" style="padding: 8px 12px; font-size: 0.85rem; border-radius: 10px;">+ Add Task</button>
+          <section class="card screen" id="categoryScreen" hidden>
+            <div class="screen-head">
+              <button id="backToHome" class="ghost-button" type="button">Back</button>
+              <div class="screen-title">
+                <p class="eyebrow">Folder</p>
+                <h2 id="categoryTitle">Projects</h2>
               </div>
-              <div id="formTasksList" style="display: grid; gap: 18px;">
-                <!-- Tasks dynamically inserted here -->
+              <span id="categoryBadge" class="pill pill-dark">0</span>
+            </div>
+
+            <div id="categoryList" class="project-name-list"></div>
+          </section>
+
+          <section class="card screen" id="projectScreen" hidden>
+            <div class="screen-head">
+              <button id="backToCategory" class="ghost-button" type="button">Back</button>
+              <div class="screen-title">
+                <p class="eyebrow">Project page</p>
+                <h2 id="projectTitle">Project</h2>
+              </div>
+              <div class="project-head-actions">
+                <span id="projectStatusBadge" class="pill pill-dark">Ongoing</span>
+                <button id="deleteProjectBtn" class="row-remove" type="button" data-requires="project.delete">Delete project</button>
               </div>
             </div>
 
-            <div class="actions span-2" style="margin-top: 12px;">
-              <button type="submit" class="primary-button">Save Update</button>
-              <button type="button" id="btnCancelAddUpdate" class="ghost-button">Cancel</button>
+            <div class="project-detail-grid">
+              <section class="detail-panel">
+                <h3>Overview</h3>
+                <div id="projectOverview" class="detail-text"></div>
+
+                <div class="timeline-editor">
+                  <h4>Project timeline</h4>
+                  <p class="muted">Week dates are derived from these. Changing them re-dates every weekly report for this project.</p>
+                  <div class="timeline-fields">
+                    <label>Kickoff<input type="date" id="projKickoff" /></label>
+                    <label>Target go-live<input type="date" id="projGoLive" /></label>
+                    <button type="button" id="projApplyTimeline" class="secondary-button small-button">Re-align weeks</button>
+                  </div>
+                  <p class="muted" id="projTimelineNote"></p>
+                </div>
+              </section>
+
+              <section class="detail-panel">
+                <div class="card-head" style="margin-bottom: 12px; align-items: center;">
+                  <h3 style="margin: 0;">Weekly updates</h3>
+                  <button id="addWeekFromTemplate" data-requires="report.create" class="secondary-button" type="button" style="padding: 8px 12px; font-size: 0.85rem; border-radius: 10px;">+ Add week from template</button>
+                  <button id="addWeeklyUpdate" data-requires="report.create" class="primary-button" type="button" style="padding: 8px 12px; font-size: 0.85rem; border-radius: 10px;">+ Add Update</button>
+                </div>
+                <div id="projectUpdates" class="log-list"></div>
+              </section>
             </div>
-          </form>
-        </section>
-      </main>
+
+            <section class="detail-panel" id="projectSummary"></section>
+
+
+            <section class="detail-panel report-panel">
+              <div class="card-head">
+                <div>
+                  <p class="eyebrow">Project report</p>
+                  <h3>Generated summary</h3>
+                </div>
+                <span id="projectReportState" class="pill pill-dark">Waiting</span>
+              </div>
+              <div id="projectReportOutput" class="report-output">
+                <p class="muted">Open a project name to generate a report for that project only.</p>
+              </div>
+              <div class="actions report-actions">
+                <button id="generateReport" class="secondary-button" type="button">Generate report (PDF)</button>
+                <button id="downloadReport" class="ghost-button" type="button">Copy HTML for email</button>
+              </div>
+            </section>
+          </section>
+
+          <section class="card screen" id="addProjectScreen" hidden>
+            <div class="screen-head">
+              <button id="cancelAddProject" class="ghost-button" type="button">Back</button>
+              <div class="screen-title">
+                <p class="eyebrow">New project</p>
+                <h2>Create New Project</h2>
+              </div>
+            </div>
+
+            <ol class="wizard-steps" id="wizardSteps">
+              <li class="wizard-step" data-step="1"><span class="wizard-step-dot">1</span><span class="wizard-step-label">Basic Details</span></li>
+              <li class="wizard-step" data-step="2"><span class="wizard-step-dot">2</span><span class="wizard-step-label">Platform Integration</span></li>
+              <li class="wizard-step" data-step="3"><span class="wizard-step-dot">3</span><span class="wizard-step-label">Review &amp; Summary</span></li>
+              <li class="wizard-step" data-step="4"><span class="wizard-step-dot">4</span><span class="wizard-step-label">Confirmation</span></li>
+            </ol>
+
+            <div class="wizard-layout">
+              <form id="addProjectForm" class="wizard-main" novalidate>
+
+                <!-- Step 1 : Basic Details -->
+                <div class="wizard-panel" data-panel="1">
+                  <div class="wizard-section">
+                    <h3 class="wizard-section-title">Project &amp; Client</h3>
+                    <div class="form-grid">
+                      <label>
+                        Project Name *
+                        <input type="text" id="npName" required placeholder="e.g. LuxeStore" />
+                      </label>
+                      <label>
+                        Client Name
+                        <input type="text" id="npClientName" placeholder="e.g. LuxeStore Pvt. Ltd." />
+                      </label>
+                      <label>
+                        CSM
+                        <input type="text" id="npCsm" placeholder="Customer success manager" />
+                      </label>
+                      <label>
+                        Project Owner
+                        <input type="text" id="npImplOwner" placeholder="Implementation lead" />
+                      </label>
+                      <label>
+                        Sales Owner
+                        <input type="text" id="npSalesOwner" placeholder="Account owner" />
+                      </label>
+                      <label>
+                        Kickoff Date
+                        <input type="date" id="npKickoffDate" />
+                      </label>
+                      <label>
+                        Target Go-Live Date
+                        <input type="date" id="npGoLiveDate" />
+                      </label>
+                      <label>
+                        Cycle Length (weeks)
+                        <select id="npCycleWeeks">
+                                                    <option value="2">2 weeks</option>
+                          <option value="3">3 weeks</option>
+                          <option value="4">4 weeks</option>
+                          <option value="5">5 weeks</option>
+                          <option value="6" selected>6 weeks</option>
+                          <option value="7">7 weeks</option>
+                          <option value="8">8 weeks</option>
+                          <option value="9">9 weeks</option>
+                          <option value="10">10 weeks</option>
+                          <option value="11">11 weeks</option>
+                          <option value="12">12 weeks</option>
+                        </select>
+                        <span class="muted" id="npCycleHint" style="font-weight:400;font-size:0.78rem;"></span>
+                      </label>
+                      <label>
+                        Technical Team
+                        <select id="npTechTeam">
+                          <option value="in-house">In-house</option>
+                          <option value="outsourced">Outsourced (third-party vendor)</option>
+                        </select>
+                      </label>
+                      <label class="span-2" id="npVendorNameField" hidden>
+                        Vendor Name
+                        <input type="text" id="npVendorName" placeholder="e.g. Acme Dev Studio" />
+                      </label>
+                      <div class="span-2">
+                        <div class="wizard-section-head static" style="margin-bottom: 10px;">
+                          <span class="wizard-section-title" style="font-size: 0.95rem;">Client Points of Contact</span>
+                          <button type="button" id="npAddPoc" class="ghost-button small-button">+ Add POC</button>
+                        </div>
+                        <div class="row-list" id="npPocList"></div>
+                        <p class="muted small-note">People on the client side for this project. They appear in the owner dropdown when assigning tasks in this project’s weekly reports, and any new name typed there is added back to this list.</p>
+                      </div>
+                      <label class="span-2">
+                        Notes
+                        <textarea id="npNotes" placeholder="Describe the project overview and goals..."></textarea>
+                      </label>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Step 2 : Platform Integration -->
+                <div class="wizard-panel" data-panel="2" hidden>
+                  <div class="wizard-section">
+                    <h3 class="wizard-section-title">Select Platforms to Integrate with WebEngage</h3>
+                    <div class="platform-cards" id="npPlatforms">
+                      <label class="platform-card"><span class="platform-card-icon">🌐</span><span class="platform-card-name">Website</span><input type="checkbox" value="Website" /></label>
+                      <label class="platform-card"><span class="platform-card-icon">🤖</span><span class="platform-card-name">Android</span><input type="checkbox" value="Android" /></label>
+                      <label class="platform-card"><span class="platform-card-icon">🍎</span><span class="platform-card-name">iOS</span><input type="checkbox" value="iOS" /></label>
+                      <label class="platform-card"><span class="platform-card-icon">🖥️</span><span class="platform-card-name">Web App</span><input type="checkbox" value="Web App" /></label>
+                      <label class="platform-card"><span class="platform-card-icon">🗂️</span><span class="platform-card-name">CRM</span><input type="checkbox" value="REST API" /></label>
+                    </div>
+                    <input type="text" id="npPlatformLink" class="inline-input" placeholder="Platform link(s) — e.g. https://www.example.com, https://app.example.com" />
+                  </div>
+
+
+                  <div class="wizard-row">
+                  <div class="wizard-section">
+                    <h3 class="wizard-section-title">Communication Channels Required</h3>
+                    <div class="checkbox-group" id="npChannels">
+                      <label class="checkbox-item"><input type="checkbox" value="Push" /> Push</label>
+                      <label class="checkbox-item"><input type="checkbox" value="Email" /> Email</label>
+                      <label class="checkbox-item"><input type="checkbox" value="SMS" /> SMS</label>
+                      <label class="checkbox-item"><input type="checkbox" value="WhatsApp" /> WhatsApp</label>
+                      <label class="checkbox-item"><input type="checkbox" value="In-App" /> In-App</label>
+                      <label class="checkbox-item"><input type="checkbox" value="Web Push" /> Web Push</label>
+                      <label class="checkbox-item"><input type="checkbox" value="On-site Notification" /> On-site Notification</label>
+                    </div>
+                  </div>
+
+                  <div class="wizard-section">
+                    <h3 class="wizard-section-title">Data Requirements</h3>
+                    <div class="radio-row">
+                      <fieldset class="radio-field">
+                        <legend>Historical Data Migration</legend>
+                        <label class="radio-item"><input type="radio" name="npHistorical" value="yes" /> Yes</label>
+                        <label class="radio-item"><input type="radio" name="npHistorical" value="no" checked /> No</label>
+                      </fieldset>
+                      <label class="radio-field">
+                        User Identifier
+                        <select id="npUserIdentifier">
+                          <option>Email</option>
+                          <option>Phone</option>
+                          <option>User ID</option>
+                          <option>Custom</option>
+                        </select>
+                      </label>
+                    </div>
+                  </div>
+                  </div>
+
+                  <div class="wizard-section">
+                    <h3 class="wizard-section-title">Additional Information</h3>
+                    <div class="form-grid form-grid-3">
+                      <label>
+                        Special Client Requirements
+                        <textarea id="npSpecialRequirements" placeholder="Enter requirements..."></textarea>
+                      </label>
+                      <label>
+                        Known Blockers
+                        <textarea id="npKnownBlockers" placeholder="Enter blockers..."></textarea>
+                      </label>
+                      <label>
+                        Dependencies
+                        <textarea id="npDependencies" placeholder="Enter dependencies..."></textarea>
+                      </label>
+                      <label class="span-full">
+                        Additional Comments (Optional)
+                        <textarea id="npAdditionalComments" placeholder="Enter any additional comments..."></textarea>
+                      </label>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Step 3 : Review & Summary -->
+                <div class="wizard-panel" data-panel="3" hidden>
+                  <div class="wizard-section">
+                    <h3 class="wizard-section-title">Review &amp; Summary</h3>
+                    <div id="npReviewBody" class="review-body"></div>
+                  </div>
+                </div>
+
+                <!-- Step 4 : Confirmation -->
+                <div class="wizard-panel" data-panel="4" hidden>
+                  <div class="wizard-section confirmation-block">
+                    <div class="confirmation-mark">✓</div>
+                    <h3 class="wizard-section-title" id="npConfirmTitle">Project created</h3>
+                    <p class="muted" id="npConfirmText"></p>
+                    <div class="actions" style="justify-content: center;">
+                      <button type="button" id="npGoToProject" class="primary-button">Open project</button>
+                      <button type="button" id="npCreateAnother" class="ghost-button">Create another</button>
+                    </div>
+                  </div>
+                </div>
+
+                <p class="wizard-error" id="npError" role="alert" hidden></p>
+
+                <div class="wizard-nav" id="npNav">
+                  <button type="button" id="npBack" class="ghost-button">Back</button>
+                  <span class="wizard-progress" id="npProgress">Step 1 of 5</span>
+                  <div class="wizard-nav-right">
+                    <button type="button" id="btnCancelAddProject" class="ghost-button">Cancel</button>
+                    <button type="submit" id="npNext" class="primary-button">Next: Platform Integration</button>
+                  </div>
+                </div>
+              </form>
+
+              <aside class="wizard-summary" id="npSummaryPanel">
+                <h3 class="wizard-section-title">Project Summary</h3>
+                <div id="npSummary"></div>
+                <div class="summary-hint">
+                  <p class="muted">You can save the project and continue later from Projects.</p>
+                  <button type="button" id="npSaveDraft" class="secondary-button full-width">Save as Draft</button>
+                </div>
+              </aside>
+            </div>
+          </section>
+
+          <section class="card screen" id="createReportScreen" hidden>
+            <div class="screen-head">
+              <button id="cancelCreateReport" class="ghost-button" type="button">Back</button>
+              <div class="screen-title">
+                <p class="eyebrow">Weekly reports</p>
+                <h2 id="createReportTitle">Project Reports</h2>
+              </div>
+            </div>
+
+            <section class="reports-index">
+              <div class="reports-index-head">
+                <label class="reports-index-picker">
+                  Project
+                  <select id="reportsIndexProject"></select>
+                </label>
+                <button id="reportsNewBtn" class="primary-button" type="button" data-requires="report.create">+ New report</button>
+              </div>
+              <div id="reportsIndexList" class="reports-index-list"></div>
+            </section>
+
+            <form id="createReportForm" class="form-grid" hidden>
+              <label class="span-2">
+                Project *
+                <select id="createReportProjectSelect" required></select>
+              </label>
+
+              <div class="span-2 week-section">
+                <h3 class="week-section-title">Last Week <span class="meta">(completed work)</span></h3>
+                <div class="form-grid">
+                  <label>
+                    Week Start Date
+                    <input type="date" id="lastWeekDate" />
+                  </label>
+                  <label>
+                    Overall Status
+                    <select id="lastWeekStatus">
+                      <option value="on track">On Track</option>
+                      <option value="needs attention">Needs Attention</option>
+                      <option value="blocked">Blocked</option>
+                    </select>
+                  </label>
+                </div>
+                <div id="lastWeekStats" style="margin-top: 14px;"></div>
+                <div class="tasks-container" style="margin-top: 14px; padding: 18px; border-radius: 18px; background: rgba(4, 10, 21, 0.3); border: 1px solid var(--border);">
+                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 12px;">
+                    <h4 style="margin: 0; font-family: Georgia, 'Times New Roman', serif;">Tasks & Sub-tasks</h4>
+                    <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                      <button type="button" id="btnChecklistLastWeek" class="primary-button" style="padding: 8px 12px; font-size: 0.85rem; border-radius: 10px;">📋 Add from checklist</button>
+                      <button type="button" id="btnAddLastWeekTask" class="secondary-button" style="padding: 8px 12px; font-size: 0.85rem; border-radius: 10px;">+ Add Task</button>
+                    </div>
+                  </div>
+                  <div id="lastWeekTasksList" style="display: grid; gap: 18px;"></div>
+                </div>
+              </div>
+
+              <div class="span-2 week-section">
+                <h3 class="week-section-title">Upcoming / Running Week <span class="meta">(this week's plan)</span></h3>
+                <div class="form-grid">
+                  <label>
+                    Week Start Date
+                    <input type="date" id="thisWeekDate" />
+                  </label>
+                  <label>
+                    Overall Status
+                    <select id="thisWeekStatus">
+                      <option value="on track">On Track</option>
+                      <option value="needs attention">Needs Attention</option>
+                      <option value="blocked">Blocked</option>
+                    </select>
+                  </label>
+                </div>
+                <div id="thisWeekStats" style="margin-top: 14px;"></div>
+                <div class="tasks-container" style="margin-top: 14px; padding: 18px; border-radius: 18px; background: rgba(4, 10, 21, 0.3); border: 1px solid var(--border);">
+                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 12px;">
+                    <h4 style="margin: 0; font-family: Georgia, 'Times New Roman', serif;">Tasks & Sub-tasks</h4>
+                    <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                      <button type="button" id="btnChecklistThisWeek" class="primary-button" style="padding: 8px 12px; font-size: 0.85rem; border-radius: 10px;">📋 Add from checklist</button>
+                      <button type="button" id="btnAddThisWeekTask" class="secondary-button" style="padding: 8px 12px; font-size: 0.85rem; border-radius: 10px;">+ Add Task</button>
+                    </div>
+                  </div>
+                  <div id="thisWeekTasksList" style="display: grid; gap: 18px;"></div>
+                </div>
+              </div>
+
+              <div class="actions span-2" style="margin-top: 12px;">
+                <button type="submit" class="primary-button">Save Report</button>
+                <button type="button" id="btnCancelCreateReport" class="ghost-button">Cancel</button>
+              </div>
+            </form>
+          </section>
+
+          <section class="card screen" id="calendarScreen" hidden>
+            <div class="card-head">
+              <div>
+                <p class="eyebrow">Calendar</p>
+                <h2>Weekly Update Calendar</h2>
+              </div>
+              <div class="actions" style="align-items: center;">
+                <button id="calendarPrev" class="ghost-button" type="button" style="padding: 8px 12px;">‹</button>
+                <span id="calendarMonthLabel" class="pill pill-dark"></span>
+                <button id="calendarNext" class="ghost-button" type="button" style="padding: 8px 12px;">›</button>
+              </div>
+            </div>
+            <div class="calendar-head">
+              <span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span>
+            </div>
+            <div id="calendarGrid" class="calendar-grid"></div>
+            <div class="detail-panel" style="margin-top: 20px;">
+              <h3>Updates covering the selected date</h3>
+              <div id="calendarSelectedList" class="project-name-list"></div>
+            </div>
+          </section>
+
+          <section class="card screen" id="teamScreen" hidden>
+            <div class="card-head">
+              <div>
+                <p class="eyebrow">Team</p>
+                <h2>Project Team</h2>
+              </div>
+            </div>
+
+            <section class="wizard-section">
+              <div class="reports-index-head">
+                <label class="reports-index-picker">
+                  Project
+                  <select id="teamProjectSelect"></select>
+                </label>
+                <button id="teamAddMember" class="secondary-button" type="button" data-requires="team.manage">+ Add member</button>
+              </div>
+              <div id="teamMemberList" class="row-list"></div>
+              <p class="muted small-note">
+                The delivery team for this project. These names are offered when assigning tasks in
+                this project&rsquo;s weekly reports, alongside the client POCs. Scoped to this project only.
+              </p>
+            </section>
+
+            <section class="wizard-section">
+              <h3 class="wizard-section-title">Workload</h3>
+              <div id="teamList" style="display: grid; gap: 10px;"></div>
+            </section>
+          </section>
+
+          <section class="card screen" id="templatesScreen" hidden>
+            <div class="card-head">
+              <div>
+                <p class="eyebrow">Master plan</p>
+                <h2>Week-wise Task Templates</h2>
+              </div>
+              <div class="actions">
+                <button id="templatesAddWeek" class="secondary-button" type="button" data-requires="template.edit">+ Add week</button>
+                <button id="templatesReloadFile" class="ghost-button" type="button" data-requires="template.edit">Reload from file</button>
+                <button id="templatesReset" class="ghost-button" type="button" data-requires="template.edit">Reset to built-in</button>
+              </div>
+            </div>
+            <p class="muted" style="margin-bottom: 12px;">
+              Every new project pre-creates one report per week from this plan. Edits here apply to
+              projects created afterwards — existing projects keep the tasks they already have.
+              The default plan is read from <code>week-templates.json</code> in the project folder.
+            </p>
+            <p class="storage-warning">
+              <strong>Stored in this browser only.</strong> Edits and deletions here save to
+              <code>localStorage</code> immediately and cannot be undone. A normal or hard reload keeps
+              your data — but clearing site data, using a private window, or opening the app from a
+              different address will show an empty or different set. Use <strong>Export backup</strong>
+              in Settings before making large deletions.
+            </p>
+            <div id="templatesList" class="templates-list"></div>
+          </section>
+
+          <section class="card screen" id="settingsScreen" hidden>
+            <div class="card-head">
+              <div>
+                <p class="eyebrow">Settings</p>
+                <h2>Profile</h2>
+              </div>
+            </div>
+            <form id="settingsForm" class="form-grid" style="max-width: 480px;">
+              <label class="span-2">
+                Display Name *
+                <input type="text" id="settingsDisplayName" required placeholder="e.g. Stuti" />
+              </label>
+              <label class="span-2">
+                Role
+                <input type="text" id="settingsRole" placeholder="e.g. Admin" />
+              </label>
+              <div class="actions span-2" style="align-items: center;">
+                <button type="submit" class="primary-button">Save</button>
+                <span id="settingsSavedNote" class="pill" hidden>Saved!</span>
+              </div>
+            </form>
+
+            <div style="margin-top: 26px; padding-top: 20px; border-top: 1px solid var(--border-soft);">
+              <h3 style="font-family: Georgia, 'Times New Roman', serif; margin-bottom: 8px;">Account</h3>
+              <div id="settingsAccount"></div>
+
+              <div id="settingsRolesBlock" data-requires="users.manage">
+                <h3 style="font-family: Georgia, 'Times New Roman', serif; margin: 24px 0 8px;">Users &amp; Roles</h3>
+                <div id="settingsRoles"></div>
+              </div>
+
+              <h3 style="font-family: Georgia, 'Times New Roman', serif; margin: 24px 0 8px;">Data &amp; Backup</h3>
+              <p class="storage-warning">
+                <strong>Everything lives in this browser.</strong> Projects, weekly reports and the
+                master template are stored in <code>localStorage</code> for
+                <span id="settingsOrigin">this address</span> only — there is no server copy.
+                Reloading the page (even a hard reload) is safe. You will lose data if you clear
+                site data / browsing history, use a private window, switch browser or device, or
+                open the app from a different address. Deletions inside the app are immediate and
+                cannot be undone. Export regularly.
+              </p>
+              <div class="demo-loader">
+                <label class="reports-index-picker">
+                  Demo data
+                  <select id="settingsDemoSelect"></select>
+                </label>
+                <button id="settingsDemoLoad" class="secondary-button" type="button" data-requires="project.create">Load demo project</button>
+              </div>
+              <p class="muted" id="settingsDemoNote" style="margin-top: 8px; font-size: 0.82rem;"></p>
+
+              <div class="actions" style="margin-top: 14px;">
+                <button id="settingsExport" class="secondary-button" type="button">Export backup (.json)</button>
+                <button id="settingsImport" data-requires="data.manage" class="ghost-button" type="button">Import backup</button>
+                <button id="settingsClear" data-requires="data.manage" class="row-remove" type="button" style="padding: 13px 18px; border-radius: 14px;">Clear all test data</button>
+                <input type="file" id="settingsImportFile" accept="application/json,.json" hidden />
+              </div>
+              <p class="muted" id="settingsDataStats" style="margin-top: 10px; font-size: 0.82rem;"></p>
+            </div>
+          </section>
+        </main>
+      </div>
+    </div>
+
+    <div id="templatePickerOverlay" class="modal-overlay" hidden>
+      <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="templatePickerTitle">
+        <div class="modal-head">
+          <div>
+            <p class="eyebrow">Quick add</p>
+            <h2 id="templatePickerTitle">Add tasks from checklist</h2>
+          </div>
+          <button type="button" id="templatePickerClose" class="ghost-button" style="padding: 8px 12px;">✕</button>
+        </div>
+        <div class="modal-toolbar">
+          <input type="search" id="templateSearch" placeholder="Search tasks…" autocomplete="off" />
+          <span id="templateSelectedCount" class="pill pill-dark">0 selected</span>
+        </div>
+        <div id="templatePickerBody" class="modal-body"></div>
+        <div class="modal-foot">
+          <button type="button" id="templatePickerCancel" class="ghost-button">Cancel</button>
+          <button type="button" id="templatePickerAdd" class="primary-button">Add selected</button>
+        </div>
+      </div>
     </div>
   </body>
 </html>

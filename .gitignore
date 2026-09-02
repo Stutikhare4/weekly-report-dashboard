@@ -1,0 +1,6 @@
+# macOS
+.DS_Store
+
+# Local scratch / test harnesses
+__smoke.html
+*.log

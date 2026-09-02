@@ -1,0 +1,525 @@
+{
+  "$comment": "Demo project generated from 'Weekly status - Salad Days.xlsx'. Loaded on demand from Settings -> Demo data. Safe to delete this file; also remove its entry from demo-data/index.json.",
+  "name": "Salad Days",
+  "description": "Real 6-week website integration: kickoff through production movement, with live blockers on SMS/WhatsApp templates and the payment gateway.",
+  "source": "Weekly status - Salad Days.xlsx",
+  "project": {
+    "name": "Salad Days",
+    "clientName": "Salad Days Pvt. Ltd.",
+    "status": "current",
+    "csm": "Stuti",
+    "implementationOwner": "Alisha",
+    "salesOwner": "Vikram Kapoor",
+    "kickoffDate": "2026-04-27",
+    "goLiveDate": "2026-06-05",
+    "cycleWeeks": 6,
+    "techTeam": "outsourced",
+    "vendorName": "Devx Team",
+    "clientPocs": [
+      {
+        "name": "Ajwanda",
+        "email": "",
+        "addedFrom": "project"
+      },
+      {
+        "name": "Alisha",
+        "email": "",
+        "addedFrom": "project"
+      },
+      {
+        "name": "Channel Team",
+        "email": "",
+        "addedFrom": "project"
+      },
+      {
+        "name": "Devx Team",
+        "email": "",
+        "addedFrom": "project"
+      },
+      {
+        "name": "Keshav",
+        "email": "",
+        "addedFrom": "project"
+      },
+      {
+        "name": "Stuti",
+        "email": "",
+        "addedFrom": "project"
+      }
+    ],
+    "platforms": [
+      "Website"
+    ],
+    "platformLink": "https://www.saladdays.in",
+    "channels": [
+      "Email",
+      "SMS",
+      "WhatsApp",
+      "Web Push"
+    ],
+    "dataRequirements": {
+      "historicalMigration": "yes",
+      "userIdentifier": "Phone"
+    },
+    "knownBlockers": "Gupshup SMS credentials failing; Razorpay checkout migration stalled.",
+    "dependencies": "Devx Team for SDK/backend changes; Gupshup for SMS/WhatsApp; Razorpay for checkout events.",
+    "notes": "Website-only WebEngage integration. Phone number is the unique identifier."
+  },
+  "weeks": [
+    {
+      "weekStart": "2026-04-27",
+      "templateWeek": 1,
+      "templateLabel": "Kickoff & Discovery",
+      "statusTag": "in progress",
+      "tasks": [
+        {
+          "title": "Onboarding mail thread initiated",
+          "phase": "Kickoff call",
+          "owner": "Stuti",
+          "status": "completed",
+          "date": "2026-04-27",
+          "blocker": "",
+          "priority": "medium",
+          "comments": "",
+          "subtasks": []
+        },
+        {
+          "title": "Channel form Shared",
+          "phase": "Kickoff call",
+          "owner": "",
+          "status": "not started",
+          "date": "",
+          "blocker": "",
+          "priority": "medium",
+          "comments": "",
+          "subtasks": []
+        },
+        {
+          "title": "Tech doc shared",
+          "phase": "Kickoff call",
+          "owner": "",
+          "status": "not started",
+          "date": "",
+          "blocker": "",
+          "priority": "medium",
+          "comments": "",
+          "subtasks": []
+        },
+        {
+          "title": "Website",
+          "phase": "Tech Team connect",
+          "owner": "Alisha",
+          "status": "completed",
+          "date": "2026-04-27",
+          "blocker": "",
+          "priority": "medium",
+          "comments": "",
+          "subtasks": []
+        },
+        {
+          "title": "Phone number will be the finalized unique identifier",
+          "phase": "User Id",
+          "owner": "Keshav",
+          "status": "completed",
+          "date": "2026-04-27",
+          "blocker": "",
+          "priority": "high",
+          "comments": "",
+          "subtasks": []
+        },
+        {
+          "title": "Creation of data model",
+          "phase": "Data Model",
+          "owner": "Ajwanda",
+          "status": "completed",
+          "date": "2026-04-27",
+          "blocker": "",
+          "priority": "high",
+          "comments": "",
+          "subtasks": []
+        },
+        {
+          "title": "Data model Finalisation - Website",
+          "phase": "Data Model",
+          "owner": "Alisha",
+          "status": "completed",
+          "date": "2026-04-27",
+          "blocker": "",
+          "priority": "high",
+          "comments": "",
+          "subtasks": []
+        }
+      ]
+    },
+    {
+      "weekStart": "2026-05-04",
+      "templateWeek": 2,
+      "templateLabel": "Staging Setup",
+      "statusTag": "in progress",
+      "tasks": [
+        {
+          "title": "SDK setup",
+          "phase": "Website - Staging",
+          "owner": "Devx Team",
+          "status": "completed",
+          "date": "2026-05-04",
+          "blocker": "",
+          "priority": "high",
+          "comments": "",
+          "subtasks": []
+        },
+        {
+          "title": "User setup",
+          "phase": "Website - Staging",
+          "owner": "",
+          "status": "not started",
+          "date": "",
+          "blocker": "",
+          "priority": "high",
+          "comments": "",
+          "subtasks": []
+        },
+        {
+          "title": "Event setup",
+          "phase": "Website - Staging",
+          "owner": "",
+          "status": "not started",
+          "date": "",
+          "blocker": "",
+          "priority": "high",
+          "comments": "",
+          "subtasks": []
+        },
+        {
+          "title": "Email Channel form",
+          "phase": "Channels Set Up - Staging",
+          "owner": "Alisha",
+          "status": "completed",
+          "date": "2026-05-04",
+          "blocker": "",
+          "priority": "high",
+          "comments": "",
+          "subtasks": []
+        }
+      ]
+    },
+    {
+      "weekStart": "2026-05-11",
+      "templateWeek": 3,
+      "templateLabel": "Channels & Integrations",
+      "statusTag": "completed",
+      "tasks": [
+        {
+          "title": "Preparation of CSV file containing historical user and transactional event data",
+          "phase": "Historic Data",
+          "owner": "Alisha",
+          "status": "completed",
+          "date": "2026-05-11",
+          "blocker": "",
+          "priority": "high",
+          "comments": "",
+          "subtasks": []
+        },
+        {
+          "title": "setup finalised on the dashboard",
+          "phase": "Events",
+          "owner": "Devx Team",
+          "status": "completed",
+          "date": "2026-05-11",
+          "blocker": "",
+          "priority": "high",
+          "comments": "",
+          "subtasks": []
+        },
+        {
+          "title": "Website Audit",
+          "phase": "Staging Audit",
+          "owner": "Ajwanda",
+          "status": "completed",
+          "date": "2026-05-11",
+          "blocker": "",
+          "priority": "high",
+          "comments": "",
+          "subtasks": []
+        },
+        {
+          "title": "Email Channel - WE",
+          "phase": "Channels Set Up - Staging",
+          "owner": "Channel Team",
+          "status": "completed",
+          "date": "2026-05-11",
+          "blocker": "",
+          "priority": "medium",
+          "comments": "",
+          "subtasks": []
+        },
+        {
+          "title": "SMS channel - Gupshup",
+          "phase": "Channels Set Up - Staging",
+          "owner": "Alisha",
+          "status": "completed",
+          "date": "2026-05-11",
+          "blocker": "",
+          "priority": "high",
+          "comments": "",
+          "subtasks": []
+        },
+        {
+          "title": "Whatsapp Channel - Gupshup",
+          "phase": "Channels Set Up - Staging",
+          "owner": "Alisha",
+          "status": "completed",
+          "date": "2026-05-11",
+          "blocker": "",
+          "priority": "high",
+          "comments": "",
+          "subtasks": []
+        },
+        {
+          "title": "WebPush Channel",
+          "phase": "Channels Set Up - Staging",
+          "owner": "Devx Team",
+          "status": "completed",
+          "date": "2026-05-11",
+          "blocker": "",
+          "priority": "medium",
+          "comments": "",
+          "subtasks": []
+        },
+        {
+          "title": "Setup a call with team, and initiased the mail thread",
+          "phase": "Razorpay",
+          "owner": "Alisha",
+          "status": "completed",
+          "date": "2026-05-11",
+          "blocker": "",
+          "priority": "high",
+          "comments": "",
+          "subtasks": []
+        }
+      ]
+    },
+    {
+      "weekStart": "2026-05-18",
+      "templateWeek": 4,
+      "templateLabel": "Audit & Templates",
+      "statusTag": "blocked",
+      "tasks": [
+        {
+          "title": "Preparation of CSV file containing historical transactional event data",
+          "phase": "Historic Data",
+          "owner": "Alisha",
+          "status": "blocked",
+          "date": "",
+          "blocker": "Cluttered data",
+          "priority": "high",
+          "comments": "",
+          "subtasks": []
+        },
+        {
+          "title": "Changes shared by webengage team, devx team to work on it.",
+          "phase": "Staging audit",
+          "owner": "Devx Team",
+          "status": "completed",
+          "date": "2026-05-18",
+          "blocker": "",
+          "priority": "high",
+          "comments": "",
+          "subtasks": []
+        },
+        {
+          "title": "Content ready",
+          "phase": "Email Warmup",
+          "owner": "Alisha",
+          "status": "delayed",
+          "date": "",
+          "blocker": "",
+          "priority": "high",
+          "comments": "",
+          "subtasks": []
+        },
+        {
+          "title": "share template to test Gupshup",
+          "phase": "SMS template",
+          "owner": "Alisha",
+          "status": "completed",
+          "date": "2026-05-18",
+          "blocker": "",
+          "priority": "high",
+          "comments": "",
+          "subtasks": []
+        },
+        {
+          "title": "Add template on the dashboard to test Gupshup",
+          "phase": "Whatsapp Template",
+          "owner": "Alisha",
+          "status": "completed",
+          "date": "2026-05-18",
+          "blocker": "",
+          "priority": "high",
+          "comments": "",
+          "subtasks": []
+        },
+        {
+          "title": "Moving from standard checkout to Razorpay Magic checkout",
+          "phase": "Razorpay",
+          "owner": "Alisha",
+          "status": "blocked",
+          "date": "",
+          "blocker": "Razorpay team is not responding",
+          "priority": "high",
+          "comments": "",
+          "subtasks": []
+        }
+      ]
+    },
+    {
+      "weekStart": "2026-05-25",
+      "templateWeek": 5,
+      "templateLabel": "Carry-overs & Fixes",
+      "statusTag": "in progress",
+      "tasks": [
+        {
+          "title": "Preparation of CSV file containing historical transactional event data",
+          "phase": "Historic Data",
+          "owner": "Alisha",
+          "status": "delayed",
+          "date": "",
+          "blocker": "",
+          "priority": "high",
+          "comments": "",
+          "subtasks": []
+        },
+        {
+          "title": "Devx team shared confirmation on the open pointers; WebEngage team will perform the audit",
+          "phase": "Staging audit",
+          "owner": "Ajwanda",
+          "status": "completed",
+          "date": "2026-05-25",
+          "blocker": "27th May",
+          "priority": "high",
+          "comments": "",
+          "subtasks": []
+        },
+        {
+          "title": "Content ready",
+          "phase": "Email Warmup",
+          "owner": "Alisha",
+          "status": "delayed",
+          "date": "",
+          "blocker": "",
+          "priority": "high",
+          "comments": "",
+          "subtasks": []
+        },
+        {
+          "title": "Gupshup updated the Credentials",
+          "phase": "SMS template",
+          "owner": "Alisha",
+          "status": "delayed",
+          "date": "",
+          "blocker": "",
+          "priority": "high",
+          "comments": "",
+          "subtasks": []
+        },
+        {
+          "title": "Gupshup updated the Credentials",
+          "phase": "Whatsapp Template",
+          "owner": "",
+          "status": "delayed",
+          "date": "",
+          "blocker": "",
+          "priority": "high",
+          "comments": "",
+          "subtasks": []
+        },
+        {
+          "title": "Will continue with the Standard Checkout, for which we will connect with the Devx Team for the setup",
+          "phase": "Razorpay",
+          "owner": "Ajwanda",
+          "status": "completed",
+          "date": "2026-05-25",
+          "blocker": "27th May",
+          "priority": "high",
+          "comments": "",
+          "subtasks": []
+        }
+      ]
+    },
+    {
+      "weekStart": "2026-06-01",
+      "templateWeek": 6,
+      "templateLabel": "Production Movement",
+      "statusTag": "not started",
+      "tasks": [
+        {
+          "title": "Preparation of CSV file containing historical transactional event data",
+          "phase": "Historic Data",
+          "owner": "Alisha",
+          "status": "not started",
+          "date": "",
+          "blocker": "",
+          "priority": "high",
+          "comments": "Alisha will work on cleaning the cluttered data and then upload it to the dashboard. We need to complete this by Wednesday.",
+          "subtasks": []
+        },
+        {
+          "title": "Will move the integration on production by 2nd june",
+          "phase": "Production Movement",
+          "owner": "Devx Team",
+          "status": "not started",
+          "date": "",
+          "blocker": "",
+          "priority": "high",
+          "comments": "Dependence on the code base.",
+          "subtasks": []
+        },
+        {
+          "title": "Content ready",
+          "phase": "Email Warmup",
+          "owner": "Alisha",
+          "status": "not started",
+          "date": "",
+          "blocker": "",
+          "priority": "high",
+          "comments": "Will make it Live by 2nd June.",
+          "subtasks": []
+        },
+        {
+          "title": "Connect with gupshup support team",
+          "phase": "SMS template",
+          "owner": "Alisha",
+          "status": "not started",
+          "date": "",
+          "blocker": "",
+          "priority": "high",
+          "comments": "Gupshup support ticket has been raised. Please take this on priority.",
+          "subtasks": []
+        },
+        {
+          "title": "Connect with gupshup support team",
+          "phase": "Whatsapp Template",
+          "owner": "",
+          "status": "not started",
+          "date": "",
+          "blocker": "",
+          "priority": "high",
+          "comments": "",
+          "subtasks": []
+        },
+        {
+          "title": "DevX Team will implement the events from backend.",
+          "phase": "Razorpay",
+          "owner": "Devx Team",
+          "status": "not started",
+          "date": "",
+          "blocker": "",
+          "priority": "high",
+          "comments": "",
+          "subtasks": []
+        }
+      ]
+    }
+  ]
+}

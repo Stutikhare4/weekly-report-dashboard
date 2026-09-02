@@ -1,0 +1,5 @@
+{
+  "$comment": "Paste your Supabase project URL and anon (public) key here, then reload. Leave them empty to keep the app in local-only mode with no login. Find both in Supabase -> Project Settings -> API. The anon key is safe in client code; row-level security is what protects the data. Sign-in is Google only, so also enable Authentication -> Providers -> Google.",
+  "url": "",
+  "anonKey": ""
+}
