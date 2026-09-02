@@ -2698,6 +2698,7 @@ button {
    because a confirmation dressed as an error trains people to ignore the real ones. */
 .app-error,
 .app-banner {
+  transition: opacity 0.25s ease, transform 0.25s ease;
   position: fixed;
   inset: auto 16px 16px 16px;
   z-index: 200;
@@ -2708,6 +2709,11 @@ button {
   font-size: 0.88rem;
   font-weight: 600;
   cursor: pointer;
+}
+
+.app-banner-leaving {
+  opacity: 0;
+  transform: translateY(8px);
 }
 
 .app-banner-error {
@@ -4188,7 +4194,7 @@ nodes.passwordForm.addEventListener("submit", (e) => handlePasswordChange(e));
     debugLog(`REJECTION ${String(event.reason)}`);
     showAppError(String(event.reason));
   });
-  nodes.appError.addEventListener("click", () => { nodes.appError.hidden = true; });
+  nodes.appError.addEventListener("click", () => dismissAppBanner());
   nodes.debugClose.addEventListener("click", () => setDebugPanel(false));
   nodes.debugCopy.addEventListener("click", () => copyDebugReport());
   document.addEventListener("keydown", (event) => {
@@ -4246,6 +4252,9 @@ function clearResetFlagFromUrl() {
 
 /* One banner, three tones. Errors are red and say what to do about it; confirmations are
    green; neutral notices are blue. Everything is click-to-dismiss. */
+const BANNER_DISMISS_MS = 10000;
+let bannerTimer = null;
+
 function showAppBanner(message, tone = "error") {
   if (!nodes.appError) {
     return;
@@ -4254,9 +4263,28 @@ function showAppBanner(message, tone = "error") {
   const icon = tone === "error" ? "⚠" : (tone === "success" ? "✓" : "ℹ");
   const suffix = tone === "error" ? " — reload the page, or click to dismiss." : " — click to dismiss.";
 
+  clearTimeout(bannerTimer);
   nodes.appError.className = `app-banner app-banner-${tone}`;
   nodes.appError.textContent = `${icon} ${message}${suffix}`;
   nodes.appError.hidden = false;
+  nodes.appError.classList.remove("app-banner-leaving");
+
+  /* Confirmations and notices clear themselves; errors stay until dismissed, since they
+     usually need reading or acting on. */
+  if (tone !== "error") {
+    bannerTimer = setTimeout(() => dismissAppBanner(), BANNER_DISMISS_MS);
+  }
+}
+
+function dismissAppBanner() {
+  clearTimeout(bannerTimer);
+  if (!nodes.appError || nodes.appError.hidden) return;
+
+  nodes.appError.classList.add("app-banner-leaving");
+  bannerTimer = setTimeout(() => {
+    nodes.appError.hidden = true;
+    nodes.appError.classList.remove("app-banner-leaving");
+  }, 260);
 }
 
 function showAppError(message) {
