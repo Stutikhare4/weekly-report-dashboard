@@ -43,6 +43,7 @@ def main():
 
     bundle = {
         "supabaseConfig": supabase_config,
+        "rolesConfig": json.loads(read("roles-config.json")),
         "weekTemplates": json.loads(read("week-templates.json")),
         "demoIndex": demo_index,
         "demos": demos,

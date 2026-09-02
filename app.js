@@ -100,34 +100,42 @@ const TASK_TEMPLATES = [
    sheet there pairs a completed table with a "This Week" table, both grouped by an
    "Integration Scope" column. That scope maps onto a task's `phase` field here.
    This is only the SEED — the editable copy lives in state.weekTemplates (Templates screen). */
-const ROLES = ["admin", "manager", "member", "viewer"];
+const ROLES = ["admin", "viewer"];
 
 const ROLE_LABELS = {
   admin: "Admin",
-  manager: "Manager",
-  member: "Member",
   viewer: "Viewer",
 };
 
 const ROLE_DESCRIPTIONS = {
-  admin: "Everything, plus managing users and roles.",
-  manager: "Create and delete projects, edit the master template, manage teams.",
-  member: "Create and edit weekly reports. Cannot delete projects or edit templates.",
-  viewer: "Read-only. Can generate and export reports.",
+  admin: "Full access — projects, reports, templates, teams, data and user roles.",
+  viewer: "Read-only. Can browse projects and generate or export reports, but change nothing.",
 };
 
+/* Two roles: Admin does everything, Viewer changes nothing. Every mutating capability is
+   admin-only. Viewing, generating and exporting reports need no permission and so are not
+   listed here. */
 const PERMISSIONS = {
-  "project.create": ["admin", "manager"],
-  "project.delete": ["admin", "manager"],
-  "project.edit": ["admin", "manager", "member"],
-  "report.create": ["admin", "manager", "member"],
-  "report.edit": ["admin", "manager", "member"],
-  "report.delete": ["admin", "manager"],
-  "template.edit": ["admin", "manager"],
-  "team.manage": ["admin", "manager"],
+  "project.create": ["admin"],
+  "project.delete": ["admin"],
+  "project.edit": ["admin"],
+  "report.create": ["admin"],
+  "report.edit": ["admin"],
+  "report.delete": ["admin"],
+  "template.edit": ["admin"],
+  "team.manage": ["admin"],
   "data.manage": ["admin"],
   "users.manage": ["admin"],
 };
+
+/* Loaded from roles-config.json at boot; these are the fallbacks if the file is missing. */
+let rolesConfig = {
+  allowedDomain: "webengage.com",
+  requireLogin: true,
+  passwordPolicy: { minLength: 10, requireUppercase: true, requireLowercase: true, requireNumber: true, requireSymbol: true },
+  users: [],
+};
+let currentSession = null;
 
 /* Read by debugLog() from anywhere, so it must be module-level, not inside boot(). */
 const DEBUG_LOG = [];
@@ -329,6 +337,7 @@ const nodes = {
   userWidget: document.getElementById("userWidget"),
   userDropdown: document.getElementById("userDropdown"),
   userDropdownSettingsLink: document.getElementById("userDropdownSettingsLink"),
+  userDropdownSignOut: document.getElementById("userDropdownSignOut"),
 
   sidebarAddProject: document.getElementById("sidebarAddProject"),
 
@@ -388,7 +397,10 @@ const nodes = {
   authTitle: document.getElementById("authTitle"),
   authIntro: document.getElementById("authIntro"),
   authError: document.getElementById("authError"),
-  authGoogle: document.getElementById("authGoogle"),
+  authEmail: document.getElementById("authEmail"),
+  authPassword: document.getElementById("authPassword"),
+  authHint: document.getElementById("authHint"),
+  authForm: document.getElementById("authForm"),
   authLocalNote: document.getElementById("authLocalNote"),
 
   debugPanel: document.getElementById("debugPanel"),
@@ -470,6 +482,15 @@ const nodes = {
   settingsDataStats: document.getElementById("settingsDataStats"),
   settingsAccount: document.getElementById("settingsAccount"),
   settingsRoles: document.getElementById("settingsRoles"),
+  settingsPasswordBlock: document.getElementById("settingsPasswordBlock"),
+  passwordForm: document.getElementById("passwordForm"),
+  pwCurrent: document.getElementById("pwCurrent"),
+  pwNew: document.getElementById("pwNew"),
+  pwConfirm: document.getElementById("pwConfirm"),
+  pwError: document.getElementById("pwError"),
+  pwResult: document.getElementById("pwResult"),
+  pwResultEmail: document.getElementById("pwResultEmail"),
+  pwHash: document.getElementById("pwHash"),
 };
 
 const SCREEN_NODES = {
@@ -601,7 +622,8 @@ function boot() {
 
   nodes.settingsForm.addEventListener("submit", (e) => saveSettings(e));
 
-  nodes.authGoogle.addEventListener("click", () => signInWithGoogle());
+  nodes.authForm.addEventListener("submit", (e) => handleEmailSignIn(e));
+nodes.passwordForm.addEventListener("submit", (e) => handlePasswordChange(e));
 
   nodes.settingsExport.addEventListener("click", () => exportBackup());
   nodes.settingsClear.addEventListener("click", () => clearAllData({ keepTemplates: true }));
@@ -637,6 +659,7 @@ function boot() {
   nodes.notifBell.addEventListener("click", (e) => { e.stopPropagation(); toggleNotifDropdown(); });
   nodes.userWidget.addEventListener("click", (e) => { e.stopPropagation(); toggleUserDropdown(); });
   nodes.userDropdownSettingsLink.addEventListener("click", () => { closeDropdowns(); openSettings(); });
+  nodes.userDropdownSignOut.addEventListener("click", () => { closeDropdowns(); signOutSession(); });
   document.addEventListener("click", () => closeDropdowns());
 
   /* Nothing should ever fail silently again: surface uncaught errors in the UI, not just
@@ -683,8 +706,8 @@ function boot() {
   }
 
 
-  renderDemoDataOptions();
-  initCloud();
+  loadRolesConfig().then(() => startSession());
+renderDemoDataOptions();
 
   /* First run only: prefer the editable JSON file over the copy compiled into app.js. */
   if (!state.weekTemplatesSeeded) {
@@ -1148,8 +1171,8 @@ function renderProjectScreen() {
                   <h4>${escapeHtml(update.weekRange)}</h4>
                 </div>
                 <div style="display: flex; align-items: center; gap: 8px;">
-                  <button class="ghost-button btn-edit-update" data-update-id="${update.id}" style="padding: 4px 10px; font-size: 0.75rem; border-radius: 8px;">Edit</button>
-                  <button class="row-remove btn-delete-update" data-update-id="${update.id}" style="padding: 4px 10px; font-size: 0.75rem;">Delete week</button>
+                  <button class="ghost-button btn-edit-update" data-requires="report.edit" data-update-id="${update.id}" style="padding: 4px 10px; font-size: 0.75rem; border-radius: 8px;">Edit</button>
+                  <button class="row-remove btn-delete-update" data-requires="report.delete" data-update-id="${update.id}" style="padding: 4px 10px; font-size: 0.75rem;">Delete week</button>
                   <span class="status-badge ${statusClass(update.statusTag)}">${escapeHtml(update.statusTag)}</span>
                 </div>
               </header>
@@ -1849,7 +1872,7 @@ function renderProjectTeam() {
       <select data-field="role">
         ${TEAM_ROLES.map((role) => `<option value="${role}"${member.role === role ? " selected" : ""}>${role}</option>`).join("")}
       </select>
-      <button type="button" class="row-remove" data-action="remove-member">Remove</button>
+      <button type="button" class="row-remove" data-requires="team.manage" data-action="remove-member">Remove</button>
     </div>
   `).join("");
 }
@@ -1938,6 +1961,7 @@ function renderSettingsScreen() {
   renderStorageStats();
   renderAccountPanel();
   renderRolesPanel();
+  nodes.settingsPasswordBlock.hidden = !currentSession;
 }
 
 function saveSettings(event) {
@@ -1996,11 +2020,13 @@ function loadState() {
 
 function ensureDefaults(targetState) {
   if (!targetState.settings || typeof targetState.settings !== "object") {
-    targetState.settings = { displayName: "Stuti", role: "Admin", theme: "dark" };
+    targetState.settings = { displayName: "Stuti", role: "viewer", theme: "light" };
   } else {
     targetState.settings.displayName = targetState.settings.displayName || "Stuti";
-    targetState.settings.role = targetState.settings.role || "Admin";
-    targetState.settings.theme = targetState.settings.theme === "light" ? "light" : "dark";
+    targetState.settings.role = ROLES.includes(String(targetState.settings.role || "").toLowerCase())
+      ? String(targetState.settings.role).toLowerCase()
+      : "viewer";
+    targetState.settings.theme = targetState.settings.theme === "dark" ? "dark" : "light";
   }
 
   if (!Array.isArray(targetState.templates)) {
@@ -2755,7 +2781,7 @@ function renderTemplateWeek(entry) {
       <select data-field="priority">
         ${TEMPLATE_PRIORITIES.map((value) => `<option value="${value}"${task.priority === value ? " selected" : ""}>${capitalize(value)}</option>`).join("")}
       </select>
-      <button type="button" class="row-remove" data-action="remove-task">Remove</button>
+      <button type="button" class="row-remove" data-requires="template.edit" data-action="remove-task">Remove</button>
     </div>
   `).join("");
 
@@ -2765,8 +2791,8 @@ function renderTemplateWeek(entry) {
         <span class="template-week-badge">Week ${entry.week}</span>
         <input type="text" class="template-week-label" data-field="label" value="${escapeHtml(entry.label)}" placeholder="Week label" />
         <span class="muted">${entry.tasks.length} task${entry.tasks.length === 1 ? "" : "s"}</span>
-        <button type="button" class="ghost-button small-button" data-action="add-task">+ Task</button>
-        <button type="button" class="row-remove" data-action="remove-week">Delete week</button>
+        <button type="button" class="ghost-button small-button" data-requires="template.edit" data-action="add-task">+ Task</button>
+        <button type="button" class="row-remove" data-requires="template.edit" data-action="remove-week">Delete week</button>
       </header>
       <div class="template-rows">${rows || `<p class="muted">No tasks yet.</p>`}</div>
     </section>
@@ -3093,9 +3119,252 @@ function applyRolePermissions() {
   });
 }
 
+async function loadRolesConfig() {
+  const inlined = bundled("rolesConfig");
+  if (inlined) {
+    rolesConfig = { ...rolesConfig, ...inlined };
+    return;
+  }
+
+  try {
+    const response = await fetch("./roles-config.json", { cache: "no-store" });
+    if (response.ok) rolesConfig = { ...rolesConfig, ...(await response.json()) };
+  } catch (error) {
+    debugLog(`roles-config.json not readable: ${error.message}`);
+  }
+}
+
+function isAllowedEmail(email) {
+  const domain = String(rolesConfig.allowedDomain || "").toLowerCase().trim();
+  if (!domain) return true;
+  return String(email || "").toLowerCase().trim().endsWith(`@${domain}`);
+}
+
+/* Config stores firstName and lastName separately; `name` is still read so older config
+   files keep working. */
+function userDisplayName(user, email) {
+  const joined = [user && user.firstName, user && user.lastName].filter(Boolean).join(" ").trim();
+  if (joined) return joined;
+  if (user && user.name) return user.name;
+
+  const local = String(email || "").split("@")[0];
+  return local.split(/[._-]+/).filter(Boolean)
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1)).join(" ") || local;
+}
+
+function findConfiguredUser(email) {
+  const wanted = String(email || "").toLowerCase().trim();
+  return (rolesConfig.users || []).find((user) => String(user.email).toLowerCase().trim() === wanted) || null;
+}
+
+/* SHA-256 of the typed password, compared against the hash in roles-config.json so no
+   plaintext password is ever stored in the repo. */
+async function hashPassword(password) {
+  const bytes = new TextEncoder().encode(password);
+  const digest = await crypto.subtle.digest("SHA-256", bytes);
+  return [...new Uint8Array(digest)].map((b) => b.toString(16).padStart(2, "0")).join("");
+}
+
+function passwordProblems(password) {
+  const policy = rolesConfig.passwordPolicy || {};
+  const problems = [];
+  if (password.length < (policy.minLength || 10)) problems.push(`at least ${policy.minLength || 10} characters`);
+  if (policy.requireUppercase && !/[A-Z]/.test(password)) problems.push("an uppercase letter");
+  if (policy.requireLowercase && !/[a-z]/.test(password)) problems.push("a lowercase letter");
+  if (policy.requireNumber && !/[0-9]/.test(password)) problems.push("a number");
+  if (policy.requireSymbol && !/[^A-Za-z0-9]/.test(password)) problems.push("a symbol");
+  return problems;
+}
+
+function describePasswordPolicy() {
+  const policy = rolesConfig.passwordPolicy || {};
+  const parts = [`${policy.minLength || 10}+ characters`];
+  if (policy.requireUppercase) parts.push("uppercase");
+  if (policy.requireLowercase) parts.push("lowercase");
+  if (policy.requireNumber) parts.push("number");
+  if (policy.requireSymbol) parts.push("symbol");
+  return `Password must have ${parts.join(", ")}.`;
+}
+
+/* ---------- Demo sign-in ---------- */
+
+/* Identifies the person so the app can pick their role. Deliberately not a security
+   control: there is no password and no server, so anyone who can open the page can type
+   any address. It exists so an internal demo shows the right view per person. */
+const SESSION_KEY = "multi-project-dashboard-session";
+
+function loadSession() {
+  try {
+    const raw = localStorage.getItem(SESSION_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch (error) {
+    return null;
+  }
+}
+
+function saveSession(session) {
+  try {
+    localStorage.setItem(SESSION_KEY, JSON.stringify(session));
+  } catch (error) {
+    debugLog(`could not store session: ${error.message}`);
+  }
+}
+
+/* A stored session is only honoured while it still matches roles-config.json. Reset
+   someone's password, change their role or remove them, and their session stops working
+   on their next load — otherwise a reset would not actually lock anyone out. */
+function startSession() {
+  if (rolesConfig.requireLogin === false) return;
+
+  const session = loadSession();
+  const user = session ? findConfiguredUser(session.email) : null;
+
+  if (session && user && isAllowedEmail(session.email) && session.fingerprint === passwordFingerprint(user)) {
+    applySession({ ...session, role: ROLES.includes(user.role) ? user.role : "viewer", name: userDisplayName(user, session.email) });
+    return;
+  }
+
+  if (session) {
+    debugLog("stored session no longer matches roles-config.json - signing out");
+    try { localStorage.removeItem(SESSION_KEY); } catch (error) { /* ignore */ }
+  }
+
+  showAuthOverlay();
+}
+
+function passwordFingerprint(user) {
+  return String(user && user.passwordHash ? user.passwordHash : "").slice(0, 12);
+}
+
+function applySession(session) {
+  currentSession = session;
+  state.settings.role = session.role;
+  state.settings.displayName = session.name;
+  saveState();
+  nodes.authOverlay.hidden = true;
+  renderAll();
+  debugLog(`session: ${session.email} (${session.role})`);
+}
+
+async function handleEmailSignIn(event) {
+  event.preventDefault();
+  showAuthError("");
+
+  const email = nodes.authEmail.value.trim().toLowerCase();
+  const password = nodes.authPassword.value;
+
+  if (!isAllowedEmail(email)) {
+    showAuthError(`Use a @${rolesConfig.allowedDomain} address. Access is limited to the internal team.`);
+    return;
+  }
+
+  const problems = passwordProblems(password);
+  if (problems.length) {
+    showAuthError(`Password needs ${problems.join(", ")}.`);
+    return;
+  }
+
+  const user = findConfiguredUser(email);
+
+  let digest;
+  try {
+    digest = await hashPassword(password);
+  } catch (error) {
+    showAuthError("This browser cannot hash passwords here — open the app over http://localhost or https.");
+    return;
+  }
+
+  /* Same message either way, so the form does not reveal which addresses exist. */
+  if (!user || user.passwordHash !== digest) {
+    showAuthError("That email and password do not match.");
+    nodes.authPassword.value = "";
+    return;
+  }
+
+  const session = {
+    email,
+    fingerprint: passwordFingerprint(user),
+    role: ROLES.includes(user.role) ? user.role : "viewer",
+    name: userDisplayName(user, email),
+    signedInAt: new Date().toISOString(),
+  };
+
+  nodes.authPassword.value = "";
+  saveSession(session);
+  applySession(session);
+}
+
+function signOutSession() {
+  if (!confirm("Sign out? Your projects stay in this browser.")) return;
+
+  try {
+    localStorage.removeItem(SESSION_KEY);
+  } catch (error) {
+    debugLog(`could not clear session: ${error.message}`);
+  }
+
+  currentSession = null;
+  nodes.authEmail.value = "";
+  showAuthOverlay();
+}
+
+/* No server means no reset email and no way to write roles-config.json from the browser.
+   The next best thing: verify the current password, enforce the policy on the new one, and
+   hand over the hash to paste in. */
+async function handlePasswordChange(event) {
+  event.preventDefault();
+  nodes.pwError.hidden = true;
+  nodes.pwResult.hidden = true;
+
+  if (!currentSession) {
+    showPasswordError("Sign in first.");
+    return;
+  }
+
+  const user = findConfiguredUser(currentSession.email);
+  if (!user) {
+    showPasswordError("Your account is not in roles-config.json.");
+    return;
+  }
+
+  const current = await hashPassword(nodes.pwCurrent.value);
+  if (current !== user.passwordHash) {
+    showPasswordError("Current password is wrong.");
+    return;
+  }
+
+  const next = nodes.pwNew.value;
+  const problems = passwordProblems(next);
+  if (problems.length) {
+    showPasswordError(`New password needs ${problems.join(", ")}.`);
+    return;
+  }
+
+  if (next !== nodes.pwConfirm.value) {
+    showPasswordError("The two new passwords do not match.");
+    return;
+  }
+
+  if (next === nodes.pwCurrent.value) {
+    showPasswordError("The new password is the same as the current one.");
+    return;
+  }
+
+  nodes.pwHash.value = await hashPassword(next);
+  nodes.pwResultEmail.textContent = currentSession.email;
+  nodes.pwResult.hidden = false;
+  nodes.passwordForm.reset();
+  nodes.pwHash.select();
+}
+
+function showPasswordError(message) {
+  nodes.pwError.textContent = message;
+  nodes.pwError.hidden = false;
+}
+
 /* ---------- Users & Roles (admin) ---------- */
 
-async function renderRolesPanel() {
+function renderRolesPanel() {
   if (!nodes.settingsRoles) return;
 
   if (!can("users.manage")) {
@@ -3103,60 +3372,172 @@ async function renderRolesPanel() {
     return;
   }
 
-  if (!cloud.enabled || !cloud.user) {
-    nodes.settingsRoles.innerHTML = `
-      <p class="muted">Roles need accounts. Your own role is
-      <strong>${escapeHtml(ROLE_LABELS[currentRole()])}</strong>, set locally for testing.</p>
-      <label class="reports-index-picker" style="max-width:240px;margin-top:10px;">
-        My role (local only)
-        <select id="localRolePicker">
-          ${ROLES.map((role) => `<option value="${role}"${currentRole() === role ? " selected" : ""}>${ROLE_LABELS[role]}</option>`).join("")}
-        </select>
-      </label>
-      <p class="muted" style="margin-top:8px;font-size:0.8rem;">${escapeHtml(ROLE_DESCRIPTIONS[currentRole()])}</p>`;
-    const picker = document.getElementById("localRolePicker");
-    if (picker) picker.addEventListener("change", () => {
-      state.settings.role = picker.value;
-      saveState();
-      renderAll();
-    });
-    return;
-  }
+  const users = rolesConfig.users || [];
 
-  const { data, error } = await cloud.client.rpc("list_users");
-  if (error) {
-    nodes.settingsRoles.innerHTML = `<p class="muted">Could not load users (${escapeHtml(error.message)}).</p>`;
-    return;
-  }
+  const myEmail = currentSession ? String(currentSession.email).toLowerCase() : "";
 
   nodes.settingsRoles.innerHTML = `
-    <p class="muted" style="margin-bottom:10px;">${data.length} account(s). Roles are enforced on the server.</p>
-    <div class="row-list">
-      ${data.map((user) => `
-        <div class="detail-row poc-row" data-user="${escapeHtml(user.id)}">
+    <p class="muted" style="margin-bottom:10px;">
+      ${users.length} account(s), from <code>roles-config.json</code>. Change a role below and the
+      updated <code>users</code> block appears underneath — paste it back into the file, commit and
+      push. There is no server, so the browser cannot save it for you.
+    </p>
+    <div class="row-list" style="margin-bottom:12px;">
+      ${users.map((user, index) => {
+        const isSelf = String(user.email).toLowerCase() === myEmail;
+        return `
+        <div class="detail-row poc-row">
           <div>
-            <div style="font-weight:700;">${escapeHtml(user.display_name || user.email)}</div>
-            <div class="meta">${escapeHtml(user.email)} · last seen ${escapeHtml(formatSummaryDate(String(user.last_seen_at).slice(0, 10)))}</div>
+            <div style="font-weight:700;">${escapeHtml(userDisplayName(user, user.email))}${isSelf ? ` <span class="meta">(you)</span>` : ""}</div>
+            <div class="meta">${escapeHtml(user.email)}</div>
           </div>
-          <select data-role-for="${escapeHtml(user.id)}"${user.id === cloud.user.id ? " disabled" : ""}>
+          <select data-role-index="${index}"${isSelf ? " disabled title='You cannot change your own role'" : ""}>
             ${ROLES.map((role) => `<option value="${role}"${user.role === role ? " selected" : ""}>${ROLE_LABELS[role]}</option>`).join("")}
           </select>
-        </div>`).join("")}
+        </div>`;
+      }).join("") || `<p class="muted">No users configured.</p>`}
+    </div>
+    <div id="rolesDiff" hidden>
+      <p class="storage-warning" style="margin-bottom:8px;">
+        <strong>Not saved yet.</strong> Paste this over the <code>users</code> array in
+        <code>roles-config.json</code>, then commit and push. Anyone whose role changed picks it up
+        on their next load.
+      </p>
+      <textarea class="report-html-source" id="rolesJson" readonly style="min-height:150px;"></textarea>
+    </div>
+
+    <h4 class="settings-subhead">Add a user, or reset a password</h4>
+    <p class="muted" style="font-size:0.82rem;margin-bottom:10px;">
+      Produces the entry to paste into <code>roles-config.json</code>. For an existing user, replace
+      just their <code>passwordHash</code>; for a new one, paste the whole block into
+      <code>users</code>. Commit and push to make it live.
+    </p>
+    <form class="password-form" id="resetForm">
+      <label>User email<input type="email" id="resetEmail" required placeholder="name@${escapeHtml(rolesConfig.allowedDomain)}" /></label>
+      <label>First name<input type="text" id="resetFirst" placeholder="e.g. Neha" /></label>
+      <label>Last name<input type="text" id="resetLast" placeholder="e.g. Sharma" /></label>
+      <label>Role
+        <select id="resetRole">
+          ${ROLES.map((role) => `<option value="${role}"${role === "viewer" ? " selected" : ""}>${ROLE_LABELS[role]}</option>`).join("")}
+        </select>
+      </label>
+      <label>Password
+        <input type="text" id="resetPassword" required placeholder="Type one, or generate" />
+      </label>
+      <div class="actions">
+        <button type="button" id="resetSuggest" class="ghost-button small-button">Suggest strong password</button>
+        <button type="submit" class="secondary-button">Add entry</button>
+      </div>
+    </form>
+    <p class="auth-error" id="resetError" hidden></p>
+    <div id="resetResult" hidden>
+      <p class="muted" style="font-size:0.82rem;margin:10px 0 6px;">
+        Entry for <strong id="resetResultEmail"></strong> — paste into <code>roles-config.json</code>:
+      </p>
+      <textarea class="report-html-source" id="resetHash" readonly style="min-height:110px;"></textarea>
+      <p class="storage-warning" style="margin-top:10px;">
+        Share this password with them directly (Slack DM or a password manager) — it is not
+        recoverable from the hash, and this is the only time it is shown.
+        <strong id="resetPlain" style="display:block;margin-top:6px;font-family:ui-monospace,Menlo,monospace;"></strong>
+      </p>
     </div>`;
 
-  nodes.settingsRoles.querySelectorAll("[data-role-for]").forEach((select) => {
-    select.addEventListener("change", () => changeUserRole(select.dataset.roleFor, select.value));
+  nodes.settingsRoles.querySelectorAll("[data-role-index]").forEach((select) => {
+    select.addEventListener("change", () => {
+      const index = Number(select.dataset.roleIndex);
+      if (rolesConfig.users[index]) rolesConfig.users[index].role = select.value;
+      showRolesJson();
+    });
+  });
+
+  const form = document.getElementById("resetForm");
+  if (form) form.addEventListener("submit", (event) => handleAdminReset(event));
+
+  const suggest = document.getElementById("resetSuggest");
+  if (suggest) suggest.addEventListener("click", () => {
+    document.getElementById("resetPassword").value = suggestPassword();
   });
 }
 
-async function changeUserRole(userId, role) {
-  const { error } = await cloud.client.rpc("set_user_role", { target: userId, new_role: role });
-  if (error) {
-    showAppError(`Could not change role (${error.message}).`);
-  } else {
-    showAppError(`Role updated to ${ROLE_LABELS[role]}.`);
+/* A password that satisfies the policy by construction, so an admin never has to invent
+   one. crypto.getRandomValues, not Math.random. */
+function suggestPassword() {
+  const groups = [
+    "ABCDEFGHJKLMNPQRSTUVWXYZ",
+    "abcdefghijkmnopqrstuvwxyz",
+    "23456789",
+    "!@#$%^&*?",
+  ];
+  const all = groups.join("");
+  /* Exactly the policy minimum — two characters from each required group, the rest random. */
+  const target = Math.max(rolesConfig.passwordPolicy?.minLength || 10, groups.length * 2);
+  const pick = (set, count) => {
+    const values = crypto.getRandomValues(new Uint32Array(count));
+    return [...values].map((value) => set[value % set.length]);
+  };
+
+  const chars = groups.flatMap((group) => pick(group, 2)).concat(pick(all, target - groups.length * 2));
+
+  /* Fisher-Yates so the guaranteed characters are not always in the same positions. */
+  const shuffle = crypto.getRandomValues(new Uint32Array(chars.length));
+  for (let i = chars.length - 1; i > 0; i -= 1) {
+    const j = shuffle[i] % (i + 1);
+    [chars[i], chars[j]] = [chars[j], chars[i]];
   }
-  renderRolesPanel();
+  return chars.join("");
+}
+
+/* The browser cannot write roles-config.json, so a role change produces the block to paste
+   rather than pretending to save. */
+function showRolesJson() {
+  const block = document.getElementById("rolesDiff");
+  const output = document.getElementById("rolesJson");
+  if (!block || !output) return;
+
+  output.value = JSON.stringify(rolesConfig.users, null, 2);
+  block.hidden = false;
+  output.select();
+}
+
+async function handleAdminReset(event) {
+  event.preventDefault();
+  const error = document.getElementById("resetError");
+  const result = document.getElementById("resetResult");
+  error.hidden = true;
+  result.hidden = true;
+
+  const email = document.getElementById("resetEmail").value.trim().toLowerCase();
+  const password = document.getElementById("resetPassword").value;
+
+  const fail = (message) => { error.textContent = message; error.hidden = false; };
+
+  if (!isAllowedEmail(email)) {
+    fail(`Use a @${rolesConfig.allowedDomain} address.`);
+    return;
+  }
+
+  const problems = passwordProblems(password);
+  if (problems.length) {
+    fail(`Password needs ${problems.join(", ")}.`);
+    return;
+  }
+
+  const local = email.split("@")[0];
+  const guess = local.split(/[._-]+/).filter(Boolean)
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1));
+  const entry = {
+    email,
+    firstName: document.getElementById("resetFirst").value.trim().replace(/\s+/g, "") || guess[0] || "",
+    lastName: document.getElementById("resetLast").value.trim().replace(/\s+/g, "") || guess.slice(1).join("") || "",
+    role: document.getElementById("resetRole").value,
+    passwordHash: await hashPassword(password),
+  };
+
+  document.getElementById("resetHash").value = JSON.stringify(entry, null, 2);
+  document.getElementById("resetResultEmail").textContent = email;
+  document.getElementById("resetPlain").textContent = password;
+  result.hidden = false;
+  document.getElementById("resetHash").select();
 }
 
 /* ---------- Accounts & cloud sync (Supabase) ---------- */
@@ -3215,6 +3596,7 @@ async function initCloud() {
 function showAuthOverlay() {
   nodes.authOverlay.hidden = false;
   showAuthError("");
+  if (nodes.authHint) nodes.authHint.textContent = describePasswordPolicy();
 }
 
 function showAuthError(message) {
@@ -3222,20 +3604,16 @@ function showAuthError(message) {
   nodes.authError.hidden = !message;
 }
 
-async function signInWithGoogle() {
-  showAuthError("");
-  try {
-    const { error } = await cloud.client.auth.signInWithOAuth({
-      provider: "google",
-      options: { redirectTo: location.href.split("?")[0] },
-    });
-    if (error) throw error;
-  } catch (error) {
-    showAuthError(error.message || "Google sign-in is not enabled for this project.");
-  }
-}
-
 async function onSignedIn(user) {
+  /* Domain gate. Also enforced in the database, so this is fast feedback, not the control. */
+  if (!isAllowedEmail(user.email)) {
+    await cloud.client.auth.signOut();
+    cloud.user = null;
+    showAuthOverlay();
+    showAuthError(`${user.email} is not a @${rolesConfig.allowedDomain} account. Access is restricted to company accounts.`);
+    return;
+  }
+
   cloud.user = user;
   nodes.authOverlay.hidden = true;
 
@@ -3244,10 +3622,8 @@ async function onSignedIn(user) {
 
   const { data: profile } = await cloud.client
     .from("profiles").select("role, display_name").eq("id", user.id).maybeSingle();
-  if (profile) {
-    cloud.role = profile.role;
-    state.settings.role = profile.role;
-  }
+  cloud.role = (profile && ROLES.includes(profile.role)) ? profile.role : configuredRoleFor(user.email);
+  state.settings.role = cloud.role;
 
   await pullCloudState();
   await cloud.client.rpc("touch_last_seen").catch(() => {});
@@ -3311,34 +3687,25 @@ async function signOut() {
   showAuthOverlay();
 }
 
-async function renderAccountPanel() {
+function renderAccountPanel() {
   if (!nodes.settingsAccount) return;
 
-  if (!cloud.enabled) {
-    nodes.settingsAccount.innerHTML = `
-      <p class="muted">Running in local-only mode — no accounts. Everything is stored in this browser.
-      Add your Supabase URL and anon key to <code>supabase-config.json</code> to turn on email login
-      and per-user dashboards.</p>`;
-    return;
-  }
-
-  if (!cloud.user) {
-    nodes.settingsAccount.innerHTML = `<p class="muted">Not signed in.</p>`;
+  if (!currentSession) {
+    nodes.settingsAccount.innerHTML = `<p class="muted">Not signed in. Sign-in is off in
+      <code>roles-config.json</code> (<code>requireLogin: false</code>).</p>`;
     return;
   }
 
   nodes.settingsAccount.innerHTML = `
-    <p class="muted">Signed in as <strong>${escapeHtml(cloud.user.email)}</strong>. Your projects sync to
-    your account and follow you to any browser.</p>
+    <p class="muted">Signed in as <strong>${escapeHtml(currentSession.email)}</strong> —
+    role <strong>${escapeHtml(ROLE_LABELS[currentSession.role])}</strong>, from
+    <code>roles-config.json</code>.</p>
+    <p class="muted" style="margin-top:6px;font-size:0.8rem;">Demo sign-in only: no password and no
+    server, so this identifies you rather than protecting anything. Data stays in this browser.</p>
     <div class="actions" style="margin-top: 12px;">
       <button type="button" id="settingsSignOut" class="ghost-button">Sign out</button>
-      <button type="button" id="settingsUsage" class="secondary-button">Refresh usage stats</button>
-    </div>
-    <p class="muted" id="settingsUsageStats" style="margin-top: 10px; font-size: 0.82rem;"></p>
-  `;
-  document.getElementById("settingsSignOut").addEventListener("click", () => signOut());
-  document.getElementById("settingsUsage").addEventListener("click", () => loadUsageStats());
-  loadUsageStats();
+    </div>`;
+  document.getElementById("settingsSignOut").addEventListener("click", () => signOutSession());
 }
 
 /* "How many people are using it" — counts only; RLS still stops anyone reading
@@ -3766,12 +4133,14 @@ function renderReportsIndex(projectId) {
         </div>
         <div class="report-row-actions">
           <span class="status-badge ${statusClass(update.statusTag)}">${escapeHtml(update.statusTag)}</span>
-          <button type="button" class="ghost-button small-button" data-edit-report="${update.id}">Edit</button>
-          <button type="button" class="row-remove" data-delete-report="${update.id}">Delete</button>
+          <button type="button" class="ghost-button small-button" data-requires="report.edit" data-edit-report="${update.id}">Edit</button>
+          <button type="button" class="row-remove" data-requires="report.delete" data-delete-report="${update.id}">Delete</button>
         </div>
       </article>
     `;
   }).join("");
+
+  applyRolePermissions();
 }
 
 function handleReportsIndexClick(event) {

@@ -12,12 +12,21 @@ A client-side PWA for tracking weekly status updates across multiple projects (C
 - `icon.svg` — app icon
 - `week-templates.json` — editable master week-wise task plan (seeds new projects)
 - `demo-data/` — optional demo datasets; `index.json` lists what Settings offers
-- `supabase-config.json` — Supabase URL + anon key; empty means local-only, no login
+- `roles-config.json` — who may sign in, their role and password hash; see `README-auth.md`
+- `tools/hash-password.py` — prints the SHA-256 hash to put in `roles-config.json`
+- `supabase-config.json` — Supabase URL + anon key; unused while sign-in is the local demo gate
 - `supabase/schema.sql` — run once in the Supabase SQL editor to create tables, RLS and stats
 - `build-standalone.py` — bundles everything into `weekly-report-dashboard.html`
 - `weekly-report-dashboard.html` — generated single-file build (do not edit by hand)
 
-## Accounts (optional)
+## Sign-in and roles
+
+Demo sign-in checked in the browser against `roles-config.json`: `@webengage.com` addresses
+only, listed users only, passwords stored as SHA-256 hashes, two roles (Admin / Viewer).
+Adding a user or resetting a password means editing that file and pushing — the browser
+cannot write to it. Full procedure in `README-auth.md`. This is a gate, not security.
+
+## Accounts via Supabase (not currently wired up)
 
 With `supabase-config.json` filled in, the app gets email/password accounts and syncs each
 user's whole `state` object to one JSONB row in `public.user_state`, protected by row-level

@@ -1,0 +1,21 @@
+{
+  "$comment": "Who may sign in, and as what. firstName and lastName are separate fields, each without spaces. Passwords are stored as SHA-256 hashes, never plaintext \u2014 generate one with tools/hash-password.py or from Settings -> Users & Roles. This is a demo gate, not real security: the check runs in the browser.",
+  "allowedDomain": "webengage.com",
+  "requireLogin": true,
+  "passwordPolicy": {
+    "minLength": 10,
+    "requireUppercase": true,
+    "requireLowercase": true,
+    "requireNumber": true,
+    "requireSymbol": true
+  },
+  "users": [
+    {
+      "email": "stuti.khare@webengage.com",
+      "firstName": "Stuti",
+      "lastName": "Khare",
+      "role": "admin",
+      "passwordHash": "e89f0e0f77c934974dcbc69c702dce140298911b57d30bc58045c8c18bbacef1"
+    }
+  ]
+}

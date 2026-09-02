@@ -2275,8 +2275,8 @@ button {
   margin-top: 4px;
 }
 
-/* Sign-in page. Deliberately dark and self-contained rather than theme-aware — it is the
-   product's front door and should look the same for everyone. */
+/* Sign-in page. Uses the same theme tokens as the rest of the app, so it follows the
+   light/dark setting instead of being its own palette. */
 .auth-overlay {
   position: fixed;
   inset: 0;
@@ -2286,10 +2286,10 @@ button {
   justify-content: center;
   padding: 32px 20px;
   overflow-y: auto;
-  color: #e6ebf5;
+  color: var(--text);
   background:
-    radial-gradient(circle at 50% 0%, rgba(99, 102, 241, 0.16), transparent 45%),
-    #0a0a12;
+    radial-gradient(circle at 50% 0%, var(--bg-wash-2), transparent 45%),
+    linear-gradient(135deg, var(--bg-grad-1) 0%, var(--bg-grad-2) 50%, var(--bg-grad-3) 100%);
 }
 
 .auth-shell {
@@ -2304,9 +2304,9 @@ button {
   height: 74px;
   margin-bottom: 22px;
   border-radius: 20px;
-  color: #a5b4fc;
-  background: #1e1b4b;
-  border: 1px solid rgba(129, 140, 248, 0.35);
+  color: var(--accent-2);
+  background: var(--surface-2);
+  border: 1px solid var(--border-strong);
 }
 
 .auth-mark svg {
@@ -2316,19 +2316,16 @@ button {
 
 .auth-wordmark {
   margin: 0 0 6px;
-  font-family: "Segoe UI", "Trebuchet MS", system-ui, sans-serif;
+  font-family: Georgia, "Times New Roman", serif;
   font-size: 2rem;
   font-weight: 800;
   letter-spacing: -0.01em;
-  background: linear-gradient(100deg, #93c5fd, #a78bfa);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
+  color: var(--text);
 }
 
 .auth-tagline {
   margin-bottom: 34px;
-  color: #9aa4b8;
+  color: var(--muted);
   font-size: 0.94rem;
 }
 
@@ -2337,29 +2334,29 @@ button {
   gap: 14px;
   padding: 28px;
   text-align: left;
-  border-radius: 16px;
-  background: #12131c;
-  border: 1px solid rgba(148, 163, 184, 0.14);
+  border-radius: 18px;
+  background: var(--panel-strong);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
 }
 
 .auth-card h2 {
   margin: 0;
-  font-family: "Segoe UI", "Trebuchet MS", system-ui, sans-serif;
+  font-family: Georgia, "Times New Roman", serif;
   font-size: 1.2rem;
-  font-weight: 700;
-  color: #f1f5f9;
+  color: var(--text);
 }
 
 .auth-sub {
   margin: -6px 0 4px;
-  color: #94a3b8;
+  color: var(--muted);
   font-size: 0.88rem;
 }
 
 .auth-card label {
   display: grid;
   gap: 6px;
-  color: #cbd5e1;
+  color: var(--text-strong-cool);
   font-size: 0.85rem;
   font-weight: 600;
 }
@@ -2367,74 +2364,125 @@ button {
 .auth-card input {
   width: 100%;
   padding: 12px 14px;
-  border-radius: 10px;
-  border: 1px solid rgba(148, 163, 184, 0.22);
-  background: #0c0d15;
-  color: #e6ebf5;
+  border-radius: 12px;
+  border: 1px solid var(--border-strong);
+  background: var(--surface-4);
+  color: var(--text);
   font: inherit;
   font-size: 0.92rem;
 }
 
 .auth-card input::placeholder {
-  color: #64748b;
+  color: var(--muted);
 }
 
 .auth-card input:focus {
   outline: none;
-  border-color: rgba(129, 140, 248, 0.7);
-  box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.18);
-}
-
-.auth-google {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  width: 100%;
-  padding: 13px;
-  border-radius: 10px;
-  border: 0;
-  background: #ffffff;
-  color: #1f2937;
-  font-size: 0.95rem;
-  font-weight: 700;
-}
-
-.auth-google:hover {
-  background: #f1f5f9;
-}
-
-.auth-divider {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  color: #64748b;
-  font-size: 0.78rem;
-}
-
-.auth-divider::before,
-.auth-divider::after {
-  content: "";
-  flex: 1;
-  height: 1px;
-  background: rgba(148, 163, 184, 0.18);
+  border-color: rgba(56, 189, 248, 0.58);
+  box-shadow: 0 0 0 4px rgba(56, 189, 248, 0.16);
 }
 
 .auth-card .primary-button {
   padding: 13px;
-  border-radius: 10px;
-  color: #0b1020;
-  background: linear-gradient(100deg, #93c5fd, #a78bfa);
+  border-radius: 12px;
   font-size: 0.95rem;
 }
 
-.auth-link {
-  padding: 4px;
-  background: none;
-  border: 0;
-  color: #93c5fd;
-  font-size: 0.85rem;
+.auth-error {
+  padding: 10px 12px;
+  border-radius: 10px;
+  color: #b91c1c;
+  background: rgba(248, 113, 113, 0.12);
+  border: 1px solid rgba(248, 113, 113, 0.32);
+  font-size: 0.84rem;
+}
+
+:root:not([data-theme="light"]) .auth-error {
+  color: #fca5a5;
+}
+
+.auth-fineprint {
+  margin-top: 2px;
+  color: var(--muted);
+  font-size: 0.76rem;
+  line-height: 1.5;
+  text-align: center;
+}
+
+.auth-footer {
+  margin-top: 26px;
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+
+.auth-note {
+  margin-top: 12px;
+  font-size: 0.78rem;
+}
+
+/* Settings forms: fields wrap into columns instead of running across the full width. */
+.settings-head {
+  margin: 26px 0 8px;
+  padding-top: 18px;
+  border-top: 1px solid var(--border-soft);
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 1.05rem;
+}
+
+.settings-subhead {
+  margin: 20px 0 6px;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 0.95rem;
+}
+
+.password-form {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  align-items: end;
+  gap: 12px;
+  padding: 16px;
+  border-radius: 14px;
+  background: var(--surface-5);
+  border: 1px solid var(--border-soft);
+}
+
+.password-form .actions {
+  grid-column: 1 / -1;
+}
+
+.password-form label {
+  display: grid;
+  gap: 6px;
+  color: var(--text-strong-cool);
+  font-size: 0.8rem;
   font-weight: 600;
+}
+
+.password-form select {
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--border-strong);
+  background: var(--surface-4);
+  color: var(--text);
+  font: inherit;
+  font-size: 0.88rem;
+}
+
+.password-form input {
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--border-strong);
+  background: var(--surface-4);
+  color: var(--text);
+  font: inherit;
+  font-size: 0.88rem;
+}
+
+.auth-hint {
+  margin: -4px 0 0;
+  color: #64748b;
+  font-size: 0.76rem;
+  line-height: 1.5;
 }
 
 .auth-error {
@@ -2705,7 +2753,6 @@ button {
 }
 
     </style>
-    <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
     </head>
   <body>
     <div id="appError" class="app-error" role="alert" hidden></div>
@@ -2718,19 +2765,27 @@ button {
         <h1 class="auth-wordmark">Weekly Report</h1>
         <p class="auth-tagline">WebEngage Project Status Platform</p>
 
-        <div class="auth-card">
-          <h2 id="authTitle">Sign in to your account</h2>
-          <p class="auth-sub" id="authIntro">Access is restricted to company accounts only.</p>
+        <form class="auth-card" id="authForm">
+          <h2 id="authTitle">Sign in to continue</h2>
+          <p class="auth-sub" id="authIntro">Use your @webengage.com email. Internal use only.</p>
 
-          <button type="button" id="authGoogle" class="auth-google">
-            <svg viewBox="0 0 18 18" width="18" height="18" aria-hidden="true"><path fill="#4285F4" d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84a4.14 4.14 0 0 1-1.8 2.72v2.26h2.92c1.7-1.57 2.68-3.88 2.68-6.62z"/><path fill="#34A853" d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.92-2.26c-.8.54-1.84.86-3.04.86-2.34 0-4.32-1.58-5.03-3.7H.96v2.33A9 9 0 0 0 9 18z"/><path fill="#FBBC05" d="M3.97 10.72a5.4 5.4 0 0 1 0-3.44V4.95H.96a9 9 0 0 0 0 8.1l3.01-2.33z"/><path fill="#EA4335" d="M9 3.58c1.32 0 2.5.45 3.44 1.35l2.58-2.58C13.46.89 11.43 0 9 0A9 9 0 0 0 .96 4.95l3.01 2.33C4.68 5.16 6.66 3.58 9 3.58z"/></svg>
-            <span>Continue with Google</span>
-          </button>
+          <label>Work email
+            <input type="email" id="authEmail" autocomplete="email" required placeholder="you@webengage.com" />
+          </label>
+
+          <label>Password
+            <input type="password" id="authPassword" autocomplete="current-password" required placeholder="Your password" />
+          </label>
+
+          <p class="auth-hint" id="authHint"></p>
 
           <p class="auth-error" id="authError" hidden></p>
 
-          <p class="auth-fineprint">By signing in, you agree to use this platform for authorized WebEngage project reporting only.</p>
-        </div>
+          <button type="submit" class="primary-button full-width">Continue</button>
+
+          <p class="auth-fineprint">Demo sign-in for the internal team. It identifies you so the app
+            knows your role — it is not a security control.</p>
+        </form>
 
         <p class="auth-footer">Weekly Report v1.0 · Internal Tool</p>
         <p class="muted auth-note" id="authLocalNote" hidden></p>
@@ -2786,6 +2841,7 @@ button {
           </button>
           <div id="userDropdown" class="dropdown-panel dropdown-panel-right" hidden>
             <button id="userDropdownSettingsLink" class="dropdown-link" type="button">Settings</button>
+            <button id="userDropdownSignOut" class="dropdown-link" type="button">Sign out</button>
           </div>
         </div>
       </header>
@@ -3342,15 +3398,38 @@ button {
             </form>
 
             <div style="margin-top: 26px; padding-top: 20px; border-top: 1px solid var(--border-soft);">
-              <h3 style="font-family: Georgia, 'Times New Roman', serif; margin-bottom: 8px;">Account</h3>
+              <h3 class="settings-head" style="margin-top:0;">Account</h3>
               <div id="settingsAccount"></div>
 
+              <div id="settingsPasswordBlock" style="margin-top: 18px;">
+                <h4 style="font-family: Georgia, 'Times New Roman', serif; margin-bottom: 6px;">Change password</h4>
+                <p class="muted" style="font-size: 0.82rem; margin-bottom: 10px;">
+                  There is no server, so this cannot email a reset link or save the change by itself.
+                  It checks your current password, then gives you the hash to paste into
+                  <code>roles-config.json</code>.
+                </p>
+                <form id="passwordForm" class="password-form">
+                  <label>Current password<input type="password" id="pwCurrent" autocomplete="current-password" required /></label>
+                  <label>New password<input type="password" id="pwNew" autocomplete="new-password" required /></label>
+                  <label>Confirm new password<input type="password" id="pwConfirm" autocomplete="new-password" required /></label>
+                  <button type="submit" class="secondary-button">Generate new hash</button>
+                </form>
+                <p class="auth-error" id="pwError" hidden></p>
+                <div id="pwResult" hidden>
+                  <p class="muted" style="font-size: 0.82rem; margin: 10px 0 6px;">
+                    Paste this as <code>passwordHash</code> for <span id="pwResultEmail"></span> in
+                    <code>roles-config.json</code>, then redeploy. Until you do, your old password still works.
+                  </p>
+                  <textarea class="report-html-source" id="pwHash" readonly style="min-height: 60px;"></textarea>
+                </div>
+              </div>
+
               <div id="settingsRolesBlock" data-requires="users.manage">
-                <h3 style="font-family: Georgia, 'Times New Roman', serif; margin: 24px 0 8px;">Users &amp; Roles</h3>
+                <h3 class="settings-head">Users &amp; Roles</h3>
                 <div id="settingsRoles"></div>
               </div>
 
-              <h3 style="font-family: Georgia, 'Times New Roman', serif; margin: 24px 0 8px;">Data &amp; Backup</h3>
+              <h3 class="settings-head">Data &amp; Backup</h3>
               <p class="storage-warning">
                 <strong>Everything lives in this browser.</strong> Projects, weekly reports and the
                 master template are stored in <code>localStorage</code> for
@@ -3402,7 +3481,7 @@ button {
         </div>
       </div>
     </div>
-    <script>window.__BUNDLED_DATA__ = {"supabaseConfig": {"$comment": "Paste your Supabase project URL and anon (public) key here, then reload. Leave them empty to keep the app in local-only mode with no login. Find both in Supabase -> Project Settings -> API. The anon key is safe in client code; row-level security is what protects the data. Sign-in is Google only, so also enable Authentication -> Providers -> Google.", "url": "", "anonKey": ""}, "weekTemplates": {"$comment": "Master week-wise plan. `platforms` scopes a task to the platforms a project selected; an empty list means the task applies to every project. Platforms: Website, Web App, Android, iOS, REST API. Edit here, then use Templates -> Reload from file.", "weeks": [{"week": 1, "label": "Kickoff & Discovery", "tasks": [{"scope": "Kickoff call", "title": "Onboarding mail thread initiated", "owner": "", "priority": "medium", "platforms": []}, {"scope": "Kickoff call", "title": "Channel form", "owner": "", "priority": "medium", "platforms": []}, {"scope": "Kickoff call", "title": "Tech doc", "owner": "", "priority": "medium", "platforms": []}, {"scope": "Kickoff call", "title": "Scope of Work", "owner": "", "priority": "medium", "platforms": []}, {"scope": "Tech Team connect", "title": "Tech team connect - Website", "owner": "", "priority": "high", "platforms": ["Website"]}, {"scope": "Tech Team connect", "title": "Tech team connect - Android", "owner": "", "priority": "high", "platforms": ["Android"]}, {"scope": "Tech Team connect", "title": "Tech team connect - iOS", "owner": "", "priority": "high", "platforms": ["iOS"]}, {"scope": "Tech Team connect", "title": "Tech team connect - Web App", "owner": "", "priority": "high", "platforms": ["Web App"]}, {"scope": "Tech Team connect", "title": "Tech team connect - REST API", "owner": "", "priority": "high", "platforms": ["REST API"]}, {"scope": "User Id", "title": "Finalise the unique user identifier", "owner": "", "priority": "high", "platforms": []}, {"scope": "Data Model", "title": "Data model - Website", "owner": "", "priority": "high", "platforms": ["Website"]}, {"scope": "Data Model", "title": "Data model - Android", "owner": "", "priority": "high", "platforms": ["Android"]}, {"scope": "Data Model", "title": "Data model - iOS", "owner": "", "priority": "high", "platforms": ["iOS"]}, {"scope": "Data Model", "title": "Data model - Web App", "owner": "", "priority": "high", "platforms": ["Web App"]}, {"scope": "Data Model", "title": "Data model - REST API", "owner": "", "priority": "high", "platforms": ["REST API"]}]}, {"week": 2, "label": "Staging Setup", "tasks": [{"scope": "Data Model", "title": "Data model finalisation & sign-off", "owner": "", "priority": "high", "platforms": []}, {"scope": "Staging", "title": "SDK setup - Website", "owner": "", "priority": "high", "platforms": ["Website"]}, {"scope": "Staging", "title": "SDK setup - Android", "owner": "", "priority": "high", "platforms": ["Android"]}, {"scope": "Staging", "title": "SDK setup - iOS", "owner": "", "priority": "high", "platforms": ["iOS"]}, {"scope": "Staging", "title": "SDK setup - Web App", "owner": "", "priority": "high", "platforms": ["Web App"]}, {"scope": "Staging", "title": "User tracking setup - Website", "owner": "", "priority": "high", "platforms": ["Website"]}, {"scope": "Staging", "title": "User tracking setup - Android", "owner": "", "priority": "high", "platforms": ["Android"]}, {"scope": "Staging", "title": "User tracking setup - iOS", "owner": "", "priority": "high", "platforms": ["iOS"]}, {"scope": "Staging", "title": "User tracking setup - Web App", "owner": "", "priority": "high", "platforms": ["Web App"]}, {"scope": "Historic Data", "title": "Preparation of CSV containing historical user and transactional data", "owner": "", "priority": "high", "platforms": []}, {"scope": "Website", "title": "User Identification", "owner": "", "priority": "high", "platforms": ["Website"]}, {"scope": "Website", "title": "User Attributes", "owner": "", "priority": "high", "platforms": ["Website"]}, {"scope": "Website", "title": "Custom Events", "owner": "", "priority": "high", "platforms": ["Website"]}, {"scope": "Website", "title": "Event Attributes", "owner": "", "priority": "high", "platforms": ["Website"]}, {"scope": "Website", "title": "Login / Logout", "owner": "", "priority": "high", "platforms": ["Website"]}, {"scope": "Website", "title": "Signup", "owner": "", "priority": "high", "platforms": ["Website"]}, {"scope": "Android", "title": "SDK Initialization", "owner": "", "priority": "high", "platforms": ["Android"]}, {"scope": "Android", "title": "User Identification", "owner": "", "priority": "high", "platforms": ["Android"]}, {"scope": "Android", "title": "User Attributes", "owner": "", "priority": "high", "platforms": ["Android"]}, {"scope": "Android", "title": "Custom Events", "owner": "", "priority": "high", "platforms": ["Android"]}, {"scope": "Android", "title": "Event Attributes", "owner": "", "priority": "high", "platforms": ["Android"]}, {"scope": "Android", "title": "Login / Logout", "owner": "", "priority": "high", "platforms": ["Android"]}, {"scope": "Android", "title": "Signup", "owner": "", "priority": "high", "platforms": ["Android"]}, {"scope": "iOS", "title": "SDK Initialization", "owner": "", "priority": "high", "platforms": ["iOS"]}, {"scope": "iOS", "title": "User Identification", "owner": "", "priority": "high", "platforms": ["iOS"]}, {"scope": "iOS", "title": "User Attributes", "owner": "", "priority": "high", "platforms": ["iOS"]}, {"scope": "iOS", "title": "Custom Events", "owner": "", "priority": "high", "platforms": ["iOS"]}, {"scope": "iOS", "title": "Event Attributes", "owner": "", "priority": "high", "platforms": ["iOS"]}, {"scope": "iOS", "title": "Login / Logout", "owner": "", "priority": "high", "platforms": ["iOS"]}, {"scope": "iOS", "title": "Signup", "owner": "", "priority": "high", "platforms": ["iOS"]}, {"scope": "REST API", "title": "API authentication", "owner": "", "priority": "high", "platforms": ["REST API"]}, {"scope": "REST API", "title": "API key configuration", "owner": "", "priority": "high", "platforms": ["REST API"]}, {"scope": "REST API", "title": "User creation / update", "owner": "", "priority": "high", "platforms": ["REST API"]}, {"scope": "REST API", "title": "User attribute updates", "owner": "", "priority": "high", "platforms": ["REST API"]}, {"scope": "REST API", "title": "User identification", "owner": "", "priority": "high", "platforms": ["REST API"]}]}, {"week": 3, "label": "Event Tracking & Channels", "tasks": [{"scope": "Staging", "title": "Event tracking setup - Website", "owner": "", "priority": "high", "platforms": ["Website"]}, {"scope": "Staging", "title": "Event tracking setup - Android", "owner": "", "priority": "high", "platforms": ["Android"]}, {"scope": "Staging", "title": "Event tracking setup - iOS", "owner": "", "priority": "high", "platforms": ["iOS"]}, {"scope": "Staging", "title": "Event tracking setup - Web App", "owner": "", "priority": "high", "platforms": ["Web App"]}, {"scope": "App Implementation", "title": "Screen tracking - Android", "owner": "", "priority": "high", "platforms": ["Android"]}, {"scope": "App Implementation", "title": "Screen tracking - iOS", "owner": "", "priority": "high", "platforms": ["iOS"]}, {"scope": "Channels - Staging", "title": "Email channel setup", "owner": "", "priority": "medium", "platforms": []}, {"scope": "Channels - Staging", "title": "SMS channel setup", "owner": "", "priority": "high", "platforms": []}, {"scope": "Channels - Staging", "title": "WhatsApp channel setup", "owner": "", "priority": "high", "platforms": []}, {"scope": "Channels - Staging", "title": "Web Push setup", "owner": "", "priority": "medium", "platforms": ["Website", "Web App"]}, {"scope": "Channels - Staging", "title": "On-site Notification setup", "owner": "", "priority": "medium", "platforms": ["Website", "Web App"]}, {"scope": "Channels - Staging", "title": "Push setup - FCM", "owner": "", "priority": "high", "platforms": ["Android"]}, {"scope": "Channels - Staging", "title": "Push setup - APNS certificate", "owner": "", "priority": "high", "platforms": ["iOS"]}, {"scope": "Channels - Staging", "title": "In-App setup", "owner": "", "priority": "high", "platforms": ["Android", "iOS"]}, {"scope": "Channels - Staging", "title": "Rich Push setup", "owner": "", "priority": "medium", "platforms": ["iOS"]}, {"scope": "REST API", "title": "Custom event API", "owner": "", "priority": "high", "platforms": ["REST API"]}, {"scope": "REST API", "title": "Backend event tracking", "owner": "", "priority": "high", "platforms": ["REST API"]}, {"scope": "REST API", "title": "Historical user data migration", "owner": "", "priority": "high", "platforms": ["REST API"]}, {"scope": "REST API", "title": "Historical event migration", "owner": "", "priority": "high", "platforms": ["REST API"]}, {"scope": "Android", "title": "Push Token Registration", "owner": "", "priority": "high", "platforms": ["Android"]}, {"scope": "Android", "title": "Firebase / FCM Setup", "owner": "", "priority": "high", "platforms": ["Android"]}, {"scope": "Android", "title": "Push Notification Setup", "owner": "", "priority": "high", "platforms": ["Android"]}, {"scope": "Android", "title": "Rich Push", "owner": "", "priority": "high", "platforms": ["Android"]}, {"scope": "Android", "title": "In-App Setup", "owner": "", "priority": "high", "platforms": ["Android"]}, {"scope": "Android", "title": "In-App Testing", "owner": "", "priority": "high", "platforms": ["Android"]}, {"scope": "Android", "title": "App Inline", "owner": "", "priority": "high", "platforms": ["Android"]}, {"scope": "iOS", "title": "Push Token Registration", "owner": "", "priority": "high", "platforms": ["iOS"]}, {"scope": "iOS", "title": "APNs Setup", "owner": "", "priority": "high", "platforms": ["iOS"]}, {"scope": "iOS", "title": "Push Notification Setup", "owner": "", "priority": "high", "platforms": ["iOS"]}, {"scope": "iOS", "title": "Rich Push", "owner": "", "priority": "high", "platforms": ["iOS"]}, {"scope": "iOS", "title": "In-App Setup", "owner": "", "priority": "high", "platforms": ["iOS"]}, {"scope": "iOS", "title": "In-App Testing", "owner": "", "priority": "high", "platforms": ["iOS"]}, {"scope": "iOS", "title": "App Inline", "owner": "", "priority": "high", "platforms": ["iOS"]}, {"scope": "Channels - Email", "title": "Email Provider Setup", "owner": "", "priority": "medium", "platforms": []}, {"scope": "Channels - SMS", "title": "SMS Provider Setup", "owner": "", "priority": "high", "platforms": []}, {"scope": "Channels - WhatsApp", "title": "WhatsApp Business Setup", "owner": "", "priority": "high", "platforms": []}, {"scope": "Channels - Push", "title": "Push Token", "owner": "", "priority": "high", "platforms": []}, {"scope": "Channels - Push", "title": "Notification Permission", "owner": "", "priority": "high", "platforms": []}, {"scope": "Channels - Push", "title": "Push Templates", "owner": "", "priority": "medium", "platforms": []}, {"scope": "Channels - Push", "title": "Rich Push", "owner": "", "priority": "medium", "platforms": []}, {"scope": "Channels - Push", "title": "Deep Links", "owner": "", "priority": "medium", "platforms": []}, {"scope": "Channels - Push", "title": "CTA", "owner": "", "priority": "medium", "platforms": []}, {"scope": "Channels - Push", "title": "Test Push", "owner": "", "priority": "medium", "platforms": []}, {"scope": "Channels - Push", "title": "Delivery Validation", "owner": "", "priority": "high", "platforms": []}, {"scope": "Channels - Web Push", "title": "Web Push Configuration", "owner": "", "priority": "medium", "platforms": []}, {"scope": "Channels - RCS", "title": "RCS Provider Setup", "owner": "", "priority": "medium", "platforms": []}, {"scope": "Channels - In-App", "title": "SDK Configuration", "owner": "", "priority": "high", "platforms": []}, {"scope": "Channels - On-site", "title": "On-site Notification", "owner": "", "priority": "medium", "platforms": []}, {"scope": "Channels - On-site", "title": "On-site Survey", "owner": "", "priority": "medium", "platforms": []}, {"scope": "Channels - On-site", "title": "On-site Feedback", "owner": "", "priority": "medium", "platforms": []}]}, {"week": 4, "label": "Audit & Templates", "tasks": [{"scope": "Staging Audit", "title": "Website audit", "owner": "", "priority": "high", "platforms": ["Website"]}, {"scope": "Staging Audit", "title": "Android app audit", "owner": "", "priority": "high", "platforms": ["Android"]}, {"scope": "Staging Audit", "title": "iOS app audit", "owner": "", "priority": "high", "platforms": ["iOS"]}, {"scope": "Staging Audit", "title": "Web App audit", "owner": "", "priority": "high", "platforms": ["Web App"]}, {"scope": "Staging Audit", "title": "Changes shared with dev team and actioned", "owner": "", "priority": "high", "platforms": []}, {"scope": "Email Warmup", "title": "Warmup content ready", "owner": "", "priority": "high", "platforms": []}, {"scope": "SMS template", "title": "Share template for provider testing", "owner": "", "priority": "high", "platforms": []}, {"scope": "WhatsApp Template", "title": "Add template on the dashboard for testing", "owner": "", "priority": "high", "platforms": []}, {"scope": "Historic Data", "title": "Historical transactional data uploaded", "owner": "", "priority": "high", "platforms": []}, {"scope": "Website", "title": "Website Testing & QA", "owner": "", "priority": "high", "platforms": ["Website"]}, {"scope": "Android", "title": "Android Testing & QA", "owner": "", "priority": "high", "platforms": ["Android"]}, {"scope": "iOS", "title": "iOS Testing & QA", "owner": "", "priority": "high", "platforms": ["iOS"]}, {"scope": "REST API", "title": "REST API testing", "owner": "", "priority": "high", "platforms": ["REST API"]}]}, {"week": 5, "label": "Production Movement", "tasks": [{"scope": "Production", "title": "Move integration to production - Website", "owner": "", "priority": "high", "platforms": ["Website"]}, {"scope": "Production", "title": "Move integration to production - Android", "owner": "", "priority": "high", "platforms": ["Android"]}, {"scope": "Production", "title": "Move integration to production - iOS", "owner": "", "priority": "high", "platforms": ["iOS"]}, {"scope": "Production", "title": "Move integration to production - Web App", "owner": "", "priority": "high", "platforms": ["Web App"]}, {"scope": "Production", "title": "Play Store release with SDK", "owner": "", "priority": "high", "platforms": ["Android"]}, {"scope": "Production", "title": "App Store release with SDK", "owner": "", "priority": "high", "platforms": ["iOS"]}, {"scope": "Production", "title": "Production testing", "owner": "", "priority": "high", "platforms": []}, {"scope": "Channels - Production", "title": "Channels enabled on production", "owner": "", "priority": "high", "platforms": []}, {"scope": "Email Warmup", "title": "Warmup journey live", "owner": "", "priority": "high", "platforms": []}, {"scope": "Production", "title": "Production API testing", "owner": "", "priority": "high", "platforms": ["REST API"]}, {"scope": "Website", "title": "Production Validation", "owner": "", "priority": "high", "platforms": ["Website"]}, {"scope": "Android", "title": "Production Validation", "owner": "", "priority": "high", "platforms": ["Android"]}, {"scope": "iOS", "title": "Production Validation", "owner": "", "priority": "high", "platforms": ["iOS"]}]}, {"week": 6, "label": "Go-Live", "tasks": [{"scope": "Go-Live", "title": "Demo dashboard walkthrough with client", "owner": "", "priority": "medium", "platforms": []}, {"scope": "Go-Live", "title": "2 or more recurring campaigns / journeys live", "owner": "", "priority": "high", "platforms": []}, {"scope": "Go-Live", "title": "Key events and attributes verified on production", "owner": "", "priority": "high", "platforms": []}, {"scope": "Go-Live", "title": "Confirmation from client on billing start", "owner": "", "priority": "high", "platforms": []}, {"scope": "Go-Live", "title": "Handover to CSM", "owner": "", "priority": "medium", "platforms": []}]}]}, "demoIndex": {"$comment": "Lists the demo datasets offered in Settings -> Demo data. Add a file here and drop the JSON alongside it to offer another demo.", "demos": [{"file": "salad-days.json", "name": "Salad Days", "description": "Real 6-week website integration: kickoff through production movement, with live blockers on SMS/WhatsApp templates and the payment gateway."}]}, "demos": {"salad-days.json": {"$comment": "Demo project generated from 'Weekly status - Salad Days.xlsx'. Loaded on demand from Settings -> Demo data. Safe to delete this file; also remove its entry from demo-data/index.json.", "name": "Salad Days", "description": "Real 6-week website integration: kickoff through production movement, with live blockers on SMS/WhatsApp templates and the payment gateway.", "source": "Weekly status - Salad Days.xlsx", "project": {"name": "Salad Days", "clientName": "Salad Days Pvt. Ltd.", "status": "current", "csm": "Stuti", "implementationOwner": "Alisha", "salesOwner": "Vikram Kapoor", "kickoffDate": "2026-04-27", "goLiveDate": "2026-06-05", "cycleWeeks": 6, "techTeam": "outsourced", "vendorName": "Devx Team", "clientPocs": [{"name": "Ajwanda", "email": "", "addedFrom": "project"}, {"name": "Alisha", "email": "", "addedFrom": "project"}, {"name": "Channel Team", "email": "", "addedFrom": "project"}, {"name": "Devx Team", "email": "", "addedFrom": "project"}, {"name": "Keshav", "email": "", "addedFrom": "project"}, {"name": "Stuti", "email": "", "addedFrom": "project"}], "platforms": ["Website"], "platformLink": "https://www.saladdays.in", "channels": ["Email", "SMS", "WhatsApp", "Web Push"], "dataRequirements": {"historicalMigration": "yes", "userIdentifier": "Phone"}, "knownBlockers": "Gupshup SMS credentials failing; Razorpay checkout migration stalled.", "dependencies": "Devx Team for SDK/backend changes; Gupshup for SMS/WhatsApp; Razorpay for checkout events.", "notes": "Website-only WebEngage integration. Phone number is the unique identifier."}, "weeks": [{"weekStart": "2026-04-27", "templateWeek": 1, "templateLabel": "Kickoff & Discovery", "statusTag": "in progress", "tasks": [{"title": "Onboarding mail thread initiated", "phase": "Kickoff call", "owner": "Stuti", "status": "completed", "date": "2026-04-27", "blocker": "", "priority": "medium", "comments": "", "subtasks": []}, {"title": "Channel form Shared", "phase": "Kickoff call", "owner": "", "status": "not started", "date": "", "blocker": "", "priority": "medium", "comments": "", "subtasks": []}, {"title": "Tech doc shared", "phase": "Kickoff call", "owner": "", "status": "not started", "date": "", "blocker": "", "priority": "medium", "comments": "", "subtasks": []}, {"title": "Website", "phase": "Tech Team connect", "owner": "Alisha", "status": "completed", "date": "2026-04-27", "blocker": "", "priority": "medium", "comments": "", "subtasks": []}, {"title": "Phone number will be the finalized unique identifier", "phase": "User Id", "owner": "Keshav", "status": "completed", "date": "2026-04-27", "blocker": "", "priority": "high", "comments": "", "subtasks": []}, {"title": "Creation of data model", "phase": "Data Model", "owner": "Ajwanda", "status": "completed", "date": "2026-04-27", "blocker": "", "priority": "high", "comments": "", "subtasks": []}, {"title": "Data model Finalisation - Website", "phase": "Data Model", "owner": "Alisha", "status": "completed", "date": "2026-04-27", "blocker": "", "priority": "high", "comments": "", "subtasks": []}]}, {"weekStart": "2026-05-04", "templateWeek": 2, "templateLabel": "Staging Setup", "statusTag": "in progress", "tasks": [{"title": "SDK setup", "phase": "Website - Staging", "owner": "Devx Team", "status": "completed", "date": "2026-05-04", "blocker": "", "priority": "high", "comments": "", "subtasks": []}, {"title": "User setup", "phase": "Website - Staging", "owner": "", "status": "not started", "date": "", "blocker": "", "priority": "high", "comments": "", "subtasks": []}, {"title": "Event setup", "phase": "Website - Staging", "owner": "", "status": "not started", "date": "", "blocker": "", "priority": "high", "comments": "", "subtasks": []}, {"title": "Email Channel form", "phase": "Channels Set Up - Staging", "owner": "Alisha", "status": "completed", "date": "2026-05-04", "blocker": "", "priority": "high", "comments": "", "subtasks": []}]}, {"weekStart": "2026-05-11", "templateWeek": 3, "templateLabel": "Channels & Integrations", "statusTag": "completed", "tasks": [{"title": "Preparation of CSV file containing historical user and transactional event data", "phase": "Historic Data", "owner": "Alisha", "status": "completed", "date": "2026-05-11", "blocker": "", "priority": "high", "comments": "", "subtasks": []}, {"title": "setup finalised on the dashboard", "phase": "Events", "owner": "Devx Team", "status": "completed", "date": "2026-05-11", "blocker": "", "priority": "high", "comments": "", "subtasks": []}, {"title": "Website Audit", "phase": "Staging Audit", "owner": "Ajwanda", "status": "completed", "date": "2026-05-11", "blocker": "", "priority": "high", "comments": "", "subtasks": []}, {"title": "Email Channel - WE", "phase": "Channels Set Up - Staging", "owner": "Channel Team", "status": "completed", "date": "2026-05-11", "blocker": "", "priority": "medium", "comments": "", "subtasks": []}, {"title": "SMS channel - Gupshup", "phase": "Channels Set Up - Staging", "owner": "Alisha", "status": "completed", "date": "2026-05-11", "blocker": "", "priority": "high", "comments": "", "subtasks": []}, {"title": "Whatsapp Channel - Gupshup", "phase": "Channels Set Up - Staging", "owner": "Alisha", "status": "completed", "date": "2026-05-11", "blocker": "", "priority": "high", "comments": "", "subtasks": []}, {"title": "WebPush Channel", "phase": "Channels Set Up - Staging", "owner": "Devx Team", "status": "completed", "date": "2026-05-11", "blocker": "", "priority": "medium", "comments": "", "subtasks": []}, {"title": "Setup a call with team, and initiased the mail thread", "phase": "Razorpay", "owner": "Alisha", "status": "completed", "date": "2026-05-11", "blocker": "", "priority": "high", "comments": "", "subtasks": []}]}, {"weekStart": "2026-05-18", "templateWeek": 4, "templateLabel": "Audit & Templates", "statusTag": "blocked", "tasks": [{"title": "Preparation of CSV file containing historical transactional event data", "phase": "Historic Data", "owner": "Alisha", "status": "blocked", "date": "", "blocker": "Cluttered data", "priority": "high", "comments": "", "subtasks": []}, {"title": "Changes shared by webengage team, devx team to work on it.", "phase": "Staging audit", "owner": "Devx Team", "status": "completed", "date": "2026-05-18", "blocker": "", "priority": "high", "comments": "", "subtasks": []}, {"title": "Content ready", "phase": "Email Warmup", "owner": "Alisha", "status": "delayed", "date": "", "blocker": "", "priority": "high", "comments": "", "subtasks": []}, {"title": "share template to test Gupshup", "phase": "SMS template", "owner": "Alisha", "status": "completed", "date": "2026-05-18", "blocker": "", "priority": "high", "comments": "", "subtasks": []}, {"title": "Add template on the dashboard to test Gupshup", "phase": "Whatsapp Template", "owner": "Alisha", "status": "completed", "date": "2026-05-18", "blocker": "", "priority": "high", "comments": "", "subtasks": []}, {"title": "Moving from standard checkout to Razorpay Magic checkout", "phase": "Razorpay", "owner": "Alisha", "status": "blocked", "date": "", "blocker": "Razorpay team is not responding", "priority": "high", "comments": "", "subtasks": []}]}, {"weekStart": "2026-05-25", "templateWeek": 5, "templateLabel": "Carry-overs & Fixes", "statusTag": "in progress", "tasks": [{"title": "Preparation of CSV file containing historical transactional event data", "phase": "Historic Data", "owner": "Alisha", "status": "delayed", "date": "", "blocker": "", "priority": "high", "comments": "", "subtasks": []}, {"title": "Devx team shared confirmation on the open pointers; WebEngage team will perform the audit", "phase": "Staging audit", "owner": "Ajwanda", "status": "completed", "date": "2026-05-25", "blocker": "27th May", "priority": "high", "comments": "", "subtasks": []}, {"title": "Content ready", "phase": "Email Warmup", "owner": "Alisha", "status": "delayed", "date": "", "blocker": "", "priority": "high", "comments": "", "subtasks": []}, {"title": "Gupshup updated the Credentials", "phase": "SMS template", "owner": "Alisha", "status": "delayed", "date": "", "blocker": "", "priority": "high", "comments": "", "subtasks": []}, {"title": "Gupshup updated the Credentials", "phase": "Whatsapp Template", "owner": "", "status": "delayed", "date": "", "blocker": "", "priority": "high", "comments": "", "subtasks": []}, {"title": "Will continue with the Standard Checkout, for which we will connect with the Devx Team for the setup", "phase": "Razorpay", "owner": "Ajwanda", "status": "completed", "date": "2026-05-25", "blocker": "27th May", "priority": "high", "comments": "", "subtasks": []}]}, {"weekStart": "2026-06-01", "templateWeek": 6, "templateLabel": "Production Movement", "statusTag": "not started", "tasks": [{"title": "Preparation of CSV file containing historical transactional event data", "phase": "Historic Data", "owner": "Alisha", "status": "not started", "date": "", "blocker": "", "priority": "high", "comments": "Alisha will work on cleaning the cluttered data and then upload it to the dashboard. We need to complete this by Wednesday.", "subtasks": []}, {"title": "Will move the integration on production by 2nd june", "phase": "Production Movement", "owner": "Devx Team", "status": "not started", "date": "", "blocker": "", "priority": "high", "comments": "Dependence on the code base.", "subtasks": []}, {"title": "Content ready", "phase": "Email Warmup", "owner": "Alisha", "status": "not started", "date": "", "blocker": "", "priority": "high", "comments": "Will make it Live by 2nd June.", "subtasks": []}, {"title": "Connect with gupshup support team", "phase": "SMS template", "owner": "Alisha", "status": "not started", "date": "", "blocker": "", "priority": "high", "comments": "Gupshup support ticket has been raised. Please take this on priority.", "subtasks": []}, {"title": "Connect with gupshup support team", "phase": "Whatsapp Template", "owner": "", "status": "not started", "date": "", "blocker": "", "priority": "high", "comments": "", "subtasks": []}, {"title": "DevX Team will implement the events from backend.", "phase": "Razorpay", "owner": "Devx Team", "status": "not started", "date": "", "blocker": "", "priority": "high", "comments": "", "subtasks": []}]}]}}};</script>
+    <script>window.__BUNDLED_DATA__ = {"supabaseConfig": {"$comment": "Paste your Supabase project URL and anon (public) key here, then reload. Leave them empty to keep the app in local-only mode with no login. Find both in Supabase -> Project Settings -> API. The anon key is safe in client code; row-level security is what protects the data. Sign-in is Google only, so also enable Authentication -> Providers -> Google.", "url": "", "anonKey": ""}, "rolesConfig": {"$comment": "Who may sign in, and as what. firstName and lastName are separate fields, each without spaces. Passwords are stored as SHA-256 hashes, never plaintext — generate one with tools/hash-password.py or from Settings -> Users & Roles. This is a demo gate, not real security: the check runs in the browser.", "allowedDomain": "webengage.com", "requireLogin": true, "passwordPolicy": {"minLength": 10, "requireUppercase": true, "requireLowercase": true, "requireNumber": true, "requireSymbol": true}, "users": [{"email": "stuti.khare@webengage.com", "firstName": "Stuti", "lastName": "Khare", "role": "admin", "passwordHash": "e89f0e0f77c934974dcbc69c702dce140298911b57d30bc58045c8c18bbacef1"}]}, "weekTemplates": {"$comment": "Master week-wise plan. `platforms` scopes a task to the platforms a project selected; an empty list means the task applies to every project. Platforms: Website, Web App, Android, iOS, REST API. Edit here, then use Templates -> Reload from file.", "weeks": [{"week": 1, "label": "Kickoff & Discovery", "tasks": [{"scope": "Kickoff call", "title": "Onboarding mail thread initiated", "owner": "", "priority": "medium", "platforms": []}, {"scope": "Kickoff call", "title": "Channel form", "owner": "", "priority": "medium", "platforms": []}, {"scope": "Kickoff call", "title": "Tech doc", "owner": "", "priority": "medium", "platforms": []}, {"scope": "Kickoff call", "title": "Scope of Work", "owner": "", "priority": "medium", "platforms": []}, {"scope": "Tech Team connect", "title": "Tech team connect - Website", "owner": "", "priority": "high", "platforms": ["Website"]}, {"scope": "Tech Team connect", "title": "Tech team connect - Android", "owner": "", "priority": "high", "platforms": ["Android"]}, {"scope": "Tech Team connect", "title": "Tech team connect - iOS", "owner": "", "priority": "high", "platforms": ["iOS"]}, {"scope": "Tech Team connect", "title": "Tech team connect - Web App", "owner": "", "priority": "high", "platforms": ["Web App"]}, {"scope": "Tech Team connect", "title": "Tech team connect - REST API", "owner": "", "priority": "high", "platforms": ["REST API"]}, {"scope": "User Id", "title": "Finalise the unique user identifier", "owner": "", "priority": "high", "platforms": []}, {"scope": "Data Model", "title": "Data model - Website", "owner": "", "priority": "high", "platforms": ["Website"]}, {"scope": "Data Model", "title": "Data model - Android", "owner": "", "priority": "high", "platforms": ["Android"]}, {"scope": "Data Model", "title": "Data model - iOS", "owner": "", "priority": "high", "platforms": ["iOS"]}, {"scope": "Data Model", "title": "Data model - Web App", "owner": "", "priority": "high", "platforms": ["Web App"]}, {"scope": "Data Model", "title": "Data model - REST API", "owner": "", "priority": "high", "platforms": ["REST API"]}]}, {"week": 2, "label": "Staging Setup", "tasks": [{"scope": "Data Model", "title": "Data model finalisation & sign-off", "owner": "", "priority": "high", "platforms": []}, {"scope": "Staging", "title": "SDK setup - Website", "owner": "", "priority": "high", "platforms": ["Website"]}, {"scope": "Staging", "title": "SDK setup - Android", "owner": "", "priority": "high", "platforms": ["Android"]}, {"scope": "Staging", "title": "SDK setup - iOS", "owner": "", "priority": "high", "platforms": ["iOS"]}, {"scope": "Staging", "title": "SDK setup - Web App", "owner": "", "priority": "high", "platforms": ["Web App"]}, {"scope": "Staging", "title": "User tracking setup - Website", "owner": "", "priority": "high", "platforms": ["Website"]}, {"scope": "Staging", "title": "User tracking setup - Android", "owner": "", "priority": "high", "platforms": ["Android"]}, {"scope": "Staging", "title": "User tracking setup - iOS", "owner": "", "priority": "high", "platforms": ["iOS"]}, {"scope": "Staging", "title": "User tracking setup - Web App", "owner": "", "priority": "high", "platforms": ["Web App"]}, {"scope": "Historic Data", "title": "Preparation of CSV containing historical user and transactional data", "owner": "", "priority": "high", "platforms": []}, {"scope": "Website", "title": "User Identification", "owner": "", "priority": "high", "platforms": ["Website"]}, {"scope": "Website", "title": "User Attributes", "owner": "", "priority": "high", "platforms": ["Website"]}, {"scope": "Website", "title": "Custom Events", "owner": "", "priority": "high", "platforms": ["Website"]}, {"scope": "Website", "title": "Event Attributes", "owner": "", "priority": "high", "platforms": ["Website"]}, {"scope": "Website", "title": "Login / Logout", "owner": "", "priority": "high", "platforms": ["Website"]}, {"scope": "Website", "title": "Signup", "owner": "", "priority": "high", "platforms": ["Website"]}, {"scope": "Android", "title": "SDK Initialization", "owner": "", "priority": "high", "platforms": ["Android"]}, {"scope": "Android", "title": "User Identification", "owner": "", "priority": "high", "platforms": ["Android"]}, {"scope": "Android", "title": "User Attributes", "owner": "", "priority": "high", "platforms": ["Android"]}, {"scope": "Android", "title": "Custom Events", "owner": "", "priority": "high", "platforms": ["Android"]}, {"scope": "Android", "title": "Event Attributes", "owner": "", "priority": "high", "platforms": ["Android"]}, {"scope": "Android", "title": "Login / Logout", "owner": "", "priority": "high", "platforms": ["Android"]}, {"scope": "Android", "title": "Signup", "owner": "", "priority": "high", "platforms": ["Android"]}, {"scope": "iOS", "title": "SDK Initialization", "owner": "", "priority": "high", "platforms": ["iOS"]}, {"scope": "iOS", "title": "User Identification", "owner": "", "priority": "high", "platforms": ["iOS"]}, {"scope": "iOS", "title": "User Attributes", "owner": "", "priority": "high", "platforms": ["iOS"]}, {"scope": "iOS", "title": "Custom Events", "owner": "", "priority": "high", "platforms": ["iOS"]}, {"scope": "iOS", "title": "Event Attributes", "owner": "", "priority": "high", "platforms": ["iOS"]}, {"scope": "iOS", "title": "Login / Logout", "owner": "", "priority": "high", "platforms": ["iOS"]}, {"scope": "iOS", "title": "Signup", "owner": "", "priority": "high", "platforms": ["iOS"]}, {"scope": "REST API", "title": "API authentication", "owner": "", "priority": "high", "platforms": ["REST API"]}, {"scope": "REST API", "title": "API key configuration", "owner": "", "priority": "high", "platforms": ["REST API"]}, {"scope": "REST API", "title": "User creation / update", "owner": "", "priority": "high", "platforms": ["REST API"]}, {"scope": "REST API", "title": "User attribute updates", "owner": "", "priority": "high", "platforms": ["REST API"]}, {"scope": "REST API", "title": "User identification", "owner": "", "priority": "high", "platforms": ["REST API"]}]}, {"week": 3, "label": "Event Tracking & Channels", "tasks": [{"scope": "Staging", "title": "Event tracking setup - Website", "owner": "", "priority": "high", "platforms": ["Website"]}, {"scope": "Staging", "title": "Event tracking setup - Android", "owner": "", "priority": "high", "platforms": ["Android"]}, {"scope": "Staging", "title": "Event tracking setup - iOS", "owner": "", "priority": "high", "platforms": ["iOS"]}, {"scope": "Staging", "title": "Event tracking setup - Web App", "owner": "", "priority": "high", "platforms": ["Web App"]}, {"scope": "App Implementation", "title": "Screen tracking - Android", "owner": "", "priority": "high", "platforms": ["Android"]}, {"scope": "App Implementation", "title": "Screen tracking - iOS", "owner": "", "priority": "high", "platforms": ["iOS"]}, {"scope": "Channels - Staging", "title": "Email channel setup", "owner": "", "priority": "medium", "platforms": []}, {"scope": "Channels - Staging", "title": "SMS channel setup", "owner": "", "priority": "high", "platforms": []}, {"scope": "Channels - Staging", "title": "WhatsApp channel setup", "owner": "", "priority": "high", "platforms": []}, {"scope": "Channels - Staging", "title": "Web Push setup", "owner": "", "priority": "medium", "platforms": ["Website", "Web App"]}, {"scope": "Channels - Staging", "title": "On-site Notification setup", "owner": "", "priority": "medium", "platforms": ["Website", "Web App"]}, {"scope": "Channels - Staging", "title": "Push setup - FCM", "owner": "", "priority": "high", "platforms": ["Android"]}, {"scope": "Channels - Staging", "title": "Push setup - APNS certificate", "owner": "", "priority": "high", "platforms": ["iOS"]}, {"scope": "Channels - Staging", "title": "In-App setup", "owner": "", "priority": "high", "platforms": ["Android", "iOS"]}, {"scope": "Channels - Staging", "title": "Rich Push setup", "owner": "", "priority": "medium", "platforms": ["iOS"]}, {"scope": "REST API", "title": "Custom event API", "owner": "", "priority": "high", "platforms": ["REST API"]}, {"scope": "REST API", "title": "Backend event tracking", "owner": "", "priority": "high", "platforms": ["REST API"]}, {"scope": "REST API", "title": "Historical user data migration", "owner": "", "priority": "high", "platforms": ["REST API"]}, {"scope": "REST API", "title": "Historical event migration", "owner": "", "priority": "high", "platforms": ["REST API"]}, {"scope": "Android", "title": "Push Token Registration", "owner": "", "priority": "high", "platforms": ["Android"]}, {"scope": "Android", "title": "Firebase / FCM Setup", "owner": "", "priority": "high", "platforms": ["Android"]}, {"scope": "Android", "title": "Push Notification Setup", "owner": "", "priority": "high", "platforms": ["Android"]}, {"scope": "Android", "title": "Rich Push", "owner": "", "priority": "high", "platforms": ["Android"]}, {"scope": "Android", "title": "In-App Setup", "owner": "", "priority": "high", "platforms": ["Android"]}, {"scope": "Android", "title": "In-App Testing", "owner": "", "priority": "high", "platforms": ["Android"]}, {"scope": "Android", "title": "App Inline", "owner": "", "priority": "high", "platforms": ["Android"]}, {"scope": "iOS", "title": "Push Token Registration", "owner": "", "priority": "high", "platforms": ["iOS"]}, {"scope": "iOS", "title": "APNs Setup", "owner": "", "priority": "high", "platforms": ["iOS"]}, {"scope": "iOS", "title": "Push Notification Setup", "owner": "", "priority": "high", "platforms": ["iOS"]}, {"scope": "iOS", "title": "Rich Push", "owner": "", "priority": "high", "platforms": ["iOS"]}, {"scope": "iOS", "title": "In-App Setup", "owner": "", "priority": "high", "platforms": ["iOS"]}, {"scope": "iOS", "title": "In-App Testing", "owner": "", "priority": "high", "platforms": ["iOS"]}, {"scope": "iOS", "title": "App Inline", "owner": "", "priority": "high", "platforms": ["iOS"]}, {"scope": "Channels - Email", "title": "Email Provider Setup", "owner": "", "priority": "medium", "platforms": []}, {"scope": "Channels - SMS", "title": "SMS Provider Setup", "owner": "", "priority": "high", "platforms": []}, {"scope": "Channels - WhatsApp", "title": "WhatsApp Business Setup", "owner": "", "priority": "high", "platforms": []}, {"scope": "Channels - Push", "title": "Push Token", "owner": "", "priority": "high", "platforms": []}, {"scope": "Channels - Push", "title": "Notification Permission", "owner": "", "priority": "high", "platforms": []}, {"scope": "Channels - Push", "title": "Push Templates", "owner": "", "priority": "medium", "platforms": []}, {"scope": "Channels - Push", "title": "Rich Push", "owner": "", "priority": "medium", "platforms": []}, {"scope": "Channels - Push", "title": "Deep Links", "owner": "", "priority": "medium", "platforms": []}, {"scope": "Channels - Push", "title": "CTA", "owner": "", "priority": "medium", "platforms": []}, {"scope": "Channels - Push", "title": "Test Push", "owner": "", "priority": "medium", "platforms": []}, {"scope": "Channels - Push", "title": "Delivery Validation", "owner": "", "priority": "high", "platforms": []}, {"scope": "Channels - Web Push", "title": "Web Push Configuration", "owner": "", "priority": "medium", "platforms": []}, {"scope": "Channels - RCS", "title": "RCS Provider Setup", "owner": "", "priority": "medium", "platforms": []}, {"scope": "Channels - In-App", "title": "SDK Configuration", "owner": "", "priority": "high", "platforms": []}, {"scope": "Channels - On-site", "title": "On-site Notification", "owner": "", "priority": "medium", "platforms": []}, {"scope": "Channels - On-site", "title": "On-site Survey", "owner": "", "priority": "medium", "platforms": []}, {"scope": "Channels - On-site", "title": "On-site Feedback", "owner": "", "priority": "medium", "platforms": []}]}, {"week": 4, "label": "Audit & Templates", "tasks": [{"scope": "Staging Audit", "title": "Website audit", "owner": "", "priority": "high", "platforms": ["Website"]}, {"scope": "Staging Audit", "title": "Android app audit", "owner": "", "priority": "high", "platforms": ["Android"]}, {"scope": "Staging Audit", "title": "iOS app audit", "owner": "", "priority": "high", "platforms": ["iOS"]}, {"scope": "Staging Audit", "title": "Web App audit", "owner": "", "priority": "high", "platforms": ["Web App"]}, {"scope": "Staging Audit", "title": "Changes shared with dev team and actioned", "owner": "", "priority": "high", "platforms": []}, {"scope": "Email Warmup", "title": "Warmup content ready", "owner": "", "priority": "high", "platforms": []}, {"scope": "SMS template", "title": "Share template for provider testing", "owner": "", "priority": "high", "platforms": []}, {"scope": "WhatsApp Template", "title": "Add template on the dashboard for testing", "owner": "", "priority": "high", "platforms": []}, {"scope": "Historic Data", "title": "Historical transactional data uploaded", "owner": "", "priority": "high", "platforms": []}, {"scope": "Website", "title": "Website Testing & QA", "owner": "", "priority": "high", "platforms": ["Website"]}, {"scope": "Android", "title": "Android Testing & QA", "owner": "", "priority": "high", "platforms": ["Android"]}, {"scope": "iOS", "title": "iOS Testing & QA", "owner": "", "priority": "high", "platforms": ["iOS"]}, {"scope": "REST API", "title": "REST API testing", "owner": "", "priority": "high", "platforms": ["REST API"]}]}, {"week": 5, "label": "Production Movement", "tasks": [{"scope": "Production", "title": "Move integration to production - Website", "owner": "", "priority": "high", "platforms": ["Website"]}, {"scope": "Production", "title": "Move integration to production - Android", "owner": "", "priority": "high", "platforms": ["Android"]}, {"scope": "Production", "title": "Move integration to production - iOS", "owner": "", "priority": "high", "platforms": ["iOS"]}, {"scope": "Production", "title": "Move integration to production - Web App", "owner": "", "priority": "high", "platforms": ["Web App"]}, {"scope": "Production", "title": "Play Store release with SDK", "owner": "", "priority": "high", "platforms": ["Android"]}, {"scope": "Production", "title": "App Store release with SDK", "owner": "", "priority": "high", "platforms": ["iOS"]}, {"scope": "Production", "title": "Production testing", "owner": "", "priority": "high", "platforms": []}, {"scope": "Channels - Production", "title": "Channels enabled on production", "owner": "", "priority": "high", "platforms": []}, {"scope": "Email Warmup", "title": "Warmup journey live", "owner": "", "priority": "high", "platforms": []}, {"scope": "Production", "title": "Production API testing", "owner": "", "priority": "high", "platforms": ["REST API"]}, {"scope": "Website", "title": "Production Validation", "owner": "", "priority": "high", "platforms": ["Website"]}, {"scope": "Android", "title": "Production Validation", "owner": "", "priority": "high", "platforms": ["Android"]}, {"scope": "iOS", "title": "Production Validation", "owner": "", "priority": "high", "platforms": ["iOS"]}]}, {"week": 6, "label": "Go-Live", "tasks": [{"scope": "Go-Live", "title": "Demo dashboard walkthrough with client", "owner": "", "priority": "medium", "platforms": []}, {"scope": "Go-Live", "title": "2 or more recurring campaigns / journeys live", "owner": "", "priority": "high", "platforms": []}, {"scope": "Go-Live", "title": "Key events and attributes verified on production", "owner": "", "priority": "high", "platforms": []}, {"scope": "Go-Live", "title": "Confirmation from client on billing start", "owner": "", "priority": "high", "platforms": []}, {"scope": "Go-Live", "title": "Handover to CSM", "owner": "", "priority": "medium", "platforms": []}]}]}, "demoIndex": {"$comment": "Lists the demo datasets offered in Settings -> Demo data. Add a file here and drop the JSON alongside it to offer another demo.", "demos": [{"file": "salad-days.json", "name": "Salad Days", "description": "Real 6-week website integration: kickoff through production movement, with live blockers on SMS/WhatsApp templates and the payment gateway."}]}, "demos": {"salad-days.json": {"$comment": "Demo project generated from 'Weekly status - Salad Days.xlsx'. Loaded on demand from Settings -> Demo data. Safe to delete this file; also remove its entry from demo-data/index.json.", "name": "Salad Days", "description": "Real 6-week website integration: kickoff through production movement, with live blockers on SMS/WhatsApp templates and the payment gateway.", "source": "Weekly status - Salad Days.xlsx", "project": {"name": "Salad Days", "clientName": "Salad Days Pvt. Ltd.", "status": "current", "csm": "Stuti", "implementationOwner": "Alisha", "salesOwner": "Vikram Kapoor", "kickoffDate": "2026-04-27", "goLiveDate": "2026-06-05", "cycleWeeks": 6, "techTeam": "outsourced", "vendorName": "Devx Team", "clientPocs": [{"name": "Ajwanda", "email": "", "addedFrom": "project"}, {"name": "Alisha", "email": "", "addedFrom": "project"}, {"name": "Channel Team", "email": "", "addedFrom": "project"}, {"name": "Devx Team", "email": "", "addedFrom": "project"}, {"name": "Keshav", "email": "", "addedFrom": "project"}, {"name": "Stuti", "email": "", "addedFrom": "project"}], "platforms": ["Website"], "platformLink": "https://www.saladdays.in", "channels": ["Email", "SMS", "WhatsApp", "Web Push"], "dataRequirements": {"historicalMigration": "yes", "userIdentifier": "Phone"}, "knownBlockers": "Gupshup SMS credentials failing; Razorpay checkout migration stalled.", "dependencies": "Devx Team for SDK/backend changes; Gupshup for SMS/WhatsApp; Razorpay for checkout events.", "notes": "Website-only WebEngage integration. Phone number is the unique identifier."}, "weeks": [{"weekStart": "2026-04-27", "templateWeek": 1, "templateLabel": "Kickoff & Discovery", "statusTag": "in progress", "tasks": [{"title": "Onboarding mail thread initiated", "phase": "Kickoff call", "owner": "Stuti", "status": "completed", "date": "2026-04-27", "blocker": "", "priority": "medium", "comments": "", "subtasks": []}, {"title": "Channel form Shared", "phase": "Kickoff call", "owner": "", "status": "not started", "date": "", "blocker": "", "priority": "medium", "comments": "", "subtasks": []}, {"title": "Tech doc shared", "phase": "Kickoff call", "owner": "", "status": "not started", "date": "", "blocker": "", "priority": "medium", "comments": "", "subtasks": []}, {"title": "Website", "phase": "Tech Team connect", "owner": "Alisha", "status": "completed", "date": "2026-04-27", "blocker": "", "priority": "medium", "comments": "", "subtasks": []}, {"title": "Phone number will be the finalized unique identifier", "phase": "User Id", "owner": "Keshav", "status": "completed", "date": "2026-04-27", "blocker": "", "priority": "high", "comments": "", "subtasks": []}, {"title": "Creation of data model", "phase": "Data Model", "owner": "Ajwanda", "status": "completed", "date": "2026-04-27", "blocker": "", "priority": "high", "comments": "", "subtasks": []}, {"title": "Data model Finalisation - Website", "phase": "Data Model", "owner": "Alisha", "status": "completed", "date": "2026-04-27", "blocker": "", "priority": "high", "comments": "", "subtasks": []}]}, {"weekStart": "2026-05-04", "templateWeek": 2, "templateLabel": "Staging Setup", "statusTag": "in progress", "tasks": [{"title": "SDK setup", "phase": "Website - Staging", "owner": "Devx Team", "status": "completed", "date": "2026-05-04", "blocker": "", "priority": "high", "comments": "", "subtasks": []}, {"title": "User setup", "phase": "Website - Staging", "owner": "", "status": "not started", "date": "", "blocker": "", "priority": "high", "comments": "", "subtasks": []}, {"title": "Event setup", "phase": "Website - Staging", "owner": "", "status": "not started", "date": "", "blocker": "", "priority": "high", "comments": "", "subtasks": []}, {"title": "Email Channel form", "phase": "Channels Set Up - Staging", "owner": "Alisha", "status": "completed", "date": "2026-05-04", "blocker": "", "priority": "high", "comments": "", "subtasks": []}]}, {"weekStart": "2026-05-11", "templateWeek": 3, "templateLabel": "Channels & Integrations", "statusTag": "completed", "tasks": [{"title": "Preparation of CSV file containing historical user and transactional event data", "phase": "Historic Data", "owner": "Alisha", "status": "completed", "date": "2026-05-11", "blocker": "", "priority": "high", "comments": "", "subtasks": []}, {"title": "setup finalised on the dashboard", "phase": "Events", "owner": "Devx Team", "status": "completed", "date": "2026-05-11", "blocker": "", "priority": "high", "comments": "", "subtasks": []}, {"title": "Website Audit", "phase": "Staging Audit", "owner": "Ajwanda", "status": "completed", "date": "2026-05-11", "blocker": "", "priority": "high", "comments": "", "subtasks": []}, {"title": "Email Channel - WE", "phase": "Channels Set Up - Staging", "owner": "Channel Team", "status": "completed", "date": "2026-05-11", "blocker": "", "priority": "medium", "comments": "", "subtasks": []}, {"title": "SMS channel - Gupshup", "phase": "Channels Set Up - Staging", "owner": "Alisha", "status": "completed", "date": "2026-05-11", "blocker": "", "priority": "high", "comments": "", "subtasks": []}, {"title": "Whatsapp Channel - Gupshup", "phase": "Channels Set Up - Staging", "owner": "Alisha", "status": "completed", "date": "2026-05-11", "blocker": "", "priority": "high", "comments": "", "subtasks": []}, {"title": "WebPush Channel", "phase": "Channels Set Up - Staging", "owner": "Devx Team", "status": "completed", "date": "2026-05-11", "blocker": "", "priority": "medium", "comments": "", "subtasks": []}, {"title": "Setup a call with team, and initiased the mail thread", "phase": "Razorpay", "owner": "Alisha", "status": "completed", "date": "2026-05-11", "blocker": "", "priority": "high", "comments": "", "subtasks": []}]}, {"weekStart": "2026-05-18", "templateWeek": 4, "templateLabel": "Audit & Templates", "statusTag": "blocked", "tasks": [{"title": "Preparation of CSV file containing historical transactional event data", "phase": "Historic Data", "owner": "Alisha", "status": "blocked", "date": "", "blocker": "Cluttered data", "priority": "high", "comments": "", "subtasks": []}, {"title": "Changes shared by webengage team, devx team to work on it.", "phase": "Staging audit", "owner": "Devx Team", "status": "completed", "date": "2026-05-18", "blocker": "", "priority": "high", "comments": "", "subtasks": []}, {"title": "Content ready", "phase": "Email Warmup", "owner": "Alisha", "status": "delayed", "date": "", "blocker": "", "priority": "high", "comments": "", "subtasks": []}, {"title": "share template to test Gupshup", "phase": "SMS template", "owner": "Alisha", "status": "completed", "date": "2026-05-18", "blocker": "", "priority": "high", "comments": "", "subtasks": []}, {"title": "Add template on the dashboard to test Gupshup", "phase": "Whatsapp Template", "owner": "Alisha", "status": "completed", "date": "2026-05-18", "blocker": "", "priority": "high", "comments": "", "subtasks": []}, {"title": "Moving from standard checkout to Razorpay Magic checkout", "phase": "Razorpay", "owner": "Alisha", "status": "blocked", "date": "", "blocker": "Razorpay team is not responding", "priority": "high", "comments": "", "subtasks": []}]}, {"weekStart": "2026-05-25", "templateWeek": 5, "templateLabel": "Carry-overs & Fixes", "statusTag": "in progress", "tasks": [{"title": "Preparation of CSV file containing historical transactional event data", "phase": "Historic Data", "owner": "Alisha", "status": "delayed", "date": "", "blocker": "", "priority": "high", "comments": "", "subtasks": []}, {"title": "Devx team shared confirmation on the open pointers; WebEngage team will perform the audit", "phase": "Staging audit", "owner": "Ajwanda", "status": "completed", "date": "2026-05-25", "blocker": "27th May", "priority": "high", "comments": "", "subtasks": []}, {"title": "Content ready", "phase": "Email Warmup", "owner": "Alisha", "status": "delayed", "date": "", "blocker": "", "priority": "high", "comments": "", "subtasks": []}, {"title": "Gupshup updated the Credentials", "phase": "SMS template", "owner": "Alisha", "status": "delayed", "date": "", "blocker": "", "priority": "high", "comments": "", "subtasks": []}, {"title": "Gupshup updated the Credentials", "phase": "Whatsapp Template", "owner": "", "status": "delayed", "date": "", "blocker": "", "priority": "high", "comments": "", "subtasks": []}, {"title": "Will continue with the Standard Checkout, for which we will connect with the Devx Team for the setup", "phase": "Razorpay", "owner": "Ajwanda", "status": "completed", "date": "2026-05-25", "blocker": "27th May", "priority": "high", "comments": "", "subtasks": []}]}, {"weekStart": "2026-06-01", "templateWeek": 6, "templateLabel": "Production Movement", "statusTag": "not started", "tasks": [{"title": "Preparation of CSV file containing historical transactional event data", "phase": "Historic Data", "owner": "Alisha", "status": "not started", "date": "", "blocker": "", "priority": "high", "comments": "Alisha will work on cleaning the cluttered data and then upload it to the dashboard. We need to complete this by Wednesday.", "subtasks": []}, {"title": "Will move the integration on production by 2nd june", "phase": "Production Movement", "owner": "Devx Team", "status": "not started", "date": "", "blocker": "", "priority": "high", "comments": "Dependence on the code base.", "subtasks": []}, {"title": "Content ready", "phase": "Email Warmup", "owner": "Alisha", "status": "not started", "date": "", "blocker": "", "priority": "high", "comments": "Will make it Live by 2nd June.", "subtasks": []}, {"title": "Connect with gupshup support team", "phase": "SMS template", "owner": "Alisha", "status": "not started", "date": "", "blocker": "", "priority": "high", "comments": "Gupshup support ticket has been raised. Please take this on priority.", "subtasks": []}, {"title": "Connect with gupshup support team", "phase": "Whatsapp Template", "owner": "", "status": "not started", "date": "", "blocker": "", "priority": "high", "comments": "", "subtasks": []}, {"title": "DevX Team will implement the events from backend.", "phase": "Razorpay", "owner": "Devx Team", "status": "not started", "date": "", "blocker": "", "priority": "high", "comments": "", "subtasks": []}]}]}}};</script>
     <script>
 const LEGACY_STORAGE_KEY = "multi-project-weekly-dashboard";
 const USER_DATA_PREFIX = "multi-project-dashboard-state:";
@@ -3506,34 +3585,42 @@ const TASK_TEMPLATES = [
    sheet there pairs a completed table with a "This Week" table, both grouped by an
    "Integration Scope" column. That scope maps onto a task's `phase` field here.
    This is only the SEED — the editable copy lives in state.weekTemplates (Templates screen). */
-const ROLES = ["admin", "manager", "member", "viewer"];
+const ROLES = ["admin", "viewer"];
 
 const ROLE_LABELS = {
   admin: "Admin",
-  manager: "Manager",
-  member: "Member",
   viewer: "Viewer",
 };
 
 const ROLE_DESCRIPTIONS = {
-  admin: "Everything, plus managing users and roles.",
-  manager: "Create and delete projects, edit the master template, manage teams.",
-  member: "Create and edit weekly reports. Cannot delete projects or edit templates.",
-  viewer: "Read-only. Can generate and export reports.",
+  admin: "Full access — projects, reports, templates, teams, data and user roles.",
+  viewer: "Read-only. Can browse projects and generate or export reports, but change nothing.",
 };
 
+/* Two roles: Admin does everything, Viewer changes nothing. Every mutating capability is
+   admin-only. Viewing, generating and exporting reports need no permission and so are not
+   listed here. */
 const PERMISSIONS = {
-  "project.create": ["admin", "manager"],
-  "project.delete": ["admin", "manager"],
-  "project.edit": ["admin", "manager", "member"],
-  "report.create": ["admin", "manager", "member"],
-  "report.edit": ["admin", "manager", "member"],
-  "report.delete": ["admin", "manager"],
-  "template.edit": ["admin", "manager"],
-  "team.manage": ["admin", "manager"],
+  "project.create": ["admin"],
+  "project.delete": ["admin"],
+  "project.edit": ["admin"],
+  "report.create": ["admin"],
+  "report.edit": ["admin"],
+  "report.delete": ["admin"],
+  "template.edit": ["admin"],
+  "team.manage": ["admin"],
   "data.manage": ["admin"],
   "users.manage": ["admin"],
 };
+
+/* Loaded from roles-config.json at boot; these are the fallbacks if the file is missing. */
+let rolesConfig = {
+  allowedDomain: "webengage.com",
+  requireLogin: true,
+  passwordPolicy: { minLength: 10, requireUppercase: true, requireLowercase: true, requireNumber: true, requireSymbol: true },
+  users: [],
+};
+let currentSession = null;
 
 /* Read by debugLog() from anywhere, so it must be module-level, not inside boot(). */
 const DEBUG_LOG = [];
@@ -3735,6 +3822,7 @@ const nodes = {
   userWidget: document.getElementById("userWidget"),
   userDropdown: document.getElementById("userDropdown"),
   userDropdownSettingsLink: document.getElementById("userDropdownSettingsLink"),
+  userDropdownSignOut: document.getElementById("userDropdownSignOut"),
 
   sidebarAddProject: document.getElementById("sidebarAddProject"),
 
@@ -3794,7 +3882,10 @@ const nodes = {
   authTitle: document.getElementById("authTitle"),
   authIntro: document.getElementById("authIntro"),
   authError: document.getElementById("authError"),
-  authGoogle: document.getElementById("authGoogle"),
+  authEmail: document.getElementById("authEmail"),
+  authPassword: document.getElementById("authPassword"),
+  authHint: document.getElementById("authHint"),
+  authForm: document.getElementById("authForm"),
   authLocalNote: document.getElementById("authLocalNote"),
 
   debugPanel: document.getElementById("debugPanel"),
@@ -3876,6 +3967,15 @@ const nodes = {
   settingsDataStats: document.getElementById("settingsDataStats"),
   settingsAccount: document.getElementById("settingsAccount"),
   settingsRoles: document.getElementById("settingsRoles"),
+  settingsPasswordBlock: document.getElementById("settingsPasswordBlock"),
+  passwordForm: document.getElementById("passwordForm"),
+  pwCurrent: document.getElementById("pwCurrent"),
+  pwNew: document.getElementById("pwNew"),
+  pwConfirm: document.getElementById("pwConfirm"),
+  pwError: document.getElementById("pwError"),
+  pwResult: document.getElementById("pwResult"),
+  pwResultEmail: document.getElementById("pwResultEmail"),
+  pwHash: document.getElementById("pwHash"),
 };
 
 const SCREEN_NODES = {
@@ -4007,7 +4107,8 @@ function boot() {
 
   nodes.settingsForm.addEventListener("submit", (e) => saveSettings(e));
 
-  nodes.authGoogle.addEventListener("click", () => signInWithGoogle());
+  nodes.authForm.addEventListener("submit", (e) => handleEmailSignIn(e));
+nodes.passwordForm.addEventListener("submit", (e) => handlePasswordChange(e));
 
   nodes.settingsExport.addEventListener("click", () => exportBackup());
   nodes.settingsClear.addEventListener("click", () => clearAllData({ keepTemplates: true }));
@@ -4043,6 +4144,7 @@ function boot() {
   nodes.notifBell.addEventListener("click", (e) => { e.stopPropagation(); toggleNotifDropdown(); });
   nodes.userWidget.addEventListener("click", (e) => { e.stopPropagation(); toggleUserDropdown(); });
   nodes.userDropdownSettingsLink.addEventListener("click", () => { closeDropdowns(); openSettings(); });
+  nodes.userDropdownSignOut.addEventListener("click", () => { closeDropdowns(); signOutSession(); });
   document.addEventListener("click", () => closeDropdowns());
 
   /* Nothing should ever fail silently again: surface uncaught errors in the UI, not just
@@ -4089,8 +4191,8 @@ function boot() {
   }
 
 
-  renderDemoDataOptions();
-  initCloud();
+  loadRolesConfig().then(() => startSession());
+renderDemoDataOptions();
 
   /* First run only: prefer the editable JSON file over the copy compiled into app.js. */
   if (!state.weekTemplatesSeeded) {
@@ -4554,8 +4656,8 @@ function renderProjectScreen() {
                   <h4>${escapeHtml(update.weekRange)}</h4>
                 </div>
                 <div style="display: flex; align-items: center; gap: 8px;">
-                  <button class="ghost-button btn-edit-update" data-update-id="${update.id}" style="padding: 4px 10px; font-size: 0.75rem; border-radius: 8px;">Edit</button>
-                  <button class="row-remove btn-delete-update" data-update-id="${update.id}" style="padding: 4px 10px; font-size: 0.75rem;">Delete week</button>
+                  <button class="ghost-button btn-edit-update" data-requires="report.edit" data-update-id="${update.id}" style="padding: 4px 10px; font-size: 0.75rem; border-radius: 8px;">Edit</button>
+                  <button class="row-remove btn-delete-update" data-requires="report.delete" data-update-id="${update.id}" style="padding: 4px 10px; font-size: 0.75rem;">Delete week</button>
                   <span class="status-badge ${statusClass(update.statusTag)}">${escapeHtml(update.statusTag)}</span>
                 </div>
               </header>
@@ -5255,7 +5357,7 @@ function renderProjectTeam() {
       <select data-field="role">
         ${TEAM_ROLES.map((role) => `<option value="${role}"${member.role === role ? " selected" : ""}>${role}</option>`).join("")}
       </select>
-      <button type="button" class="row-remove" data-action="remove-member">Remove</button>
+      <button type="button" class="row-remove" data-requires="team.manage" data-action="remove-member">Remove</button>
     </div>
   `).join("");
 }
@@ -5344,6 +5446,7 @@ function renderSettingsScreen() {
   renderStorageStats();
   renderAccountPanel();
   renderRolesPanel();
+  nodes.settingsPasswordBlock.hidden = !currentSession;
 }
 
 function saveSettings(event) {
@@ -5402,11 +5505,13 @@ function loadState() {
 
 function ensureDefaults(targetState) {
   if (!targetState.settings || typeof targetState.settings !== "object") {
-    targetState.settings = { displayName: "Stuti", role: "Admin", theme: "dark" };
+    targetState.settings = { displayName: "Stuti", role: "viewer", theme: "light" };
   } else {
     targetState.settings.displayName = targetState.settings.displayName || "Stuti";
-    targetState.settings.role = targetState.settings.role || "Admin";
-    targetState.settings.theme = targetState.settings.theme === "light" ? "light" : "dark";
+    targetState.settings.role = ROLES.includes(String(targetState.settings.role || "").toLowerCase())
+      ? String(targetState.settings.role).toLowerCase()
+      : "viewer";
+    targetState.settings.theme = targetState.settings.theme === "dark" ? "dark" : "light";
   }
 
   if (!Array.isArray(targetState.templates)) {
@@ -6161,7 +6266,7 @@ function renderTemplateWeek(entry) {
       <select data-field="priority">
         ${TEMPLATE_PRIORITIES.map((value) => `<option value="${value}"${task.priority === value ? " selected" : ""}>${capitalize(value)}</option>`).join("")}
       </select>
-      <button type="button" class="row-remove" data-action="remove-task">Remove</button>
+      <button type="button" class="row-remove" data-requires="template.edit" data-action="remove-task">Remove</button>
     </div>
   `).join("");
 
@@ -6171,8 +6276,8 @@ function renderTemplateWeek(entry) {
         <span class="template-week-badge">Week ${entry.week}</span>
         <input type="text" class="template-week-label" data-field="label" value="${escapeHtml(entry.label)}" placeholder="Week label" />
         <span class="muted">${entry.tasks.length} task${entry.tasks.length === 1 ? "" : "s"}</span>
-        <button type="button" class="ghost-button small-button" data-action="add-task">+ Task</button>
-        <button type="button" class="row-remove" data-action="remove-week">Delete week</button>
+        <button type="button" class="ghost-button small-button" data-requires="template.edit" data-action="add-task">+ Task</button>
+        <button type="button" class="row-remove" data-requires="template.edit" data-action="remove-week">Delete week</button>
       </header>
       <div class="template-rows">${rows || `<p class="muted">No tasks yet.</p>`}</div>
     </section>
@@ -6499,9 +6604,252 @@ function applyRolePermissions() {
   });
 }
 
+async function loadRolesConfig() {
+  const inlined = bundled("rolesConfig");
+  if (inlined) {
+    rolesConfig = { ...rolesConfig, ...inlined };
+    return;
+  }
+
+  try {
+    const response = await fetch("./roles-config.json", { cache: "no-store" });
+    if (response.ok) rolesConfig = { ...rolesConfig, ...(await response.json()) };
+  } catch (error) {
+    debugLog(`roles-config.json not readable: ${error.message}`);
+  }
+}
+
+function isAllowedEmail(email) {
+  const domain = String(rolesConfig.allowedDomain || "").toLowerCase().trim();
+  if (!domain) return true;
+  return String(email || "").toLowerCase().trim().endsWith(`@${domain}`);
+}
+
+/* Config stores firstName and lastName separately; `name` is still read so older config
+   files keep working. */
+function userDisplayName(user, email) {
+  const joined = [user && user.firstName, user && user.lastName].filter(Boolean).join(" ").trim();
+  if (joined) return joined;
+  if (user && user.name) return user.name;
+
+  const local = String(email || "").split("@")[0];
+  return local.split(/[._-]+/).filter(Boolean)
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1)).join(" ") || local;
+}
+
+function findConfiguredUser(email) {
+  const wanted = String(email || "").toLowerCase().trim();
+  return (rolesConfig.users || []).find((user) => String(user.email).toLowerCase().trim() === wanted) || null;
+}
+
+/* SHA-256 of the typed password, compared against the hash in roles-config.json so no
+   plaintext password is ever stored in the repo. */
+async function hashPassword(password) {
+  const bytes = new TextEncoder().encode(password);
+  const digest = await crypto.subtle.digest("SHA-256", bytes);
+  return [...new Uint8Array(digest)].map((b) => b.toString(16).padStart(2, "0")).join("");
+}
+
+function passwordProblems(password) {
+  const policy = rolesConfig.passwordPolicy || {};
+  const problems = [];
+  if (password.length < (policy.minLength || 10)) problems.push(`at least ${policy.minLength || 10} characters`);
+  if (policy.requireUppercase && !/[A-Z]/.test(password)) problems.push("an uppercase letter");
+  if (policy.requireLowercase && !/[a-z]/.test(password)) problems.push("a lowercase letter");
+  if (policy.requireNumber && !/[0-9]/.test(password)) problems.push("a number");
+  if (policy.requireSymbol && !/[^A-Za-z0-9]/.test(password)) problems.push("a symbol");
+  return problems;
+}
+
+function describePasswordPolicy() {
+  const policy = rolesConfig.passwordPolicy || {};
+  const parts = [`${policy.minLength || 10}+ characters`];
+  if (policy.requireUppercase) parts.push("uppercase");
+  if (policy.requireLowercase) parts.push("lowercase");
+  if (policy.requireNumber) parts.push("number");
+  if (policy.requireSymbol) parts.push("symbol");
+  return `Password must have ${parts.join(", ")}.`;
+}
+
+/* ---------- Demo sign-in ---------- */
+
+/* Identifies the person so the app can pick their role. Deliberately not a security
+   control: there is no password and no server, so anyone who can open the page can type
+   any address. It exists so an internal demo shows the right view per person. */
+const SESSION_KEY = "multi-project-dashboard-session";
+
+function loadSession() {
+  try {
+    const raw = localStorage.getItem(SESSION_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch (error) {
+    return null;
+  }
+}
+
+function saveSession(session) {
+  try {
+    localStorage.setItem(SESSION_KEY, JSON.stringify(session));
+  } catch (error) {
+    debugLog(`could not store session: ${error.message}`);
+  }
+}
+
+/* A stored session is only honoured while it still matches roles-config.json. Reset
+   someone's password, change their role or remove them, and their session stops working
+   on their next load — otherwise a reset would not actually lock anyone out. */
+function startSession() {
+  if (rolesConfig.requireLogin === false) return;
+
+  const session = loadSession();
+  const user = session ? findConfiguredUser(session.email) : null;
+
+  if (session && user && isAllowedEmail(session.email) && session.fingerprint === passwordFingerprint(user)) {
+    applySession({ ...session, role: ROLES.includes(user.role) ? user.role : "viewer", name: userDisplayName(user, session.email) });
+    return;
+  }
+
+  if (session) {
+    debugLog("stored session no longer matches roles-config.json - signing out");
+    try { localStorage.removeItem(SESSION_KEY); } catch (error) { /* ignore */ }
+  }
+
+  showAuthOverlay();
+}
+
+function passwordFingerprint(user) {
+  return String(user && user.passwordHash ? user.passwordHash : "").slice(0, 12);
+}
+
+function applySession(session) {
+  currentSession = session;
+  state.settings.role = session.role;
+  state.settings.displayName = session.name;
+  saveState();
+  nodes.authOverlay.hidden = true;
+  renderAll();
+  debugLog(`session: ${session.email} (${session.role})`);
+}
+
+async function handleEmailSignIn(event) {
+  event.preventDefault();
+  showAuthError("");
+
+  const email = nodes.authEmail.value.trim().toLowerCase();
+  const password = nodes.authPassword.value;
+
+  if (!isAllowedEmail(email)) {
+    showAuthError(`Use a @${rolesConfig.allowedDomain} address. Access is limited to the internal team.`);
+    return;
+  }
+
+  const problems = passwordProblems(password);
+  if (problems.length) {
+    showAuthError(`Password needs ${problems.join(", ")}.`);
+    return;
+  }
+
+  const user = findConfiguredUser(email);
+
+  let digest;
+  try {
+    digest = await hashPassword(password);
+  } catch (error) {
+    showAuthError("This browser cannot hash passwords here — open the app over http://localhost or https.");
+    return;
+  }
+
+  /* Same message either way, so the form does not reveal which addresses exist. */
+  if (!user || user.passwordHash !== digest) {
+    showAuthError("That email and password do not match.");
+    nodes.authPassword.value = "";
+    return;
+  }
+
+  const session = {
+    email,
+    fingerprint: passwordFingerprint(user),
+    role: ROLES.includes(user.role) ? user.role : "viewer",
+    name: userDisplayName(user, email),
+    signedInAt: new Date().toISOString(),
+  };
+
+  nodes.authPassword.value = "";
+  saveSession(session);
+  applySession(session);
+}
+
+function signOutSession() {
+  if (!confirm("Sign out? Your projects stay in this browser.")) return;
+
+  try {
+    localStorage.removeItem(SESSION_KEY);
+  } catch (error) {
+    debugLog(`could not clear session: ${error.message}`);
+  }
+
+  currentSession = null;
+  nodes.authEmail.value = "";
+  showAuthOverlay();
+}
+
+/* No server means no reset email and no way to write roles-config.json from the browser.
+   The next best thing: verify the current password, enforce the policy on the new one, and
+   hand over the hash to paste in. */
+async function handlePasswordChange(event) {
+  event.preventDefault();
+  nodes.pwError.hidden = true;
+  nodes.pwResult.hidden = true;
+
+  if (!currentSession) {
+    showPasswordError("Sign in first.");
+    return;
+  }
+
+  const user = findConfiguredUser(currentSession.email);
+  if (!user) {
+    showPasswordError("Your account is not in roles-config.json.");
+    return;
+  }
+
+  const current = await hashPassword(nodes.pwCurrent.value);
+  if (current !== user.passwordHash) {
+    showPasswordError("Current password is wrong.");
+    return;
+  }
+
+  const next = nodes.pwNew.value;
+  const problems = passwordProblems(next);
+  if (problems.length) {
+    showPasswordError(`New password needs ${problems.join(", ")}.`);
+    return;
+  }
+
+  if (next !== nodes.pwConfirm.value) {
+    showPasswordError("The two new passwords do not match.");
+    return;
+  }
+
+  if (next === nodes.pwCurrent.value) {
+    showPasswordError("The new password is the same as the current one.");
+    return;
+  }
+
+  nodes.pwHash.value = await hashPassword(next);
+  nodes.pwResultEmail.textContent = currentSession.email;
+  nodes.pwResult.hidden = false;
+  nodes.passwordForm.reset();
+  nodes.pwHash.select();
+}
+
+function showPasswordError(message) {
+  nodes.pwError.textContent = message;
+  nodes.pwError.hidden = false;
+}
+
 /* ---------- Users & Roles (admin) ---------- */
 
-async function renderRolesPanel() {
+function renderRolesPanel() {
   if (!nodes.settingsRoles) return;
 
   if (!can("users.manage")) {
@@ -6509,60 +6857,172 @@ async function renderRolesPanel() {
     return;
   }
 
-  if (!cloud.enabled || !cloud.user) {
-    nodes.settingsRoles.innerHTML = `
-      <p class="muted">Roles need accounts. Your own role is
-      <strong>${escapeHtml(ROLE_LABELS[currentRole()])}</strong>, set locally for testing.</p>
-      <label class="reports-index-picker" style="max-width:240px;margin-top:10px;">
-        My role (local only)
-        <select id="localRolePicker">
-          ${ROLES.map((role) => `<option value="${role}"${currentRole() === role ? " selected" : ""}>${ROLE_LABELS[role]}</option>`).join("")}
-        </select>
-      </label>
-      <p class="muted" style="margin-top:8px;font-size:0.8rem;">${escapeHtml(ROLE_DESCRIPTIONS[currentRole()])}</p>`;
-    const picker = document.getElementById("localRolePicker");
-    if (picker) picker.addEventListener("change", () => {
-      state.settings.role = picker.value;
-      saveState();
-      renderAll();
-    });
-    return;
-  }
+  const users = rolesConfig.users || [];
 
-  const { data, error } = await cloud.client.rpc("list_users");
-  if (error) {
-    nodes.settingsRoles.innerHTML = `<p class="muted">Could not load users (${escapeHtml(error.message)}).</p>`;
-    return;
-  }
+  const myEmail = currentSession ? String(currentSession.email).toLowerCase() : "";
 
   nodes.settingsRoles.innerHTML = `
-    <p class="muted" style="margin-bottom:10px;">${data.length} account(s). Roles are enforced on the server.</p>
-    <div class="row-list">
-      ${data.map((user) => `
-        <div class="detail-row poc-row" data-user="${escapeHtml(user.id)}">
+    <p class="muted" style="margin-bottom:10px;">
+      ${users.length} account(s), from <code>roles-config.json</code>. Change a role below and the
+      updated <code>users</code> block appears underneath — paste it back into the file, commit and
+      push. There is no server, so the browser cannot save it for you.
+    </p>
+    <div class="row-list" style="margin-bottom:12px;">
+      ${users.map((user, index) => {
+        const isSelf = String(user.email).toLowerCase() === myEmail;
+        return `
+        <div class="detail-row poc-row">
           <div>
-            <div style="font-weight:700;">${escapeHtml(user.display_name || user.email)}</div>
-            <div class="meta">${escapeHtml(user.email)} · last seen ${escapeHtml(formatSummaryDate(String(user.last_seen_at).slice(0, 10)))}</div>
+            <div style="font-weight:700;">${escapeHtml(userDisplayName(user, user.email))}${isSelf ? ` <span class="meta">(you)</span>` : ""}</div>
+            <div class="meta">${escapeHtml(user.email)}</div>
           </div>
-          <select data-role-for="${escapeHtml(user.id)}"${user.id === cloud.user.id ? " disabled" : ""}>
+          <select data-role-index="${index}"${isSelf ? " disabled title='You cannot change your own role'" : ""}>
             ${ROLES.map((role) => `<option value="${role}"${user.role === role ? " selected" : ""}>${ROLE_LABELS[role]}</option>`).join("")}
           </select>
-        </div>`).join("")}
+        </div>`;
+      }).join("") || `<p class="muted">No users configured.</p>`}
+    </div>
+    <div id="rolesDiff" hidden>
+      <p class="storage-warning" style="margin-bottom:8px;">
+        <strong>Not saved yet.</strong> Paste this over the <code>users</code> array in
+        <code>roles-config.json</code>, then commit and push. Anyone whose role changed picks it up
+        on their next load.
+      </p>
+      <textarea class="report-html-source" id="rolesJson" readonly style="min-height:150px;"></textarea>
+    </div>
+
+    <h4 class="settings-subhead">Add a user, or reset a password</h4>
+    <p class="muted" style="font-size:0.82rem;margin-bottom:10px;">
+      Produces the entry to paste into <code>roles-config.json</code>. For an existing user, replace
+      just their <code>passwordHash</code>; for a new one, paste the whole block into
+      <code>users</code>. Commit and push to make it live.
+    </p>
+    <form class="password-form" id="resetForm">
+      <label>User email<input type="email" id="resetEmail" required placeholder="name@${escapeHtml(rolesConfig.allowedDomain)}" /></label>
+      <label>First name<input type="text" id="resetFirst" placeholder="e.g. Neha" /></label>
+      <label>Last name<input type="text" id="resetLast" placeholder="e.g. Sharma" /></label>
+      <label>Role
+        <select id="resetRole">
+          ${ROLES.map((role) => `<option value="${role}"${role === "viewer" ? " selected" : ""}>${ROLE_LABELS[role]}</option>`).join("")}
+        </select>
+      </label>
+      <label>Password
+        <input type="text" id="resetPassword" required placeholder="Type one, or generate" />
+      </label>
+      <div class="actions">
+        <button type="button" id="resetSuggest" class="ghost-button small-button">Suggest strong password</button>
+        <button type="submit" class="secondary-button">Add entry</button>
+      </div>
+    </form>
+    <p class="auth-error" id="resetError" hidden></p>
+    <div id="resetResult" hidden>
+      <p class="muted" style="font-size:0.82rem;margin:10px 0 6px;">
+        Entry for <strong id="resetResultEmail"></strong> — paste into <code>roles-config.json</code>:
+      </p>
+      <textarea class="report-html-source" id="resetHash" readonly style="min-height:110px;"></textarea>
+      <p class="storage-warning" style="margin-top:10px;">
+        Share this password with them directly (Slack DM or a password manager) — it is not
+        recoverable from the hash, and this is the only time it is shown.
+        <strong id="resetPlain" style="display:block;margin-top:6px;font-family:ui-monospace,Menlo,monospace;"></strong>
+      </p>
     </div>`;
 
-  nodes.settingsRoles.querySelectorAll("[data-role-for]").forEach((select) => {
-    select.addEventListener("change", () => changeUserRole(select.dataset.roleFor, select.value));
+  nodes.settingsRoles.querySelectorAll("[data-role-index]").forEach((select) => {
+    select.addEventListener("change", () => {
+      const index = Number(select.dataset.roleIndex);
+      if (rolesConfig.users[index]) rolesConfig.users[index].role = select.value;
+      showRolesJson();
+    });
+  });
+
+  const form = document.getElementById("resetForm");
+  if (form) form.addEventListener("submit", (event) => handleAdminReset(event));
+
+  const suggest = document.getElementById("resetSuggest");
+  if (suggest) suggest.addEventListener("click", () => {
+    document.getElementById("resetPassword").value = suggestPassword();
   });
 }
 
-async function changeUserRole(userId, role) {
-  const { error } = await cloud.client.rpc("set_user_role", { target: userId, new_role: role });
-  if (error) {
-    showAppError(`Could not change role (${error.message}).`);
-  } else {
-    showAppError(`Role updated to ${ROLE_LABELS[role]}.`);
+/* A password that satisfies the policy by construction, so an admin never has to invent
+   one. crypto.getRandomValues, not Math.random. */
+function suggestPassword() {
+  const groups = [
+    "ABCDEFGHJKLMNPQRSTUVWXYZ",
+    "abcdefghijkmnopqrstuvwxyz",
+    "23456789",
+    "!@#$%^&*?",
+  ];
+  const all = groups.join("");
+  /* Exactly the policy minimum — two characters from each required group, the rest random. */
+  const target = Math.max(rolesConfig.passwordPolicy?.minLength || 10, groups.length * 2);
+  const pick = (set, count) => {
+    const values = crypto.getRandomValues(new Uint32Array(count));
+    return [...values].map((value) => set[value % set.length]);
+  };
+
+  const chars = groups.flatMap((group) => pick(group, 2)).concat(pick(all, target - groups.length * 2));
+
+  /* Fisher-Yates so the guaranteed characters are not always in the same positions. */
+  const shuffle = crypto.getRandomValues(new Uint32Array(chars.length));
+  for (let i = chars.length - 1; i > 0; i -= 1) {
+    const j = shuffle[i] % (i + 1);
+    [chars[i], chars[j]] = [chars[j], chars[i]];
   }
-  renderRolesPanel();
+  return chars.join("");
+}
+
+/* The browser cannot write roles-config.json, so a role change produces the block to paste
+   rather than pretending to save. */
+function showRolesJson() {
+  const block = document.getElementById("rolesDiff");
+  const output = document.getElementById("rolesJson");
+  if (!block || !output) return;
+
+  output.value = JSON.stringify(rolesConfig.users, null, 2);
+  block.hidden = false;
+  output.select();
+}
+
+async function handleAdminReset(event) {
+  event.preventDefault();
+  const error = document.getElementById("resetError");
+  const result = document.getElementById("resetResult");
+  error.hidden = true;
+  result.hidden = true;
+
+  const email = document.getElementById("resetEmail").value.trim().toLowerCase();
+  const password = document.getElementById("resetPassword").value;
+
+  const fail = (message) => { error.textContent = message; error.hidden = false; };
+
+  if (!isAllowedEmail(email)) {
+    fail(`Use a @${rolesConfig.allowedDomain} address.`);
+    return;
+  }
+
+  const problems = passwordProblems(password);
+  if (problems.length) {
+    fail(`Password needs ${problems.join(", ")}.`);
+    return;
+  }
+
+  const local = email.split("@")[0];
+  const guess = local.split(/[._-]+/).filter(Boolean)
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1));
+  const entry = {
+    email,
+    firstName: document.getElementById("resetFirst").value.trim().replace(/\s+/g, "") || guess[0] || "",
+    lastName: document.getElementById("resetLast").value.trim().replace(/\s+/g, "") || guess.slice(1).join("") || "",
+    role: document.getElementById("resetRole").value,
+    passwordHash: await hashPassword(password),
+  };
+
+  document.getElementById("resetHash").value = JSON.stringify(entry, null, 2);
+  document.getElementById("resetResultEmail").textContent = email;
+  document.getElementById("resetPlain").textContent = password;
+  result.hidden = false;
+  document.getElementById("resetHash").select();
 }
 
 /* ---------- Accounts & cloud sync (Supabase) ---------- */
@@ -6621,6 +7081,7 @@ async function initCloud() {
 function showAuthOverlay() {
   nodes.authOverlay.hidden = false;
   showAuthError("");
+  if (nodes.authHint) nodes.authHint.textContent = describePasswordPolicy();
 }
 
 function showAuthError(message) {
@@ -6628,20 +7089,16 @@ function showAuthError(message) {
   nodes.authError.hidden = !message;
 }
 
-async function signInWithGoogle() {
-  showAuthError("");
-  try {
-    const { error } = await cloud.client.auth.signInWithOAuth({
-      provider: "google",
-      options: { redirectTo: location.href.split("?")[0] },
-    });
-    if (error) throw error;
-  } catch (error) {
-    showAuthError(error.message || "Google sign-in is not enabled for this project.");
-  }
-}
-
 async function onSignedIn(user) {
+  /* Domain gate. Also enforced in the database, so this is fast feedback, not the control. */
+  if (!isAllowedEmail(user.email)) {
+    await cloud.client.auth.signOut();
+    cloud.user = null;
+    showAuthOverlay();
+    showAuthError(`${user.email} is not a @${rolesConfig.allowedDomain} account. Access is restricted to company accounts.`);
+    return;
+  }
+
   cloud.user = user;
   nodes.authOverlay.hidden = true;
 
@@ -6650,10 +7107,8 @@ async function onSignedIn(user) {
 
   const { data: profile } = await cloud.client
     .from("profiles").select("role, display_name").eq("id", user.id).maybeSingle();
-  if (profile) {
-    cloud.role = profile.role;
-    state.settings.role = profile.role;
-  }
+  cloud.role = (profile && ROLES.includes(profile.role)) ? profile.role : configuredRoleFor(user.email);
+  state.settings.role = cloud.role;
 
   await pullCloudState();
   await cloud.client.rpc("touch_last_seen").catch(() => {});
@@ -6717,34 +7172,25 @@ async function signOut() {
   showAuthOverlay();
 }
 
-async function renderAccountPanel() {
+function renderAccountPanel() {
   if (!nodes.settingsAccount) return;
 
-  if (!cloud.enabled) {
-    nodes.settingsAccount.innerHTML = `
-      <p class="muted">Running in local-only mode — no accounts. Everything is stored in this browser.
-      Add your Supabase URL and anon key to <code>supabase-config.json</code> to turn on email login
-      and per-user dashboards.</p>`;
-    return;
-  }
-
-  if (!cloud.user) {
-    nodes.settingsAccount.innerHTML = `<p class="muted">Not signed in.</p>`;
+  if (!currentSession) {
+    nodes.settingsAccount.innerHTML = `<p class="muted">Not signed in. Sign-in is off in
+      <code>roles-config.json</code> (<code>requireLogin: false</code>).</p>`;
     return;
   }
 
   nodes.settingsAccount.innerHTML = `
-    <p class="muted">Signed in as <strong>${escapeHtml(cloud.user.email)}</strong>. Your projects sync to
-    your account and follow you to any browser.</p>
+    <p class="muted">Signed in as <strong>${escapeHtml(currentSession.email)}</strong> —
+    role <strong>${escapeHtml(ROLE_LABELS[currentSession.role])}</strong>, from
+    <code>roles-config.json</code>.</p>
+    <p class="muted" style="margin-top:6px;font-size:0.8rem;">Demo sign-in only: no password and no
+    server, so this identifies you rather than protecting anything. Data stays in this browser.</p>
     <div class="actions" style="margin-top: 12px;">
       <button type="button" id="settingsSignOut" class="ghost-button">Sign out</button>
-      <button type="button" id="settingsUsage" class="secondary-button">Refresh usage stats</button>
-    </div>
-    <p class="muted" id="settingsUsageStats" style="margin-top: 10px; font-size: 0.82rem;"></p>
-  `;
-  document.getElementById("settingsSignOut").addEventListener("click", () => signOut());
-  document.getElementById("settingsUsage").addEventListener("click", () => loadUsageStats());
-  loadUsageStats();
+    </div>`;
+  document.getElementById("settingsSignOut").addEventListener("click", () => signOutSession());
 }
 
 /* "How many people are using it" — counts only; RLS still stops anyone reading
@@ -7172,12 +7618,14 @@ function renderReportsIndex(projectId) {
         </div>
         <div class="report-row-actions">
           <span class="status-badge ${statusClass(update.statusTag)}">${escapeHtml(update.statusTag)}</span>
-          <button type="button" class="ghost-button small-button" data-edit-report="${update.id}">Edit</button>
-          <button type="button" class="row-remove" data-delete-report="${update.id}">Delete</button>
+          <button type="button" class="ghost-button small-button" data-requires="report.edit" data-edit-report="${update.id}">Edit</button>
+          <button type="button" class="row-remove" data-requires="report.delete" data-delete-report="${update.id}">Delete</button>
         </div>
       </article>
     `;
   }).join("");
+
+  applyRolePermissions();
 }
 
 function handleReportsIndexClick(event) {

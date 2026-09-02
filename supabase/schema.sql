@@ -88,15 +88,48 @@ $$;
 grant execute on function public.touch_last_seen() to authenticated;
 
 -- ============================================================ RBAC
--- Roles live on the profile. Server-side enforcement is what counts; the client also
--- hides actions a role cannot perform, but that is convenience, not security.
+-- Two roles. Admin does everything; Viewer changes nothing.
+-- Server-side enforcement is what counts; the client also hides what a role cannot do,
+-- but that is convenience, not security.
+
+alter table public.profiles drop constraint if exists profiles_role_check;
 
 alter table public.profiles
-  add column if not exists role text not null default 'member'
-  check (role in ('admin', 'manager', 'member', 'viewer'));
+  add column if not exists role text not null default 'viewer';
 
--- Helper used by the policies below. SECURITY DEFINER so it can read the role without
--- tripping the very policies it is being used by.
+-- Anything created under the old four-role model collapses into the two we keep.
+update public.profiles set role = 'viewer' where role not in ('admin', 'viewer');
+
+alter table public.profiles
+  add constraint profiles_role_check check (role in ('admin', 'viewer'));
+
+-- ---------------------------------------------------------------- access rules
+-- Mirrors roles-config.json. Kept in the database as well so the rules hold even if a
+-- browser loads a stale config file.
+create table if not exists public.access_rules (
+  id             int primary key default 1,
+  allowed_domain text not null default 'webengage.com',
+  default_role   text not null default 'viewer',
+  constraint one_row check (id = 1)
+);
+
+insert into public.access_rules (id, allowed_domain, default_role)
+values (1, 'webengage.com', 'viewer')
+on conflict (id) do nothing;
+
+alter table public.access_rules enable row level security;
+
+drop policy if exists "read access rules" on public.access_rules;
+create policy "read access rules" on public.access_rules for select using (true);
+
+create table if not exists public.bootstrap_admins (email text primary key);
+
+insert into public.bootstrap_admins (email)
+values ('stuti.khare@webengage.com')
+on conflict (email) do nothing;
+
+alter table public.bootstrap_admins enable row level security;
+
 create or replace function public.is_admin()
 returns boolean
 language sql stable
@@ -107,7 +140,6 @@ $$;
 
 grant execute on function public.is_admin() to authenticated;
 
--- Admins may read and update every profile; everyone else stays limited to their own.
 drop policy if exists "read own profile" on public.profiles;
 create policy "read own profile" on public.profiles
   for select using (auth.uid() = id or public.is_admin());
@@ -116,8 +148,44 @@ drop policy if exists "update own profile" on public.profiles;
 create policy "update own profile" on public.profiles
   for update using (auth.uid() = id or public.is_admin());
 
--- Nobody may change their own role by updating the row directly; go through this
--- function, which only admins may call.
+-- Sign-up: reject anything outside the allowed domain, and grant admin to the
+-- bootstrap list. Everyone else gets the default role.
+create or replace function public.handle_new_user()
+returns trigger
+language plpgsql
+security definer set search_path = public
+as $$
+declare
+  rules  public.access_rules%rowtype;
+  granted text;
+begin
+  select * into rules from public.access_rules where id = 1;
+
+  if rules.allowed_domain is not null and rules.allowed_domain <> ''
+     and lower(new.email) not like '%@' || lower(rules.allowed_domain) then
+    raise exception 'Access is restricted to @% accounts', rules.allowed_domain;
+  end if;
+
+  if exists (select 1 from public.bootstrap_admins where lower(email) = lower(new.email)) then
+    granted := 'admin';
+  else
+    granted := coalesce(rules.default_role, 'viewer');
+  end if;
+
+  insert into public.profiles (id, email, display_name, role)
+  values (new.id, new.email, split_part(new.email, '@', 1), granted)
+  on conflict (id) do nothing;
+
+  return new;
+end;
+$$;
+
+drop trigger if exists on_auth_user_created on auth.users;
+create trigger on_auth_user_created
+  after insert on auth.users
+  for each row execute function public.handle_new_user();
+
+-- Roles change only through this function, never by writing to the row.
 create or replace function public.set_user_role(target uuid, new_role text)
 returns void
 language plpgsql
@@ -128,7 +196,7 @@ begin
     raise exception 'only an admin may change roles';
   end if;
 
-  if new_role not in ('admin', 'manager', 'member', 'viewer') then
+  if new_role not in ('admin', 'viewer') then
     raise exception 'unknown role: %', new_role;
   end if;
 
@@ -142,7 +210,6 @@ $$;
 
 grant execute on function public.set_user_role(uuid, text) to authenticated;
 
--- Admin-only list for the Users & Roles screen.
 create or replace function public.list_users()
 returns table (id uuid, email text, display_name text, role text, created_at timestamptz, last_seen_at timestamptz)
 language plpgsql
@@ -161,22 +228,3 @@ end;
 $$;
 
 grant execute on function public.list_users() to authenticated;
-
--- The first person to sign up becomes the admin; everyone after that is a member.
-create or replace function public.handle_new_user()
-returns trigger
-language plpgsql
-security definer set search_path = public
-as $$
-declare
-  first_user boolean;
-begin
-  select count(*) = 0 into first_user from public.profiles;
-
-  insert into public.profiles (id, email, display_name, role)
-  values (new.id, new.email, split_part(new.email, '@', 1),
-          case when first_user then 'admin' else 'member' end)
-  on conflict (id) do nothing;
-  return new;
-end;
-$$;
