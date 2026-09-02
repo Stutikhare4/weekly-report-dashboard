@@ -1,4 +1,4 @@
-const CACHE_NAME = "weekly-dashboard-v64";
+const CACHE_NAME = "weekly-dashboard-v65";
 const ASSETS = ["./", "./index.html", "./styles.css", "./app.js", "./week-templates.json", "./supabase-config.json", "./demo-data/index.json", "./demo-data/salad-days.json", "./manifest.webmanifest", "./icon.svg"];
 
 self.addEventListener("install", (event) => {

@@ -129,6 +129,9 @@ const PERMISSIONS = {
   "users.manage": ["admin"],
 };
 
+/* Read by debugLog() from anywhere, so it must be module-level, not inside boot(). */
+const DEBUG_LOG = [];
+
 const TEMPLATE_PRIORITIES = ["high", "medium", "low"];
 const DEFAULT_CYCLE_WEEKS = 5;
 const MIN_CYCLE_WEEKS = 2;
@@ -511,170 +514,185 @@ const NAV_HANDLERS = {
   "templates": openTemplates,
 };
 
-document.querySelectorAll(".nav-item").forEach((button) => {
-  button.addEventListener("click", () => {
-    const handler = NAV_HANDLERS[button.dataset.navKey];
-    if (handler) handler();
+/* All start-up work runs from here, invoked at the very end of this file. Module-level
+   `const`s are in the temporal dead zone until their declaration is evaluated, so boot
+   code must not run before them — several bugs came from exactly that.
+   Function declarations hoist, so boot() itself can be called from the bottom. */
+function boot() {
+  document.querySelectorAll(".nav-item").forEach((button) => {
+    button.addEventListener("click", () => {
+      const handler = NAV_HANDLERS[button.dataset.navKey];
+      if (handler) handler();
+    });
   });
-});
 
-nodes.openCurrent.addEventListener("click", () => openCurrentProject());
-nodes.openClosed.addEventListener("click", () => openClosedProject());
-nodes.backToHome.addEventListener("click", () => openDashboard());
-nodes.backToCategory.addEventListener("click", () => openCategory(uiState.category));
-nodes.generateReport.addEventListener("click", () => generateReportPdf());
-nodes.downloadReport.addEventListener("click", () => copyReportHtml());
+  nodes.openCurrent.addEventListener("click", () => openCurrentProject());
+  nodes.openClosed.addEventListener("click", () => openClosedProject());
+  nodes.backToHome.addEventListener("click", () => openDashboard());
+  nodes.backToCategory.addEventListener("click", () => openCategory(uiState.category));
+  nodes.generateReport.addEventListener("click", () => generateReportPdf());
+  nodes.downloadReport.addEventListener("click", () => copyReportHtml());
 
-nodes.sidebarAddProject.addEventListener("click", () => openAddProject());
-nodes.homeAddProject.addEventListener("click", () => openAddProject());
-nodes.cancelAddProject.addEventListener("click", () => navigateToScreen(uiState.returnScreen));
-nodes.btnCancelAddProject.addEventListener("click", () => navigateToScreen(uiState.returnScreen));
-nodes.addProjectForm.addEventListener("submit", (e) => handleWizardSubmit(e));
-nodes.npBack.addEventListener("click", () => goToWizardStep(uiState.wizardStep - 1));
-nodes.npSaveDraft.addEventListener("click", () => {
-  showWizardError("");
-  try {
-    saveProject({ asDraft: true });
-  } catch (error) {
-    showWizardError(`Could not save draft: ${error.message}`);
-    throw error;
+  nodes.sidebarAddProject.addEventListener("click", () => openAddProject());
+  nodes.homeAddProject.addEventListener("click", () => openAddProject());
+  nodes.cancelAddProject.addEventListener("click", () => navigateToScreen(uiState.returnScreen));
+  nodes.btnCancelAddProject.addEventListener("click", () => navigateToScreen(uiState.returnScreen));
+  nodes.addProjectForm.addEventListener("submit", (e) => handleWizardSubmit(e));
+  nodes.npBack.addEventListener("click", () => goToWizardStep(uiState.wizardStep - 1));
+  nodes.npSaveDraft.addEventListener("click", () => {
+    showWizardError("");
+    try {
+      saveProject({ asDraft: true });
+    } catch (error) {
+      showWizardError(`Could not save draft: ${error.message}`);
+      throw error;
+    }
+  });
+  nodes.npGoToProject.addEventListener("click", () => { if (uiState.wizardSavedId) openProject(uiState.wizardSavedId); });
+  nodes.npCreateAnother.addEventListener("click", () => openAddProject());
+  nodes.npAddPoc.addEventListener("click", () => addPocRow());
+  nodes.addProjectForm.addEventListener("change", (e) => handleWizardChange(e));
+  nodes.addProjectForm.addEventListener("input", (e) => {
+    if (e.target.matches("input, select, textarea")) renderWizardSummary();
+  });
+  nodes.npSummary.addEventListener("click", (e) => {
+    const edit = e.target.closest("[data-goto-step]");
+    if (edit) goToWizardStep(Number(edit.dataset.gotoStep));
+  });
+  nodes.wizardSteps.addEventListener("click", (e) => {
+    const step = e.target.closest(".wizard-step");
+    if (step && uiState.wizardStep < WIZARD_CONFIRM_STEP) goToWizardStep(Number(step.dataset.step));
+  });
+
+  nodes.addWeeklyUpdate.addEventListener("click", () => openCreateReport(uiState.projectId, null, { editing: true }));
+  nodes.addWeekFromTemplate.addEventListener("click", () => addWeekToProject(uiState.projectId));
+  nodes.deleteProjectBtn.addEventListener("click", () => deleteProject(uiState.projectId));
+  nodes.projApplyTimeline.addEventListener("click", () => applyProjectTimeline(uiState.projectId));
+  ["npKickoffDate", "npGoLiveDate"].forEach((id) => {
+    const node = document.getElementById(id);
+    if (node) node.addEventListener("change", () => syncCycleWeeksToDates());
+  });
+  nodes.cancelCreateReport.addEventListener("click", () => navigateToScreen(uiState.returnScreen));
+  nodes.btnCancelCreateReport.addEventListener("click", () => navigateToScreen(uiState.returnScreen));
+  nodes.createReportForm.addEventListener("submit", (e) => saveWeeklyUpdate(e));
+  nodes.btnAddLastWeekTask.addEventListener("click", () => addNewTaskToForm("last"));
+  nodes.btnAddThisWeekTask.addEventListener("click", () => addNewTaskToForm("upcoming"));
+  nodes.btnChecklistLastWeek.addEventListener("click", () => openTemplatePicker("last"));
+  nodes.btnChecklistThisWeek.addEventListener("click", () => openTemplatePicker("upcoming"));
+  nodes.templatePickerClose.addEventListener("click", () => closeTemplatePicker());
+  nodes.templatePickerCancel.addEventListener("click", () => closeTemplatePicker());
+  nodes.templatePickerAdd.addEventListener("click", () => addSelectedTemplates());
+  nodes.templateSearch.addEventListener("input", () => filterTemplatePicker(nodes.templateSearch.value));
+  nodes.templatePickerOverlay.addEventListener("click", (e) => {
+    if (e.target === nodes.templatePickerOverlay) closeTemplatePicker();
+  });
+  nodes.createReportProjectSelect.addEventListener("change", () => loadProjectIntoReportEditor(nodes.createReportProjectSelect.value));
+  nodes.reportsIndexProject.addEventListener("change", () => {
+    uiState.projectId = nodes.reportsIndexProject.value || null;
+    renderReportsIndex(nodes.reportsIndexProject.value);
+  });
+  nodes.reportsIndexList.addEventListener("click", (e) => handleReportsIndexClick(e));
+  nodes.reportsNewBtn.addEventListener("click", () => {
+    openCreateReport(nodes.reportsIndexProject.value || null, null, { editing: true });
+  });
+
+  nodes.calendarPrev.addEventListener("click", () => shiftCalendarMonth(-1));
+  nodes.calendarNext.addEventListener("click", () => shiftCalendarMonth(1));
+
+  nodes.settingsForm.addEventListener("submit", (e) => saveSettings(e));
+
+  nodes.authGoogle.addEventListener("click", () => signInWithGoogle());
+
+  nodes.settingsExport.addEventListener("click", () => exportBackup());
+  nodes.settingsClear.addEventListener("click", () => clearAllData({ keepTemplates: true }));
+  nodes.settingsDemoLoad.addEventListener("click", () => loadDemoData(nodes.settingsDemoSelect.value));
+  nodes.settingsDemoSelect.addEventListener("change", () => describeSelectedDemo());
+  nodes.settingsImport.addEventListener("click", () => nodes.settingsImportFile.click());
+  nodes.settingsImportFile.addEventListener("change", (e) => {
+    if (e.target.files && e.target.files[0]) importBackup(e.target.files[0]);
+    e.target.value = "";
+  });
+
+  nodes.teamProjectSelect.addEventListener("change", () => {
+    uiState.teamProjectId = nodes.teamProjectSelect.value;
+    renderTeamScreen();
+  });
+  nodes.teamAddMember.addEventListener("click", () => addTeamMember());
+  nodes.teamMemberList.addEventListener("input", (e) => handleTeamMemberInput(e));
+  nodes.teamMemberList.addEventListener("change", (e) => handleTeamMemberInput(e));
+  nodes.teamMemberList.addEventListener("click", (e) => handleTeamMemberClick(e));
+
+  nodes.templatesList.addEventListener("input", (e) => handleTemplatesInput(e));
+  nodes.templatesList.addEventListener("change", (e) => handleTemplatesInput(e));
+  nodes.templatesList.addEventListener("click", (e) => handleTemplatesClick(e));
+  nodes.templatesAddWeek.addEventListener("click", () => addTemplateWeek());
+  nodes.templatesReloadFile.addEventListener("click", () => reloadTemplatesFromFile());
+  nodes.templatesReset.addEventListener("click", () => resetTemplatesToDefault());
+
+  nodes.themeToggle.addEventListener("click", () => toggleTheme());
+  nodes.searchInput.addEventListener("input", () => renderSearchResults());
+  nodes.searchInput.addEventListener("focus", () => renderSearchResults());
+  nodes.searchInput.addEventListener("click", (e) => e.stopPropagation());
+  nodes.searchInput.addEventListener("keydown", (e) => handleSearchKeydown(e));
+  nodes.notifBell.addEventListener("click", (e) => { e.stopPropagation(); toggleNotifDropdown(); });
+  nodes.userWidget.addEventListener("click", (e) => { e.stopPropagation(); toggleUserDropdown(); });
+  nodes.userDropdownSettingsLink.addEventListener("click", () => { closeDropdowns(); openSettings(); });
+  document.addEventListener("click", () => closeDropdowns());
+
+  /* Nothing should ever fail silently again: surface uncaught errors in the UI, not just
+     the console, so a dead-looking button always says why it is dead. */
+  window.addEventListener("error", (event) => {
+    debugLog(`ERROR ${event.message} @ ${event.filename || "?"}:${event.lineno || "?"}`);
+    showAppError(event.message);
+  });
+  window.addEventListener("unhandledrejection", (event) => {
+    debugLog(`REJECTION ${String(event.reason)}`);
+    showAppError(String(event.reason));
+  });
+  nodes.appError.addEventListener("click", () => { nodes.appError.hidden = true; });
+  nodes.debugClose.addEventListener("click", () => setDebugPanel(false));
+  nodes.debugCopy.addEventListener("click", () => copyDebugReport());
+  document.addEventListener("keydown", (event) => {
+    if (event.shiftKey && (event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "d") {
+      event.preventDefault();
+      setDebugPanel(nodes.debugPanel.hidden);
+    }
+  });
+
+  document.title = "Weekly Report Dashboard";
+  debugLog(`boot url=${location.href}`);
+  renderAll();
+  safeRender(registerServiceWorker);
+  if (location.search.includes("debug") || location.hash.includes("debug")) {
+    setDebugPanel(true);
   }
-});
-nodes.npGoToProject.addEventListener("click", () => { if (uiState.wizardSavedId) openProject(uiState.wizardSavedId); });
-nodes.npCreateAnother.addEventListener("click", () => openAddProject());
-nodes.npAddPoc.addEventListener("click", () => addPocRow());
-nodes.addProjectForm.addEventListener("change", (e) => handleWizardChange(e));
-nodes.addProjectForm.addEventListener("input", (e) => {
-  if (e.target.matches("input, select, textarea")) renderWizardSummary();
-});
-nodes.npSummary.addEventListener("click", (e) => {
-  const edit = e.target.closest("[data-goto-step]");
-  if (edit) goToWizardStep(Number(edit.dataset.gotoStep));
-});
-nodes.wizardSteps.addEventListener("click", (e) => {
-  const step = e.target.closest(".wizard-step");
-  if (step && uiState.wizardStep < WIZARD_CONFIRM_STEP) goToWizardStep(Number(step.dataset.step));
-});
 
-nodes.addWeeklyUpdate.addEventListener("click", () => openCreateReport(uiState.projectId, null, { editing: true }));
-nodes.addWeekFromTemplate.addEventListener("click", () => addWeekToProject(uiState.projectId));
-nodes.deleteProjectBtn.addEventListener("click", () => deleteProject(uiState.projectId));
-nodes.projApplyTimeline.addEventListener("click", () => applyProjectTimeline(uiState.projectId));
-["npKickoffDate", "npGoLiveDate"].forEach((id) => {
-  const node = document.getElementById(id);
-  if (node) node.addEventListener("change", () => syncCycleWeeksToDates());
-});
-nodes.cancelCreateReport.addEventListener("click", () => navigateToScreen(uiState.returnScreen));
-nodes.btnCancelCreateReport.addEventListener("click", () => navigateToScreen(uiState.returnScreen));
-nodes.createReportForm.addEventListener("submit", (e) => saveWeeklyUpdate(e));
-nodes.btnAddLastWeekTask.addEventListener("click", () => addNewTaskToForm("last"));
-nodes.btnAddThisWeekTask.addEventListener("click", () => addNewTaskToForm("upcoming"));
-nodes.btnChecklistLastWeek.addEventListener("click", () => openTemplatePicker("last"));
-nodes.btnChecklistThisWeek.addEventListener("click", () => openTemplatePicker("upcoming"));
-nodes.templatePickerClose.addEventListener("click", () => closeTemplatePicker());
-nodes.templatePickerCancel.addEventListener("click", () => closeTemplatePicker());
-nodes.templatePickerAdd.addEventListener("click", () => addSelectedTemplates());
-nodes.templateSearch.addEventListener("input", () => filterTemplatePicker(nodes.templateSearch.value));
-nodes.templatePickerOverlay.addEventListener("click", (e) => {
-  if (e.target === nodes.templatePickerOverlay) closeTemplatePicker();
-});
-nodes.createReportProjectSelect.addEventListener("change", () => loadProjectIntoReportEditor(nodes.createReportProjectSelect.value));
-nodes.reportsIndexProject.addEventListener("change", () => {
-  uiState.projectId = nodes.reportsIndexProject.value || null;
-  renderReportsIndex(nodes.reportsIndexProject.value);
-});
-nodes.reportsIndexList.addEventListener("click", (e) => handleReportsIndexClick(e));
-nodes.reportsNewBtn.addEventListener("click", () => {
-  openCreateReport(nodes.reportsIndexProject.value || null, null, { editing: true });
-});
-
-nodes.calendarPrev.addEventListener("click", () => shiftCalendarMonth(-1));
-nodes.calendarNext.addEventListener("click", () => shiftCalendarMonth(1));
-
-nodes.settingsForm.addEventListener("submit", (e) => saveSettings(e));
-
-nodes.authGoogle.addEventListener("click", () => signInWithGoogle());
-
-nodes.settingsExport.addEventListener("click", () => exportBackup());
-nodes.settingsClear.addEventListener("click", () => clearAllData({ keepTemplates: true }));
-nodes.settingsDemoLoad.addEventListener("click", () => loadDemoData(nodes.settingsDemoSelect.value));
-nodes.settingsDemoSelect.addEventListener("change", () => describeSelectedDemo());
-nodes.settingsImport.addEventListener("click", () => nodes.settingsImportFile.click());
-nodes.settingsImportFile.addEventListener("change", (e) => {
-  if (e.target.files && e.target.files[0]) importBackup(e.target.files[0]);
-  e.target.value = "";
-});
-
-nodes.teamProjectSelect.addEventListener("change", () => {
-  uiState.teamProjectId = nodes.teamProjectSelect.value;
-  renderTeamScreen();
-});
-nodes.teamAddMember.addEventListener("click", () => addTeamMember());
-nodes.teamMemberList.addEventListener("input", (e) => handleTeamMemberInput(e));
-nodes.teamMemberList.addEventListener("change", (e) => handleTeamMemberInput(e));
-nodes.teamMemberList.addEventListener("click", (e) => handleTeamMemberClick(e));
-
-nodes.templatesList.addEventListener("input", (e) => handleTemplatesInput(e));
-nodes.templatesList.addEventListener("change", (e) => handleTemplatesInput(e));
-nodes.templatesList.addEventListener("click", (e) => handleTemplatesClick(e));
-nodes.templatesAddWeek.addEventListener("click", () => addTemplateWeek());
-nodes.templatesReloadFile.addEventListener("click", () => reloadTemplatesFromFile());
-nodes.templatesReset.addEventListener("click", () => resetTemplatesToDefault());
-
-nodes.themeToggle.addEventListener("click", () => toggleTheme());
-nodes.searchInput.addEventListener("input", () => renderSearchResults());
-nodes.searchInput.addEventListener("focus", () => renderSearchResults());
-nodes.searchInput.addEventListener("click", (e) => e.stopPropagation());
-nodes.searchInput.addEventListener("keydown", (e) => handleSearchKeydown(e));
-nodes.notifBell.addEventListener("click", (e) => { e.stopPropagation(); toggleNotifDropdown(); });
-nodes.userWidget.addEventListener("click", (e) => { e.stopPropagation(); toggleUserDropdown(); });
-nodes.userDropdownSettingsLink.addEventListener("click", () => { closeDropdowns(); openSettings(); });
-document.addEventListener("click", () => closeDropdowns());
-
-/* Declared before the bootstrap below, which logs into it. */
-const DEBUG_LOG = [];
-
-/* Nothing should ever fail silently again: surface uncaught errors in the UI, not just
-   the console, so a dead-looking button always says why it is dead. */
-window.addEventListener("error", (event) => {
-  debugLog(`ERROR ${event.message} @ ${event.filename || "?"}:${event.lineno || "?"}`);
-  showAppError(event.message);
-});
-window.addEventListener("unhandledrejection", (event) => {
-  debugLog(`REJECTION ${String(event.reason)}`);
-  showAppError(String(event.reason));
-});
-nodes.appError.addEventListener("click", () => { nodes.appError.hidden = true; });
-nodes.debugClose.addEventListener("click", () => setDebugPanel(false));
-nodes.debugCopy.addEventListener("click", () => copyDebugReport());
-document.addEventListener("keydown", (event) => {
-  if (event.shiftKey && (event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "d") {
-    event.preventDefault();
-    setDebugPanel(nodes.debugPanel.hidden);
+  /* ?login renders the sign-in page for design review without any backend configured. */
+  if (location.search.includes("login")) {
+    nodes.authOverlay.hidden = false;
+    nodes.authLocalNote.hidden = false;
+    nodes.authLocalNote.textContent = "Preview only — no backend configured, so signing in will not work yet.";
   }
-});
 
-document.title = "Weekly Report Dashboard";
-debugLog(`boot url=${location.href}`);
-renderAll();
-safeRender(registerServiceWorker);
-if (location.search.includes("debug") || location.hash.includes("debug")) {
-  setDebugPanel(true);
-}
+  if (location.search.includes("reset")) {
+    const wipeTemplates = location.search.includes("reset=all");
+    /* Strip the flag before doing the work: leaving ?reset in the address bar means every
+       later refresh silently wipes the data again. */
+    clearResetFlagFromUrl();
+    clearAllData({ keepTemplates: !wipeTemplates });
+  }
 
-/* ?login renders the sign-in page for design review without any backend configured. */
-if (location.search.includes("login")) {
-  nodes.authOverlay.hidden = false;
-  nodes.authLocalNote.hidden = false;
-  nodes.authLocalNote.textContent = "Preview only — no backend configured, so signing in will not work yet.";
-}
 
-if (location.search.includes("reset")) {
-  const wipeTemplates = location.search.includes("reset=all");
-  /* Strip the flag before doing the work: leaving ?reset in the address bar means every
-     later refresh silently wipes the data again. */
-  clearResetFlagFromUrl();
-  clearAllData({ keepTemplates: !wipeTemplates });
+  renderDemoDataOptions();
+  initCloud();
+
+  /* First run only: prefer the editable JSON file over the copy compiled into app.js. */
+  if (!state.weekTemplatesSeeded) {
+    state.weekTemplatesSeeded = true;
+    saveState();
+    seedTemplatesFromFile({ silent: true });
+  }
+
 }
 
 function clearResetFlagFromUrl() {
@@ -685,16 +703,6 @@ function clearResetFlagFromUrl() {
   } catch (error) {
     debugLog(`could not clean the URL: ${error.message}`);
   }
-}
-
-renderDemoDataOptions();
-initCloud();
-
-/* First run only: prefer the editable JSON file over the copy compiled into app.js. */
-if (!state.weekTemplatesSeeded) {
-  state.weekTemplatesSeeded = true;
-  saveState();
-  seedTemplatesFromFile({ silent: true });
 }
 
 function showAppError(message) {
@@ -4279,3 +4287,7 @@ function syncOwnersIntoProjectPocs(project, tasks) {
       debugLog(`POC "${name}" added to project ${project.name} from a task owner`);
     });
 }
+
+
+/* Everything above is declarations; start the app. */
+boot();
