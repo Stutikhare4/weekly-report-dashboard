@@ -372,9 +372,21 @@ const nodes = {
   deleteProjectBtn: document.getElementById("deleteProjectBtn"),
   projKickoff: document.getElementById("projKickoff"),
   projGoLive: document.getElementById("projGoLive"),
-  projApplyTimeline: document.getElementById("projApplyTimeline"),
+  projDetailsForm: document.getElementById("projDetailsForm"),
+  projEditToggle: document.getElementById("projEditToggle"),
+  projCancelEdit: document.getElementById("projCancelEdit"),
+  projName: document.getElementById("projName"),
+  projCsm: document.getElementById("projCsm"),
+  projOwner: document.getElementById("projOwner"),
+  projSalesOwner: document.getElementById("projSalesOwner"),
+  projCycleWeeks: document.getElementById("projCycleWeeks"),
+  projTechTeam: document.getElementById("projTechTeam"),
+  projVendorField: document.getElementById("projVendorField"),
+  projVendorName: document.getElementById("projVendorName"),
+  projNotes: document.getElementById("projNotes"),
   projTimelineNote: document.getElementById("projTimelineNote"),
   npCycleHint: document.getElementById("npCycleHint"),
+  npGoLiveHint: document.getElementById("npGoLiveHint"),
   projectOverview: document.getElementById("projectOverview"),
   projectSummary: document.getElementById("projectSummary"),
   projectUpdates: document.getElementById("projectUpdates"),
@@ -588,10 +600,20 @@ function boot() {
   nodes.addWeeklyUpdate.addEventListener("click", () => openCreateReport(uiState.projectId, null, { editing: true }));
   nodes.addWeekFromTemplate.addEventListener("click", () => addWeekToProject(uiState.projectId));
   nodes.deleteProjectBtn.addEventListener("click", () => deleteProject(uiState.projectId));
-  nodes.projApplyTimeline.addEventListener("click", () => applyProjectTimeline(uiState.projectId));
-  ["npKickoffDate", "npGoLiveDate"].forEach((id) => {
+  nodes.projEditToggle.addEventListener("click", () => toggleProjectDetails(true));
+  nodes.projCancelEdit.addEventListener("click", () => toggleProjectDetails(false));
+  nodes.projDetailsForm.addEventListener("submit", (e) => saveProjectDetails(e));
+  nodes.projTechTeam.addEventListener("change", () => {
+    nodes.projVendorField.hidden = nodes.projTechTeam.value !== "outsourced";
+  });
+  [nodes.projKickoff, nodes.projCycleWeeks].forEach((node) => {
+    node.addEventListener("change", () => {
+      nodes.projGoLive.value = computeGoLiveDate(nodes.projKickoff.value, nodes.projCycleWeeks.value);
+    });
+  });
+  ["npKickoffDate", "npCycleWeeks"].forEach((id) => {
     const node = document.getElementById(id);
-    if (node) node.addEventListener("change", () => syncCycleWeeksToDates());
+    if (node) node.addEventListener("change", () => syncGoLiveFromCycle());
   });
   nodes.cancelCreateReport.addEventListener("click", () => navigateToScreen(uiState.returnScreen));
   nodes.btnCancelCreateReport.addEventListener("click", () => navigateToScreen(uiState.returnScreen));
@@ -1308,7 +1330,6 @@ function buildReport(projectId) {
     projectName: project.name,
     projectStatus: project.status,
     projectNotes: project.notes || "No notes yet",
-    clientName: project.clientName || "",
     csm: project.csm || "",
     projectOwner: project.implementationOwner || "",
     clientPocs: (project.clientPocs || []).map(formatPoc).filter(Boolean).join(", "),
@@ -2119,7 +2140,7 @@ function ensureDefaults(targetState) {
     if (project.vendorName === undefined) project.vendorName = "";
     if (project.crmTool === undefined) project.crmTool = "";
 
-    ["clientName", "csm", "implementationOwner", "salesOwner", "kickoffDate", "goLiveDate",
+    ["csm", "implementationOwner", "salesOwner", "kickoffDate", "goLiveDate",
       "otherToolName", "cdpOtherName", "integrationRequirementOther", "accessRequiredOther", "specialRequirements",
       "knownBlockers", "dependencies", "additionalComments", "docsLink", "testEnvironment",
       "integrationNotes"].forEach((key) => {
@@ -2566,14 +2587,13 @@ function collectWizardData() {
     name: fieldValue("npName"),
     status: "current", /* new projects are always Ongoing; closed via the project page */
     notes: fieldValue("npNotes"),
-    clientName: fieldValue("npClientName"),
     csm: fieldValue("npCsm"),
     implementationOwner: fieldValue("npImplOwner"),
     clientPocs: collectRows(nodes.npPocList, ["name", "email"]),
     team: [],
     salesOwner: fieldValue("npSalesOwner"),
     kickoffDate: fieldValue("npKickoffDate"),
-    goLiveDate: fieldValue("npGoLiveDate"),
+    goLiveDate: computeGoLiveDate(fieldValue("npKickoffDate"), Number(fieldValue("npCycleWeeks")) || DEFAULT_CYCLE_WEEKS),
     cycleWeeks: Number(fieldValue("npCycleWeeks")) || DEFAULT_CYCLE_WEEKS,
     techTeam,
     vendorName: techTeam === "outsourced" ? fieldValue("npVendorName") : "",
@@ -2651,7 +2671,6 @@ function renderWizardSummary() {
     <div class="summary-group">
       ${summaryGroupHead("Basic Details", 1)}
       ${summaryRow("Project Name", data.name)}
-      ${summaryRow("Client Name", data.clientName)}
       ${summaryRow("CSM", data.csm)}
       ${summaryRow("Project Owner", data.implementationOwner)}
       ${summaryRow("Client POCs", data.clientPocs.map(formatPoc).join(", "))}
@@ -2715,7 +2734,6 @@ function renderWizardReview() {
   const blocks = [
     reviewGroup("Basic Details", 1, [
       ["Project Name", data.name],
-      ["Client Name", data.clientName],
       ["CSM", data.csm],
       ["Project Owner", data.implementationOwner],
       ["Client POCs", data.clientPocs.map(formatPoc).join(", ")],
@@ -3967,7 +3985,29 @@ function weeksBetween(startValue, endValue) {
   return Math.max(1, Math.ceil((end - start) / (7 * 24 * 60 * 60 * 1000)));
 }
 
-/* Cycle length follows the kickoff -> go-live span; the user can still override it. */
+/* Go-live is derived: kickoff + N whole weeks, landing on the last day of the final week. */
+function computeGoLiveDate(kickoffValue, weeks) {
+  if (!kickoffValue) return "";
+
+  const kickoff = new Date(`${kickoffValue}T00:00:00`);
+  if (Number.isNaN(kickoff.getTime())) return "";
+
+  const count = Math.min(Math.max(Number(weeks) || DEFAULT_CYCLE_WEEKS, MIN_CYCLE_WEEKS), MAX_CYCLE_WEEKS);
+  return toInputDate(shiftDays(kickoff, count * 7 - 1));
+}
+
+function syncGoLiveFromCycle() {
+  const kickoff = fieldValue("npKickoffDate");
+  const weeks = Number(fieldValue("npCycleWeeks")) || DEFAULT_CYCLE_WEEKS;
+  const goLive = computeGoLiveDate(kickoff, weeks);
+
+  field("npGoLiveDate").value = goLive;
+  nodes.npGoLiveHint.textContent = goLive
+    ? `${weeks} weeks from kickoff — ends ${formatSummaryDate(goLive)}.`
+    : "Set a kickoff date and it will be calculated.";
+  renderWizardSummary();
+}
+
 function syncCycleWeeksToDates() {
   const span = weeksBetween(fieldValue("npKickoffDate"), fieldValue("npGoLiveDate"));
   const templateWeeks = state.weekTemplates.length;
@@ -3987,47 +4027,93 @@ function syncCycleWeeksToDates() {
   renderWizardSummary();
 }
 
-/* Re-dates every weekly report for a project from its kickoff, preserving week order.
-   This is what makes a timeline change reflect across the whole project. */
-function applyProjectTimeline(projectId) {
-  const project = state.projects.find((item) => item.id === projectId);
+function toggleProjectDetails(editing) {
+  nodes.projDetailsForm.hidden = !editing;
+  nodes.projEditToggle.textContent = editing ? "Editing…" : "Edit";
+  nodes.projEditToggle.disabled = editing;
+  if (!editing) renderProjectTimeline(state.projects.find((item) => item.id === uiState.projectId));
+}
+
+/* Saves the whole details block. Changing kickoff or cycle length re-dates every weekly
+   report for the project, so the plan stays consistent with the timeline. */
+function saveProjectDetails(event) {
+  event.preventDefault();
+  if (!requirePermission("project.edit", "edit project details")) return;
+
+  const project = state.projects.find((item) => item.id === uiState.projectId);
   if (!project) return;
 
-  const kickoff = nodes.projKickoff.value;
-  if (!kickoff) {
-    showAppError("Set a kickoff date before re-aligning the weeks.");
+  const name = nodes.projName.value.trim();
+  if (!name) {
+    showAppError("A project needs a name.");
     return;
   }
 
+  const kickoff = nodes.projKickoff.value;
+  const weeks = Number(nodes.projCycleWeeks.value) || DEFAULT_CYCLE_WEEKS;
+  const datesChanged = kickoff !== project.kickoffDate || weeks !== project.cycleWeeks;
+
+  project.name = name;
+  project.csm = nodes.projCsm.value.trim();
+  project.implementationOwner = nodes.projOwner.value.trim();
+  project.salesOwner = nodes.projSalesOwner.value.trim();
+  project.techTeam = nodes.projTechTeam.value;
+  project.vendorName = project.techTeam === "outsourced" ? nodes.projVendorName.value.trim() : "";
+  project.notes = nodes.projNotes.value.trim();
   project.kickoffDate = kickoff;
-  project.goLiveDate = nodes.projGoLive.value || "";
+  project.cycleWeeks = weeks;
+  project.goLiveDate = computeGoLiveDate(kickoff, weeks);
 
   const updates = state.updates
-    .filter((item) => item.projectId === projectId)
+    .filter((item) => item.projectId === project.id)
     .sort((left, right) => left.weekStart.localeCompare(right.weekStart));
 
-  const firstMonday = mondayOnOrAfter(kickoff);
-  updates.forEach((update, index) => {
-    update.weekStart = toInputDate(shiftDays(new Date(`${firstMonday}T00:00:00`), index * 7));
-    update.weekRange = formatWeekRange(update.weekStart);
+  if (datesChanged && kickoff && updates.length) {
+    const firstMonday = mondayOnOrAfter(kickoff);
+    updates.forEach((update, index) => {
+      update.weekStart = toInputDate(shiftDays(new Date(`${firstMonday}T00:00:00`), index * 7));
+      update.weekRange = formatWeekRange(update.weekStart);
+    });
+  }
+
+  state.updates.forEach((update) => {
+    if (update.projectId === project.id) update.projectName = project.name;
   });
 
-  project.cycleWeeks = updates.length || project.cycleWeeks;
   saveState();
+  toggleProjectDetails(false);
   renderAll();
-  showAppSuccess(`Timeline re-aligned: ${updates.length} week(s) now run from ${formatSummaryDate(firstMonday)}.`);
+  showAppSuccess(datesChanged && updates.length
+    ? `Details saved. ${updates.length} week(s) re-dated from ${formatSummaryDate(mondayOnOrAfter(kickoff))}.`
+    : "Project details saved.");
 }
 
 function renderProjectTimeline(project) {
-  if (!nodes.projKickoff) return;
+  if (!project || !nodes.projName) return;
 
+  nodes.projCycleWeeks.innerHTML = "";
+  for (let weeks = MIN_CYCLE_WEEKS; weeks <= MAX_CYCLE_WEEKS; weeks += 1) {
+    const option = document.createElement("option");
+    option.value = String(weeks);
+    option.textContent = `${weeks} weeks`;
+    nodes.projCycleWeeks.append(option);
+  }
+
+  nodes.projName.value = project.name || "";
+  nodes.projCsm.value = project.csm || "";
+  nodes.projOwner.value = project.implementationOwner || "";
+  nodes.projSalesOwner.value = project.salesOwner || "";
   nodes.projKickoff.value = project.kickoffDate || "";
-  nodes.projGoLive.value = project.goLiveDate || "";
+  nodes.projCycleWeeks.value = String(project.cycleWeeks || DEFAULT_CYCLE_WEEKS);
+  nodes.projGoLive.value = project.goLiveDate || computeGoLiveDate(project.kickoffDate, project.cycleWeeks);
+  nodes.projTechTeam.value = project.techTeam || "in-house";
+  nodes.projVendorField.hidden = nodes.projTechTeam.value !== "outsourced";
+  nodes.projVendorName.value = project.vendorName || "";
+  nodes.projNotes.value = project.notes || "";
 
   const updates = state.updates.filter((item) => item.projectId === project.id);
-  const span = weeksBetween(project.kickoffDate, project.goLiveDate);
   nodes.projTimelineNote.textContent = updates.length
-    ? `${updates.length} week(s) generated${span ? ` · ${span} week(s) between kickoff and go-live` : ""}.`
+    ? `${updates.length} week(s) generated · go-live ${project.goLiveDate ? formatSummaryDate(project.goLiveDate) : "not set"}.`
     : "No weekly reports yet.";
 }
 

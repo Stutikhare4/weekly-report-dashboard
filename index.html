@@ -209,14 +209,37 @@
                 <h3>Overview</h3>
                 <div id="projectOverview" class="detail-text"></div>
 
-                <div class="timeline-editor">
-                  <h4>Project timeline</h4>
-                  <p class="muted">Week dates are derived from these. Changing them re-dates every weekly report for this project.</p>
-                  <div class="timeline-fields">
-                    <label>Kickoff<input type="date" id="projKickoff" /></label>
-                    <label>Target go-live<input type="date" id="projGoLive" /></label>
-                    <button type="button" id="projApplyTimeline" class="secondary-button small-button">Re-align weeks</button>
+                <div class="timeline-editor" id="projDetailsBlock">
+                  <div class="wizard-section-head static" style="margin-bottom:8px;">
+                    <h4 style="margin:0;">Project details</h4>
+                    <button type="button" id="projEditToggle" class="ghost-button small-button" data-requires="project.edit">Edit</button>
                   </div>
+                  <p class="muted" id="projDetailsNote">Go-live is calculated from kickoff and cycle length. Changing either re-dates every weekly report.</p>
+
+                  <form id="projDetailsForm" class="timeline-fields" hidden>
+                    <label>Project name<input type="text" id="projName" /></label>
+                    <label>CSM<input type="text" id="projCsm" /></label>
+                    <label>Project owner<input type="text" id="projOwner" /></label>
+                    <label>Sales owner<input type="text" id="projSalesOwner" /></label>
+                    <label>Kickoff<input type="date" id="projKickoff" /></label>
+                    <label>Cycle length
+                      <select id="projCycleWeeks"></select>
+                    </label>
+                    <label>Target go-live<input type="date" id="projGoLive" readonly /></label>
+                    <label>Technical team
+                      <select id="projTechTeam">
+                        <option value="in-house">In-house</option>
+                        <option value="outsourced">Outsourced (third-party vendor)</option>
+                      </select>
+                    </label>
+                    <label id="projVendorField" hidden>Vendor<input type="text" id="projVendorName" /></label>
+                    <label class="span-full">Notes<textarea id="projNotes" rows="2"></textarea></label>
+                    <div class="actions span-full">
+                      <button type="submit" class="secondary-button small-button">Save details</button>
+                      <button type="button" id="projCancelEdit" class="ghost-button small-button">Cancel</button>
+                    </div>
+                  </form>
+
                   <p class="muted" id="projTimelineNote"></p>
                 </div>
               </section>
@@ -281,10 +304,6 @@
                         <input type="text" id="npName" required placeholder="e.g. LuxeStore" />
                       </label>
                       <label>
-                        Client Name
-                        <input type="text" id="npClientName" placeholder="e.g. LuxeStore Pvt. Ltd." />
-                      </label>
-                      <label>
                         CSM
                         <input type="text" id="npCsm" placeholder="Customer success manager" />
                       </label>
@@ -302,7 +321,8 @@
                       </label>
                       <label>
                         Target Go-Live Date
-                        <input type="date" id="npGoLiveDate" />
+                        <input type="date" id="npGoLiveDate" readonly />
+                        <span class="muted field-hint" id="npGoLiveHint">Calculated from Kickoff Date + Cycle Length.</span>
                       </label>
                       <label>
                         Cycle Length (weeks)
