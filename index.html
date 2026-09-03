@@ -695,6 +695,23 @@
                 <div id="settingsRoles"></div>
               </div>
 
+              <div id="settingsSyncBlock" data-requires="project.edit">
+                <h3 class="settings-head">Update existing projects from the template</h3>
+                <p class="muted" style="font-size: 0.82rem; margin-bottom: 10px;">
+                  Projects keep the task wording they were created with. This re-applies the current
+                  <code>week-templates.json</code> wording to tasks that are <strong>still untouched</strong> —
+                  not started, no owner, date, blocker or comments. Anything you have worked on is left alone.
+                </p>
+                <div class="actions">
+                  <button type="button" id="syncPreview" class="secondary-button">Preview changes</button>
+                  <button type="button" id="syncApply" class="primary-button" disabled>Apply</button>
+                </div>
+                <div id="syncResult" hidden style="margin-top: 12px;">
+                  <textarea class="report-html-source" id="syncList" readonly style="min-height: 150px;"></textarea>
+                </div>
+                <p class="muted" id="syncNote" style="margin-top: 8px; font-size: 0.82rem;"></p>
+              </div>
+
               <h3 class="settings-head">Data &amp; Backup</h3>
               <p class="storage-warning">
                 <strong>Everything lives in this browser.</strong> Projects, weekly reports and the

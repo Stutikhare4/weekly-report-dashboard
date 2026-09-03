@@ -492,6 +492,11 @@ const nodes = {
   settingsDemoLoad: document.getElementById("settingsDemoLoad"),
   settingsDemoNote: document.getElementById("settingsDemoNote"),
   settingsDataStats: document.getElementById("settingsDataStats"),
+  syncPreview: document.getElementById("syncPreview"),
+  syncApply: document.getElementById("syncApply"),
+  syncResult: document.getElementById("syncResult"),
+  syncList: document.getElementById("syncList"),
+  syncNote: document.getElementById("syncNote"),
   settingsAccount: document.getElementById("settingsAccount"),
   settingsRoles: document.getElementById("settingsRoles"),
   settingsPasswordBlock: document.getElementById("settingsPasswordBlock"),
@@ -646,6 +651,9 @@ function boot() {
 
   nodes.authForm.addEventListener("submit", (e) => handleEmailSignIn(e));
 nodes.passwordForm.addEventListener("submit", (e) => handlePasswordChange(e));
+
+  nodes.syncPreview.addEventListener("click", () => previewTemplateSync());
+  nodes.syncApply.addEventListener("click", () => applyTemplateSync());
 
   nodes.settingsExport.addEventListener("click", () => exportBackup());
   nodes.settingsClear.addEventListener("click", () => clearAllData({ keepTemplates: true }));
@@ -3780,6 +3788,123 @@ async function loadUsageStats() {
 
   target.textContent =
     `${row.total_users} account(s) total · ${row.active_7d} active in the last 7 days · ${row.active_30d} in the last 30.`;
+}
+
+/* ---------- Re-apply template wording to existing projects ---------- */
+
+/* Tasks are copied into a project when it is created, so later edits to the template do not
+   reach them. This finds tasks that still look exactly as generated and refreshes their
+   wording from the current template. A task anyone has started is never touched. */
+let pendingTemplateSync = null;
+
+function isUntouchedTask(task) {
+  return (task.status || "not started") === "not started"
+    && !String(task.owner || "").trim()
+    && !String(task.date || "").trim()
+    && !String(task.blocker || "").trim()
+    && !String(task.comments || "").trim()
+    && !(task.subtasks || []).length;
+}
+
+function titleTokens(text) {
+  return new Set(String(text || "").toLowerCase().replace(/[^a-z0-9 ]+/g, " ").split(/\s+/).filter(Boolean));
+}
+
+/* Jaccard overlap — "Channel form shared" vs "Channel form" scores 0.67, while two
+   unrelated tasks score near zero. */
+function similarity(left, right) {
+  const a = titleTokens(left);
+  const b = titleTokens(right);
+  if (!a.size || !b.size) return 0;
+
+  let shared = 0;
+  a.forEach((token) => { if (b.has(token)) shared += 1; });
+  return shared / (a.size + b.size - shared);
+}
+
+function planTemplateSync() {
+  const changes = [];
+
+  state.updates.forEach((update) => {
+    const template = state.weekTemplates.find((entry) => entry.week === update.templateWeek);
+    if (!template) return;
+
+    const project = state.projects.find((item) => item.id === update.projectId);
+    const platforms = project ? project.platforms || [] : [];
+    const candidates = templateTasksForProject(template.tasks, { platforms });
+    const claimed = new Set();
+
+    (update.tasks || []).forEach((task) => {
+      if (!isUntouchedTask(task)) return;
+
+      let best = null;
+      let bestScore = 0;
+      candidates.forEach((candidate, index) => {
+        if (claimed.has(index)) return;
+        const score = similarity(task.title, candidate.title);
+        if (score > bestScore) { bestScore = score; best = { candidate, index }; }
+      });
+
+      if (!best || bestScore < 0.5) return;
+      if (best.candidate.title === task.title && best.candidate.scope === task.phase) return;
+
+      claimed.add(best.index);
+      changes.push({
+        taskId: task.id,
+        updateId: update.id,
+        projectName: update.projectName,
+        week: update.templateWeek,
+        from: { scope: task.phase, title: task.title },
+        to: { scope: best.candidate.scope, title: best.candidate.title },
+      });
+    });
+  });
+
+  return changes;
+}
+
+function previewTemplateSync() {
+  if (!requirePermission("project.edit", "update project tasks")) return;
+
+  pendingTemplateSync = planTemplateSync();
+  nodes.syncApply.disabled = !pendingTemplateSync.length;
+
+  if (!pendingTemplateSync.length) {
+    nodes.syncResult.hidden = true;
+    nodes.syncNote.textContent = "Nothing to update — every untouched task already matches the template.";
+    return;
+  }
+
+  nodes.syncList.value = pendingTemplateSync
+    .map((change) => `${change.projectName} · W${change.week}\n   ${change.from.scope} | ${change.from.title}\n → ${change.to.scope} | ${change.to.title}`)
+    .join("\n\n");
+  nodes.syncResult.hidden = false;
+  nodes.syncNote.textContent = `${pendingTemplateSync.length} task(s) would change. Nothing is saved until you press Apply.`;
+}
+
+function applyTemplateSync() {
+  if (!pendingTemplateSync || !pendingTemplateSync.length) return;
+  if (!requirePermission("project.edit", "update project tasks")) return;
+  if (!confirm(`Update ${pendingTemplateSync.length} task(s) across your projects? Only untouched tasks change.`)) return;
+
+  let applied = 0;
+  pendingTemplateSync.forEach((change) => {
+    const update = state.updates.find((item) => item.id === change.updateId);
+    const task = update && (update.tasks || []).find((item) => item.id === change.taskId);
+    if (!task || !isUntouchedTask(task)) return;
+
+    task.phase = change.to.scope;
+    task.title = change.to.title;
+    applied += 1;
+  });
+
+  saveState();
+  pendingTemplateSync = null;
+  nodes.syncApply.disabled = true;
+  nodes.syncResult.hidden = true;
+  nodes.syncNote.textContent = "";
+  renderAll();
+  showAppSuccess(`Updated ${applied} task(s) from the template.`);
 }
 
 /* ---------- Backup / restore ---------- */
