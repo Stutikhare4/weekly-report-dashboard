@@ -2482,6 +2482,31 @@ button {
   font-size: 0.88rem;
 }
 
+/* This textarea sits outside .form-grid, so it needs its own sizing rather than
+   falling back to the browser's default ~20-column box. */
+.comments-field {
+  display: block;
+}
+
+.comments-field textarea {
+  width: 100%;
+  min-height: 130px;
+  padding: 14px 16px;
+  border-radius: 16px;
+  border: 1px solid var(--border-strong);
+  color: var(--text);
+  background: var(--surface-4);
+  font: inherit;
+  line-height: 1.55;
+  resize: vertical;
+}
+
+.comments-field textarea:focus {
+  outline: none;
+  border-color: rgba(56, 189, 248, 0.58);
+  box-shadow: 0 0 0 4px rgba(56, 189, 248, 0.16);
+}
+
 .field-hint {
   font-size: 0.76rem;
   font-weight: 400;
