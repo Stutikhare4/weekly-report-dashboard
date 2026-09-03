@@ -1,142 +1,1091 @@
 {
-  "$comment": "Master week-wise plan. `platforms` scopes a task to the platforms a project selected; an empty list means the task applies to every project. Platforms: Website, Web App, Android, iOS, REST API. Edit here, then use Templates -> Reload from file.",
+  "$comment": "Master week-wise plan. `platforms` scopes a task to the platforms a project selected; an empty list means every project. `days` is how long the task takes in the base cycle (baseCycleWeeks). `daysByCycle` overrides that for specific cycle lengths, e.g. {\"7\": 10, \"8\": 14}. A cycle with no override is scaled from `days` pro rata, so a new cycle length needs no changes here. A task with no `days` defaults to 7 (spans its week).",
+  "baseCycleWeeks": 6,
+  "defaultTaskDays": 7,
   "weeks": [
-    {"week":1,"label":"Kickoff & Discovery","tasks":[
-      {"scope":"Kickoff call","title":"Onboarding mail thread initiated","owner":"","priority":"medium","platforms":[]},
-      {"scope":"Kickoff call","title":"Channel form","owner":"","priority":"medium","platforms":[]},
-      {"scope":"Kickoff call","title":"Tech doc","owner":"","priority":"medium","platforms":[]},
-      {"scope":"Kickoff call","title":"Scope of Work","owner":"","priority":"medium","platforms":[]},
-      {"scope":"Tech Team connect","title":"Tech team connect - Website","owner":"","priority":"high","platforms":["Website"]},
-      {"scope":"Tech Team connect","title":"Tech team connect - Android","owner":"","priority":"high","platforms":["Android"]},
-      {"scope":"Tech Team connect","title":"Tech team connect - iOS","owner":"","priority":"high","platforms":["iOS"]},
-      {"scope":"Tech Team connect","title":"Tech team connect - Web App","owner":"","priority":"high","platforms":["Web App"]},
-      {"scope":"Tech Team connect","title":"Tech team connect - REST API","owner":"","priority":"high","platforms":["REST API"]},
-      {"scope":"User Id","title":"Finalise the unique user identifier","owner":"","priority":"high","platforms":[]},
-      {"scope":"Data Model","title":"Data model - Website","owner":"","priority":"high","platforms":["Website"]},
-      {"scope":"Data Model","title":"Data model - Android","owner":"","priority":"high","platforms":["Android"]},
-      {"scope":"Data Model","title":"Data model - iOS","owner":"","priority":"high","platforms":["iOS"]},
-      {"scope":"Data Model","title":"Data model - Web App","owner":"","priority":"high","platforms":["Web App"]},
-      {"scope":"Data Model","title":"Data model - REST API","owner":"","priority":"high","platforms":["REST API"]}
-    ]},
-    {"week":2,"label":"Staging Setup","tasks":[
-      {"scope":"Data Model","title":"Data model finalisation & sign-off","owner":"","priority":"high","platforms":[]},
-      {"scope":"Staging","title":"SDK setup - Website","owner":"","priority":"high","platforms":["Website"]},
-      {"scope":"Staging","title":"SDK setup - Android","owner":"","priority":"high","platforms":["Android"]},
-      {"scope":"Staging","title":"SDK setup - iOS","owner":"","priority":"high","platforms":["iOS"]},
-      {"scope":"Staging","title":"SDK setup - Web App","owner":"","priority":"high","platforms":["Web App"]},
-      {"scope":"Staging","title":"User tracking setup - Website","owner":"","priority":"high","platforms":["Website"]},
-      {"scope":"Staging","title":"User tracking setup - Android","owner":"","priority":"high","platforms":["Android"]},
-      {"scope":"Staging","title":"User tracking setup - iOS","owner":"","priority":"high","platforms":["iOS"]},
-      {"scope":"Staging","title":"User tracking setup - Web App","owner":"","priority":"high","platforms":["Web App"]},
-      {"scope":"Historical Data","title":"Preparation of CSV containing historical user and historical transactional data","owner":"","priority":"high","platforms":[]},
-      {"scope":"Website","title":"User Attributes","owner":"","priority":"high","platforms":["Website"]},
-      {"scope":"Website","title":"Custom Events","owner":"","priority":"high","platforms":["Website"]},
-      {"scope":"Website","title":"Event Attributes","owner":"","priority":"high","platforms":["Website"]},
-      {"scope":"Website","title":"Login / Logout","owner":"","priority":"high","platforms":["Website"]},
-      {"scope":"Website","title":"Signup","owner":"","priority":"high","platforms":["Website"]},
-      {"scope":"Android","title":"SDK Initialization","owner":"","priority":"high","platforms":["Android"]},
-      {"scope":"Android","title":"User Attributes","owner":"","priority":"high","platforms":["Android"]},
-      {"scope":"Android","title":"Custom Events","owner":"","priority":"high","platforms":["Android"]},
-      {"scope":"Android","title":"Event Attributes","owner":"","priority":"high","platforms":["Android"]},
-      {"scope":"Android","title":"Login / Logout","owner":"","priority":"high","platforms":["Android"]},
-      {"scope":"Android","title":"Signup","owner":"","priority":"high","platforms":["Android"]},
-      {"scope":"iOS","title":"SDK Initialization","owner":"","priority":"high","platforms":["iOS"]},
-      {"scope":"iOS","title":"User Attributes","owner":"","priority":"high","platforms":["iOS"]},
-      {"scope":"iOS","title":"Custom Events","owner":"","priority":"high","platforms":["iOS"]},
-      {"scope":"iOS","title":"Login / Logout","owner":"","priority":"high","platforms":["iOS"]},
-      {"scope":"iOS","title":"Signup","owner":"","priority":"high","platforms":["iOS"]},
-      {"scope":"REST API","title":"API key configuration","owner":"","priority":"high","platforms":["REST API"]},
-      {"scope":"REST API","title":"User Tracking","owner":"","priority":"high","platforms":["REST API"]},
-      {"scope":"REST API","title":"Event Tracking","owner":"","priority":"high","platforms":["REST API"]}
-    ]},
-    {"week":3,"label":"Event Tracking & Channels","tasks":[
-      {"scope":"Staging","title":"Event tracking setup - Website","owner":"","priority":"high","platforms":["Website"]},
-      {"scope":"Staging","title":"Event tracking setup - Android","owner":"","priority":"high","platforms":["Android"]},
-      {"scope":"Staging","title":"Event tracking setup - iOS","owner":"","priority":"high","platforms":["iOS"]},
-      {"scope":"Staging","title":"Event tracking setup - Web App","owner":"","priority":"high","platforms":["Web App"]},
-      {"scope":"App Implementation","title":"Screen tracking - Android","owner":"","priority":"high","platforms":["Android"]},
-      {"scope":"App Implementation","title":"Screen tracking - iOS","owner":"","priority":"high","platforms":["iOS"]},
-      {"scope":"Channels - Staging","title":"Email channel setup","owner":"","priority":"medium","platforms":[]},
-      {"scope":"Channels - Staging","title":"SMS channel setup","owner":"","priority":"high","platforms":[]},
-      {"scope":"Channels - Staging","title":"WhatsApp channel setup","owner":"","priority":"high","platforms":[]},
-      {"scope":"Channels - Staging","title":"Web Push setup","owner":"","priority":"medium","platforms":["Website","Web App"]},
-      {"scope":"Channels - Staging","title":"On-site Notification setup","owner":"","priority":"medium","platforms":["Website","Web App"]},
-      {"scope":"Channels - Staging","title":"Push setup - FCM","owner":"","priority":"high","platforms":["Android"]},
-      {"scope":"Channels - Staging","title":"Push setup - APNS certificate","owner":"","priority":"high","platforms":["iOS"]},
-      {"scope":"Channels - Staging","title":"In-App setup","owner":"","priority":"high","platforms":["Android","iOS"]},
-      {"scope":"Channels - Staging","title":"Rich Push setup","owner":"","priority":"medium","platforms":["iOS"]},
-      {"scope":"REST API","title":"Custom event API","owner":"","priority":"high","platforms":["REST API"]},
-      {"scope":"REST API","title":"Backend event tracking","owner":"","priority":"high","platforms":["REST API"]},
-      {"scope":"REST API","title":"Historical user data migration","owner":"","priority":"high","platforms":["REST API"]},
-      {"scope":"REST API","title":"Historical event migration","owner":"","priority":"high","platforms":["REST API"]},
-      {"scope":"Android","title":"Push Token Registration","owner":"","priority":"high","platforms":["Android"]},
-      {"scope":"Android","title":"Firebase / FCM Setup","owner":"","priority":"high","platforms":["Android"]},
-      {"scope":"Android","title":"Push Notification Setup","owner":"","priority":"high","platforms":["Android"]},
-      {"scope":"Android","title":"Rich Push","owner":"","priority":"high","platforms":["Android"]},
-      {"scope":"Android","title":"In-App Setup","owner":"","priority":"high","platforms":["Android"]},
-      {"scope":"Android","title":"In-App Testing","owner":"","priority":"high","platforms":["Android"]},
-      {"scope":"Android","title":"App Inline","owner":"","priority":"high","platforms":["Android"]},
-      {"scope":"iOS","title":"Push Token Registration","owner":"","priority":"high","platforms":["iOS"]},
-      {"scope":"iOS","title":"APNs Setup","owner":"","priority":"high","platforms":["iOS"]},
-      {"scope":"iOS","title":"Push Notification Setup","owner":"","priority":"high","platforms":["iOS"]},
-      {"scope":"iOS","title":"Rich Push","owner":"","priority":"high","platforms":["iOS"]},
-      {"scope":"iOS","title":"In-App Setup","owner":"","priority":"high","platforms":["iOS"]},
-      {"scope":"iOS","title":"In-App Testing","owner":"","priority":"high","platforms":["iOS"]},
-      {"scope":"iOS","title":"App Inline","owner":"","priority":"high","platforms":["iOS"]},
-      {"scope":"Channels - Email","title":"Email Provider Setup","owner":"","priority":"medium","platforms":[]},
-      {"scope":"Channels - SMS","title":"SMS Provider Setup","owner":"","priority":"high","platforms":[]},
-      {"scope":"Channels - WhatsApp","title":"WhatsApp Business Setup","owner":"","priority":"high","platforms":[]},
-      {"scope":"Channels - Push","title":"Push Token","owner":"","priority":"high","platforms":[]},
-      {"scope":"Channels - Push","title":"Notification Permission","owner":"","priority":"high","platforms":[]},
-      {"scope":"Channels - Push","title":"Push Templates","owner":"","priority":"medium","platforms":[]},
-      {"scope":"Channels - Push","title":"Rich Push","owner":"","priority":"medium","platforms":[]},
-      {"scope":"Channels - Push","title":"Deep Links","owner":"","priority":"medium","platforms":[]},
-      {"scope":"Channels - Push","title":"CTA","owner":"","priority":"medium","platforms":[]},
-      {"scope":"Channels - Push","title":"Test Push","owner":"","priority":"medium","platforms":[]},
-      {"scope":"Channels - Push","title":"Delivery Validation","owner":"","priority":"high","platforms":[]},
-      {"scope":"Channels - Web Push","title":"Web Push Configuration","owner":"","priority":"medium","platforms":[]},
-      {"scope":"Channels - RCS","title":"RCS Provider Setup","owner":"","priority":"medium","platforms":[]},
-      {"scope":"Channels - In-App","title":"SDK Configuration","owner":"","priority":"high","platforms":[]},
-      {"scope":"Channels - On-site","title":"On-site Notification","owner":"","priority":"medium","platforms":[]},
-      {"scope":"Channels - On-site","title":"On-site Survey","owner":"","priority":"medium","platforms":[]},
-      {"scope":"Channels - On-site","title":"On-site Feedback","owner":"","priority":"medium","platforms":[]}
-    ]},
-    {"week":4,"label":"Audit & Templates","tasks":[
-      {"scope":"Staging Audit","title":"Website audit","owner":"","priority":"high","platforms":["Website"]},
-      {"scope":"Staging Audit","title":"Android app audit","owner":"","priority":"high","platforms":["Android"]},
-      {"scope":"Staging Audit","title":"iOS app audit","owner":"","priority":"high","platforms":["iOS"]},
-      {"scope":"Staging Audit","title":"Web App audit","owner":"","priority":"high","platforms":["Web App"]},
-      {"scope":"Staging Audit","title":"Changes shared with dev team and actioned","owner":"","priority":"high","platforms":[]},
-      {"scope":"Email Warmup","title":"Warmup content ready","owner":"","priority":"high","platforms":[]},
-      {"scope":"SMS template","title":"Share template for provider testing","owner":"","priority":"high","platforms":[]},
-      {"scope":"WhatsApp Template","title":"Add template on the dashboard for testing","owner":"","priority":"high","platforms":[]},
-      {"scope":"Historic Data","title":"Historical transactional data uploaded","owner":"","priority":"high","platforms":[]},
-      {"scope":"Website","title":"Website Testing & QA","owner":"","priority":"high","platforms":["Website"]},
-      {"scope":"Android","title":"Android Testing & QA","owner":"","priority":"high","platforms":["Android"]},
-      {"scope":"iOS","title":"iOS Testing & QA","owner":"","priority":"high","platforms":["iOS"]},
-      {"scope":"REST API","title":"REST API testing","owner":"","priority":"high","platforms":["REST API"]}
-    ]},
-    {"week":5,"label":"Production Movement","tasks":[
-      {"scope":"Production","title":"Move integration to production - Website","owner":"","priority":"high","platforms":["Website"]},
-      {"scope":"Production","title":"Move integration to production - Android","owner":"","priority":"high","platforms":["Android"]},
-      {"scope":"Production","title":"Move integration to production - iOS","owner":"","priority":"high","platforms":["iOS"]},
-      {"scope":"Production","title":"Move integration to production - Web App","owner":"","priority":"high","platforms":["Web App"]},
-      {"scope":"Production","title":"Play Store release with SDK","owner":"","priority":"high","platforms":["Android"]},
-      {"scope":"Production","title":"App Store release with SDK","owner":"","priority":"high","platforms":["iOS"]},
-      {"scope":"Production","title":"Production testing","owner":"","priority":"high","platforms":[]},
-      {"scope":"Channels - Production","title":"Channels enabled on production","owner":"","priority":"high","platforms":[]},
-      {"scope":"Email Warmup","title":"Warmup journey live","owner":"","priority":"high","platforms":[]},
-      {"scope":"Production","title":"Production API testing","owner":"","priority":"high","platforms":["REST API"]},
-      {"scope":"Website","title":"Production Validation","owner":"","priority":"high","platforms":["Website"]},
-      {"scope":"Android","title":"Production Validation","owner":"","priority":"high","platforms":["Android"]},
-      {"scope":"iOS","title":"Production Validation","owner":"","priority":"high","platforms":["iOS"]}
-    ]},
-    {"week":6,"label":"Go-Live","tasks":[
-      {"scope":"Go-Live","title":"Demo dashboard walkthrough with client","owner":"","priority":"medium","platforms":[]},
-      {"scope":"Go-Live","title":"2 or more recurring campaigns / journeys live","owner":"","priority":"high","platforms":[]},
-      {"scope":"Go-Live","title":"Key events and attributes verified on production","owner":"","priority":"high","platforms":[]},
-      {"scope":"Go-Live","title":"Confirmation from client on billing start","owner":"","priority":"high","platforms":[]},
-      {"scope":"Go-Live","title":"Handover to CSM","owner":"","priority":"medium","platforms":[]}
-    ]}
+    {
+      "week": 1,
+      "label": "Kickoff & Discovery",
+      "tasks": [
+        {
+          "scope": "Kickoff call",
+          "title": "Onboarding mail thread initiated",
+          "owner": "",
+          "priority": "medium",
+          "platforms": []
+        },
+        {
+          "scope": "Kickoff call",
+          "title": "Channel form",
+          "owner": "",
+          "priority": "medium",
+          "platforms": []
+        },
+        {
+          "scope": "Kickoff call",
+          "title": "Tech doc",
+          "owner": "",
+          "priority": "medium",
+          "platforms": []
+        },
+        {
+          "scope": "Kickoff call",
+          "title": "Scope of Work",
+          "owner": "",
+          "priority": "medium",
+          "platforms": []
+        },
+        {
+          "scope": "Tech Team connect",
+          "title": "Tech team connect - Website",
+          "owner": "",
+          "priority": "high",
+          "platforms": [
+            "Website"
+          ]
+        },
+        {
+          "scope": "Tech Team connect",
+          "title": "Tech team connect - Android",
+          "owner": "",
+          "priority": "high",
+          "platforms": [
+            "Android"
+          ]
+        },
+        {
+          "scope": "Tech Team connect",
+          "title": "Tech team connect - iOS",
+          "owner": "",
+          "priority": "high",
+          "platforms": [
+            "iOS"
+          ]
+        },
+        {
+          "scope": "Tech Team connect",
+          "title": "Tech team connect - Web App",
+          "owner": "",
+          "priority": "high",
+          "platforms": [
+            "Web App"
+          ]
+        },
+        {
+          "scope": "Tech Team connect",
+          "title": "Tech team connect - REST API",
+          "owner": "",
+          "priority": "high",
+          "platforms": [
+            "REST API"
+          ]
+        },
+        {
+          "scope": "User Id",
+          "title": "Finalise the unique user identifier",
+          "owner": "",
+          "priority": "high",
+          "platforms": []
+        },
+        {
+          "scope": "Data Model",
+          "title": "Data model - Website",
+          "owner": "",
+          "priority": "high",
+          "platforms": [
+            "Website"
+          ]
+        },
+        {
+          "scope": "Data Model",
+          "title": "Data model - Android",
+          "owner": "",
+          "priority": "high",
+          "platforms": [
+            "Android"
+          ]
+        },
+        {
+          "scope": "Data Model",
+          "title": "Data model - iOS",
+          "owner": "",
+          "priority": "high",
+          "platforms": [
+            "iOS"
+          ]
+        },
+        {
+          "scope": "Data Model",
+          "title": "Data model - Web App",
+          "owner": "",
+          "priority": "high",
+          "platforms": [
+            "Web App"
+          ]
+        },
+        {
+          "scope": "Data Model",
+          "title": "Data model - REST API",
+          "owner": "",
+          "priority": "high",
+          "platforms": [
+            "REST API"
+          ]
+        }
+      ]
+    },
+    {
+      "week": 2,
+      "label": "Staging Setup",
+      "tasks": [
+        {
+          "scope": "Data Model",
+          "title": "Data model finalisation & sign-off",
+          "owner": "",
+          "priority": "high",
+          "platforms": []
+        },
+        {
+          "scope": "Staging",
+          "title": "SDK setup - Website",
+          "owner": "",
+          "priority": "high",
+          "platforms": [
+            "Website"
+          ]
+        },
+        {
+          "scope": "Staging",
+          "title": "SDK setup - Android",
+          "owner": "",
+          "priority": "high",
+          "platforms": [
+            "Android"
+          ]
+        },
+        {
+          "scope": "Staging",
+          "title": "SDK setup - iOS",
+          "owner": "",
+          "priority": "high",
+          "platforms": [
+            "iOS"
+          ]
+        },
+        {
+          "scope": "Staging",
+          "title": "SDK setup - Web App",
+          "owner": "",
+          "priority": "high",
+          "platforms": [
+            "Web App"
+          ]
+        },
+        {
+          "scope": "Staging",
+          "title": "User tracking setup - Website",
+          "owner": "",
+          "priority": "high",
+          "platforms": [
+            "Website"
+          ]
+        },
+        {
+          "scope": "Staging",
+          "title": "User tracking setup - Android",
+          "owner": "",
+          "priority": "high",
+          "platforms": [
+            "Android"
+          ]
+        },
+        {
+          "scope": "Staging",
+          "title": "User tracking setup - iOS",
+          "owner": "",
+          "priority": "high",
+          "platforms": [
+            "iOS"
+          ]
+        },
+        {
+          "scope": "Staging",
+          "title": "User tracking setup - Web App",
+          "owner": "",
+          "priority": "high",
+          "platforms": [
+            "Web App"
+          ]
+        },
+        {
+          "scope": "Historical Data",
+          "title": "Preparation of CSV containing historical user and historical transactional data",
+          "owner": "",
+          "priority": "high",
+          "platforms": []
+        },
+        {
+          "scope": "Website",
+          "title": "User Attributes",
+          "owner": "",
+          "priority": "high",
+          "platforms": [
+            "Website"
+          ]
+        },
+        {
+          "scope": "Website",
+          "title": "Custom Events",
+          "owner": "",
+          "priority": "high",
+          "platforms": [
+            "Website"
+          ]
+        },
+        {
+          "scope": "Website",
+          "title": "Event Attributes",
+          "owner": "",
+          "priority": "high",
+          "platforms": [
+            "Website"
+          ]
+        },
+        {
+          "scope": "Website",
+          "title": "Login / Logout",
+          "owner": "",
+          "priority": "high",
+          "platforms": [
+            "Website"
+          ]
+        },
+        {
+          "scope": "Website",
+          "title": "Signup",
+          "owner": "",
+          "priority": "high",
+          "platforms": [
+            "Website"
+          ]
+        },
+        {
+          "scope": "Android",
+          "title": "SDK Initialization",
+          "owner": "",
+          "priority": "high",
+          "platforms": [
+            "Android"
+          ]
+        },
+        {
+          "scope": "Android",
+          "title": "User Attributes",
+          "owner": "",
+          "priority": "high",
+          "platforms": [
+            "Android"
+          ]
+        },
+        {
+          "scope": "Android",
+          "title": "Custom Events",
+          "owner": "",
+          "priority": "high",
+          "platforms": [
+            "Android"
+          ]
+        },
+        {
+          "scope": "Android",
+          "title": "Event Attributes",
+          "owner": "",
+          "priority": "high",
+          "platforms": [
+            "Android"
+          ]
+        },
+        {
+          "scope": "Android",
+          "title": "Login / Logout",
+          "owner": "",
+          "priority": "high",
+          "platforms": [
+            "Android"
+          ]
+        },
+        {
+          "scope": "Android",
+          "title": "Signup",
+          "owner": "",
+          "priority": "high",
+          "platforms": [
+            "Android"
+          ]
+        },
+        {
+          "scope": "iOS",
+          "title": "SDK Initialization",
+          "owner": "",
+          "priority": "high",
+          "platforms": [
+            "iOS"
+          ]
+        },
+        {
+          "scope": "iOS",
+          "title": "User Attributes",
+          "owner": "",
+          "priority": "high",
+          "platforms": [
+            "iOS"
+          ]
+        },
+        {
+          "scope": "iOS",
+          "title": "Custom Events",
+          "owner": "",
+          "priority": "high",
+          "platforms": [
+            "iOS"
+          ]
+        },
+        {
+          "scope": "iOS",
+          "title": "Login / Logout",
+          "owner": "",
+          "priority": "high",
+          "platforms": [
+            "iOS"
+          ]
+        },
+        {
+          "scope": "iOS",
+          "title": "Signup",
+          "owner": "",
+          "priority": "high",
+          "platforms": [
+            "iOS"
+          ]
+        },
+        {
+          "scope": "REST API",
+          "title": "API key configuration",
+          "owner": "",
+          "priority": "high",
+          "platforms": [
+            "REST API"
+          ]
+        },
+        {
+          "scope": "REST API",
+          "title": "User Tracking",
+          "owner": "",
+          "priority": "high",
+          "platforms": [
+            "REST API"
+          ]
+        },
+        {
+          "scope": "REST API",
+          "title": "Event Tracking",
+          "owner": "",
+          "priority": "high",
+          "platforms": [
+            "REST API"
+          ]
+        }
+      ]
+    },
+    {
+      "week": 3,
+      "label": "Event Tracking & Channels",
+      "tasks": [
+        {
+          "scope": "Staging",
+          "title": "Event tracking setup - Website",
+          "owner": "",
+          "priority": "high",
+          "platforms": [
+            "Website"
+          ]
+        },
+        {
+          "scope": "Staging",
+          "title": "Event tracking setup - Android",
+          "owner": "",
+          "priority": "high",
+          "platforms": [
+            "Android"
+          ]
+        },
+        {
+          "scope": "Staging",
+          "title": "Event tracking setup - iOS",
+          "owner": "",
+          "priority": "high",
+          "platforms": [
+            "iOS"
+          ]
+        },
+        {
+          "scope": "Staging",
+          "title": "Event tracking setup - Web App",
+          "owner": "",
+          "priority": "high",
+          "platforms": [
+            "Web App"
+          ]
+        },
+        {
+          "scope": "App Implementation",
+          "title": "Screen tracking - Android",
+          "owner": "",
+          "priority": "high",
+          "platforms": [
+            "Android"
+          ]
+        },
+        {
+          "scope": "App Implementation",
+          "title": "Screen tracking - iOS",
+          "owner": "",
+          "priority": "high",
+          "platforms": [
+            "iOS"
+          ]
+        },
+        {
+          "scope": "Channels - Staging",
+          "title": "Email channel setup",
+          "owner": "",
+          "priority": "medium",
+          "platforms": []
+        },
+        {
+          "scope": "Channels - Staging",
+          "title": "SMS channel setup",
+          "owner": "",
+          "priority": "high",
+          "platforms": []
+        },
+        {
+          "scope": "Channels - Staging",
+          "title": "WhatsApp channel setup",
+          "owner": "",
+          "priority": "high",
+          "platforms": []
+        },
+        {
+          "scope": "Channels - Staging",
+          "title": "Web Push setup",
+          "owner": "",
+          "priority": "medium",
+          "platforms": [
+            "Website",
+            "Web App"
+          ]
+        },
+        {
+          "scope": "Channels - Staging",
+          "title": "On-site Notification setup",
+          "owner": "",
+          "priority": "medium",
+          "platforms": [
+            "Website",
+            "Web App"
+          ]
+        },
+        {
+          "scope": "Channels - Staging",
+          "title": "Push setup - FCM",
+          "owner": "",
+          "priority": "high",
+          "platforms": [
+            "Android"
+          ]
+        },
+        {
+          "scope": "Channels - Staging",
+          "title": "Push setup - APNS certificate",
+          "owner": "",
+          "priority": "high",
+          "platforms": [
+            "iOS"
+          ]
+        },
+        {
+          "scope": "Channels - Staging",
+          "title": "In-App setup",
+          "owner": "",
+          "priority": "high",
+          "platforms": [
+            "Android",
+            "iOS"
+          ]
+        },
+        {
+          "scope": "Channels - Staging",
+          "title": "Rich Push setup",
+          "owner": "",
+          "priority": "medium",
+          "platforms": [
+            "iOS"
+          ]
+        },
+        {
+          "scope": "REST API",
+          "title": "Custom event API",
+          "owner": "",
+          "priority": "high",
+          "platforms": [
+            "REST API"
+          ]
+        },
+        {
+          "scope": "REST API",
+          "title": "Backend event tracking",
+          "owner": "",
+          "priority": "high",
+          "platforms": [
+            "REST API"
+          ]
+        },
+        {
+          "scope": "REST API",
+          "title": "Historical user data migration",
+          "owner": "",
+          "priority": "high",
+          "platforms": [
+            "REST API"
+          ]
+        },
+        {
+          "scope": "REST API",
+          "title": "Historical event migration",
+          "owner": "",
+          "priority": "high",
+          "platforms": [
+            "REST API"
+          ]
+        },
+        {
+          "scope": "Android",
+          "title": "Push Token Registration",
+          "owner": "",
+          "priority": "high",
+          "platforms": [
+            "Android"
+          ]
+        },
+        {
+          "scope": "Android",
+          "title": "Firebase / FCM Setup",
+          "owner": "",
+          "priority": "high",
+          "platforms": [
+            "Android"
+          ]
+        },
+        {
+          "scope": "Android",
+          "title": "Push Notification Setup",
+          "owner": "",
+          "priority": "high",
+          "platforms": [
+            "Android"
+          ]
+        },
+        {
+          "scope": "Android",
+          "title": "Rich Push",
+          "owner": "",
+          "priority": "high",
+          "platforms": [
+            "Android"
+          ]
+        },
+        {
+          "scope": "Android",
+          "title": "In-App Setup",
+          "owner": "",
+          "priority": "high",
+          "platforms": [
+            "Android"
+          ]
+        },
+        {
+          "scope": "Android",
+          "title": "In-App Testing",
+          "owner": "",
+          "priority": "high",
+          "platforms": [
+            "Android"
+          ]
+        },
+        {
+          "scope": "Android",
+          "title": "App Inline",
+          "owner": "",
+          "priority": "high",
+          "platforms": [
+            "Android"
+          ]
+        },
+        {
+          "scope": "iOS",
+          "title": "Push Token Registration",
+          "owner": "",
+          "priority": "high",
+          "platforms": [
+            "iOS"
+          ]
+        },
+        {
+          "scope": "iOS",
+          "title": "APNs Setup",
+          "owner": "",
+          "priority": "high",
+          "platforms": [
+            "iOS"
+          ]
+        },
+        {
+          "scope": "iOS",
+          "title": "Push Notification Setup",
+          "owner": "",
+          "priority": "high",
+          "platforms": [
+            "iOS"
+          ]
+        },
+        {
+          "scope": "iOS",
+          "title": "Rich Push",
+          "owner": "",
+          "priority": "high",
+          "platforms": [
+            "iOS"
+          ]
+        },
+        {
+          "scope": "iOS",
+          "title": "In-App Setup",
+          "owner": "",
+          "priority": "high",
+          "platforms": [
+            "iOS"
+          ]
+        },
+        {
+          "scope": "iOS",
+          "title": "In-App Testing",
+          "owner": "",
+          "priority": "high",
+          "platforms": [
+            "iOS"
+          ]
+        },
+        {
+          "scope": "iOS",
+          "title": "App Inline",
+          "owner": "",
+          "priority": "high",
+          "platforms": [
+            "iOS"
+          ]
+        },
+        {
+          "scope": "Channels - Email",
+          "title": "Email Provider Setup",
+          "owner": "",
+          "priority": "medium",
+          "platforms": []
+        },
+        {
+          "scope": "Channels - SMS",
+          "title": "SMS Provider Setup",
+          "owner": "",
+          "priority": "high",
+          "platforms": []
+        },
+        {
+          "scope": "Channels - WhatsApp",
+          "title": "WhatsApp Business Setup",
+          "owner": "",
+          "priority": "high",
+          "platforms": []
+        },
+        {
+          "scope": "Channels - Push",
+          "title": "Push Token",
+          "owner": "",
+          "priority": "high",
+          "platforms": []
+        },
+        {
+          "scope": "Channels - Push",
+          "title": "Notification Permission",
+          "owner": "",
+          "priority": "high",
+          "platforms": []
+        },
+        {
+          "scope": "Channels - Push",
+          "title": "Push Templates",
+          "owner": "",
+          "priority": "medium",
+          "platforms": []
+        },
+        {
+          "scope": "Channels - Push",
+          "title": "Rich Push",
+          "owner": "",
+          "priority": "medium",
+          "platforms": []
+        },
+        {
+          "scope": "Channels - Push",
+          "title": "Deep Links",
+          "owner": "",
+          "priority": "medium",
+          "platforms": []
+        },
+        {
+          "scope": "Channels - Push",
+          "title": "CTA",
+          "owner": "",
+          "priority": "medium",
+          "platforms": []
+        },
+        {
+          "scope": "Channels - Push",
+          "title": "Test Push",
+          "owner": "",
+          "priority": "medium",
+          "platforms": []
+        },
+        {
+          "scope": "Channels - Push",
+          "title": "Delivery Validation",
+          "owner": "",
+          "priority": "high",
+          "platforms": []
+        },
+        {
+          "scope": "Channels - Web Push",
+          "title": "Web Push Configuration",
+          "owner": "",
+          "priority": "medium",
+          "platforms": []
+        },
+        {
+          "scope": "Channels - RCS",
+          "title": "RCS Provider Setup",
+          "owner": "",
+          "priority": "medium",
+          "platforms": []
+        },
+        {
+          "scope": "Channels - In-App",
+          "title": "SDK Configuration",
+          "owner": "",
+          "priority": "high",
+          "platforms": []
+        },
+        {
+          "scope": "Channels - On-site",
+          "title": "On-site Notification",
+          "owner": "",
+          "priority": "medium",
+          "platforms": []
+        },
+        {
+          "scope": "Channels - On-site",
+          "title": "On-site Survey",
+          "owner": "",
+          "priority": "medium",
+          "platforms": []
+        },
+        {
+          "scope": "Channels - On-site",
+          "title": "On-site Feedback",
+          "owner": "",
+          "priority": "medium",
+          "platforms": []
+        }
+      ]
+    },
+    {
+      "week": 4,
+      "label": "Audit & Templates",
+      "tasks": [
+        {
+          "scope": "Staging Audit",
+          "title": "Website audit",
+          "owner": "",
+          "priority": "high",
+          "platforms": [
+            "Website"
+          ]
+        },
+        {
+          "scope": "Staging Audit",
+          "title": "Android app audit",
+          "owner": "",
+          "priority": "high",
+          "platforms": [
+            "Android"
+          ]
+        },
+        {
+          "scope": "Staging Audit",
+          "title": "iOS app audit",
+          "owner": "",
+          "priority": "high",
+          "platforms": [
+            "iOS"
+          ]
+        },
+        {
+          "scope": "Staging Audit",
+          "title": "Web App audit",
+          "owner": "",
+          "priority": "high",
+          "platforms": [
+            "Web App"
+          ]
+        },
+        {
+          "scope": "Staging Audit",
+          "title": "Changes shared with dev team and actioned",
+          "owner": "",
+          "priority": "high",
+          "platforms": []
+        },
+        {
+          "scope": "Email Warmup",
+          "title": "Warmup content ready",
+          "owner": "",
+          "priority": "high",
+          "platforms": []
+        },
+        {
+          "scope": "SMS template",
+          "title": "Share template for provider testing",
+          "owner": "",
+          "priority": "high",
+          "platforms": []
+        },
+        {
+          "scope": "WhatsApp Template",
+          "title": "Add template on the dashboard for testing",
+          "owner": "",
+          "priority": "high",
+          "platforms": []
+        },
+        {
+          "scope": "Historic Data",
+          "title": "Historical transactional data uploaded",
+          "owner": "",
+          "priority": "high",
+          "platforms": []
+        },
+        {
+          "scope": "Website",
+          "title": "Website Testing & QA",
+          "owner": "",
+          "priority": "high",
+          "platforms": [
+            "Website"
+          ]
+        },
+        {
+          "scope": "Android",
+          "title": "Android Testing & QA",
+          "owner": "",
+          "priority": "high",
+          "platforms": [
+            "Android"
+          ]
+        },
+        {
+          "scope": "iOS",
+          "title": "iOS Testing & QA",
+          "owner": "",
+          "priority": "high",
+          "platforms": [
+            "iOS"
+          ]
+        },
+        {
+          "scope": "REST API",
+          "title": "REST API testing",
+          "owner": "",
+          "priority": "high",
+          "platforms": [
+            "REST API"
+          ]
+        }
+      ]
+    },
+    {
+      "week": 5,
+      "label": "Production Movement",
+      "tasks": [
+        {
+          "scope": "Production",
+          "title": "Move integration to production - Website",
+          "owner": "",
+          "priority": "high",
+          "platforms": [
+            "Website"
+          ]
+        },
+        {
+          "scope": "Production",
+          "title": "Move integration to production - Android",
+          "owner": "",
+          "priority": "high",
+          "platforms": [
+            "Android"
+          ]
+        },
+        {
+          "scope": "Production",
+          "title": "Move integration to production - iOS",
+          "owner": "",
+          "priority": "high",
+          "platforms": [
+            "iOS"
+          ]
+        },
+        {
+          "scope": "Production",
+          "title": "Move integration to production - Web App",
+          "owner": "",
+          "priority": "high",
+          "platforms": [
+            "Web App"
+          ]
+        },
+        {
+          "scope": "Production",
+          "title": "Play Store release with SDK",
+          "owner": "",
+          "priority": "high",
+          "platforms": [
+            "Android"
+          ]
+        },
+        {
+          "scope": "Production",
+          "title": "App Store release with SDK",
+          "owner": "",
+          "priority": "high",
+          "platforms": [
+            "iOS"
+          ]
+        },
+        {
+          "scope": "Production",
+          "title": "Production testing",
+          "owner": "",
+          "priority": "high",
+          "platforms": []
+        },
+        {
+          "scope": "Channels - Production",
+          "title": "Channels enabled on production",
+          "owner": "",
+          "priority": "high",
+          "platforms": []
+        },
+        {
+          "scope": "Email Warmup",
+          "title": "Warmup journey live",
+          "owner": "",
+          "priority": "high",
+          "platforms": []
+        },
+        {
+          "scope": "Production",
+          "title": "Production API testing",
+          "owner": "",
+          "priority": "high",
+          "platforms": [
+            "REST API"
+          ]
+        },
+        {
+          "scope": "Website",
+          "title": "Production Validation",
+          "owner": "",
+          "priority": "high",
+          "platforms": [
+            "Website"
+          ]
+        },
+        {
+          "scope": "Android",
+          "title": "Production Validation",
+          "owner": "",
+          "priority": "high",
+          "platforms": [
+            "Android"
+          ]
+        },
+        {
+          "scope": "iOS",
+          "title": "Production Validation",
+          "owner": "",
+          "priority": "high",
+          "platforms": [
+            "iOS"
+          ]
+        }
+      ]
+    },
+    {
+      "week": 6,
+      "label": "Go-Live",
+      "tasks": [
+        {
+          "scope": "Go-Live",
+          "title": "Demo dashboard walkthrough with client",
+          "owner": "",
+          "priority": "medium",
+          "platforms": []
+        },
+        {
+          "scope": "Go-Live",
+          "title": "2 or more recurring campaigns / journeys live",
+          "owner": "",
+          "priority": "high",
+          "platforms": []
+        },
+        {
+          "scope": "Go-Live",
+          "title": "Key events and attributes verified on production",
+          "owner": "",
+          "priority": "high",
+          "platforms": []
+        },
+        {
+          "scope": "Go-Live",
+          "title": "Confirmation from client on billing start",
+          "owner": "",
+          "priority": "high",
+          "platforms": []
+        },
+        {
+          "scope": "Go-Live",
+          "title": "Handover to CSM",
+          "owner": "",
+          "priority": "medium",
+          "platforms": []
+        }
+      ]
+    }
   ]
 }

@@ -10,7 +10,10 @@ A client-side PWA for tracking weekly status updates across multiple projects (C
 - `sw.js` — service worker; lists cached assets in `ASSETS` — keep in sync if files are added/renamed
 - `manifest.webmanifest` — PWA install metadata
 - `icon.svg` — app icon
-- `week-templates.json` — editable master week-wise task plan (seeds new projects)
+- `week-templates.json` — editable master week-wise task plan (seeds new projects). Each task
+  may carry `days` (duration in the `baseCycleWeeks` cycle) and `daysByCycle` overrides such as
+  `{"7": 10, "8": 14}`; an unlisted cycle is scaled from `days` pro rata, so new cycle lengths
+  need no edits. Missing `days` falls back to `defaultTaskDays`.
 - `demo-data/` — optional demo datasets; `index.json` lists what Settings offers
 - `roles-config.json` — who may sign in, their role and password hash; see `README-auth.md`
 - `tools/hash-password.py` — prints the SHA-256 hash to put in `roles-config.json`
@@ -33,6 +36,14 @@ user's whole `state` object to one JSONB row in `public.user_state`, protected b
 security — every person sees only their own dashboard. Settings → Account shows who is signed
 in and a usage count from the `usage_stats()` function. Leave the config empty and the app
 behaves exactly as before: no login, local only. Setup steps are in `README-supabase.md`.
+
+## Task timeline
+
+Tasks run in parallel within their week: each starts on its week's Monday and ends
+`days - 1` later, so a task longer than a week simply overruns. A project's go-live is
+whichever is later — the nominal end of the cycle, or the last task to finish — which means
+the cycle length is a plan, not a ceiling. Durations and planned dates stay editable per task
+in the report editor.
 
 ## State
 

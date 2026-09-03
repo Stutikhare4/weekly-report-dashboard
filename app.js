@@ -142,6 +142,11 @@ const DEBUG_LOG = [];
 
 const TEMPLATE_PRIORITIES = ["high", "medium", "low"];
 const DEFAULT_CYCLE_WEEKS = 5;
+const DEFAULT_TASK_DAYS = 7;
+const BASE_CYCLE_WEEKS = 6;
+
+/* Overwritten from week-templates.json when it loads. */
+let templateMeta = { baseCycleWeeks: BASE_CYCLE_WEEKS, defaultTaskDays: DEFAULT_TASK_DAYS };
 const MIN_CYCLE_WEEKS = 2;
 const MAX_CYCLE_WEEKS = 12;
 
@@ -2122,6 +2127,8 @@ function ensureDefaults(targetState) {
       if (task.owner === undefined) task.owner = "";
       if (task.priority === undefined) task.priority = "medium";
       if (!Array.isArray(task.platforms)) task.platforms = [];
+      if (task.days === undefined) task.days = null;
+      if (!task.daysByCycle || typeof task.daysByCycle !== "object") task.daysByCycle = {};
     });
   });
 
@@ -2793,6 +2800,7 @@ function saveProject({ asDraft } = { asDraft: false }) {
 
   state.projects.push(newProject);
   const createdWeeks = generateWeeklyPlan(newProject);
+  refreshProjectGoLive(newProject.id);
   saveState();
   uiState.wizardSavedId = newProject.id;
 
@@ -2841,6 +2849,8 @@ function renderTemplateWeek(entry) {
       <select data-field="priority">
         ${TEMPLATE_PRIORITIES.map((value) => `<option value="${value}"${task.priority === value ? " selected" : ""}>${capitalize(value)}</option>`).join("")}
       </select>
+      <input type="number" min="1" data-field="days" value="${task.days || ""}" placeholder="Days" title="Days to complete in a ${templateBaseCycle()}-week cycle" />
+      <input type="text" data-field="daysByCycle" value="${escapeHtml(formatDaysByCycle(task.daysByCycle))}" placeholder="7:10, 8:14" title="Per-cycle overrides — cycle:days, comma separated" />
       <button type="button" class="row-remove" data-requires="template.edit" data-action="remove-task">Remove</button>
     </div>
   `).join("");
@@ -2857,6 +2867,24 @@ function renderTemplateWeek(entry) {
       <div class="template-rows">${rows || `<p class="muted">No tasks yet.</p>`}</div>
     </section>
   `;
+}
+
+/* "7:10, 8:14" <-> { "7": 10, "8": 14 } — a compact way to edit per-cycle overrides in a
+   single cell rather than one column per cycle length. */
+function formatDaysByCycle(map) {
+  return Object.entries(map || {})
+    .sort((left, right) => Number(left[0]) - Number(right[0]))
+    .map(([cycle, days]) => `${cycle}:${days}`)
+    .join(", ");
+}
+
+function parseDaysByCycle(text) {
+  const out = {};
+  String(text || "").split(",").forEach((pair) => {
+    const [cycle, days] = pair.split(":").map((part) => part.trim());
+    if (Number(cycle) > 0 && Number(days) > 0) out[String(Number(cycle))] = Number(days);
+  });
+  return out;
 }
 
 function findTemplateWeek(week) {
@@ -2886,7 +2914,14 @@ function handleTemplatesInput(event) {
   const task = entry.tasks.find((item) => item.id === rowEl.dataset.task);
   if (!task) return;
 
-  task[field] = event.target.value;
+  if (field === "days") {
+    task.days = Number(event.target.value) > 0 ? Number(event.target.value) : null;
+  } else if (field === "daysByCycle") {
+    task.daysByCycle = parseDaysByCycle(event.target.value);
+  } else {
+    task[field] = event.target.value;
+  }
+
   saveState();
 }
 
@@ -2918,7 +2953,7 @@ function handleTemplatesClick(event) {
   const action = button.dataset.action;
 
   if (action === "add-task") {
-    entry.tasks.push({ id: newId(), scope: "", title: "", owner: "", priority: "medium", platforms: [] });
+    entry.tasks.push({ id: newId(), scope: "", title: "", owner: "", priority: "medium", platforms: [], days: null, daysByCycle: {} });
   } else if (action === "remove-task") {
     const rowEl = button.closest(".template-row");
     const task = entry.tasks.find((item) => item.id === rowEl.dataset.task);
@@ -2953,6 +2988,8 @@ function toTemplateWeeks(weeks) {
       owner: task.owner || "",
       priority: TEMPLATE_PRIORITIES.includes(task.priority) ? task.priority : "medium",
       platforms: Array.isArray(task.platforms) ? task.platforms : [],
+      days: Number(task.days) > 0 ? Number(task.days) : null,
+      daysByCycle: (task.daysByCycle && typeof task.daysByCycle === "object") ? task.daysByCycle : {},
     })),
   }));
 }
@@ -2974,6 +3011,7 @@ async function fetchSeedTemplates() {
     if (!Array.isArray(inlined.weeks) || !inlined.weeks.length) {
       throw new Error("bundled week templates are empty");
     }
+    templateMeta = { baseCycleWeeks: inlined.baseCycleWeeks, defaultTaskDays: inlined.defaultTaskDays };
     return inlined.weeks;
   }
 
@@ -2985,6 +3023,7 @@ async function fetchSeedTemplates() {
     throw new Error("week-templates.json has no 'weeks' array");
   }
 
+  templateMeta = { baseCycleWeeks: data.baseCycleWeeks, defaultTaskDays: data.defaultTaskDays };
   return data.weeks;
 }
 
@@ -4057,7 +4096,7 @@ function addWeekToProject(projectId) {
     fromTemplate: Boolean(template),
     templateWeek: weekNumber,
     templateLabel: template ? template.label : `Week ${weekNumber}`,
-    tasks: template ? templateTasksToUpdateTasks(templateTasksForProject(template.tasks, project)) : [],
+    tasks: template ? templateTasksToUpdateTasks(templateTasksForProject(template.tasks, project), weekStart, project.cycleWeeks) : [],
     createdAt: new Date().toISOString(),
   });
 
@@ -4075,19 +4114,25 @@ function templateTasksForProject(tasks, project) {
   });
 }
 
-function templateTasksToUpdateTasks(tasks) {
-  return tasks.map((task) => ({
-    id: newId(),
-    title: task.title,
-    phase: task.scope,
-    owner: task.owner || "",
-    status: "not started",
-    date: "",
-    blocker: "",
-    priority: task.priority || "medium",
-    comments: "",
-    subtasks: [],
-  }));
+function templateTasksToUpdateTasks(tasks, weekStart, cycleWeeks) {
+  return tasks.map((task) => {
+    const days = resolveTaskDays(task, cycleWeeks);
+    return {
+      id: newId(),
+      title: task.title,
+      phase: task.scope,
+      owner: task.owner || "",
+      status: "not started",
+      date: "",
+      blocker: "",
+      priority: task.priority || "medium",
+      comments: "",
+      days,
+      startDate: weekStart || "",
+      dueDate: taskDueDate(weekStart, days),
+      subtasks: [],
+    };
+  });
 }
 
 /* ---------- Timeline ---------- */
@@ -4181,8 +4226,6 @@ function saveProjectDetails(event) {
   project.notes = nodes.projNotes.value.trim();
   project.kickoffDate = kickoff;
   project.cycleWeeks = weeks;
-  project.goLiveDate = computeGoLiveDate(kickoff, weeks);
-
   const updates = state.updates
     .filter((item) => item.projectId === project.id)
     .sort((left, right) => left.weekStart.localeCompare(right.weekStart));
@@ -4199,6 +4242,17 @@ function saveProjectDetails(event) {
     if (update.projectId === project.id) update.projectName = project.name;
   });
 
+  /* Re-dating the weeks moves every task with them, then go-live follows the task ends. */
+  if (datesChanged && kickoff) {
+    state.updates.filter((item) => item.projectId === project.id).forEach((update) => {
+      (update.tasks || []).forEach((task) => {
+        task.startDate = update.weekStart;
+        task.dueDate = taskDueDate(update.weekStart, task.days || templateDefaultDays());
+      });
+    });
+  }
+
+  refreshProjectGoLive(project.id);
   saveState();
   toggleProjectDetails(false);
   renderAll();
@@ -4236,6 +4290,70 @@ function renderProjectTimeline(project) {
     : "No weekly reports yet.";
 }
 
+/* ---------- Task durations ---------- */
+
+/* How long a task takes depends on the project's cycle length. `daysByCycle` holds explicit
+   values per cycle; anything not listed is scaled pro rata from `days`, so adding a 9- or
+   10-week cycle needs no edits to the task list. */
+function templateBaseCycle() {
+  const value = Number(templateMeta.baseCycleWeeks);
+  return Number.isFinite(value) && value > 0 ? value : BASE_CYCLE_WEEKS;
+}
+
+function templateDefaultDays() {
+  const value = Number(templateMeta.defaultTaskDays);
+  return Number.isFinite(value) && value > 0 ? value : DEFAULT_TASK_DAYS;
+}
+
+function resolveTaskDays(task, cycleWeeks) {
+  const cycle = Number(cycleWeeks) || DEFAULT_CYCLE_WEEKS;
+  const overrides = task.daysByCycle || {};
+
+  if (overrides[String(cycle)] !== undefined) {
+    return Math.max(1, Number(overrides[String(cycle)]) || 1);
+  }
+
+  const base = Number(task.days);
+  if (Number.isFinite(base) && base > 0) {
+    return Math.max(1, Math.round(base * cycle / templateBaseCycle()));
+  }
+
+  return templateDefaultDays();
+}
+
+/* Parallel within a week: every task starts on its own week's Monday. A task longer than a
+   week simply runs past it — the cycle is a plan, not a ceiling. */
+function taskDueDate(startValue, days) {
+  if (!startValue) return "";
+  const start = new Date(`${startValue}T00:00:00`);
+  if (Number.isNaN(start.getTime())) return "";
+  return toInputDate(shiftDays(start, Math.max(1, Number(days) || 1) - 1));
+}
+
+/* Go-live is whichever is later: the end of the nominal cycle, or the last task to finish. */
+function computeProjectGoLive(project, updates) {
+  const nominal = computeGoLiveDate(project.kickoffDate, project.cycleWeeks);
+  const ends = (updates || [])
+    .flatMap((update) => update.tasks || [])
+    .map((task) => task.dueDate)
+    .filter(Boolean);
+
+  if (!ends.length) return nominal;
+
+  const latest = ends.sort()[ends.length - 1];
+  return nominal && nominal > latest ? nominal : latest;
+}
+
+function refreshProjectGoLive(projectId) {
+  const project = state.projects.find((item) => item.id === projectId);
+  if (!project) return;
+
+  project.goLiveDate = computeProjectGoLive(
+    project,
+    state.updates.filter((update) => update.projectId === projectId),
+  );
+}
+
 /* ---------- Week-wise plan generation ---------- */
 
 /* Turns the master template into real, fully editable weekly update records — one per week
@@ -4262,7 +4380,7 @@ function generateWeeklyPlan(project) {
       fromTemplate: true,
       templateWeek: template.week,
       templateLabel: template.label,
-      tasks: templateTasksToUpdateTasks(templateTasksForProject(template.tasks, project)),
+      tasks: templateTasksToUpdateTasks(templateTasksForProject(template.tasks, project), weekStart, weeks),
       createdAt: new Date().toISOString(),
     });
     created += 1;
@@ -4470,6 +4588,9 @@ function loadUpdateIntoSection(sectionKey, update) {
   (update.tasks || []).forEach((task) => {
     const card = addNewTaskToForm(sectionKey);
     setTaskPhase(card, task.phase || "");
+    card.querySelector(".form-task-days").value = task.days || "";
+    card.querySelector(".form-task-start").value = task.startDate || "";
+    card.querySelector(".form-task-due").value = task.dueDate || "";
     card.querySelector(".form-task-title").value = task.title || "";
     card.querySelector(".form-task-owner").value = task.owner || "";
     card.querySelector(".form-task-status").value = task.status || "not started";
@@ -4662,6 +4783,20 @@ function addNewTaskToForm(sectionKey) {
           <input type="date" class="form-task-date" />
         </div>
       </div>
+      <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;">
+        <div>
+          <label style="font-size: 0.85rem; display: block; color: #cbd5e1; font-weight: normal; margin-bottom: 2px;">Duration (days)</label>
+          <input type="number" min="1" class="form-task-days" placeholder="e.g. 7" />
+        </div>
+        <div>
+          <label style="font-size: 0.85rem; display: block; color: #cbd5e1; font-weight: normal; margin-bottom: 2px;">Planned start</label>
+          <input type="date" class="form-task-start" />
+        </div>
+        <div>
+          <label style="font-size: 0.85rem; display: block; color: #cbd5e1; font-weight: normal; margin-bottom: 2px;">Planned due</label>
+          <input type="date" class="form-task-due" />
+        </div>
+      </div>
       <div style="display: grid; gap: 8px;">
         <label style="font-size: 0.85rem; display: block; color: #cbd5e1; font-weight: normal; margin-bottom: 2px;">Comments / Notes</label>
         <input type="text" placeholder="Add any notes for this task..." class="form-task-comments" />
@@ -4798,10 +4933,16 @@ function gatherTasksFromList(listEl) {
       });
     });
 
+    const days = Number(card.querySelector(".form-task-days").value) || null;
+    const startDate = card.querySelector(".form-task-start").value;
+
     tasks.push({
       id: newId(),
       title,
       phase: card.dataset.phase || "",
+      days,
+      startDate,
+      dueDate: card.querySelector(".form-task-due").value || taskDueDate(startDate, days),
       owner: card.querySelector(".form-task-owner").value.trim(),
       status: card.querySelector(".form-task-status").value,
       date: card.querySelector(".form-task-date").value,
@@ -4871,6 +5012,7 @@ function saveWeeklyUpdate(event) {
   uiState.editingLastId = null;
   uiState.editingUpcomingId = null;
   syncOwnersIntoProjectPocs(project, activeSections.flatMap((sec) => sec.tasks));
+  refreshProjectGoLive(project.id);
   saveState();
 
   openProject(project.id);

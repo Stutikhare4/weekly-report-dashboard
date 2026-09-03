@@ -2162,7 +2162,7 @@ button {
 
 .template-row {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1.7fr) auto 108px auto;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.5fr) auto 100px 72px 110px auto;
   gap: 8px;
   align-items: center;
 }
