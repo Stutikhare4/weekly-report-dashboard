@@ -179,7 +179,7 @@ p {
   align-items: center;
   justify-content: space-between;
   gap: 20px;
-  padding: 14px 32px;
+  padding: 10px 32px;
   border-bottom: 1px solid var(--border);
   background: var(--topbar-bg);
   backdrop-filter: blur(18px);
@@ -521,12 +521,12 @@ p {
 .content {
   display: grid;
   gap: 24px;
-  padding: 32px;
+  padding: 20px 24px 6px;
   align-content: start;
 }
 
 .card {
-  padding: 24px;
+  padding: 18px 20px;
   border-radius: var(--radius);
   background: var(--panel);
   border: 1px solid var(--border);
@@ -665,7 +665,7 @@ p {
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  margin-bottom: 20px;
+  margin-bottom: 10px;
 }
 
 .screen-title {
@@ -890,14 +890,14 @@ button {
 .checkbox-group {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: 8px;
 }
 
 .checkbox-group .checkbox-item {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 10px 14px;
+  padding: 8px 12px;
   border-radius: 12px;
   border: 1px solid var(--border-strong);
   background: var(--surface-6);
@@ -1588,8 +1588,8 @@ button {
   display: flex;
   align-items: center;
   gap: 8px;
-  margin: 0 0 22px;
-  padding: 14px 16px;
+  margin: 0 0 10px;
+  padding: 9px 14px;
   list-style: none;
   border-radius: 18px;
   background: var(--surface-5);
@@ -1665,12 +1665,12 @@ button {
 
 .wizard-panel {
   display: grid;
-  gap: 16px;
+  gap: 14px;
 }
 
 .wizard-section {
   height: 100%;
-  padding: 16px 18px;
+  padding: 11px 15px;
   border-radius: 18px;
   background: var(--surface-5);
   border: 1px solid var(--border);
@@ -1687,8 +1687,8 @@ button {
 
 .wizard-section-title {
   font-family: Georgia, "Times New Roman", serif;
-  font-size: 0.98rem;
-  margin: 0 0 12px;
+  font-size: 0.95rem;
+  margin: 0 0 7px;
 }
 
 .wizard-section-head {
@@ -1715,15 +1715,15 @@ button {
 
 .platform-cards {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 10px;
 }
 
 .platform-card {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 14px 16px;
+  gap: 9px;
+  padding: 9px 12px;
   border-radius: 16px;
   border: 1px solid var(--border-strong);
   background: var(--surface-6);
@@ -1947,7 +1947,7 @@ button {
   align-items: center;
   gap: 12px;
   margin: 4px -4px -4px;
-  padding: 12px 16px;
+  padding: 10px 16px;
   border-radius: 16px;
   background: var(--panel-strong);
   border: 1px solid var(--border);
@@ -1971,14 +1971,24 @@ button {
 .wizard-row {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  align-items: start;
-  gap: 16px;
+  align-items: stretch;
+  gap: 14px;
 }
 
+.wizard-row-3 {
+  grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr) minmax(0, 1.25fr);
+}
+
+/* The summary is reference material, so it scrolls inside itself rather than making the
+   whole page scroll — it was taller than the form and driving the page height. */
 .wizard-summary {
   position: sticky;
-  top: 20px;
+  top: 16px;
+  /* topbar, screen head, stepper and card padding above and below. */
+  max-height: calc(100vh - 305px);
+  overflow-y: auto;
   display: grid;
+  align-content: start;
   gap: 14px;
   padding: 18px;
   border-radius: 18px;
@@ -2502,7 +2512,7 @@ button {
 
 .comments-field textarea {
   width: 100%;
-  min-height: 130px;
+  min-height: 58px;
   padding: 14px 16px;
   border-radius: 16px;
   border: 1px solid var(--border-strong);
@@ -2517,6 +2527,21 @@ button {
   outline: none;
   border-color: rgba(56, 189, 248, 0.58);
   box-shadow: 0 0 0 4px rgba(56, 189, 248, 0.16);
+}
+
+/* Basic Details has enough fields that two columns push it off screen; let it flow into
+   three or four on a wide window. */
+.wizard-panel .form-grid {
+  grid-template-columns: repeat(auto-fit, minmax(205px, 1fr));
+  gap: 12px;
+}
+
+.wizard-panel .form-grid .span-2 {
+  grid-column: 1 / -1;
+}
+
+.wizard-panel .form-grid textarea {
+  min-height: 62px;
 }
 
 .field-hint {
@@ -3274,9 +3299,10 @@ button {
                   <div class="wizard-section">
                     <h3 class="wizard-section-title">Additional Comments (Optional)</h3>
                     <label class="comments-field">
-                      <textarea id="npAdditionalComments" rows="5" placeholder="Anything else the implementation team should know before kickoff — special client requirements, known blockers, dependencies…"></textarea>
+                      <textarea id="npAdditionalComments" placeholder="Anything else the team should know — special requirements, known blockers, dependencies…"></textarea>
                     </label>
                   </div>
+
                 </div>
 
                 <!-- Step 3 : Review & Summary -->
