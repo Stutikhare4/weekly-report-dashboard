@@ -391,7 +391,6 @@ const nodes = {
   projNotes: document.getElementById("projNotes"),
   projTimelineNote: document.getElementById("projTimelineNote"),
   npCycleHint: document.getElementById("npCycleHint"),
-  npGoLiveHint: document.getElementById("npGoLiveHint"),
   projectOverview: document.getElementById("projectOverview"),
   projectSummary: document.getElementById("projectSummary"),
   projectUpdates: document.getElementById("projectUpdates"),
@@ -4166,9 +4165,6 @@ function syncGoLiveFromCycle() {
   const goLive = computeGoLiveDate(kickoff, weeks);
 
   field("npGoLiveDate").value = goLive;
-  nodes.npGoLiveHint.textContent = goLive
-    ? `${weeks} weeks from kickoff — ends ${formatSummaryDate(goLive)}.`
-    : "Set a kickoff date and it will be calculated.";
   renderWizardSummary();
 }
 
