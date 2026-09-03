@@ -2172,9 +2172,31 @@ button {
 
 .template-row {
   display: grid;
-  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.5fr) auto 100px 72px 110px auto;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.5fr) auto 100px 72px 110px auto auto;
   gap: 8px;
   align-items: center;
+}
+
+/* Elastic marks the work that absorbs the project length; everything else keeps a fixed
+   duration however long the project runs. */
+.template-elastic {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+  font-size: 12px;
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.template-row .template-elastic input,
+.template-week-head .template-elastic input {
+  width: auto;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  accent-color: var(--accent);
 }
 
 .template-row input,

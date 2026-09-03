@@ -188,22 +188,22 @@ const WEEK_TEMPLATE_SEED = [
       { scope: "Historic Data", title: "Preparation of CSV containing historical user and transactional data", owner: "", priority: "high", platforms: [] },
       { scope: "Website", title: "User Identification", owner: "", priority: "high", platforms: ["Website"] },
       { scope: "Website", title: "User Attributes", owner: "", priority: "high", platforms: ["Website"] },
-      { scope: "Website", title: "Custom Events", owner: "", priority: "high", platforms: ["Website"] },
-      { scope: "Website", title: "Event Attributes", owner: "", priority: "high", platforms: ["Website"] },
+      { scope: "Website", title: "Custom Events", owner: "", priority: "high", elastic: true, platforms: ["Website"] },
+      { scope: "Website", title: "Event Attributes", owner: "", priority: "high", elastic: true, platforms: ["Website"] },
       { scope: "Website", title: "Login / Logout", owner: "", priority: "high", platforms: ["Website"] },
       { scope: "Website", title: "Signup", owner: "", priority: "high", platforms: ["Website"] },
       { scope: "Android", title: "SDK Initialization", owner: "", priority: "high", platforms: ["Android"] },
       { scope: "Android", title: "User Identification", owner: "", priority: "high", platforms: ["Android"] },
       { scope: "Android", title: "User Attributes", owner: "", priority: "high", platforms: ["Android"] },
-      { scope: "Android", title: "Custom Events", owner: "", priority: "high", platforms: ["Android"] },
-      { scope: "Android", title: "Event Attributes", owner: "", priority: "high", platforms: ["Android"] },
+      { scope: "Android", title: "Custom Events", owner: "", priority: "high", elastic: true, platforms: ["Android"] },
+      { scope: "Android", title: "Event Attributes", owner: "", priority: "high", elastic: true, platforms: ["Android"] },
       { scope: "Android", title: "Login / Logout", owner: "", priority: "high", platforms: ["Android"] },
       { scope: "Android", title: "Signup", owner: "", priority: "high", platforms: ["Android"] },
       { scope: "iOS", title: "SDK Initialization", owner: "", priority: "high", platforms: ["iOS"] },
       { scope: "iOS", title: "User Identification", owner: "", priority: "high", platforms: ["iOS"] },
       { scope: "iOS", title: "User Attributes", owner: "", priority: "high", platforms: ["iOS"] },
-      { scope: "iOS", title: "Custom Events", owner: "", priority: "high", platforms: ["iOS"] },
-      { scope: "iOS", title: "Event Attributes", owner: "", priority: "high", platforms: ["iOS"] },
+      { scope: "iOS", title: "Custom Events", owner: "", priority: "high", elastic: true, platforms: ["iOS"] },
+      { scope: "iOS", title: "Event Attributes", owner: "", priority: "high", elastic: true, platforms: ["iOS"] },
       { scope: "iOS", title: "Login / Logout", owner: "", priority: "high", platforms: ["iOS"] },
       { scope: "iOS", title: "Signup", owner: "", priority: "high", platforms: ["iOS"] },
       { scope: "REST API", title: "API authentication", owner: "", priority: "high", platforms: ["REST API"] },
@@ -216,11 +216,12 @@ const WEEK_TEMPLATE_SEED = [
   {
     week: 3,
     label: "Event Tracking & Channels",
+    elastic: true,
     tasks: [
-      { scope: "Staging", title: "Event tracking setup - Website", owner: "", priority: "high", platforms: ["Website"] },
-      { scope: "Staging", title: "Event tracking setup - Android", owner: "", priority: "high", platforms: ["Android"] },
-      { scope: "Staging", title: "Event tracking setup - iOS", owner: "", priority: "high", platforms: ["iOS"] },
-      { scope: "Staging", title: "Event tracking setup - Web App", owner: "", priority: "high", platforms: ["Web App"] },
+      { scope: "Staging", title: "Event tracking setup - Website", owner: "", priority: "high", elastic: true, platforms: ["Website"] },
+      { scope: "Staging", title: "Event tracking setup - Android", owner: "", priority: "high", elastic: true, platforms: ["Android"] },
+      { scope: "Staging", title: "Event tracking setup - iOS", owner: "", priority: "high", elastic: true, platforms: ["iOS"] },
+      { scope: "Staging", title: "Event tracking setup - Web App", owner: "", priority: "high", elastic: true, platforms: ["Web App"] },
       { scope: "App Implementation", title: "Screen tracking - Android", owner: "", priority: "high", platforms: ["Android"] },
       { scope: "App Implementation", title: "Screen tracking - iOS", owner: "", priority: "high", platforms: ["iOS"] },
       { scope: "Channels - Staging", title: "Email channel setup", owner: "", priority: "medium", platforms: [] },
@@ -232,10 +233,10 @@ const WEEK_TEMPLATE_SEED = [
       { scope: "Channels - Staging", title: "Push setup - APNS certificate", owner: "", priority: "high", platforms: ["iOS"] },
       { scope: "Channels - Staging", title: "In-App setup", owner: "", priority: "high", platforms: ["Android", "iOS"] },
       { scope: "Channels - Staging", title: "Rich Push setup", owner: "", priority: "medium", platforms: ["iOS"] },
-      { scope: "REST API", title: "Custom event API", owner: "", priority: "high", platforms: ["REST API"] },
-      { scope: "REST API", title: "Backend event tracking", owner: "", priority: "high", platforms: ["REST API"] },
+      { scope: "REST API", title: "Custom event API", owner: "", priority: "high", elastic: true, platforms: ["REST API"] },
+      { scope: "REST API", title: "Backend event tracking", owner: "", priority: "high", elastic: true, platforms: ["REST API"] },
       { scope: "REST API", title: "Historical user data migration", owner: "", priority: "high", platforms: ["REST API"] },
-      { scope: "REST API", title: "Historical event migration", owner: "", priority: "high", platforms: ["REST API"] },
+      { scope: "REST API", title: "Historical event migration", owner: "", priority: "high", elastic: true, platforms: ["REST API"] },
       { scope: "Android", title: "Push Token Registration", owner: "", priority: "high", platforms: ["Android"] },
       { scope: "Android", title: "Firebase / FCM Setup", owner: "", priority: "high", platforms: ["Android"] },
       { scope: "Android", title: "Push Notification Setup", owner: "", priority: "high", platforms: ["Android"] },
@@ -2120,12 +2121,14 @@ function ensureDefaults(targetState) {
   targetState.weekTemplates.forEach((week) => {
     if (!Array.isArray(week.tasks)) week.tasks = [];
     if (week.label === undefined) week.label = `Week ${week.week}`;
+    if (week.elastic === undefined) week.elastic = false;
     week.tasks.forEach((task) => {
       if (!task.id) task.id = newId();
       if (task.scope === undefined) task.scope = "";
       if (task.owner === undefined) task.owner = "";
       if (task.priority === undefined) task.priority = "medium";
       if (!Array.isArray(task.platforms)) task.platforms = [];
+      if (task.elastic === undefined) task.elastic = false;
       if (task.days === undefined) task.days = null;
       if (!task.daysByCycle || typeof task.daysByCycle !== "object") task.daysByCycle = {};
     });
@@ -2850,6 +2853,10 @@ function renderTemplateWeek(entry) {
       </select>
       <input type="number" min="1" data-field="days" value="${task.days || ""}" placeholder="Days" title="Days to complete in a ${templateBaseCycle()}-week cycle" />
       <input type="text" data-field="daysByCycle" value="${escapeHtml(formatDaysByCycle(task.daysByCycle))}" placeholder="7:10, 8:14" title="Per-cycle overrides — cycle:days, comma separated" />
+      <label class="template-elastic" title="Elastic: this task's duration stretches or shrinks with the project length. Leave off for work that takes a fixed amount of effort.">
+        <input type="checkbox" data-field="elastic"${task.elastic ? " checked" : ""} />
+        <span>Elastic</span>
+      </label>
       <button type="button" class="row-remove" data-requires="template.edit" data-action="remove-task">Remove</button>
     </div>
   `).join("");
@@ -2860,6 +2867,10 @@ function renderTemplateWeek(entry) {
         <span class="template-week-badge">Week ${entry.week}</span>
         <input type="text" class="template-week-label" data-field="label" value="${escapeHtml(entry.label)}" placeholder="Week label" />
         <span class="muted">${entry.tasks.length} task${entry.tasks.length === 1 ? "" : "s"}</span>
+        <label class="template-elastic" title="Elastic: this stage absorbs the project length — it spans more weeks in a long project and fewer in a short one. Every other stage keeps one week.">
+          <input type="checkbox" data-field="weekElastic"${entry.elastic ? " checked" : ""} />
+          <span>Elastic stage</span>
+        </label>
         <button type="button" class="ghost-button small-button" data-requires="template.edit" data-action="add-task">+ Task</button>
         <button type="button" class="row-remove" data-requires="template.edit" data-action="remove-week">Delete week</button>
       </header>
@@ -2909,11 +2920,19 @@ function handleTemplatesInput(event) {
     return;
   }
 
+  if (field === "weekElastic") {
+    entry.elastic = event.target.checked;
+    saveState();
+    return;
+  }
+
   const rowEl = event.target.closest(".template-row");
   const task = entry.tasks.find((item) => item.id === rowEl.dataset.task);
   if (!task) return;
 
-  if (field === "days") {
+  if (field === "elastic") {
+    task.elastic = event.target.checked;
+  } else if (field === "days") {
     task.days = Number(event.target.value) > 0 ? Number(event.target.value) : null;
   } else if (field === "daysByCycle") {
     task.daysByCycle = parseDaysByCycle(event.target.value);
@@ -2952,7 +2971,7 @@ function handleTemplatesClick(event) {
   const action = button.dataset.action;
 
   if (action === "add-task") {
-    entry.tasks.push({ id: newId(), scope: "", title: "", owner: "", priority: "medium", platforms: [], days: null, daysByCycle: {} });
+    entry.tasks.push({ id: newId(), scope: "", title: "", owner: "", priority: "medium", platforms: [], elastic: false, days: null, daysByCycle: {} });
   } else if (action === "remove-task") {
     const rowEl = button.closest(".template-row");
     const task = entry.tasks.find((item) => item.id === rowEl.dataset.task);
@@ -2980,9 +2999,11 @@ function toTemplateWeeks(weeks) {
   return weeks.map((week, index) => ({
     week: Number(week.week) || index + 1,
     label: week.label || `Week ${index + 1}`,
+    elastic: Boolean(week.elastic),
     tasks: (week.tasks || []).map((task) => ({
       id: newId(),
       scope: task.scope || "",
+      elastic: Boolean(task.elastic),
       title: task.title || "",
       owner: task.owner || "",
       priority: TEMPLATE_PRIORITIES.includes(task.priority) ? task.priority : "medium",
@@ -4353,11 +4374,14 @@ function resolveTaskDays(task, cycleWeeks) {
   }
 
   const base = Number(task.days);
-  if (Number.isFinite(base) && base > 0) {
-    return Math.max(1, Math.round(base * cycle / templateBaseCycle()));
-  }
+  const days = Number.isFinite(base) && base > 0 ? base : templateDefaultDays();
 
-  return templateDefaultDays();
+  /* Only elastic work stretches or compresses with the project length. SDK setup, user
+     tracking, channel setup and the like take a fixed amount of effort whether the project
+     runs 4 weeks or 12 — it is the event tracking phase that absorbs the difference. */
+  if (!task.elastic) return Math.max(1, Math.round(days));
+
+  return Math.max(1, Math.round(days * cycle / templateBaseCycle()));
 }
 
 /* Parallel within a week: every task starts on its own week's Monday. A task longer than a
@@ -4398,17 +4422,110 @@ function refreshProjectGoLive(projectId) {
 /* Turns the master template into real, fully editable weekly update records — one per week
    of the project's cycle. They behave exactly like hand-made reports, so tasks can be
    added, edited or removed per project from the Create Report screen afterwards. */
+/* ---------- Fitting the master plan to the project's cycle ---------- */
+
+/* The master plan is an ordered list of stages, not a fixed number of weeks. The project's
+   cycle length decides how many weeks each stage spans, and every stage always appears: a
+   short cycle merges stages into a week, a long one spreads them out. Nothing is ever
+   dropped, so Go-Live survives a 3-week project and a 12-week project has no empty weeks.
+
+   Stages marked `elastic` (in practice event tracking) absorb the slack; every other stage
+   keeps one week, because SDK setup, channel setup and the rest take as long as they take. */
+function stageSpans(stages, cycleWeeks) {
+  const spans = new Map();
+  if (!stages.length) return spans;
+
+  const cycle = Math.max(1, Number(cycleWeeks) || DEFAULT_CYCLE_WEEKS);
+  const elasticCount = stages.filter((stage) => stage.elastic).length;
+  const fixedCount = stages.length - elasticCount;
+
+  /* Elastic stages take whatever the fixed ones leave, and never less than a week each.
+     With no elastic stage at all the whole plan is simply scaled pro rata. */
+  const elasticTotal = elasticCount ? Math.max(elasticCount, cycle - fixedCount) : 0;
+  const fixedWidth = fixedCount ? (cycle - elasticTotal) / fixedCount : 0;
+  const elasticWidth = elasticCount ? elasticTotal / elasticCount : 0;
+
+  let position = 0;
+  stages.forEach((stage) => {
+    const start = Math.min(cycle, Math.floor(position) + 1);
+    position += stage.elastic ? elasticWidth : fixedWidth;
+    const end = Math.min(cycle, Math.max(start, Math.ceil(position)));
+    spans.set(stage.week, { start, end });
+  });
+
+  return spans;
+}
+
+/* Deal a stage's tasks across the weeks it spans, in template order and breaking only
+   between domains so one domain's work never straddles a week boundary. Domains are split
+   further only when there are fewer of them than weeks to fill, which is what stops a
+   stretched stage from leaving a week with nothing to report. */
+function dealTasksAcrossWeeks(tasks, weeks) {
+  const buckets = Array.from({ length: Math.max(1, weeks) }, () => []);
+  if (buckets.length === 1 || !tasks.length) {
+    buckets[0].push(...tasks);
+    return buckets;
+  }
+
+  const groups = [];
+  tasks.forEach((task) => {
+    const last = groups[groups.length - 1];
+    if (last && last.scope === (task.scope || "")) last.items.push(task);
+    else groups.push({ scope: task.scope || "", items: [task] });
+  });
+
+  while (groups.length < buckets.length && groups.some((group) => group.items.length > 1)) {
+    let largest = 0;
+    groups.forEach((group, index) => {
+      if (group.items.length > groups[largest].items.length) largest = index;
+    });
+    const { scope, items } = groups[largest];
+    const half = Math.ceil(items.length / 2);
+    groups.splice(largest, 1, { scope, items: items.slice(0, half) }, { scope, items: items.slice(half) });
+  }
+
+  let index = 0;
+  let placed = 0;
+  groups.forEach((group) => {
+    const held = buckets[index].length;
+    if (held && index < buckets.length - 1) {
+      const share = (tasks.length - placed + held) / (buckets.length - index);
+      // Start the next week when adding this domain would overshoot the fair share by
+      // more than leaving the week short of it.
+      if (held + group.items.length - share > share - held) index += 1;
+    }
+    buckets[index].push(...group.items);
+    placed += group.items.length;
+  });
+
+  return buckets;
+}
+
 function generateWeeklyPlan(project) {
   const weeks = Math.min(Math.max(Number(project.cycleWeeks) || DEFAULT_CYCLE_WEEKS, MIN_CYCLE_WEEKS), MAX_CYCLE_WEEKS);
   const firstMonday = mondayOnOrAfter(project.kickoffDate);
-  let created = 0;
+  const stages = [...state.weekTemplates].sort((left, right) => left.week - right.week);
+  const spans = stageSpans(stages, weeks);
+  const plan = Array.from({ length: weeks }, () => ({ labels: [], stageWeeks: [], tasks: [] }));
 
-  for (let index = 0; index < weeks; index += 1) {
-    const template = state.weekTemplates.find((entry) => entry.week === index + 1);
-    if (!template) continue;
+  stages.forEach((stage) => {
+    const span = spans.get(stage.week);
+    if (!span) return;
+    const width = span.end - span.start + 1;
+    const buckets = dealTasksAcrossWeeks(templateTasksForProject(stage.tasks || [], project), width);
 
+    buckets.forEach((bucket, offset) => {
+      const slot = plan[span.start - 1 + offset];
+      if (!slot) return;
+      const label = width > 1 ? `${stage.label} (${offset + 1} of ${width})` : stage.label;
+      if (!slot.labels.includes(label)) slot.labels.push(label);
+      if (!slot.stageWeeks.includes(stage.week)) slot.stageWeeks.push(stage.week);
+      slot.tasks.push(...bucket);
+    });
+  });
+
+  plan.forEach((slot, index) => {
     const weekStart = toInputDate(shiftDays(new Date(`${firstMonday}T00:00:00`), index * 7));
-
     state.updates.push({
       id: newId(),
       projectId: project.id,
@@ -4417,15 +4534,14 @@ function generateWeeklyPlan(project) {
       weekRange: formatWeekRange(weekStart),
       statusTag: "not started",
       fromTemplate: true,
-      templateWeek: template.week,
-      templateLabel: template.label,
-      tasks: templateTasksToUpdateTasks(templateTasksForProject(template.tasks, project), weekStart, weeks),
+      templateWeek: slot.stageWeeks[0] || index + 1,
+      templateLabel: slot.labels.join(" + ") || `Week ${index + 1}`,
+      tasks: templateTasksToUpdateTasks(slot.tasks, weekStart, weeks),
       createdAt: new Date().toISOString(),
     });
-    created += 1;
-  }
+  });
 
-  return created;
+  return plan.length;
 }
 
 function mondayOnOrAfter(dateValue) {

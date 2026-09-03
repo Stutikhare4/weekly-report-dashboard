@@ -12,8 +12,10 @@ A client-side PWA for tracking weekly status updates across multiple projects (C
 - `icon.svg` — app icon
 - `week-templates.json` — editable master week-wise task plan (seeds new projects). Each task
   may carry `days` (duration in the `baseCycleWeeks` cycle) and `daysByCycle` overrides such as
-  `{"7": 10, "8": 14}`; an unlisted cycle is scaled from `days` pro rata, so new cycle lengths
-  need no edits. Missing `days` falls back to `defaultTaskDays`.
+  `{"7": 10, "8": 14}`; an unlisted cycle is scaled from `days` pro rata for elastic tasks
+  only, so new cycle lengths need no edits. Missing `days` falls back to `defaultTaskDays`
+  (currently every task, so all durations are 7 days until real ones are entered). A stage or
+  task may carry `elastic: true` — see "Fitting the master plan" below.
 - `demo-data/` — optional demo datasets; `index.json` lists what Settings offers
 - `roles-config.json` — who may sign in, their role and password hash; see `README-auth.md`
 - `tools/hash-password.py` — prints the SHA-256 hash to put in `roles-config.json`
@@ -37,13 +39,34 @@ security — every person sees only their own dashboard. Settings → Account sh
 in and a usage count from the `usage_stats()` function. Leave the config empty and the app
 behaves exactly as before: no login, local only. Setup steps are in `README-supabase.md`.
 
+## Fitting the master plan to a project's cycle
+
+The master plan is an ordered list of *stages*, not a fixed number of weeks — `week: 3` is
+stage 3, not "project week 3". `stageSpans()` decides how many project weeks each stage gets,
+so **every stage and every task appears at every cycle length**: a 3-week project merges
+stages into a week, a 12-week project spreads them out. Nothing is ever dropped — Go-Live
+survives a short project — and no week is left empty.
+
+Stages flagged `elastic` absorb the slack (in practice "Event Tracking & Channels"); every
+other stage keeps one week, because SDK setup, channel setup and the like take a fixed amount
+of effort however long the project runs. With no elastic stage the whole plan scales pro rata.
+
+`dealTasksAcrossWeeks()` spreads a stretched stage's tasks over its weeks in template order,
+breaking only between domains so one domain's work never straddles a week boundary; domains
+are split further only when there are fewer of them than weeks to fill.
+
+The same `elastic` flag on a *task* controls duration: elastic tasks scale with the cycle
+(`resolveTaskDays`), fixed tasks keep their `days`. Both flags are editable per stage and per
+task on the Templates screen.
+
 ## Task timeline
 
 Tasks run in parallel within their week: each starts on its week's Monday and ends
 `days - 1` later, so a task longer than a week simply overruns. A project's go-live is
 whichever is later — the nominal end of the cycle, or the last task to finish — which means
 the cycle length is a plan, not a ceiling. Durations and planned dates stay editable per task
-in the report editor.
+in the report editor. A task whose start date moves outside its week is re-filed into the week
+that now contains it (`refileTasksIntoWeeks`).
 
 ## State
 
