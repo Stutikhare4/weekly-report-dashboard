@@ -2398,7 +2398,7 @@ function platformLabel(name) {
   return PLATFORM_LABEL[name] || name;
 }
 
-const ALL_CHANNELS = ["Push", "Email", "SMS", "WhatsApp", "In-App", "Web Push", "On-site Notification"];
+const ALL_CHANNELS = ["Push", "Email", "SMS", "WhatsApp", "RCS", "IVR", "In-App", "Web Push", "On-site Notification"];
 
 function field(id) {
   return document.getElementById(id);
@@ -2609,9 +2609,6 @@ function collectWizardData() {
     },
 
 
-    specialRequirements: fieldValue("npSpecialRequirements"),
-    knownBlockers: fieldValue("npKnownBlockers"),
-    dependencies: fieldValue("npDependencies"),
     additionalComments: fieldValue("npAdditionalComments"),
 
 
@@ -2754,11 +2751,8 @@ function renderWizardReview() {
       ["Historical Data Migration", yesNo(data.dataRequirements.historicalMigration)],
       ["User Identifier", data.dataRequirements.userIdentifier],
     ]),
-    reviewGroup("Additional Information", 2, [
-      ["Special Client Requirements", data.specialRequirements],
-      ["Known Blockers", data.knownBlockers],
-      ["Dependencies", data.dependencies],
-      ["Additional Comments", data.additionalComments],
+    reviewGroup("Additional Comments", 2, [
+      ["Comments", data.additionalComments],
     ]),
   ].filter(Boolean).join("");
 
