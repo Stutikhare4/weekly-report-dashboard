@@ -4248,6 +4248,7 @@ function saveProjectDetails(event) {
     });
   }
 
+  refileTasksIntoWeeks(project.id);
   refreshProjectGoLive(project.id);
   saveState();
   toggleProjectDetails(false);
@@ -4284,6 +4285,48 @@ function renderProjectTimeline(project) {
   nodes.projTimelineNote.textContent = updates.length
     ? `${updates.length} week(s) generated · go-live ${project.goLiveDate ? formatSummaryDate(project.goLiveDate) : "not set"}.`
     : "No weekly reports yet.";
+}
+
+/* ---------- Keeping tasks in the right week ---------- */
+
+/* A task belongs to the week its planned start falls in. Change that date past the end of
+   its week and the task moves to the week that now contains it, so the weekly report always
+   shows what is actually starting then. Only existing weeks are used — nothing is invented. */
+function weekContaining(updates, dateValue) {
+  if (!dateValue) return null;
+
+  return updates.find((update) => {
+    const end = toInputDate(shiftDays(new Date(`${update.weekStart}T00:00:00`), 6));
+    return update.weekStart <= dateValue && dateValue <= end;
+  }) || null;
+}
+
+function refileTasksIntoWeeks(projectId) {
+  const updates = state.updates
+    .filter((item) => item.projectId === projectId)
+    .sort((left, right) => left.weekStart.localeCompare(right.weekStart));
+
+  if (updates.length < 2) return 0;
+
+  const moves = [];
+
+  updates.forEach((update) => {
+    (update.tasks || []).forEach((task) => {
+      if (!task.startDate) return;
+
+      const target = weekContaining(updates, task.startDate);
+      if (target && target.id !== update.id) {
+        moves.push({ task, from: update, to: target });
+      }
+    });
+  });
+
+  moves.forEach(({ task, from, to }) => {
+    from.tasks = from.tasks.filter((item) => item.id !== task.id);
+    to.tasks.push(task);
+  });
+
+  return moves.length;
 }
 
 /* ---------- Task durations ---------- */
@@ -5008,8 +5051,14 @@ function saveWeeklyUpdate(event) {
   uiState.editingLastId = null;
   uiState.editingUpcomingId = null;
   syncOwnersIntoProjectPocs(project, activeSections.flatMap((sec) => sec.tasks));
+
+  const moved = refileTasksIntoWeeks(project.id);
   refreshProjectGoLive(project.id);
   saveState();
+
+  if (moved) {
+    showAppInfo(`${moved} task(s) moved to the week their start date now falls in.`);
+  }
 
   openProject(project.id);
 }
