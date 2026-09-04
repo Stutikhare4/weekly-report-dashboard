@@ -5,6 +5,7 @@
     "6": "Week 6",
     "12": "Week 12"
   },
+  "version": "2026-09-04-google-sheet",
   "baseCycleWeeks": 4,
   "cycleWeeksWithData": [
     4,

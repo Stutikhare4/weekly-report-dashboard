@@ -39,6 +39,12 @@ behaves exactly as before: no login, local only. Setup steps are in `README-supa
 
 ## Master plan and cycle length
 
+`week-templates.json` carries a `version`, mirrored by `WEEK_TEMPLATE_VERSION` in `app.js`.
+**Bump both whenever the plan changes**: a browser stores the plan it first loaded, and without
+a version change it keeps that copy for ever — after the move to the sheet, a stale copy had no
+offsets, so every task resolved to N+0 and piled into week 1. `templatesAreCurrent()` re-seeds
+on a version change, or when a stored task is missing offsets.
+
 `week-templates.json` is generated from the team's Google Sheet (its URL is in `source`), which
 has one tab per planned cycle length — **Week 4, Week 6, Week 12** — holding the *same* 95 tasks
 with different timings. Each task carries `offsetByCycle`, the completion date as a day offset

@@ -150,6 +150,10 @@ let templateMeta = { baseCycleWeeks: BASE_CYCLE_WEEKS, defaultTaskDays: DEFAULT_
 const MIN_CYCLE_WEEKS = 2;
 const MAX_CYCLE_WEEKS = 12;
 
+/* Bump this whenever the master plan changes shape or content: a browser holding an older
+   version re-seeds itself on the next load instead of silently keeping the stale plan. */
+const WEEK_TEMPLATE_VERSION = "2026-09-04-google-sheet";
+
 const WEEK_TEMPLATE_SEED = [
   {
     week: 1,
@@ -720,13 +724,29 @@ nodes.passwordForm.addEventListener("submit", (e) => handlePasswordChange(e));
   loadRolesConfig().then(() => startSession());
 renderDemoDataOptions();
 
-  /* First run only: prefer the editable JSON file over the copy compiled into app.js. */
-  if (!state.weekTemplatesSeeded) {
+  /* Prefer the editable JSON file over the copy compiled into app.js — on first run, and
+     again whenever the master plan changes. Without the version check a browser kept the
+     plan it first saw for ever: after the move to the team's sheet every task in a stale
+     copy resolved to N+0 and piled into week 1. */
+  if (!state.weekTemplatesSeeded || !templatesAreCurrent()) {
+    const refreshing = state.weekTemplatesSeeded;
     state.weekTemplatesSeeded = true;
     saveState();
-    seedTemplatesFromFile({ silent: true });
+    seedTemplatesFromFile({ silent: true }).then((ok) => {
+      if (ok && refreshing) {
+        showAppInfo(`Master plan updated to the latest version — ${state.weekTemplates.length} phases, ${state.weekTemplates.reduce((total, week) => total + week.tasks.length, 0)} tasks. Existing projects keep the plan they were created with.`);
+      }
+    });
   }
 
+}
+
+/* Stale either because the version moved on, or because the stored plan predates a field the
+   scheduler needs — a task with no offsets would otherwise silently land in week 1. */
+function templatesAreCurrent() {
+  if ((state.weekTemplatesVersion || "") !== WEEK_TEMPLATE_VERSION) return false;
+  return (state.weekTemplates || []).every((week) =>
+    (week.tasks || []).every((task) => Object.keys(task.offsetByCycle || {}).length));
 }
 
 function clearResetFlagFromUrl() {
@@ -2043,6 +2063,7 @@ function loadState() {
            every edit on the Templates screen was discarded on the next page load. */
         weekTemplates: Array.isArray(parsed.weekTemplates) ? parsed.weekTemplates : null,
         weekTemplatesSeeded: Boolean(parsed.weekTemplatesSeeded),
+        weekTemplatesVersion: parsed.weekTemplatesVersion || "",
         demoSeeded: Boolean(parsed.demoSeeded),
       };
     }
@@ -2990,7 +3011,7 @@ async function fetchSeedTemplates() {
     if (!Array.isArray(inlined.weeks) || !inlined.weeks.length) {
       throw new Error("bundled week templates are empty");
     }
-    templateMeta = { baseCycleWeeks: inlined.baseCycleWeeks, defaultTaskDays: inlined.defaultTaskDays, cycleWeeksWithData: inlined.cycleWeeksWithData };
+    templateMeta = { baseCycleWeeks: inlined.baseCycleWeeks, defaultTaskDays: inlined.defaultTaskDays, cycleWeeksWithData: inlined.cycleWeeksWithData, version: inlined.version };
     return inlined.weeks;
   }
 
@@ -3002,7 +3023,7 @@ async function fetchSeedTemplates() {
     throw new Error("week-templates.json has no 'weeks' array");
   }
 
-  templateMeta = { baseCycleWeeks: data.baseCycleWeeks, defaultTaskDays: data.defaultTaskDays, cycleWeeksWithData: data.cycleWeeksWithData };
+  templateMeta = { baseCycleWeeks: data.baseCycleWeeks, defaultTaskDays: data.defaultTaskDays, cycleWeeksWithData: data.cycleWeeksWithData, version: data.version };
   return data.weeks;
 }
 
@@ -3010,6 +3031,7 @@ async function seedTemplatesFromFile({ silent } = {}) {
   try {
     const weeks = await fetchSeedTemplates();
     state.weekTemplates = toTemplateWeeks(weeks);
+    state.weekTemplatesVersion = templateMeta.version || WEEK_TEMPLATE_VERSION;
     saveState();
     renderTemplatesScreen();
     debugLog(`templates seeded from week-templates.json (${state.weekTemplates.length} weeks)`);
@@ -3033,6 +3055,7 @@ function resetTemplatesToDefault() {
   if (!confirm("Replace the master plan with the default week-wise template built into the app? Your edits here will be lost.")) return;
 
   state.weekTemplates = toTemplateWeeks(WEEK_TEMPLATE_SEED);
+  state.weekTemplatesVersion = WEEK_TEMPLATE_VERSION;
   saveState();
   renderTemplatesScreen();
 }
