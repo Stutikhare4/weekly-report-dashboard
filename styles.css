@@ -2286,6 +2286,71 @@ button {
   font-size: 0.95rem;
 }
 
+/* Expand a week in place to scan its tasks without opening the report editor. */
+.report-row-toggle {
+  flex: none;
+  width: 26px;
+  height: 26px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  border: 1px solid var(--border-strong);
+  background: var(--surface-4);
+  color: var(--text);
+  font-size: 11px;
+  line-height: 1;
+  cursor: pointer;
+  transition: transform 120ms ease, background 120ms ease;
+}
+
+.report-row-toggle:hover:not(:disabled) {
+  background: var(--surface-2);
+}
+
+.report-row-toggle.is-open {
+  transform: rotate(90deg);
+}
+
+.report-row-toggle:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.report-row-tasks {
+  flex: 1 0 100%;
+  min-width: 0;
+  overflow-x: auto;
+  margin-top: 4px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border-soft);
+}
+
+.report-row-task-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+
+.report-row-task-table th,
+.report-row-task-table td {
+  text-align: left;
+  padding: 6px 10px 6px 0;
+  border-bottom: 1px solid var(--border-soft);
+  vertical-align: top;
+}
+
+.report-row-task-table th {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+}
+
+.report-row-task-table tr:last-child td {
+  border-bottom: 0;
+}
+
 .report-row-actions {
   display: flex;
   align-items: center;

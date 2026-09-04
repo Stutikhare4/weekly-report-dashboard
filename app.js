@@ -523,6 +523,7 @@ let uiState = {
   calendarSelectedDate: null,
   wizardStep: 1,
   wizardSavedId: null,
+  openReportRows: new Set(),
 };
 let latestReportText = "";
 let taskCounter = 0;
@@ -4593,19 +4594,32 @@ function renderReportsIndex(projectId) {
   nodes.reportsIndexList.innerHTML = updates.map((update, index) => {
     const tasks = update.tasks || [];
     const done = tasks.filter((task) => task.status === "completed").length;
+    const open = uiState.openReportRows.has(update.id);
+    /* Weeks are numbered by position in the project. The template label names the phase the
+       week's work belongs to, which is not the same thing — several weeks share a phase. */
+    const label = update.templateLabel && !/^Week \d+$/.test(update.templateLabel)
+      ? update.templateLabel
+      : (tasks.length ? "Custom week" : "No tasks due");
+
     return `
       <article class="report-row">
         <div class="report-row-week">
-          <span class="template-week-badge">Week ${update.templateWeek || index + 1}</span>
+          <button type="button" class="report-row-toggle${open ? " is-open" : ""}" data-toggle-report="${update.id}"
+            aria-expanded="${open ? "true" : "false"}" aria-controls="report-tasks-${update.id}"
+            title="${open ? "Hide" : "Show"} this week's tasks"${tasks.length ? "" : " disabled"}>&#9656;</button>
+          <span class="template-week-badge">Week ${index + 1}</span>
           <div>
             <div class="report-row-range">${escapeHtml(update.weekRange)}</div>
-            <div class="meta">${escapeHtml(update.templateLabel || "Custom week")} · ${tasks.length} task${tasks.length === 1 ? "" : "s"} · ${done} completed</div>
+            <div class="meta">${escapeHtml(label)} · ${tasks.length} task${tasks.length === 1 ? "" : "s"} · ${done} completed</div>
           </div>
         </div>
         <div class="report-row-actions">
           <span class="status-badge ${statusClass(update.statusTag)}">${escapeHtml(update.statusTag)}</span>
           <button type="button" class="ghost-button small-button" data-requires="report.edit" data-edit-report="${update.id}">Edit</button>
           <button type="button" class="row-remove" data-requires="report.delete" data-delete-report="${update.id}">Delete</button>
+        </div>
+        <div class="report-row-tasks" id="report-tasks-${update.id}"${open ? "" : " hidden"}>
+          ${renderReportRowTasks(tasks)}
         </div>
       </article>
     `;
@@ -4614,7 +4628,43 @@ function renderReportsIndex(projectId) {
   applyRolePermissions();
 }
 
+/* A read-only peek at the week's work, so the list can be scanned without opening each
+   report for editing. */
+function renderReportRowTasks(tasks) {
+  if (!tasks.length) return `<p class="muted">No tasks due this week.</p>`;
+
+  return `
+    <table class="report-row-task-table">
+      <thead><tr><th>Task</th><th>Domain</th><th>Owner</th><th>Due</th><th>Status</th></tr></thead>
+      <tbody>
+        ${tasks.map((task) => `
+          <tr>
+            <td>${escapeHtml(task.title || "Untitled task")}</td>
+            <td class="muted">${escapeHtml(task.phase || "—")}</td>
+            <td class="muted">${escapeHtml(task.owner || "—")}</td>
+            <td class="muted">${escapeHtml(task.dueDate ? formatSummaryDate(task.dueDate) : "—")}</td>
+            <td><span class="status-badge ${statusClass(task.status)}">${escapeHtml(task.status)}</span></td>
+          </tr>`).join("")}
+      </tbody>
+    </table>
+  `;
+}
+
 function handleReportsIndexClick(event) {
+  const toggle = event.target.closest("[data-toggle-report]");
+  if (toggle) {
+    const id = toggle.dataset.toggleReport;
+    const panel = document.getElementById(`report-tasks-${id}`);
+    const open = !uiState.openReportRows.has(id);
+    if (open) uiState.openReportRows.add(id);
+    else uiState.openReportRows.delete(id);
+    if (panel) panel.hidden = !open;
+    toggle.classList.toggle("is-open", open);
+    toggle.setAttribute("aria-expanded", open ? "true" : "false");
+    toggle.title = `${open ? "Hide" : "Show"} this week's tasks`;
+    return;
+  }
+
   const edit = event.target.closest("[data-edit-report]");
   if (edit) {
     openEditUpdate(edit.dataset.editReport);
