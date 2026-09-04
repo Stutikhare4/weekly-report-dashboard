@@ -73,6 +73,18 @@ Known data slips in the sheet, imported as written rather than silently correcte
 6 and Week 12 tabs the five *Production* channel-setup rows (Email/SMS/WhatsApp/RCS/IVR) still
 carry the staging value N+10, so they schedule before the production dashboard exists.
 
+## Weekly reports screen
+
+Weeks are an accordion: collapsed to a summary line (week number, dates, phase, task count,
+completed count, status), one open at a time. The open week **is** the editor — task, domain,
+owner, due date, status and comments, with sub-tasks nested underneath, all writing straight to
+state on change. There is no separate form below the list, so a week's tasks are never rendered
+twice. "Edit" opens a week in place; "+ New report" appends a week and opens it.
+
+Structural changes (add/remove a task or sub-task) re-render the list and restore the open row;
+field edits patch the summary line by hand instead, since re-rendering would blur the input
+mid-edit.
+
 ## Task timeline
 
 Tasks run in parallel within their week: each starts on its week's Monday and ends

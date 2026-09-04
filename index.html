@@ -490,77 +490,10 @@
                 <button id="reportsNewBtn" class="primary-button" type="button" data-requires="report.create">+ New report</button>
               </div>
               <div id="reportsIndexList" class="reports-index-list"></div>
+              <!-- Owner suggestions for the inline week editors: the project's team and client POCs. -->
+              <datalist id="ownerOptions"></datalist>
             </section>
 
-            <form id="createReportForm" class="form-grid" hidden>
-              <label class="span-2">
-                Project *
-                <select id="createReportProjectSelect" required></select>
-              </label>
-
-              <div class="span-2 week-section">
-                <h3 class="week-section-title">Last Week <span class="meta">(completed work)</span></h3>
-                <div class="form-grid">
-                  <label>
-                    Week Start Date
-                    <input type="date" id="lastWeekDate" />
-                  </label>
-                  <label>
-                    Overall Status
-                    <select id="lastWeekStatus">
-                      <option value="on track">On Track</option>
-                      <option value="needs attention">Needs Attention</option>
-                      <option value="blocked">Blocked</option>
-                    </select>
-                  </label>
-                </div>
-                <div id="lastWeekStats" style="margin-top: 14px;"></div>
-                <div class="tasks-container" style="margin-top: 14px; padding: 18px; border-radius: 18px; background: rgba(4, 10, 21, 0.3); border: 1px solid var(--border);">
-                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 12px;">
-                    <h4 style="margin: 0; font-family: Georgia, 'Times New Roman', serif;">Tasks & Sub-tasks</h4>
-                    <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-                      <button type="button" id="btnChecklistLastWeek" class="primary-button" style="padding: 8px 12px; font-size: 0.85rem; border-radius: 10px;">📋 Add from checklist</button>
-                      <button type="button" id="btnAddLastWeekTask" class="secondary-button" style="padding: 8px 12px; font-size: 0.85rem; border-radius: 10px;">+ Add Task</button>
-                    </div>
-                  </div>
-                  <div id="lastWeekTasksList" style="display: grid; gap: 18px;"></div>
-                </div>
-              </div>
-
-              <div class="span-2 week-section">
-                <h3 class="week-section-title">Upcoming / Running Week <span class="meta">(this week's plan)</span></h3>
-                <div class="form-grid">
-                  <label>
-                    Week Start Date
-                    <input type="date" id="thisWeekDate" />
-                  </label>
-                  <label>
-                    Overall Status
-                    <select id="thisWeekStatus">
-                      <option value="on track">On Track</option>
-                      <option value="needs attention">Needs Attention</option>
-                      <option value="blocked">Blocked</option>
-                    </select>
-                  </label>
-                </div>
-                <div id="thisWeekStats" style="margin-top: 14px;"></div>
-                <div class="tasks-container" style="margin-top: 14px; padding: 18px; border-radius: 18px; background: rgba(4, 10, 21, 0.3); border: 1px solid var(--border);">
-                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 12px;">
-                    <h4 style="margin: 0; font-family: Georgia, 'Times New Roman', serif;">Tasks & Sub-tasks</h4>
-                    <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-                      <button type="button" id="btnChecklistThisWeek" class="primary-button" style="padding: 8px 12px; font-size: 0.85rem; border-radius: 10px;">📋 Add from checklist</button>
-                      <button type="button" id="btnAddThisWeekTask" class="secondary-button" style="padding: 8px 12px; font-size: 0.85rem; border-radius: 10px;">+ Add Task</button>
-                    </div>
-                  </div>
-                  <div id="thisWeekTasksList" style="display: grid; gap: 18px;"></div>
-                </div>
-              </div>
-
-              <div class="actions span-2" style="margin-top: 12px;">
-                <button type="submit" class="primary-button">Save Report</button>
-                <button type="button" id="btnCancelCreateReport" class="ghost-button">Cancel</button>
-              </div>
-            </form>
           </section>
 
           <section class="card screen" id="calendarScreen" hidden>
@@ -744,25 +677,5 @@
       </div>
     </div>
 
-    <div id="templatePickerOverlay" class="modal-overlay" hidden>
-      <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="templatePickerTitle">
-        <div class="modal-head">
-          <div>
-            <p class="eyebrow">Quick add</p>
-            <h2 id="templatePickerTitle">Add tasks from checklist</h2>
-          </div>
-          <button type="button" id="templatePickerClose" class="ghost-button" style="padding: 8px 12px;">✕</button>
-        </div>
-        <div class="modal-toolbar">
-          <input type="search" id="templateSearch" placeholder="Search tasks…" autocomplete="off" />
-          <span id="templateSelectedCount" class="pill pill-dark">0 selected</span>
-        </div>
-        <div id="templatePickerBody" class="modal-body"></div>
-        <div class="modal-foot">
-          <button type="button" id="templatePickerCancel" class="ghost-button">Cancel</button>
-          <button type="button" id="templatePickerAdd" class="primary-button">Add selected</button>
-        </div>
-      </div>
-    </div>
   </body>
 </html>

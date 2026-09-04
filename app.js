@@ -2,100 +2,8 @@ const LEGACY_STORAGE_KEY = "multi-project-weekly-dashboard";
 const USER_DATA_PREFIX = "multi-project-dashboard-state:";
 const STATE_KEY = "multi-project-dashboard-state";
 const SUBTASK_STATUSES = ["not started", "in progress", "delayed", "blocked", "completed"];
+const WEEK_STATUSES = ["not started", "on track", "needs attention", "blocked", "completed"];
 
-// Predefined onboarding checklist. Users pick tasks from here instead of typing
-// each one by hand — title + team (owner) get pre-filled, they only add the
-// date / status / details. Edit this list to change the standard playbook.
-const TASK_TEMPLATES = [
-  {
-    phase: "Pre Kickoff",
-    tasks: [
-      { title: "Sales <> Post-Sales handoff call", team: "OBM" },
-      { title: "Sales Handoff Intake Form", team: "OBM" },
-      { title: "Introduction to Client", team: "OBM" },
-      { title: "Setup Pre-KO / Lead Call", team: "OBM" },
-      { title: "Allocation of Internal Team - Add to Slack & Asana", team: "OPS" },
-      { title: "Welcome Email", team: "OBM" },
-      { title: "Schedule Kick-Off Meeting", team: "OBM" },
-    ],
-  },
-  {
-    phase: "Kickoff and Scope Definition",
-    tasks: [
-      { title: "Kick-off Meeting", team: "OBM" },
-      { title: "Kick Off Intake Form", team: "OBM" },
-      { title: "Update Asana Project Plan & Project fields", team: "OBM" },
-      { title: "Discovery", team: "OBM" },
-      { title: "Data Modelling", team: "TSS" },
-      { title: "Data Model validation & Sign-Off from DS Team", team: "TSS" },
-      { title: "Data Model sign off for implementing use cases - by GC", team: "GC" },
-      { title: "Schema", team: "TSS" },
-      { title: "Defined Use-Cases for Creation", team: "GC" },
-      { title: "Scope of Work", team: "TSS" },
-      { title: "Submit Weekly Report", team: "OBM" },
-    ],
-  },
-  {
-    phase: "Staging Deployment",
-    tasks: [
-      { title: "Create Staging Dashboard", team: "OBM" },
-      { title: "SDK Set Up", team: "Client" },
-      { title: "App Push / In-App Setup", team: "Client" },
-      { title: "Hashing", team: "OBM" },
-      { title: "User and Event Tracking", team: "Client" },
-      { title: "RCS Setup", team: "OBM" },
-      { title: "Web Push / Onsite Setup", team: "Client" },
-      { title: "Google / Facebook Retargeting Setup", team: "Client" },
-      { title: "IVR Setup", team: "OBM" },
-      { title: "Staging Audit", team: "TSS" },
-      { title: "Inform Client + PM on Staging Deployment Completion", team: "TSS" },
-      { title: "Completion of Staging Deployment", team: "OBM" },
-      { title: "Send Weekly Report", team: "OBM" },
-    ],
-  },
-  {
-    phase: "Production Deployment",
-    tasks: [
-      { title: "Create Production Dashboard", team: "OBM" },
-      { title: "SDK Setup on Production", team: "Client" },
-      { title: "SSO Setup", team: "OBM" },
-      { title: "Hashing", team: "OBM" },
-      { title: "User & Event Tracking Prod", team: "Client" },
-      { title: "Web Push / Onsite Setup", team: "Client" },
-      { title: "App Push / In-App Setup", team: "Client" },
-      { title: "Google / Facebook Retargeting Setup", team: "Client" },
-      { title: "IVR Setup", team: "OBM" },
-      { title: "Set Alerts & Reports", team: "OBM" },
-      { title: "Production Audit", team: "TSS" },
-    ],
-  },
-  {
-    phase: "Training and Use-Cases",
-    tasks: [
-      { title: "Call to Discuss Training Plan & Use Cases Flow", team: "GC" },
-      { title: "Training Session 1", team: "OBM" },
-      { title: "Training Session 2", team: "OBM" },
-      { title: "Send Dashboard Pre-Recorded List", team: "OBM" },
-      { title: "Use Case 1 Setup", team: "OBM" },
-      { title: "Use Case 2 Setup", team: "OBM" },
-    ],
-  },
-  {
-    phase: "Go-Live",
-    tasks: [
-      { title: "Final Checks", team: "OBM" },
-      { title: "Account Closure", team: "OBM" },
-      { title: "Mark Project Completed", team: "OBM" },
-      { title: "Offline Data Uploaded", team: "TSS" },
-      { title: "Update checklist for S3 / SFTP", team: "TSS" },
-      { title: "2 or More Recurring Campaigns / Journeys Live", team: "OBM" },
-      { title: "Key Events + Attributes Integrated", team: "OBM" },
-      { title: "Get Confirmation from Client on Billing Start", team: "OBM" },
-      { title: "Inform Billing & Cross-Functional Teams on Order Creation Thread", team: "OBM" },
-      { title: "Integration Invoice Clearance", team: "OBM" },
-    ],
-  },
-];
 /* Week-wise master plan, derived from the "Weekly status - Salad Days" workbook: each week
    sheet there pairs a completed table with a "This Week" table, both grouped by an
    "Integration Scope" column. That scope maps onto a task's `phase` field here.
@@ -418,34 +326,11 @@ const nodes = {
   npAddPoc: document.getElementById("npAddPoc"),
   cancelAddProject: document.getElementById("cancelAddProject"),
   btnCancelAddProject: document.getElementById("btnCancelAddProject"),
-
-  createReportForm: document.getElementById("createReportForm"),
   reportsIndexProject: document.getElementById("reportsIndexProject"),
   reportsIndexList: document.getElementById("reportsIndexList"),
   reportsNewBtn: document.getElementById("reportsNewBtn"),
   createReportTitle: document.getElementById("createReportTitle"),
-  createReportProjectSelect: document.getElementById("createReportProjectSelect"),
-  lastWeekDate: document.getElementById("lastWeekDate"),
-  lastWeekStatus: document.getElementById("lastWeekStatus"),
-  lastWeekStats: document.getElementById("lastWeekStats"),
-  lastWeekTasksList: document.getElementById("lastWeekTasksList"),
-  btnAddLastWeekTask: document.getElementById("btnAddLastWeekTask"),
-  thisWeekDate: document.getElementById("thisWeekDate"),
-  thisWeekStatus: document.getElementById("thisWeekStatus"),
-  thisWeekStats: document.getElementById("thisWeekStats"),
-  thisWeekTasksList: document.getElementById("thisWeekTasksList"),
-  btnAddThisWeekTask: document.getElementById("btnAddThisWeekTask"),
-  btnChecklistLastWeek: document.getElementById("btnChecklistLastWeek"),
-  btnChecklistThisWeek: document.getElementById("btnChecklistThisWeek"),
-  templatePickerOverlay: document.getElementById("templatePickerOverlay"),
-  templatePickerBody: document.getElementById("templatePickerBody"),
-  templatePickerClose: document.getElementById("templatePickerClose"),
-  templatePickerCancel: document.getElementById("templatePickerCancel"),
-  templatePickerAdd: document.getElementById("templatePickerAdd"),
-  templateSearch: document.getElementById("templateSearch"),
-  templateSelectedCount: document.getElementById("templateSelectedCount"),
   cancelCreateReport: document.getElementById("cancelCreateReport"),
-  btnCancelCreateReport: document.getElementById("btnCancelCreateReport"),
 
   calendarGrid: document.getElementById("calendarGrid"),
   calendarMonthLabel: document.getElementById("calendarMonthLabel"),
@@ -588,7 +473,7 @@ function boot() {
     if (step && uiState.wizardStep < WIZARD_CONFIRM_STEP) goToWizardStep(Number(step.dataset.step));
   });
 
-  nodes.addWeeklyUpdate.addEventListener("click", () => openCreateReport(uiState.projectId, null, { editing: true }));
+  nodes.addWeeklyUpdate.addEventListener("click", () => addWeeklyReport(uiState.projectId));
   nodes.addWeekFromTemplate.addEventListener("click", () => addWeekToProject(uiState.projectId));
   nodes.deleteProjectBtn.addEventListener("click", () => deleteProject(uiState.projectId));
   nodes.projEditToggle.addEventListener("click", () => toggleProjectDetails(true));
@@ -607,27 +492,15 @@ function boot() {
     if (node) node.addEventListener("change", () => syncGoLiveFromCycle());
   });
   nodes.cancelCreateReport.addEventListener("click", () => navigateToScreen(uiState.returnScreen));
-  nodes.btnCancelCreateReport.addEventListener("click", () => navigateToScreen(uiState.returnScreen));
-  nodes.createReportForm.addEventListener("submit", (e) => saveWeeklyUpdate(e));
-  nodes.btnAddLastWeekTask.addEventListener("click", () => addNewTaskToForm("last"));
-  nodes.btnAddThisWeekTask.addEventListener("click", () => addNewTaskToForm("upcoming"));
-  nodes.btnChecklistLastWeek.addEventListener("click", () => openTemplatePicker("last"));
-  nodes.btnChecklistThisWeek.addEventListener("click", () => openTemplatePicker("upcoming"));
-  nodes.templatePickerClose.addEventListener("click", () => closeTemplatePicker());
-  nodes.templatePickerCancel.addEventListener("click", () => closeTemplatePicker());
-  nodes.templatePickerAdd.addEventListener("click", () => addSelectedTemplates());
-  nodes.templateSearch.addEventListener("input", () => filterTemplatePicker(nodes.templateSearch.value));
-  nodes.templatePickerOverlay.addEventListener("click", (e) => {
-    if (e.target === nodes.templatePickerOverlay) closeTemplatePicker();
-  });
-  nodes.createReportProjectSelect.addEventListener("change", () => loadProjectIntoReportEditor(nodes.createReportProjectSelect.value));
   nodes.reportsIndexProject.addEventListener("change", () => {
     uiState.projectId = nodes.reportsIndexProject.value || null;
     renderReportsIndex(nodes.reportsIndexProject.value);
   });
   nodes.reportsIndexList.addEventListener("click", (e) => handleReportsIndexClick(e));
+  nodes.reportsIndexList.addEventListener("input", (e) => handleReportsIndexInput(e));
+  nodes.reportsIndexList.addEventListener("change", (e) => handleReportsIndexInput(e));
   nodes.reportsNewBtn.addEventListener("click", () => {
-    openCreateReport(nodes.reportsIndexProject.value || null, null, { editing: true });
+    addWeeklyReport(nodes.reportsIndexProject.value || null);
   });
 
   nodes.calendarPrev.addEventListener("click", () => shiftCalendarMonth(-1));
@@ -1764,19 +1637,6 @@ function renderProjectSummary(projectId) {
      instead. The panel is hidden rather than left as an empty bordered box. */
   nodes.projectSummary.innerHTML = "";
   nodes.projectSummary.hidden = true;
-}
-
-function reportSection(sectionKey) {
-  return sectionKey === "last"
-    ? { list: nodes.lastWeekTasksList, stats: nodes.lastWeekStats, date: nodes.lastWeekDate, status: nodes.lastWeekStatus }
-    : { list: nodes.thisWeekTasksList, stats: nodes.thisWeekStats, date: nodes.thisWeekDate, status: nodes.thisWeekStatus };
-}
-
-function renderCreateReportStats(sectionKey) {
-  const section = reportSection(sectionKey);
-  const rows = [...section.list.querySelectorAll(".form-subtask-row")];
-  const subtasks = rows.map((row) => ({ status: row.querySelector(".form-subtask-status").value }));
-  section.stats.innerHTML = buildStatTileRow(countSubtaskStatuses(subtasks));
 }
 
 /* ---------- Charts ---------- */
@@ -4531,41 +4391,48 @@ function mondayOfThisWeek() {
   return toInputDate(monday);
 }
 
-function classifyProjectWeeks(projectId) {
-  const updatesAsc = state.updates
-    .filter((update) => update.projectId === projectId)
-    .sort((left, right) => left.weekStart.localeCompare(right.weekStart));
-  const todayStr = toInputDate(new Date());
-  const weekEndStr = (update) => toInputDate(shiftDays(new Date(`${update.weekStart}T00:00:00`), 6));
-
-  const thisWeekUpdate = updatesAsc.find(
-    (update) => update.weekStart <= todayStr && todayStr <= weekEndStr(update),
-  ) || null;
-  const completedUpdates = updatesAsc.filter((update) => weekEndStr(update) < todayStr);
-  const lastWeekUpdate = completedUpdates.length ? completedUpdates[completedUpdates.length - 1] : null;
-
-  return { lastWeekUpdate, thisWeekUpdate };
-}
-
 /* Opening without `editing` shows the index of existing reports; the editor only appears
    once you pick one to edit or start a new one. */
+/* Add the week after the project's last one, then open it for editing. */
+function addWeeklyReport(projectId) {
+  if (!requirePermission("report.create", "add a weekly report")) return;
+  const project = state.projects.find((item) => item.id === projectId);
+  if (!project) {
+    showAppInfo("Pick a project first, then add a report to it.");
+    return;
+  }
+
+  const existing = state.updates
+    .filter((item) => item.projectId === project.id)
+    .sort((left, right) => left.weekStart.localeCompare(right.weekStart));
+  const last = existing[existing.length - 1];
+  const weekStart = last
+    ? toInputDate(shiftDays(new Date(`${last.weekStart}T00:00:00`), 7))
+    : mondayOnOrBefore(project.kickoffDate);
+
+  const update = {
+    id: newId(), projectId: project.id, projectName: project.name, weekStart,
+    weekRange: formatWeekRange(weekStart), statusTag: "not started",
+    fromTemplate: false, templateWeek: existing.length + 1, templateLabel: "",
+    tasks: [], createdAt: new Date().toISOString(),
+  };
+  state.updates.push(update);
+  saveState();
+
+  uiState.openReportRows.clear();
+  uiState.openReportRows.add(update.id);
+  openCreateReport(project.id, null, { editing: false });
+  setReportRowsOpenState();
+}
+
 function openCreateReport(projectId, focusUpdateId, { editing = Boolean(focusUpdateId) } = {}) {
   uiState.returnScreen = uiState.screen === "create-report" ? uiState.returnScreen : uiState.screen;
   uiState.screen = "create-report";
   uiState.activeNav = "create-report";
   uiState.projectId = projectId || null;
 
-  nodes.createReportTitle.textContent = editing
-    ? (focusUpdateId ? "Edit Weekly Report" : "New Weekly Report")
-    : "Project Reports";
-  populateProjectPicker(nodes.createReportProjectSelect, projectId);
+  nodes.createReportTitle.textContent = "Project Reports";
   populateProjectPicker(nodes.reportsIndexProject, projectId);
-  nodes.createReportProjectSelect.disabled = Boolean(projectId);
-
-  nodes.createReportForm.hidden = !editing;
-  if (editing) {
-    loadProjectIntoReportEditor(projectId || "", focusUpdateId || null);
-  }
 
   renderReportsIndex(projectId || "");
   renderAll();
@@ -4581,6 +4448,8 @@ function renderReportsIndex(projectId) {
     nodes.reportsIndexList.innerHTML = `<p class="muted">Pick a project to see its weekly reports.</p>`;
     return;
   }
+
+  refreshOwnerOptions(projectId);
 
   const updates = state.updates
     .filter((update) => update.projectId === projectId)
@@ -4606,7 +4475,7 @@ function renderReportsIndex(projectId) {
         <div class="report-row-week">
           <button type="button" class="report-row-toggle${open ? " is-open" : ""}" data-toggle-report="${update.id}"
             aria-expanded="${open ? "true" : "false"}" aria-controls="report-tasks-${update.id}"
-            title="${open ? "Hide" : "Show"} this week's tasks"${tasks.length ? "" : " disabled"}>&#9656;</button>
+            title="${open ? "Hide" : "Show"} this week's tasks">&#9656;</button>
           <span class="template-week-badge">Week ${index + 1}</span>
           <div>
             <div class="report-row-range">${escapeHtml(update.weekRange)}</div>
@@ -4619,7 +4488,7 @@ function renderReportsIndex(projectId) {
           <button type="button" class="row-remove" data-requires="report.delete" data-delete-report="${update.id}">Delete</button>
         </div>
         <div class="report-row-tasks" id="report-tasks-${update.id}"${open ? "" : " hidden"}>
-          ${renderReportRowTasks(tasks)}
+          ${renderReportRowTasks(update)}
         </div>
       </article>
     `;
@@ -4630,38 +4499,186 @@ function renderReportsIndex(projectId) {
 
 /* A read-only peek at the week's work, so the list can be scanned without opening each
    report for editing. */
-function renderReportRowTasks(tasks) {
-  if (!tasks.length) return `<p class="muted">No tasks due this week.</p>`;
+function setReportRowsOpenState() {
+  nodes.reportsIndexList.querySelectorAll("[data-toggle-report]").forEach((button) => {
+    const open = uiState.openReportRows.has(button.dataset.toggleReport);
+    const panel = document.getElementById(`report-tasks-${button.dataset.toggleReport}`);
+    if (panel) panel.hidden = !open;
+    button.classList.toggle("is-open", open);
+    button.setAttribute("aria-expanded", open ? "true" : "false");
+    button.title = `${open ? "Hide" : "Show"} this week's tasks`;
+  });
+}
+
+function statusSelect(attr, value) {
+  return `<select data-${attr}="status">${SUBTASK_STATUSES
+    .map((status) => `<option value="${status}"${status === value ? " selected" : ""}>${capitalize(status)}</option>`)
+    .join("")}</select>`;
+}
+
+/* The expanded week is where a week is edited: there is no separate form below the list, so
+   the tasks are never shown twice. Every field writes straight to state on change. */
+function applyWeekStructureChange(button) {
+  const editor = button.closest(".week-editor");
+  const update = state.updates.find((item) => item.id === editor.dataset.update);
+  if (!update) return;
+  update.tasks = update.tasks || [];
+
+  const taskId = button.dataset.addSubtask || button.dataset.removeTask || button.dataset.task;
+  const task = update.tasks.find((item) => item.id === taskId);
+
+  if (button.dataset.addTask) {
+    update.tasks.push({
+      id: newId(), title: "", phase: "", owner: "", status: "not started", date: "",
+      blocker: "", priority: "medium", comments: "",
+      days: templateDefaultDays(), startDate: update.weekStart || "",
+      dueDate: taskDueDate(update.weekStart, templateDefaultDays()), subtasks: [],
+    });
+  } else if (button.dataset.removeTask && task) {
+    update.tasks = update.tasks.filter((item) => item.id !== task.id);
+  } else if (button.dataset.addSubtask && task) {
+    task.subtasks = task.subtasks || [];
+    task.subtasks.push({ id: newId(), title: "", owner: task.owner || "", status: "not started", date: update.weekStart || "", details: "" });
+  } else if (button.dataset.removeSubtask && task) {
+    task.subtasks = (task.subtasks || []).filter((item) => item.id !== button.dataset.removeSubtask);
+  }
+
+  saveState();
+  renderReportsIndex(nodes.reportsIndexProject.value);
+  setReportRowsOpenState();
+}
+
+function renderReportRowTasks(update) {
+  const tasks = update.tasks || [];
+
+  const rows = tasks.map((task) => {
+    const subtasks = task.subtasks || [];
+    return `
+      <tr class="week-task-row" data-task="${task.id}">
+        <td><input type="text" data-task-field="title" value="${escapeHtml(task.title || "")}" placeholder="Task" /></td>
+        <td><input type="text" data-task-field="phase" value="${escapeHtml(task.phase || "")}" placeholder="Domain" /></td>
+        <td><input type="text" list="ownerOptions" data-task-field="owner" value="${escapeHtml(task.owner || "")}" placeholder="Owner" /></td>
+        <td><input type="date" data-task-field="dueDate" value="${escapeHtml(task.dueDate || "")}" /></td>
+        <td>${statusSelect("task-field", task.status)}</td>
+        <td><input type="text" data-task-field="comments" value="${escapeHtml(task.comments || "")}" placeholder="Comments" /></td>
+        <td class="week-task-actions">
+          <button type="button" class="link-button" data-add-subtask="${task.id}" title="Add a sub-task">+ Sub</button>
+          <button type="button" class="row-remove" data-remove-task="${task.id}" title="Remove this task">&times;</button>
+        </td>
+      </tr>
+      ${subtasks.map((sub) => `
+        <tr class="week-subtask-row" data-task="${task.id}" data-subtask="${sub.id}">
+          <td class="week-subtask-title"><span aria-hidden="true">&#8627;</span><input type="text" data-subtask-field="title" value="${escapeHtml(sub.title || "")}" placeholder="Sub-task" /></td>
+          <td></td>
+          <td><input type="text" list="ownerOptions" data-subtask-field="owner" value="${escapeHtml(sub.owner || "")}" placeholder="Owner" /></td>
+          <td><input type="date" data-subtask-field="date" value="${escapeHtml(sub.date || "")}" /></td>
+          <td>${statusSelect("subtask-field", sub.status)}</td>
+          <td><input type="text" data-subtask-field="details" value="${escapeHtml(sub.details || "")}" placeholder="Details" /></td>
+          <td class="week-task-actions">
+            <button type="button" class="row-remove" data-remove-subtask="${sub.id}" data-task="${task.id}" title="Remove this sub-task">&times;</button>
+          </td>
+        </tr>`).join("")}
+    `;
+  }).join("");
 
   return `
-    <table class="report-row-task-table">
-      <thead><tr><th>Task</th><th>Domain</th><th>Owner</th><th>Due</th><th>Status</th></tr></thead>
-      <tbody>
-        ${tasks.map((task) => `
-          <tr>
-            <td>${escapeHtml(task.title || "Untitled task")}</td>
-            <td class="muted">${escapeHtml(task.phase || "—")}</td>
-            <td class="muted">${escapeHtml(task.owner || "—")}</td>
-            <td class="muted">${escapeHtml(task.dueDate ? formatSummaryDate(task.dueDate) : "—")}</td>
-            <td><span class="status-badge ${statusClass(task.status)}">${escapeHtml(task.status)}</span></td>
-          </tr>`).join("")}
-      </tbody>
-    </table>
+    <div class="week-editor" data-update="${update.id}">
+      <div class="week-editor-head">
+        <label>Week status
+          <select data-week-field="statusTag">${WEEK_STATUSES
+            .map((status) => `<option value="${status}"${status === update.statusTag ? " selected" : ""}>${capitalize(status)}</option>`)
+            .join("")}</select>
+        </label>
+        <label>Week starting
+          <input type="date" data-week-field="weekStart" value="${escapeHtml(update.weekStart || "")}" />
+        </label>
+        <button type="button" class="secondary-button small-button" data-add-task="${update.id}">+ Add task</button>
+      </div>
+      ${tasks.length ? `
+        <div class="week-editor-scroll">
+          <table class="report-row-task-table">
+            <thead><tr><th>Task</th><th>Domain</th><th>Owner</th><th>Due</th><th>Status</th><th>Comments</th><th></th></tr></thead>
+            <tbody>${rows}</tbody>
+          </table>
+        </div>` : `<p class="muted">No tasks due this week. Use “+ Add task” to add one.</p>`}
+    </div>
   `;
+}
+
+/* Editing in place: find what the field belongs to, write it, save. The row summary is
+   refreshed by hand rather than re-rendering the list, which would blur the field mid-edit. */
+function handleReportsIndexInput(event) {
+  const field = event.target;
+  const editor = field.closest(".week-editor");
+  if (!editor) return;
+  if (!requirePermission("report.edit", "edit a weekly report")) return;
+
+  const update = state.updates.find((item) => item.id === editor.dataset.update);
+  if (!update) return;
+
+  const weekField = field.dataset.weekField;
+  if (weekField) {
+    update[weekField] = field.value;
+    if (weekField === "weekStart") update.weekRange = formatWeekRange(field.value);
+    saveState();
+    refreshReportRowSummary(update);
+    return;
+  }
+
+  const row = field.closest("[data-task]");
+  const task = (update.tasks || []).find((item) => item.id === row.dataset.task);
+  if (!task) return;
+
+  if (field.dataset.taskField) {
+    task[field.dataset.taskField] = field.value;
+    if (field.dataset.taskField === "dueDate") task.days = daysBetweenInclusive(task.startDate, field.value);
+  } else if (field.dataset.subtaskField) {
+    const sub = (task.subtasks || []).find((item) => item.id === row.dataset.subtask);
+    if (!sub) return;
+    sub[field.dataset.subtaskField] = field.value;
+  }
+
+  saveState();
+  refreshReportRowSummary(update);
+}
+
+/* Keep the collapsed summary honest while its week is open and being edited. */
+function refreshReportRowSummary(update) {
+  const editor = nodes.reportsIndexList.querySelector(`.week-editor[data-update="${update.id}"]`);
+  const article = editor && editor.closest(".report-row");
+  if (!article) return;
+
+  const tasks = update.tasks || [];
+  const done = tasks.filter((task) => task.status === "completed").length;
+  const label = update.templateLabel && !/^Week \d+$/.test(update.templateLabel)
+    ? update.templateLabel
+    : (tasks.length ? "Custom week" : "No tasks due");
+
+  article.querySelector(".report-row-range").textContent = update.weekRange;
+  article.querySelector(".meta").textContent =
+    `${label} · ${tasks.length} task${tasks.length === 1 ? "" : "s"} · ${done} completed`;
+  const badge = article.querySelector(".report-row-actions .status-badge");
+  badge.textContent = update.statusTag;
+  badge.className = `status-badge ${statusClass(update.statusTag)}`;
 }
 
 function handleReportsIndexClick(event) {
   const toggle = event.target.closest("[data-toggle-report]");
   if (toggle) {
+    /* An accordion: opening a week closes the others, so the list stays compact however many
+       weeks a project has. */
     const id = toggle.dataset.toggleReport;
-    const panel = document.getElementById(`report-tasks-${id}`);
     const open = !uiState.openReportRows.has(id);
+    uiState.openReportRows.clear();
     if (open) uiState.openReportRows.add(id);
-    else uiState.openReportRows.delete(id);
-    if (panel) panel.hidden = !open;
-    toggle.classList.toggle("is-open", open);
-    toggle.setAttribute("aria-expanded", open ? "true" : "false");
-    toggle.title = `${open ? "Hide" : "Show"} this week's tasks`;
+    setReportRowsOpenState();
+    return;
+  }
+
+  const structural = event.target.closest("[data-add-task], [data-remove-task], [data-add-subtask], [data-remove-subtask]");
+  if (structural) {
+    if (!requirePermission("report.edit", "edit a weekly report")) return;
+    applyWeekStructureChange(structural);
     return;
   }
 
@@ -4678,508 +4695,20 @@ function handleReportsIndexClick(event) {
   }
 }
 
+/* Editing happens inside the week's own card, so "Edit" just opens that week. */
 function openEditUpdate(updateId) {
-  const update = state.updates.find((u) => u.id === updateId);
+  const update = state.updates.find((item) => item.id === updateId);
   if (!update) return;
-
-  const project = state.projects.find((p) => p.id === update.projectId);
+  const project = state.projects.find((item) => item.id === update.projectId);
   if (!project) return;
 
-  openCreateReport(project.id, updateId);
-}
+  uiState.openReportRows.clear();
+  uiState.openReportRows.add(updateId);
+  openCreateReport(project.id, null, { editing: false });
+  setReportRowsOpenState();
 
-function loadProjectIntoReportEditor(projectId, focusUpdateId) {
-  refreshOwnerOptions(projectId);
-  nodes.lastWeekTasksList.innerHTML = "";
-  nodes.thisWeekTasksList.innerHTML = "";
-  uiState.editingLastId = null;
-  uiState.editingUpcomingId = null;
-
-  const thisMonday = mondayOfThisWeek();
-  const lastMonday = toInputDate(shiftDays(new Date(`${thisMonday}T00:00:00`), -7));
-  nodes.thisWeekDate.value = thisMonday;
-  nodes.lastWeekDate.value = lastMonday;
-  nodes.thisWeekStatus.value = "on track";
-  nodes.lastWeekStatus.value = "on track";
-
-  if (projectId) {
-    let { lastWeekUpdate, thisWeekUpdate } = classifyProjectWeeks(projectId);
-
-    // Make sure the specifically-edited update is shown, even if it isn't the
-    // latest completed / current-week one.
-    if (focusUpdateId) {
-      const focus = state.updates.find((u) => u.id === focusUpdateId);
-      if (focus) {
-        const todayStr = toInputDate(new Date());
-        const focusEnd = toInputDate(shiftDays(new Date(`${focus.weekStart}T00:00:00`), 6));
-        if (focus.weekStart <= todayStr && todayStr <= focusEnd) {
-          thisWeekUpdate = focus;
-        } else if (focusEnd < todayStr) {
-          lastWeekUpdate = focus;
-        } else {
-          thisWeekUpdate = focus;
-        }
-      }
-    }
-
-    if (lastWeekUpdate) loadUpdateIntoSection("last", lastWeekUpdate);
-    if (thisWeekUpdate) loadUpdateIntoSection("upcoming", thisWeekUpdate);
-  }
-
-  if (!nodes.lastWeekTasksList.children.length) addNewTaskToForm("last");
-  if (!nodes.thisWeekTasksList.children.length) addNewTaskToForm("upcoming");
-
-  renderCreateReportStats("last");
-  renderCreateReportStats("upcoming");
-}
-
-function loadUpdateIntoSection(sectionKey, update) {
-  const section = reportSection(sectionKey);
-  section.date.value = update.weekStart;
-  section.status.value = update.statusTag;
-  if (sectionKey === "last") {
-    uiState.editingLastId = update.id;
-  } else {
-    uiState.editingUpcomingId = update.id;
-  }
-
-  (update.tasks || []).forEach((task) => {
-    const card = addNewTaskToForm(sectionKey);
-    setTaskPhase(card, task.phase || "");
-    card.querySelector(".form-task-days").value = task.days || "";
-    card.querySelector(".form-task-start").value = task.startDate || "";
-    card.querySelector(".form-task-due").value = task.dueDate || "";
-    card.querySelector(".form-task-title").value = task.title || "";
-    card.querySelector(".form-task-owner").value = task.owner || "";
-    card.querySelector(".form-task-status").value = task.status || "not started";
-    card.querySelector(".form-task-date").value = task.date || "";
-    card.querySelector(".form-task-comments").value = task.comments || "";
-
-    const subtasksList = card.querySelector(".form-subtasks-list");
-    (task.subtasks || []).forEach((sub) => {
-      const row = addNewSubTaskToForm(subtasksList, sectionKey);
-      row.querySelector(".form-subtask-title").value = sub.title || "";
-      row.querySelector(".form-subtask-date").value = sub.date || "";
-      row.querySelector(".form-subtask-owner").value = sub.owner || "";
-      row.querySelector(".form-subtask-status").value = sub.status || "not started";
-      row.querySelector(".form-subtask-blocker").value = sub.blocker || "";
-      row.querySelector(".form-subtask-priority").value = sub.priority || "medium";
-      row.querySelector(".form-subtask-comments").value = sub.comments || "";
-    });
-  });
-}
-
-function setTaskPhase(card, phase) {
-  card.dataset.phase = phase || "";
-  const badge = card.querySelector(".form-task-phase");
-  if (!badge) return;
-  if (phase) {
-    badge.textContent = phase;
-    badge.style.display = "inline-flex";
-  } else {
-    badge.textContent = "";
-    badge.style.display = "none";
-  }
-}
-
-let templatePickerSection = null;
-
-function openTemplatePicker(sectionKey) {
-  templatePickerSection = sectionKey;
-  nodes.templateSearch.value = "";
-  renderTemplatePicker();
-  nodes.templatePickerOverlay.hidden = false;
-  document.body.style.overflow = "hidden";
-  nodes.templateSearch.focus();
-}
-
-function closeTemplatePicker() {
-  nodes.templatePickerOverlay.hidden = true;
-  document.body.style.overflow = "";
-  templatePickerSection = null;
-}
-
-function renderTemplatePicker() {
-  nodes.templatePickerBody.innerHTML = TASK_TEMPLATES.map((group, gi) => `
-    <div class="template-group" data-phase="${escapeHtml(group.phase)}">
-      <div class="template-group-head">
-        <label class="template-group-toggle">
-          <input type="checkbox" class="template-group-check" data-group="${gi}" />
-          <span>${escapeHtml(group.phase)}</span>
-        </label>
-        <span class="meta template-group-count">${group.tasks.length}</span>
-      </div>
-      <div class="template-items">
-        ${group.tasks.map((t, ti) => `
-          <label class="template-item" data-search="${escapeHtml((t.title + " " + t.team).toLowerCase())}">
-            <input type="checkbox" class="template-item-check" data-group="${gi}" data-index="${ti}" />
-            <span class="template-item-title">${escapeHtml(t.title)}</span>
-            <span class="team-badge team-${escapeHtml(t.team.toLowerCase())}">${escapeHtml(t.team)}</span>
-          </label>
-        `).join("")}
-      </div>
-    </div>
-  `).join("");
-
-  nodes.templatePickerBody.querySelectorAll(".template-group-check").forEach((groupCheck) => {
-    groupCheck.addEventListener("change", () => {
-      const gi = groupCheck.dataset.group;
-      nodes.templatePickerBody
-        .querySelectorAll(`.template-item-check[data-group="${gi}"]`)
-        .forEach((itemCheck) => {
-          if (!itemCheck.closest(".template-item").hidden) itemCheck.checked = groupCheck.checked;
-        });
-      updateTemplateSelectedCount();
-    });
-  });
-
-  nodes.templatePickerBody.querySelectorAll(".template-item-check").forEach((itemCheck) => {
-    itemCheck.addEventListener("change", () => updateTemplateSelectedCount());
-  });
-
-  updateTemplateSelectedCount();
-}
-
-function filterTemplatePicker(query) {
-  const q = (query || "").trim().toLowerCase();
-  nodes.templatePickerBody.querySelectorAll(".template-group").forEach((group) => {
-    let anyVisible = false;
-    group.querySelectorAll(".template-item").forEach((item) => {
-      const match = !q || item.dataset.search.includes(q);
-      item.hidden = !match;
-      if (match) anyVisible = true;
-    });
-    group.hidden = !anyVisible;
-  });
-}
-
-function updateTemplateSelectedCount() {
-  const n = nodes.templatePickerBody.querySelectorAll(".template-item-check:checked").length;
-  nodes.templateSelectedCount.textContent = `${n} selected`;
-}
-
-function addSelectedTemplates() {
-  const sectionKey = templatePickerSection;
-  if (!sectionKey) return;
-
-  const checked = [...nodes.templatePickerBody.querySelectorAll(".template-item-check:checked")];
-  if (!checked.length) {
-    closeTemplatePicker();
-    return;
-  }
-
-  // Drop the initial blank placeholder card if it was never filled in.
-  const list = reportSection(sectionKey).list;
-  const firstCard = list.querySelector(".form-task-card");
-  if (
-    list.querySelectorAll(".form-task-card").length === 1 &&
-    firstCard &&
-    !firstCard.querySelector(".form-task-title").value.trim() &&
-    !firstCard.dataset.phase
-  ) {
-    firstCard.remove();
-  }
-
-  checked.forEach((chk) => {
-    const group = TASK_TEMPLATES[Number(chk.dataset.group)];
-    const tmpl = group && group.tasks[Number(chk.dataset.index)];
-    if (!tmpl) return;
-    const card = addNewTaskToForm(sectionKey);
-    setTaskPhase(card, group.phase);
-    card.querySelector(".form-task-title").value = tmpl.title;
-    card.querySelector(".form-task-owner").value = tmpl.team;
-  });
-
-  renderCreateReportStats(sectionKey);
-  closeTemplatePicker();
-}
-
-function addNewTaskToForm(sectionKey) {
-  taskCounter += 1;
-  const taskId = `task_${taskCounter}_${Date.now()}`;
-
-  const taskCard = document.createElement("div");
-  taskCard.className = "form-task-card";
-  taskCard.id = taskId;
-  taskCard.innerHTML = `
-    <div class="form-task-header">
-      <div>
-        <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
-          <h4 style="margin: 0; font-size: 0.95rem; color: var(--accent-2);">Task Details</h4>
-          <span class="form-task-phase phase-badge" style="display: none;"></span>
-        </div>
-        <div class="form-task-summary" style="display: none; font-size: 0.85rem; color: #cbd5e1; margin-top: 4px;"></div>
-      </div>
-      <div style="display: flex; align-items: center; gap: 8px;">
-        <button type="button" class="ghost-button btn-edit-task" style="display: none; padding: 6px 12px; font-size: 0.8rem; border-radius: 8px;">Edit</button>
-        <button type="button" class="secondary-button btn-done-task" style="padding: 6px 12px; font-size: 0.8rem; border-radius: 8px;">Done</button>
-        <button type="button" class="delete-button" id="btn_delete_${taskId}">Remove Task</button>
-      </div>
-    </div>
-    <div class="form-task-body" style="display: grid; gap: 12px;">
-      <div style="display: grid; gap: 8px;">
-        <label style="font-size: 0.85rem; display: block; color: #cbd5e1; font-weight: normal; margin-bottom: 2px;">Task Title *</label>
-        <input type="text" placeholder="e.g. Implement user login" class="form-task-title" />
-      </div>
-      <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;">
-        <div>
-          <label style="font-size: 0.85rem; display: block; color: #cbd5e1; font-weight: normal; margin-bottom: 2px;">Ownership *</label>
-          <input type="text" placeholder="e.g. Apoorv — CTO" class="form-task-owner" list="ownerOptions" />
-        </div>
-        <div>
-          <label style="font-size: 0.85rem; display: block; color: #cbd5e1; font-weight: normal; margin-bottom: 2px;">Status *</label>
-          <select class="form-task-status" required>
-            <option value="not started">Not Started</option>
-            <option value="in progress">In Progress</option>
-            <option value="delayed">Delayed</option>
-            <option value="blocked">Blocked</option>
-            <option value="completed">Completed</option>
-          </select>
-        </div>
-        <div>
-          <label style="font-size: 0.85rem; display: block; color: #cbd5e1; font-weight: normal; margin-bottom: 2px;">Completed On</label>
-          <input type="date" class="form-task-date" />
-        </div>
-      </div>
-      <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;">
-        <div>
-          <label style="font-size: 0.85rem; display: block; color: #cbd5e1; font-weight: normal; margin-bottom: 2px;">Duration (days)</label>
-          <input type="number" min="1" class="form-task-days" placeholder="e.g. 7" />
-        </div>
-        <div>
-          <label style="font-size: 0.85rem; display: block; color: #cbd5e1; font-weight: normal; margin-bottom: 2px;">Planned start</label>
-          <input type="date" class="form-task-start" />
-        </div>
-        <div>
-          <label style="font-size: 0.85rem; display: block; color: #cbd5e1; font-weight: normal; margin-bottom: 2px;">Planned due</label>
-          <input type="date" class="form-task-due" />
-        </div>
-      </div>
-      <div style="display: grid; gap: 8px;">
-        <label style="font-size: 0.85rem; display: block; color: #cbd5e1; font-weight: normal; margin-bottom: 2px;">Comments / Notes</label>
-        <input type="text" placeholder="Add any notes for this task..." class="form-task-comments" />
-      </div>
-      <div style="margin-top: 8px;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-          <h5 style="margin: 0; font-size: 0.85rem; color: var(--muted);">Sub-tasks</h5>
-          <button type="button" class="secondary-button btn-add-subtask" style="padding: 4px 8px; font-size: 0.75rem; border-radius: 6px;">+ Add Sub-task</button>
-        </div>
-        <div class="table-scroll">
-          <table class="subtask-table">
-            <thead>
-              <tr>
-                <th>Sub Task</th><th>Date</th><th>Ownership</th><th>Status</th><th>Blocker</th><th>Priority</th><th>Comments/Notes</th><th></th>
-              </tr>
-            </thead>
-            <tbody class="form-subtasks-list"><!-- Sub-tasks will go here --></tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-  `;
-
-  taskCard.querySelector(`#btn_delete_${taskId}`).addEventListener("click", () => {
-    taskCard.remove();
-    renderCreateReportStats(sectionKey);
-  });
-
-  const btnAddSubtask = taskCard.querySelector(".btn-add-subtask");
-  const subtasksList = taskCard.querySelector(".form-subtasks-list");
-  btnAddSubtask.addEventListener("click", () => {
-    addNewSubTaskToForm(subtasksList, sectionKey);
-    renderCreateReportStats(sectionKey);
-  });
-
-  const bodyEl = taskCard.querySelector(".form-task-body");
-  const summaryEl = taskCard.querySelector(".form-task-summary");
-  const btnDone = taskCard.querySelector(".btn-done-task");
-  const btnEdit = taskCard.querySelector(".btn-edit-task");
-  const titleInput = taskCard.querySelector(".form-task-title");
-  const ownerInput = taskCard.querySelector(".form-task-owner");
-  const statusSelect = taskCard.querySelector(".form-task-status");
-
-  btnDone.addEventListener("click", () => {
-    if (!titleInput.value.trim()) {
-      titleInput.reportValidity();
-      return;
-    }
-    const statusLabel = statusSelect.options[statusSelect.selectedIndex].text;
-    summaryEl.textContent = `${titleInput.value.trim()} — ${ownerInput.value.trim() || "Unassigned"} (${statusLabel})`;
-    summaryEl.style.display = "block";
-    bodyEl.style.display = "none";
-    btnDone.style.display = "none";
-    btnEdit.style.display = "inline-flex";
-  });
-
-  btnEdit.addEventListener("click", () => {
-    summaryEl.style.display = "none";
-    bodyEl.style.display = "grid";
-    btnDone.style.display = "inline-flex";
-    btnEdit.style.display = "none";
-  });
-
-  reportSection(sectionKey).list.appendChild(taskCard);
-  renderCreateReportStats(sectionKey);
-  return taskCard;
-}
-
-function addNewSubTaskToForm(container, sectionKey) {
-  subtaskCounter += 1;
-  const subtaskId = `subtask_${subtaskCounter}_${Date.now()}`;
-  const defaultDate = reportSection(sectionKey).date.value || "";
-
-  const subtaskRow = document.createElement("tr");
-  subtaskRow.className = "form-subtask-row";
-  subtaskRow.id = subtaskId;
-  subtaskRow.innerHTML = `
-    <td><input type="text" placeholder="Sub-task title..." class="form-subtask-title" /></td>
-    <td><input type="date" class="form-subtask-date" value="${defaultDate}" /></td>
-    <td><input type="text" placeholder="Owner" class="form-subtask-owner" list="ownerOptions" /></td>
-    <td>
-      <select class="form-subtask-status" required>
-        <option value="not started">Not Started</option>
-        <option value="in progress">In Progress</option>
-        <option value="delayed">Delayed</option>
-        <option value="blocked">Blocked</option>
-        <option value="completed">Completed</option>
-      </select>
-    </td>
-    <td><input type="text" placeholder="—" class="form-subtask-blocker" /></td>
-    <td>
-      <select class="form-subtask-priority">
-        <option value="low">Low</option>
-        <option value="medium" selected>Medium</option>
-        <option value="high">High</option>
-      </select>
-    </td>
-    <td><input type="text" placeholder="Notes..." class="form-subtask-comments" /></td>
-    <td><button type="button" class="delete-button btn-delete-subtask" id="btn_delete_${subtaskId}">✕</button></td>
-  `;
-
-  subtaskRow.querySelector(`#btn_delete_${subtaskId}`).addEventListener("click", () => {
-    subtaskRow.remove();
-    renderCreateReportStats(sectionKey);
-  });
-
-  subtaskRow.querySelector(".form-subtask-status").addEventListener("change", () => {
-    renderCreateReportStats(sectionKey);
-  });
-
-  container.appendChild(subtaskRow);
-  return subtaskRow;
-}
-
-function gatherTasksFromList(listEl) {
-  const tasks = [];
-  listEl.querySelectorAll(".form-task-card").forEach((card) => {
-    const title = card.querySelector(".form-task-title").value.trim();
-    if (!title) return;
-
-    const subtasks = [];
-    card.querySelectorAll(".form-subtask-row").forEach((row) => {
-      const subTitle = row.querySelector(".form-subtask-title").value.trim();
-      if (!subTitle) return;
-      subtasks.push({
-        id: newId(),
-        title: subTitle,
-        date: row.querySelector(".form-subtask-date").value,
-        owner: row.querySelector(".form-subtask-owner").value.trim(),
-        status: row.querySelector(".form-subtask-status").value,
-        blocker: row.querySelector(".form-subtask-blocker").value.trim(),
-        priority: row.querySelector(".form-subtask-priority").value,
-        comments: row.querySelector(".form-subtask-comments").value.trim(),
-      });
-    });
-
-    const days = Number(card.querySelector(".form-task-days").value) || null;
-    const startDate = card.querySelector(".form-task-start").value;
-
-    tasks.push({
-      id: newId(),
-      title,
-      phase: card.dataset.phase || "",
-      days,
-      startDate,
-      dueDate: card.querySelector(".form-task-due").value || taskDueDate(startDate, days),
-      owner: card.querySelector(".form-task-owner").value.trim(),
-      status: card.querySelector(".form-task-status").value,
-      date: card.querySelector(".form-task-date").value,
-      comments: card.querySelector(".form-task-comments").value.trim(),
-      subtasks,
-    });
-  });
-  return tasks;
-}
-
-function saveWeeklyUpdate(event) {
-  event.preventDefault();
-  if (!requirePermission("report.edit", "edit weekly reports")) return;
-
-  const projectId = nodes.createReportProjectSelect.value;
-  if (!projectId) return;
-
-  const project = state.projects.find((p) => p.id === projectId);
-  if (!project) return;
-
-  const sections = [
-    { label: "Last Week", weekStart: nodes.lastWeekDate.value, statusTag: nodes.lastWeekStatus.value, tasks: gatherTasksFromList(nodes.lastWeekTasksList), editingId: uiState.editingLastId },
-    { label: "Upcoming / Running Week", weekStart: nodes.thisWeekDate.value, statusTag: nodes.thisWeekStatus.value, tasks: gatherTasksFromList(nodes.thisWeekTasksList), editingId: uiState.editingUpcomingId },
-  ];
-
-  // A section is "active" if it has tasks or corresponds to an existing record.
-  const activeSections = sections.filter((sec) => sec.tasks.length || sec.editingId);
-
-  if (!activeSections.length) {
-    alert("Add at least one task in either the Last Week or Upcoming Week section.");
-    return;
-  }
-
-  for (const sec of activeSections) {
-    if (!sec.weekStart) {
-      alert(`Please set the week start date for the ${sec.label} section.`);
-      return;
-    }
-  }
-
-  activeSections.forEach((sec) => {
-    if (sec.editingId) {
-      const index = state.updates.findIndex((u) => u.id === sec.editingId);
-      if (index !== -1) {
-        state.updates[index] = {
-          ...state.updates[index],
-          weekStart: sec.weekStart,
-          weekRange: formatWeekRange(sec.weekStart),
-          statusTag: sec.statusTag,
-          tasks: sec.tasks,
-        };
-      }
-    } else {
-      state.updates.push({
-        id: newId(),
-        projectId: project.id,
-        projectName: project.name,
-        weekStart: sec.weekStart,
-        weekRange: formatWeekRange(sec.weekStart),
-        statusTag: sec.statusTag,
-        tasks: sec.tasks,
-        createdAt: new Date().toISOString(),
-      });
-    }
-  });
-
-  uiState.editingLastId = null;
-  uiState.editingUpcomingId = null;
-  syncOwnersIntoProjectPocs(project, activeSections.flatMap((sec) => sec.tasks));
-
-  const moved = refileTasksIntoWeeks(project.id);
-  refreshProjectGoLive(project.id);
-  saveState();
-
-  if (moved) {
-    showAppInfo(`${moved} task(s) moved to the week their start date now falls in.`);
-  }
-
-  openProject(project.id);
+  const article = nodes.reportsIndexList.querySelector(`.week-editor[data-update="${updateId}"]`);
+  if (article) article.scrollIntoView({ behavior: "smooth", block: "center" });
 }
 
 /* Any owner typed on a task that is not already a POC for this project is added to that
