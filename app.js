@@ -143,180 +143,156 @@ const DEBUG_LOG = [];
 const TEMPLATE_PRIORITIES = ["high", "medium", "low"];
 const DEFAULT_CYCLE_WEEKS = 5;
 const DEFAULT_TASK_DAYS = 7;
-const BASE_CYCLE_WEEKS = 6;
+const BASE_CYCLE_WEEKS = 4;
 
 /* Overwritten from week-templates.json when it loads. */
-let templateMeta = { baseCycleWeeks: BASE_CYCLE_WEEKS, defaultTaskDays: DEFAULT_TASK_DAYS };
+let templateMeta = { baseCycleWeeks: BASE_CYCLE_WEEKS, defaultTaskDays: DEFAULT_TASK_DAYS, cycleWeeksWithData: [4, 6, 12] };
 const MIN_CYCLE_WEEKS = 2;
 const MAX_CYCLE_WEEKS = 12;
 
 const WEEK_TEMPLATE_SEED = [
   {
     week: 1,
-    label: "Kickoff & Discovery",
+    label: "Kickoff",
+    elastic: false,
     tasks: [
-      { scope: "Kickoff call", title: "Onboarding mail thread initiated", owner: "", priority: "medium", platforms: [] },
-      { scope: "Kickoff call", title: "Channel form", owner: "", priority: "medium", platforms: [] },
-      { scope: "Kickoff call", title: "Tech doc", owner: "", priority: "medium", platforms: [] },
-      { scope: "Kickoff call", title: "Scope of Work", owner: "", priority: "medium", platforms: [] },
-      { scope: "Tech Team connect", title: "Tech team connect - Website", owner: "", priority: "high", platforms: ["Website"] },
-      { scope: "Tech Team connect", title: "Tech team connect - Android", owner: "", priority: "high", platforms: ["Android"] },
-      { scope: "Tech Team connect", title: "Tech team connect - iOS", owner: "", priority: "high", platforms: ["iOS"] },
-      { scope: "Tech Team connect", title: "Tech team connect - Web App", owner: "", priority: "high", platforms: ["Web App"] },
-      { scope: "Tech Team connect", title: "Tech team connect - REST API", owner: "", priority: "high", platforms: ["REST API"] },
-      { scope: "User Id", title: "Finalise the unique user identifier", owner: "", priority: "high", platforms: [] },
-      { scope: "Data Model", title: "Data model - Website", owner: "", priority: "high", platforms: ["Website"] },
-      { scope: "Data Model", title: "Data model - Android", owner: "", priority: "high", platforms: ["Android"] },
-      { scope: "Data Model", title: "Data model - iOS", owner: "", priority: "high", platforms: ["iOS"] },
-      { scope: "Data Model", title: "Data model - Web App", owner: "", priority: "high", platforms: ["Web App"] },
-      { scope: "Data Model", title: "Data model - REST API", owner: "", priority: "high", platforms: ["REST API"] },
+      { scope: "Kickoff", title: "Kick-off Meeting", owner: "Webengage OBM", priority: "medium", platforms: [], channels: [], elastic: false, offsetByCycle: { "4": 0, "6": 0, "12": 0 } },
+      { scope: "Kickoff", title: "Discovery", owner: "Webengage OBM", priority: "medium", platforms: [], channels: [], elastic: false, offsetByCycle: { "4": 0, "6": 0, "12": 0 } },
+      { scope: "Kickoff", title: "Data Modelling", owner: "Webengage OBM", priority: "medium", platforms: [], channels: [], elastic: false, offsetByCycle: { "4": 3, "6": 3, "12": 3 } },
+      { scope: "Kickoff", title: "Scope of Work", owner: "Webengage OBM", priority: "medium", platforms: [], channels: [], elastic: false, offsetByCycle: { "4": 0, "6": 0, "12": 0 } },
+      { scope: "Kickoff", title: "Create Staging Dashboard", owner: "Webengage OBM", priority: "medium", platforms: [], channels: [], elastic: false, offsetByCycle: { "4": 0, "6": 0, "12": 0 } },
+      { scope: "Kickoff", title: "Data Model Finalised", owner: "Client team", priority: "medium", platforms: [], channels: [], elastic: false, offsetByCycle: { "4": 2, "6": 2, "12": 2 } },
     ],
   },
   {
     week: 2,
-    label: "Staging Setup",
+    label: "Staging Deployment",
+    elastic: true,
     tasks: [
-      { scope: "Data Model", title: "Data model finalisation & sign-off", owner: "", priority: "high", platforms: [] },
-      { scope: "Staging", title: "SDK setup - Website", owner: "", priority: "high", platforms: ["Website"] },
-      { scope: "Staging", title: "SDK setup - Android", owner: "", priority: "high", platforms: ["Android"] },
-      { scope: "Staging", title: "SDK setup - iOS", owner: "", priority: "high", platforms: ["iOS"] },
-      { scope: "Staging", title: "SDK setup - Web App", owner: "", priority: "high", platforms: ["Web App"] },
-      { scope: "Staging", title: "User tracking setup - Website", owner: "", priority: "high", platforms: ["Website"] },
-      { scope: "Staging", title: "User tracking setup - Android", owner: "", priority: "high", platforms: ["Android"] },
-      { scope: "Staging", title: "User tracking setup - iOS", owner: "", priority: "high", platforms: ["iOS"] },
-      { scope: "Staging", title: "User tracking setup - Web App", owner: "", priority: "high", platforms: ["Web App"] },
-      { scope: "Historic Data", title: "Preparation of CSV containing historical user and transactional data", owner: "", priority: "high", platforms: [] },
-      { scope: "Website", title: "User Identification", owner: "", priority: "high", platforms: ["Website"] },
-      { scope: "Website", title: "User Attributes", owner: "", priority: "high", platforms: ["Website"] },
-      { scope: "Website", title: "Custom Events", owner: "", priority: "high", elastic: true, platforms: ["Website"] },
-      { scope: "Website", title: "Event Attributes", owner: "", priority: "high", elastic: true, platforms: ["Website"] },
-      { scope: "Website", title: "Login / Logout", owner: "", priority: "high", platforms: ["Website"] },
-      { scope: "Website", title: "Signup", owner: "", priority: "high", platforms: ["Website"] },
-      { scope: "Android", title: "SDK Initialization", owner: "", priority: "high", platforms: ["Android"] },
-      { scope: "Android", title: "User Identification", owner: "", priority: "high", platforms: ["Android"] },
-      { scope: "Android", title: "User Attributes", owner: "", priority: "high", platforms: ["Android"] },
-      { scope: "Android", title: "Custom Events", owner: "", priority: "high", elastic: true, platforms: ["Android"] },
-      { scope: "Android", title: "Event Attributes", owner: "", priority: "high", elastic: true, platforms: ["Android"] },
-      { scope: "Android", title: "Login / Logout", owner: "", priority: "high", platforms: ["Android"] },
-      { scope: "Android", title: "Signup", owner: "", priority: "high", platforms: ["Android"] },
-      { scope: "iOS", title: "SDK Initialization", owner: "", priority: "high", platforms: ["iOS"] },
-      { scope: "iOS", title: "User Identification", owner: "", priority: "high", platforms: ["iOS"] },
-      { scope: "iOS", title: "User Attributes", owner: "", priority: "high", platforms: ["iOS"] },
-      { scope: "iOS", title: "Custom Events", owner: "", priority: "high", elastic: true, platforms: ["iOS"] },
-      { scope: "iOS", title: "Event Attributes", owner: "", priority: "high", elastic: true, platforms: ["iOS"] },
-      { scope: "iOS", title: "Login / Logout", owner: "", priority: "high", platforms: ["iOS"] },
-      { scope: "iOS", title: "Signup", owner: "", priority: "high", platforms: ["iOS"] },
-      { scope: "REST API", title: "API authentication", owner: "", priority: "high", platforms: ["REST API"] },
-      { scope: "REST API", title: "API key configuration", owner: "", priority: "high", platforms: ["REST API"] },
-      { scope: "REST API", title: "User creation / update", owner: "", priority: "high", platforms: ["REST API"] },
-      { scope: "REST API", title: "User attribute updates", owner: "", priority: "high", platforms: ["REST API"] },
-      { scope: "REST API", title: "User identification", owner: "", priority: "high", platforms: ["REST API"] },
+      { scope: "Website", title: "SDK Set Up", owner: "Client tech team", priority: "medium", platforms: ["Website"], channels: [], elastic: false, offsetByCycle: { "4": 5, "6": 5, "12": 5 } },
+      { scope: "Web App", title: "SDK Set Up", owner: "Client tech team", priority: "medium", platforms: ["Web App"], channels: [], elastic: false, offsetByCycle: { "4": 5, "6": 5, "12": 5 } },
+      { scope: "Website", title: "User Tracking", owner: "Client tech team", priority: "medium", platforms: ["Website"], channels: [], elastic: false, offsetByCycle: { "4": 5, "6": 5, "12": 5 } },
+      { scope: "Web App", title: "User Tracking", owner: "Client tech team", priority: "medium", platforms: ["Web App"], channels: [], elastic: false, offsetByCycle: { "4": 5, "6": 5, "12": 5 } },
+      { scope: "Website", title: "Event Tracking", owner: "Client tech team", priority: "medium", platforms: ["Website"], channels: [], elastic: true, offsetByCycle: { "4": 7, "6": 10, "12": 17 } },
+      { scope: "Web App", title: "Event Tracking", owner: "Client tech team", priority: "medium", platforms: ["Web App"], channels: [], elastic: true, offsetByCycle: { "4": 10, "6": 15, "12": 30 } },
+      { scope: "Website", title: "Web Push Setup", owner: "Client tech team", priority: "medium", platforms: ["Website"], channels: ["Web Push", "Push"], elastic: false, offsetByCycle: { "4": 5, "6": 5, "12": 5 } },
+      { scope: "Web App", title: "Web Push Setup", owner: "Client tech team", priority: "medium", platforms: ["Web App"], channels: ["Web Push", "Push"], elastic: false, offsetByCycle: { "4": 5, "6": 5, "12": 5 } },
+      { scope: "Android", title: "SDK Set Up", owner: "Client tech team", priority: "medium", platforms: ["Android"], channels: [], elastic: false, offsetByCycle: { "4": 5, "6": 5, "12": 5 } },
+      { scope: "Android", title: "User Tracking", owner: "Client tech team", priority: "medium", platforms: ["Android"], channels: [], elastic: false, offsetByCycle: { "4": 5, "6": 5, "12": 5 } },
+      { scope: "Android", title: "Event Tracking", owner: "Client tech team", priority: "medium", platforms: ["Android"], channels: [], elastic: true, offsetByCycle: { "4": 10, "6": 15, "12": 30 } },
+      { scope: "Android", title: "Push Setup", owner: "Client tech team", priority: "medium", platforms: ["Android"], channels: ["Push"], elastic: false, offsetByCycle: { "4": 5, "6": 5, "12": 5 } },
+      { scope: "Android", title: "Push credentials", owner: "Client tech team", priority: "medium", platforms: ["Android"], channels: ["Push"], elastic: false, offsetByCycle: { "4": 5, "6": 5, "12": 5 } },
+      { scope: "Android", title: "Screen Tracking", owner: "Client tech team", priority: "medium", platforms: ["Android"], channels: [], elastic: true, offsetByCycle: { "4": 10, "6": 15, "12": 30 } },
+      { scope: "Android", title: "Deeplinks", owner: "Client tech team", priority: "medium", platforms: ["Android"], channels: [], elastic: false, offsetByCycle: { "4": 5, "6": 5, "12": 5 } },
+      { scope: "Android", title: "Silent / Force Login", owner: "Client tech team", priority: "medium", platforms: ["Android"], channels: [], elastic: false, offsetByCycle: { "4": 5, "6": 5, "12": 5 } },
+      { scope: "iOS", title: "SDK Set Up", owner: "Client tech team", priority: "medium", platforms: ["iOS"], channels: [], elastic: false, offsetByCycle: { "4": 5, "6": 5, "12": 5 } },
+      { scope: "iOS", title: "User Tracking", owner: "Client tech team", priority: "medium", platforms: ["iOS"], channels: [], elastic: false, offsetByCycle: { "4": 5, "6": 5, "12": 5 } },
+      { scope: "iOS", title: "Event Tracking", owner: "Client tech team", priority: "medium", platforms: ["iOS"], channels: [], elastic: true, offsetByCycle: { "4": 10, "6": 15, "12": 30 } },
+      { scope: "iOS", title: "Push Setup", owner: "Client tech team", priority: "medium", platforms: ["iOS"], channels: ["Push"], elastic: false, offsetByCycle: { "4": 5, "6": 5, "12": 5 } },
+      { scope: "iOS", title: "Rich Push Setup", owner: "Client tech team", priority: "medium", platforms: ["iOS"], channels: ["Push"], elastic: false, offsetByCycle: { "4": 5, "6": 5, "12": 5 } },
+      { scope: "iOS", title: "Screen Tracking", owner: "Client tech team", priority: "medium", platforms: ["iOS"], channels: [], elastic: true, offsetByCycle: { "4": 10, "6": 15, "12": 30 } },
+      { scope: "iOS", title: "Deeplinks", owner: "Client tech team", priority: "medium", platforms: ["iOS"], channels: [], elastic: false, offsetByCycle: { "4": 5, "6": 5, "12": 5 } },
+      { scope: "iOS", title: "Push credentials", owner: "Client tech team", priority: "medium", platforms: ["iOS"], channels: ["Push"], elastic: false, offsetByCycle: { "4": 5, "6": 5, "12": 5 } },
+      { scope: "Communication Channels", title: "Email setup", owner: "Cpaas / Client team", priority: "medium", platforms: [], channels: ["Email"], elastic: false, offsetByCycle: { "4": 10, "6": 10, "12": 10 } },
+      { scope: "Communication Channels", title: "SMS setup", owner: "Cpaas / Client team", priority: "medium", platforms: [], channels: ["SMS"], elastic: false, offsetByCycle: { "4": 10, "6": 10, "12": 10 } },
+      { scope: "Communication Channels", title: "Whatsapp setup", owner: "Cpaas / Client team", priority: "medium", platforms: [], channels: ["WhatsApp"], elastic: false, offsetByCycle: { "4": 10, "6": 10, "12": 10 } },
+      { scope: "Communication Channels", title: "RCS setup", owner: "Cpaas / Client team", priority: "medium", platforms: [], channels: ["RCS"], elastic: false, offsetByCycle: { "4": 10, "6": 10, "12": 10 } },
+      { scope: "Communication Channels", title: "IVR setup", owner: "Cpaas / Client team", priority: "medium", platforms: [], channels: ["IVR"], elastic: false, offsetByCycle: { "4": 10, "6": 10, "12": 10 } },
+      { scope: "Rest API", title: "User Tracking", owner: "Client tech team", priority: "medium", platforms: ["REST API"], channels: [], elastic: true, offsetByCycle: { "4": 10, "6": 15, "12": 15 } },
+      { scope: "Rest API", title: "Event Tracking", owner: "Client tech team", priority: "medium", platforms: ["REST API"], channels: [], elastic: true, offsetByCycle: { "4": 10, "6": 15, "12": 15 } },
+      { scope: "Website", title: "Users and Events Audit", owner: "Webengage OBM", priority: "medium", platforms: ["Website"], channels: [], elastic: true, offsetByCycle: { "4": 15, "6": 17, "12": 30 } },
+      { scope: "Web App", title: "Users and Events Audit", owner: "Webengage OBM", priority: "medium", platforms: ["Web App"], channels: [], elastic: true, offsetByCycle: { "4": 17, "6": 21, "12": 40 } },
+      { scope: "Website", title: "WebPush Audit", owner: "Webengage OBM", priority: "medium", platforms: ["Website"], channels: ["Web Push", "Push"], elastic: true, offsetByCycle: { "4": 15, "6": 17, "12": 30 } },
+      { scope: "Web App", title: "WebPush Audit", owner: "Webengage OBM", priority: "medium", platforms: ["Web App"], channels: ["Web Push", "Push"], elastic: true, offsetByCycle: { "4": 17, "6": 21, "12": 40 } },
+      { scope: "Website", title: "Onsite Notification Audit", owner: "Webengage OBM", priority: "medium", platforms: ["Website"], channels: ["On-site Notification"], elastic: true, offsetByCycle: { "4": 15, "6": 17, "12": 30 } },
+      { scope: "Web App", title: "Onsite Notification Audit", owner: "Webengage OBM", priority: "medium", platforms: ["Web App"], channels: ["On-site Notification"], elastic: true, offsetByCycle: { "4": 17, "6": 21, "12": 40 } },
+      { scope: "Website", title: "Fixes or Changes", owner: "Client tech team", priority: "medium", platforms: ["Website"], channels: [], elastic: true, offsetByCycle: { "4": 17, "6": 21, "12": 35 } },
+      { scope: "Web App", title: "Fixes or Changes", owner: "Client tech team", priority: "medium", platforms: ["Web App"], channels: [], elastic: true, offsetByCycle: { "4": 21, "6": 25, "12": 50 } },
+      { scope: "Android", title: "Users and Events Audit", owner: "Webengage OBM", priority: "medium", platforms: ["Android"], channels: [], elastic: true, offsetByCycle: { "4": 17, "6": 21, "12": 40 } },
+      { scope: "Android", title: "Push Android", owner: "Webengage OBM", priority: "medium", platforms: ["Android"], channels: ["Push"], elastic: true, offsetByCycle: { "4": 17, "6": 21, "12": 40 } },
+      { scope: "Android", title: "In-App Android", owner: "Webengage OBM", priority: "medium", platforms: ["Android"], channels: ["In-App"], elastic: true, offsetByCycle: { "4": 17, "6": 21, "12": 40 } },
+      { scope: "Android", title: "Deeplinks", owner: "Webengage OBM", priority: "medium", platforms: ["Android"], channels: [], elastic: true, offsetByCycle: { "4": 17, "6": 21, "12": 40 } },
+      { scope: "Android", title: "Fixes or Changes", owner: "Client tech team", priority: "medium", platforms: ["Android"], channels: [], elastic: true, offsetByCycle: { "4": 21, "6": 25, "12": 50 } },
+      { scope: "iOS", title: "Users and Events Audit", owner: "Webengage OBM", priority: "medium", platforms: ["iOS"], channels: [], elastic: true, offsetByCycle: { "4": 17, "6": 21, "12": 40 } },
+      { scope: "iOS", title: "Push, Rich Push iOS", owner: "Webengage OBM", priority: "medium", platforms: ["iOS"], channels: ["Push"], elastic: true, offsetByCycle: { "4": 17, "6": 21, "12": 40 } },
+      { scope: "iOS", title: "In-App iOS", owner: "Webengage OBM", priority: "medium", platforms: ["iOS"], channels: ["In-App"], elastic: true, offsetByCycle: { "4": 17, "6": 21, "12": 40 } },
+      { scope: "iOS", title: "Deeplinks", owner: "Webengage OBM", priority: "medium", platforms: ["iOS"], channels: [], elastic: true, offsetByCycle: { "4": 17, "6": 21, "12": 40 } },
+      { scope: "iOS", title: "Fixes or Changes", owner: "Client tech team", priority: "medium", platforms: ["iOS"], channels: [], elastic: true, offsetByCycle: { "4": 21, "6": 25, "12": 50 } },
+      { scope: "Rest API", title: "Data Validation", owner: "Webengage OBM", priority: "medium", platforms: ["REST API"], channels: [], elastic: true, offsetByCycle: { "4": 17, "6": 21, "12": 40 } },
+      { scope: "Rest API", title: "Count Matching", owner: "Webengage team + Client team", priority: "medium", platforms: ["REST API"], channels: [], elastic: true, offsetByCycle: { "4": 17, "6": 21, "12": 40 } },
+      { scope: "Communication Channels", title: "Email Audit", owner: "Webengage OBM", priority: "medium", platforms: [], channels: ["Email"], elastic: true, offsetByCycle: { "4": 15, "6": 25, "12": 35 } },
+      { scope: "Communication Channels", title: "SMS Audit", owner: "Webengage OBM", priority: "medium", platforms: [], channels: ["SMS"], elastic: true, offsetByCycle: { "4": 15, "6": 25, "12": 35 } },
+      { scope: "Communication Channels", title: "Whatsapp Audit", owner: "Webengage OBM", priority: "medium", platforms: [], channels: ["WhatsApp"], elastic: true, offsetByCycle: { "4": 15, "6": 25, "12": 35 } },
+      { scope: "Communication Channels", title: "RCS Audit", owner: "Webengage OBM", priority: "medium", platforms: [], channels: ["RCS"], elastic: true, offsetByCycle: { "4": 15, "6": 25, "12": 35 } },
     ],
   },
   {
     week: 3,
-    label: "Event Tracking & Channels",
+    label: "Production Deployment",
     elastic: true,
     tasks: [
-      { scope: "Staging", title: "Event tracking setup - Website", owner: "", priority: "high", elastic: true, platforms: ["Website"] },
-      { scope: "Staging", title: "Event tracking setup - Android", owner: "", priority: "high", elastic: true, platforms: ["Android"] },
-      { scope: "Staging", title: "Event tracking setup - iOS", owner: "", priority: "high", elastic: true, platforms: ["iOS"] },
-      { scope: "Staging", title: "Event tracking setup - Web App", owner: "", priority: "high", elastic: true, platforms: ["Web App"] },
-      { scope: "App Implementation", title: "Screen tracking - Android", owner: "", priority: "high", platforms: ["Android"] },
-      { scope: "App Implementation", title: "Screen tracking - iOS", owner: "", priority: "high", platforms: ["iOS"] },
-      { scope: "Channels - Staging", title: "Email channel setup", owner: "", priority: "medium", platforms: [] },
-      { scope: "Channels - Staging", title: "SMS channel setup", owner: "", priority: "high", platforms: [] },
-      { scope: "Channels - Staging", title: "WhatsApp channel setup", owner: "", priority: "high", platforms: [] },
-      { scope: "Channels - Staging", title: "Web Push setup", owner: "", priority: "medium", platforms: ["Website", "Web App"] },
-      { scope: "Channels - Staging", title: "On-site Notification setup", owner: "", priority: "medium", platforms: ["Website", "Web App"] },
-      { scope: "Channels - Staging", title: "Push setup - FCM", owner: "", priority: "high", platforms: ["Android"] },
-      { scope: "Channels - Staging", title: "Push setup - APNS certificate", owner: "", priority: "high", platforms: ["iOS"] },
-      { scope: "Channels - Staging", title: "In-App setup", owner: "", priority: "high", platforms: ["Android", "iOS"] },
-      { scope: "Channels - Staging", title: "Rich Push setup", owner: "", priority: "medium", platforms: ["iOS"] },
-      { scope: "REST API", title: "Custom event API", owner: "", priority: "high", elastic: true, platforms: ["REST API"] },
-      { scope: "REST API", title: "Backend event tracking", owner: "", priority: "high", elastic: true, platforms: ["REST API"] },
-      { scope: "REST API", title: "Historical user data migration", owner: "", priority: "high", platforms: ["REST API"] },
-      { scope: "REST API", title: "Historical event migration", owner: "", priority: "high", elastic: true, platforms: ["REST API"] },
-      { scope: "Android", title: "Push Token Registration", owner: "", priority: "high", platforms: ["Android"] },
-      { scope: "Android", title: "Firebase / FCM Setup", owner: "", priority: "high", platforms: ["Android"] },
-      { scope: "Android", title: "Push Notification Setup", owner: "", priority: "high", platforms: ["Android"] },
-      { scope: "Android", title: "Rich Push", owner: "", priority: "high", platforms: ["Android"] },
-      { scope: "Android", title: "In-App Setup", owner: "", priority: "high", platforms: ["Android"] },
-      { scope: "Android", title: "In-App Testing", owner: "", priority: "high", platforms: ["Android"] },
-      { scope: "Android", title: "App Inline", owner: "", priority: "high", platforms: ["Android"] },
-      { scope: "iOS", title: "Push Token Registration", owner: "", priority: "high", platforms: ["iOS"] },
-      { scope: "iOS", title: "APNs Setup", owner: "", priority: "high", platforms: ["iOS"] },
-      { scope: "iOS", title: "Push Notification Setup", owner: "", priority: "high", platforms: ["iOS"] },
-      { scope: "iOS", title: "Rich Push", owner: "", priority: "high", platforms: ["iOS"] },
-      { scope: "iOS", title: "In-App Setup", owner: "", priority: "high", platforms: ["iOS"] },
-      { scope: "iOS", title: "In-App Testing", owner: "", priority: "high", platforms: ["iOS"] },
-      { scope: "iOS", title: "App Inline", owner: "", priority: "high", platforms: ["iOS"] },
-      { scope: "Channels - Email", title: "Email Provider Setup", owner: "", priority: "medium", platforms: [] },
-      { scope: "Channels - SMS", title: "SMS Provider Setup", owner: "", priority: "high", platforms: [] },
-      { scope: "Channels - WhatsApp", title: "WhatsApp Business Setup", owner: "", priority: "high", platforms: [] },
-      { scope: "Channels - Push", title: "Push Token", owner: "", priority: "high", platforms: [] },
-      { scope: "Channels - Push", title: "Notification Permission", owner: "", priority: "high", platforms: [] },
-      { scope: "Channels - Push", title: "Push Templates", owner: "", priority: "medium", platforms: [] },
-      { scope: "Channels - Push", title: "Rich Push", owner: "", priority: "medium", platforms: [] },
-      { scope: "Channels - Push", title: "Deep Links", owner: "", priority: "medium", platforms: [] },
-      { scope: "Channels - Push", title: "CTA", owner: "", priority: "medium", platforms: [] },
-      { scope: "Channels - Push", title: "Test Push", owner: "", priority: "medium", platforms: [] },
-      { scope: "Channels - Push", title: "Delivery Validation", owner: "", priority: "high", platforms: [] },
-      { scope: "Channels - Web Push", title: "Web Push Configuration", owner: "", priority: "medium", platforms: [] },
-      { scope: "Channels - RCS", title: "RCS Provider Setup", owner: "", priority: "medium", platforms: [] },
-      { scope: "Channels - In-App", title: "SDK Configuration", owner: "", priority: "high", platforms: [] },
-      { scope: "Channels - On-site", title: "On-site Notification", owner: "", priority: "medium", platforms: [] },
-      { scope: "Channels - On-site", title: "On-site Survey", owner: "", priority: "medium", platforms: [] },
-      { scope: "Channels - On-site", title: "On-site Feedback", owner: "", priority: "medium", platforms: [] },
+      { scope: "Production Deployment", title: "Create Production Dashboard", owner: "Webengage OBM", priority: "medium", platforms: [], channels: [], elastic: true, offsetByCycle: { "4": 21, "6": 21, "12": 35 } },
+      { scope: "Website", title: "Production Migration", owner: "Client tech team", priority: "medium", platforms: ["Website"], channels: [], elastic: true, offsetByCycle: { "4": 22, "6": 27, "12": 40 } },
+      { scope: "Web App", title: "Production Migration", owner: "Client tech team", priority: "medium", platforms: ["Web App"], channels: [], elastic: true, offsetByCycle: { "4": 22, "6": 27, "12": 60 } },
+      { scope: "Website", title: "Web Push Setup on dashboard", owner: "Client tech team", priority: "medium", platforms: ["Website"], channels: ["Web Push", "Push"], elastic: true, offsetByCycle: { "4": 22, "6": 27, "12": 40 } },
+      { scope: "Web App", title: "Web Push Setup on dashboard", owner: "Client tech team", priority: "medium", platforms: ["Web App"], channels: ["Web Push", "Push"], elastic: true, offsetByCycle: { "4": 22, "6": 27, "12": 60 } },
+      { scope: "Android", title: "Production Migration", owner: "Client tech team", priority: "medium", platforms: ["Android"], channels: [], elastic: true, offsetByCycle: { "4": 22, "6": 27, "12": 60 } },
+      { scope: "Android", title: "Push credentials", owner: "Client tech team", priority: "medium", platforms: ["Android"], channels: ["Push"], elastic: true, offsetByCycle: { "4": 22, "6": 27, "12": 60 } },
+      { scope: "iOS", title: "Production Migration", owner: "Client tech team", priority: "medium", platforms: ["iOS"], channels: [], elastic: true, offsetByCycle: { "4": 22, "6": 27, "12": 60 } },
+      { scope: "iOS", title: "Push credentials", owner: "Client tech team", priority: "medium", platforms: ["iOS"], channels: ["Push"], elastic: true, offsetByCycle: { "4": 22, "6": 27, "12": 60 } },
+      { scope: "Rest API", title: "Production Migration", owner: "Client tech team", priority: "medium", platforms: ["REST API"], channels: [], elastic: true, offsetByCycle: { "4": 22, "6": 27, "12": 60 } },
+      { scope: "Communication Channels", title: "Email setup", owner: "Cpaas / Client team", priority: "medium", platforms: [], channels: ["Email"], elastic: true, offsetByCycle: { "4": 22, "6": 10, "12": 10 } },
+      { scope: "Communication Channels", title: "SMS setup", owner: "Cpaas / Client team", priority: "medium", platforms: [], channels: ["SMS"], elastic: true, offsetByCycle: { "4": 22, "6": 10, "12": 10 } },
+      { scope: "Communication Channels", title: "Whatsapp setup", owner: "Cpaas / Client team", priority: "medium", platforms: [], channels: ["WhatsApp"], elastic: true, offsetByCycle: { "4": 22, "6": 10, "12": 10 } },
+      { scope: "Communication Channels", title: "RCS setup", owner: "Cpaas / Client team", priority: "medium", platforms: [], channels: ["RCS"], elastic: true, offsetByCycle: { "4": 22, "6": 10, "12": 10 } },
+      { scope: "Communication Channels", title: "IVR setup", owner: "Cpaas / Client team", priority: "medium", platforms: [], channels: ["IVR"], elastic: true, offsetByCycle: { "4": 23, "6": 10, "12": 10 } },
+      { scope: "Website", title: "Users and Events Audit", owner: "Webengage OBM", priority: "medium", platforms: ["Website"], channels: [], elastic: true, offsetByCycle: { "4": 23, "6": 28, "12": 50 } },
+      { scope: "Web App", title: "Users and Events Audit", owner: "Webengage OBM", priority: "medium", platforms: ["Web App"], channels: [], elastic: true, offsetByCycle: { "4": 24, "6": 31, "12": 63 } },
+      { scope: "Website", title: "WebPush Audit", owner: "Webengage OBM", priority: "medium", platforms: ["Website"], channels: ["Web Push", "Push"], elastic: true, offsetByCycle: { "4": 23, "6": 28, "12": 50 } },
+      { scope: "Web App", title: "WebPush Audit", owner: "Webengage OBM", priority: "medium", platforms: ["Web App"], channels: ["Web Push", "Push"], elastic: true, offsetByCycle: { "4": 24, "6": 31, "12": 63 } },
+      { scope: "Website", title: "Onsite Notification Audit", owner: "Webengage OBM", priority: "medium", platforms: ["Website"], channels: ["On-site Notification"], elastic: true, offsetByCycle: { "4": 23, "6": 28, "12": 50 } },
+      { scope: "Web App", title: "Onsite Notification Audit", owner: "Webengage OBM", priority: "medium", platforms: ["Web App"], channels: ["On-site Notification"], elastic: true, offsetByCycle: { "4": 24, "6": 31, "12": 63 } },
+      { scope: "Website", title: "Fixes or Changes", owner: "Client tech team", priority: "medium", platforms: ["Website"], channels: [], elastic: true, offsetByCycle: { "4": 24, "6": 31, "12": 60 } },
+      { scope: "Web App", title: "Fixes or Changes", owner: "Client tech team", priority: "medium", platforms: ["Web App"], channels: [], elastic: true, offsetByCycle: { "4": 25, "6": 36, "12": 70 } },
+      { scope: "Android", title: "Users and Events Audit", owner: "Webengage OBM", priority: "medium", platforms: ["Android"], channels: [], elastic: true, offsetByCycle: { "4": 24, "6": 31, "12": 63 } },
+      { scope: "Android", title: "Push Android", owner: "Webengage OBM", priority: "medium", platforms: ["Android"], channels: ["Push"], elastic: true, offsetByCycle: { "4": 24, "6": 31, "12": 63 } },
+      { scope: "Android", title: "In-App Android", owner: "Webengage OBM", priority: "medium", platforms: ["Android"], channels: ["In-App"], elastic: true, offsetByCycle: { "4": 24, "6": 31, "12": 63 } },
+      { scope: "Android", title: "Deeplinks", owner: "Webengage OBM", priority: "medium", platforms: ["Android"], channels: [], elastic: true, offsetByCycle: { "4": 24, "6": 31, "12": 63 } },
+      { scope: "Android", title: "Fixes or Changes", owner: "Client tech team", priority: "medium", platforms: ["Android"], channels: [], elastic: true, offsetByCycle: { "4": 25, "6": 36, "12": 70 } },
+      { scope: "iOS", title: "Users and Events Audit", owner: "Webengage OBM", priority: "medium", platforms: ["iOS"], channels: [], elastic: true, offsetByCycle: { "4": 24, "6": 31, "12": 63 } },
+      { scope: "iOS", title: "Push, Rich Push iOS", owner: "Webengage OBM", priority: "medium", platforms: ["iOS"], channels: ["Push"], elastic: true, offsetByCycle: { "4": 24, "6": 31, "12": 63 } },
+      { scope: "iOS", title: "In-App iOS", owner: "Webengage OBM", priority: "medium", platforms: ["iOS"], channels: ["In-App"], elastic: true, offsetByCycle: { "4": 24, "6": 31, "12": 63 } },
+      { scope: "iOS", title: "Deeplinks", owner: "Webengage OBM", priority: "medium", platforms: ["iOS"], channels: [], elastic: true, offsetByCycle: { "4": 24, "6": 31, "12": 63 } },
+      { scope: "iOS", title: "Fixes or Changes", owner: "Client tech team", priority: "medium", platforms: ["iOS"], channels: [], elastic: true, offsetByCycle: { "4": 24, "6": 36, "12": 70 } },
+      { scope: "Rest API", title: "Data Validation", owner: "Webengage OBM", priority: "medium", platforms: ["REST API"], channels: [], elastic: true, offsetByCycle: { "4": 25, "6": 37, "12": 70 } },
+      { scope: "Rest API", title: "Count Matching", owner: "Webengage team + Client team", priority: "medium", platforms: ["REST API"], channels: [], elastic: true, offsetByCycle: { "4": 25, "6": 37, "12": 70 } },
+      { scope: "Communication Channels", title: "Email Audit", owner: "Webengage OBM", priority: "medium", platforms: [], channels: ["Email"], elastic: true, offsetByCycle: { "4": 23, "6": 31, "12": 50 } },
+      { scope: "Communication Channels", title: "SMS Audit", owner: "Webengage OBM", priority: "medium", platforms: [], channels: ["SMS"], elastic: true, offsetByCycle: { "4": 23, "6": 31, "12": 50 } },
+      { scope: "Communication Channels", title: "Whatsapp Audit", owner: "Webengage OBM", priority: "medium", platforms: [], channels: ["WhatsApp"], elastic: true, offsetByCycle: { "4": 23, "6": 31, "12": 50 } },
+      { scope: "Communication Channels", title: "RCS Audit", owner: "Webengage OBM", priority: "medium", platforms: [], channels: ["RCS"], elastic: true, offsetByCycle: { "4": 23, "6": 31, "12": 50 } },
+      { scope: "Communication Channels", title: "Historical User Data Upload", owner: "Client team", priority: "medium", platforms: [], channels: [], elastic: true, offsetByCycle: { "4": 23, "6": 31, "12": 50 } },
+      { scope: "Communication Channels", title: "Historical Events Data Upload", owner: "Client team", priority: "medium", platforms: [], channels: [], elastic: true, offsetByCycle: { "4": 23, "6": 31, "12": 50 } },
     ],
   },
   {
     week: 4,
-    label: "Audit & Templates",
+    label: "Training and Use-Cases",
+    elastic: true,
     tasks: [
-      { scope: "Staging Audit", title: "Website audit", owner: "", priority: "high", platforms: ["Website"] },
-      { scope: "Staging Audit", title: "Android app audit", owner: "", priority: "high", platforms: ["Android"] },
-      { scope: "Staging Audit", title: "iOS app audit", owner: "", priority: "high", platforms: ["iOS"] },
-      { scope: "Staging Audit", title: "Web App audit", owner: "", priority: "high", platforms: ["Web App"] },
-      { scope: "Staging Audit", title: "Changes shared with dev team and actioned", owner: "", priority: "high", platforms: [] },
-      { scope: "Email Warmup", title: "Warmup content ready", owner: "", priority: "high", platforms: [] },
-      { scope: "SMS template", title: "Share template for provider testing", owner: "", priority: "high", platforms: [] },
-      { scope: "WhatsApp Template", title: "Add template on the dashboard for testing", owner: "", priority: "high", platforms: [] },
-      { scope: "Historic Data", title: "Historical transactional data uploaded", owner: "", priority: "high", platforms: [] },
-      { scope: "Website", title: "Website Testing & QA", owner: "", priority: "high", platforms: ["Website"] },
-      { scope: "Android", title: "Android Testing & QA", owner: "", priority: "high", platforms: ["Android"] },
-      { scope: "iOS", title: "iOS Testing & QA", owner: "", priority: "high", platforms: ["iOS"] },
-      { scope: "REST API", title: "REST API testing", owner: "", priority: "high", platforms: ["REST API"] },
+      { scope: "Training and Use-Cases", title: "Training Session I", owner: "Webengage OBM", priority: "medium", platforms: [], channels: [], elastic: true, offsetByCycle: { "4": 23, "6": 36, "12": 70 } },
+      { scope: "Training and Use-Cases", title: "Training Session II", owner: "Webengage OBM", priority: "medium", platforms: [], channels: [], elastic: true, offsetByCycle: { "4": 23, "6": 36, "12": 70 } },
+      { scope: "Training and Use-Cases", title: "Training Session III", owner: "Webengage OBM", priority: "medium", platforms: [], channels: [], elastic: true, offsetByCycle: { "4": 23, "6": 36, "12": 70 } },
+      { scope: "Communication Channels", title: "Email Warmup Journey Live", owner: "Webengage OBM", priority: "medium", platforms: [], channels: ["Email"], elastic: true, offsetByCycle: { "4": 23, "6": 36, "12": 70 } },
+      { scope: "Communication Channels", title: "Whatsapp Warmup Journey Live", owner: "Webengage OBM", priority: "medium", platforms: [], channels: ["WhatsApp"], elastic: true, offsetByCycle: { "4": 23, "6": 36, "12": 70 } },
+      { scope: "Communication Channels", title: "Send Dashboard Recording", owner: "Webengage OBM", priority: "medium", platforms: [], channels: [], elastic: true, offsetByCycle: { "4": 23, "6": 36, "12": 70 } },
     ],
   },
   {
     week: 5,
-    label: "Production Movement",
+    label: "Go Live",
+    elastic: true,
     tasks: [
-      { scope: "Production", title: "Move integration to production - Website", owner: "", priority: "high", platforms: ["Website"] },
-      { scope: "Production", title: "Move integration to production - Android", owner: "", priority: "high", platforms: ["Android"] },
-      { scope: "Production", title: "Move integration to production - iOS", owner: "", priority: "high", platforms: ["iOS"] },
-      { scope: "Production", title: "Move integration to production - Web App", owner: "", priority: "high", platforms: ["Web App"] },
-      { scope: "Production", title: "Play Store release with SDK", owner: "", priority: "high", platforms: ["Android"] },
-      { scope: "Production", title: "App Store release with SDK", owner: "", priority: "high", platforms: ["iOS"] },
-      { scope: "Production", title: "Production testing", owner: "", priority: "high", platforms: [] },
-      { scope: "Channels - Production", title: "Channels enabled on production", owner: "", priority: "high", platforms: [] },
-      { scope: "Email Warmup", title: "Warmup journey live", owner: "", priority: "high", platforms: [] },
-      { scope: "Production", title: "Production API testing", owner: "", priority: "high", platforms: ["REST API"] },
-      { scope: "Website", title: "Production Validation", owner: "", priority: "high", platforms: ["Website"] },
-      { scope: "Android", title: "Production Validation", owner: "", priority: "high", platforms: ["Android"] },
-      { scope: "iOS", title: "Production Validation", owner: "", priority: "high", platforms: ["iOS"] },
-    ],
-  },
-  {
-    week: 6,
-    label: "Go-Live",
-    tasks: [
-      { scope: "Go-Live", title: "Demo dashboard walkthrough with client", owner: "", priority: "medium", platforms: [] },
-      { scope: "Go-Live", title: "2 or more recurring campaigns / journeys live", owner: "", priority: "high", platforms: [] },
-      { scope: "Go-Live", title: "Key events and attributes verified on production", owner: "", priority: "high", platforms: [] },
-      { scope: "Go-Live", title: "Confirmation from client on billing start", owner: "", priority: "high", platforms: [] },
-      { scope: "Go-Live", title: "Handover to CSM", owner: "", priority: "medium", platforms: [] },
+      { scope: "All Integrated Domains", title: "Integration / Domains check", owner: "Webengage OBM", priority: "medium", platforms: [], channels: [], elastic: true, offsetByCycle: { "4": 27, "6": 40, "12": 77 } },
     ],
   },
 ];
@@ -2128,9 +2104,9 @@ function ensureDefaults(targetState) {
       if (task.owner === undefined) task.owner = "";
       if (task.priority === undefined) task.priority = "medium";
       if (!Array.isArray(task.platforms)) task.platforms = [];
+      if (!Array.isArray(task.channels)) task.channels = [];
       if (task.elastic === undefined) task.elastic = false;
-      if (task.days === undefined) task.days = null;
-      if (!task.daysByCycle || typeof task.daysByCycle !== "object") task.daysByCycle = {};
+      if (!task.offsetByCycle || typeof task.offsetByCycle !== "object") task.offsetByCycle = {};
     });
   });
 
@@ -2851,12 +2827,8 @@ function renderTemplateWeek(entry) {
       <select data-field="priority">
         ${TEMPLATE_PRIORITIES.map((value) => `<option value="${value}"${task.priority === value ? " selected" : ""}>${capitalize(value)}</option>`).join("")}
       </select>
-      <input type="number" min="1" data-field="days" value="${task.days || ""}" placeholder="Days" title="Days to complete in a ${templateBaseCycle()}-week cycle" />
-      <input type="text" data-field="daysByCycle" value="${escapeHtml(formatDaysByCycle(task.daysByCycle))}" placeholder="7:10, 8:14" title="Per-cycle overrides — cycle:days, comma separated" />
-      <label class="template-elastic" title="Elastic: this task's duration stretches or shrinks with the project length. Leave off for work that takes a fixed amount of effort.">
-        <input type="checkbox" data-field="elastic"${task.elastic ? " checked" : ""} />
-        <span>Elastic</span>
-      </label>
+      <input type="text" data-field="offsetByCycle" value="${escapeHtml(formatOffsets(task.offsetByCycle))}" placeholder="4:5, 6:5, 12:5" title="Completion day offset from the kickoff date, per cycle length — cycle:day, comma separated. A cycle not listed is interpolated between the nearest two." />
+      <span class="template-elastic${task.elastic ? " is-elastic" : ""}" title="${task.elastic ? "Elastic — this task's completion date moves with the project length." : "Fixed — this task completes the same number of days after kickoff whatever the project length."}">${task.elastic ? "Elastic" : "Fixed"}</span>
       <button type="button" class="row-remove" data-requires="template.edit" data-action="remove-task">Remove</button>
     </div>
   `).join("");
@@ -2864,13 +2836,9 @@ function renderTemplateWeek(entry) {
   return `
     <section class="template-week" data-week="${entry.week}">
       <header class="template-week-head">
-        <span class="template-week-badge">Week ${entry.week}</span>
+        <span class="template-week-badge">Phase ${entry.week}</span>
         <input type="text" class="template-week-label" data-field="label" value="${escapeHtml(entry.label)}" placeholder="Week label" />
         <span class="muted">${entry.tasks.length} task${entry.tasks.length === 1 ? "" : "s"}</span>
-        <label class="template-elastic" title="Elastic: this stage absorbs the project length — it spans more weeks in a long project and fewer in a short one. Every other stage keeps one week.">
-          <input type="checkbox" data-field="weekElastic"${entry.elastic ? " checked" : ""} />
-          <span>Elastic stage</span>
-        </label>
         <button type="button" class="ghost-button small-button" data-requires="template.edit" data-action="add-task">+ Task</button>
         <button type="button" class="row-remove" data-requires="template.edit" data-action="remove-week">Delete week</button>
       </header>
@@ -2879,20 +2847,20 @@ function renderTemplateWeek(entry) {
   `;
 }
 
-/* "7:10, 8:14" <-> { "7": 10, "8": 14 } — a compact way to edit per-cycle overrides in a
-   single cell rather than one column per cycle length. */
-function formatDaysByCycle(map) {
+/* "4:5, 6:5, 12:30" <-> { "4": 5, "6": 5, "12": 30 } — the completion day offset from kickoff
+   for each cycle length the master sheet plans for, in one cell rather than a column each. */
+function formatOffsets(map) {
   return Object.entries(map || {})
     .sort((left, right) => Number(left[0]) - Number(right[0]))
-    .map(([cycle, days]) => `${cycle}:${days}`)
+    .map(([cycle, day]) => `${cycle}:${day}`)
     .join(", ");
 }
 
-function parseDaysByCycle(text) {
+function parseOffsets(text) {
   const out = {};
   String(text || "").split(",").forEach((pair) => {
-    const [cycle, days] = pair.split(":").map((part) => part.trim());
-    if (Number(cycle) > 0 && Number(days) > 0) out[String(Number(cycle))] = Number(days);
+    const [cycle, day] = pair.split(":").map((part) => part.trim());
+    if (Number(cycle) > 0 && Number(day) >= 0) out[String(Number(cycle))] = Number(day);
   });
   return out;
 }
@@ -2920,22 +2888,13 @@ function handleTemplatesInput(event) {
     return;
   }
 
-  if (field === "weekElastic") {
-    entry.elastic = event.target.checked;
-    saveState();
-    return;
-  }
-
   const rowEl = event.target.closest(".template-row");
   const task = entry.tasks.find((item) => item.id === rowEl.dataset.task);
   if (!task) return;
 
-  if (field === "elastic") {
-    task.elastic = event.target.checked;
-  } else if (field === "days") {
-    task.days = Number(event.target.value) > 0 ? Number(event.target.value) : null;
-  } else if (field === "daysByCycle") {
-    task.daysByCycle = parseDaysByCycle(event.target.value);
+  if (field === "offsetByCycle") {
+    task.offsetByCycle = parseOffsets(event.target.value);
+    task.elastic = new Set(Object.values(task.offsetByCycle)).size > 1;
   } else {
     task[field] = event.target.value;
   }
@@ -2971,7 +2930,7 @@ function handleTemplatesClick(event) {
   const action = button.dataset.action;
 
   if (action === "add-task") {
-    entry.tasks.push({ id: newId(), scope: "", title: "", owner: "", priority: "medium", platforms: [], elastic: false, days: null, daysByCycle: {} });
+    entry.tasks.push({ id: newId(), scope: "", title: "", owner: "", priority: "medium", platforms: [], channels: [], elastic: false, offsetByCycle: {} });
   } else if (action === "remove-task") {
     const rowEl = button.closest(".template-row");
     const task = entry.tasks.find((item) => item.id === rowEl.dataset.task);
@@ -3008,8 +2967,8 @@ function toTemplateWeeks(weeks) {
       owner: task.owner || "",
       priority: TEMPLATE_PRIORITIES.includes(task.priority) ? task.priority : "medium",
       platforms: Array.isArray(task.platforms) ? task.platforms : [],
-      days: Number(task.days) > 0 ? Number(task.days) : null,
-      daysByCycle: (task.daysByCycle && typeof task.daysByCycle === "object") ? task.daysByCycle : {},
+      channels: Array.isArray(task.channels) ? task.channels : [],
+      offsetByCycle: (task.offsetByCycle && typeof task.offsetByCycle === "object") ? task.offsetByCycle : {},
     })),
   }));
 }
@@ -3031,7 +2990,7 @@ async function fetchSeedTemplates() {
     if (!Array.isArray(inlined.weeks) || !inlined.weeks.length) {
       throw new Error("bundled week templates are empty");
     }
-    templateMeta = { baseCycleWeeks: inlined.baseCycleWeeks, defaultTaskDays: inlined.defaultTaskDays };
+    templateMeta = { baseCycleWeeks: inlined.baseCycleWeeks, defaultTaskDays: inlined.defaultTaskDays, cycleWeeksWithData: inlined.cycleWeeksWithData };
     return inlined.weeks;
   }
 
@@ -3043,7 +3002,7 @@ async function fetchSeedTemplates() {
     throw new Error("week-templates.json has no 'weeks' array");
   }
 
-  templateMeta = { baseCycleWeeks: data.baseCycleWeeks, defaultTaskDays: data.defaultTaskDays };
+  templateMeta = { baseCycleWeeks: data.baseCycleWeeks, defaultTaskDays: data.defaultTaskDays, cycleWeeksWithData: data.cycleWeeksWithData };
   return data.weeks;
 }
 
@@ -4125,34 +4084,55 @@ function addWeekToProject(projectId) {
 }
 
 /* A task with no platforms applies to every project; otherwise it is only generated when the
-   project selected at least one of its platforms. */
+   project selected at least one of its platforms. Channel-specific work (Email setup, Push
+   credentials, WebPush Audit...) is filtered the same way against the project's channels — but
+   only once the project has chosen some, so an early draft still gets the full plan. */
 function templateTasksForProject(tasks, project) {
-  const selected = project.platforms || [];
+  const platforms = project.platforms || [];
+  const channels = project.channels || [];
+
   return tasks.filter((task) => {
-    const wanted = task.platforms || [];
-    return !wanted.length || wanted.some((platform) => selected.includes(platform));
+    const wantedPlatforms = task.platforms || [];
+    if (wantedPlatforms.length && !wantedPlatforms.some((name) => platforms.includes(name))) return false;
+
+    const wantedChannels = task.channels || [];
+    if (!channels.length || !wantedChannels.length) return true;
+    return wantedChannels.some((name) => channels.includes(name));
   });
 }
 
 function templateTasksToUpdateTasks(tasks, weekStart, cycleWeeks) {
-  return tasks.map((task) => {
-    const days = resolveTaskDays(task, cycleWeeks);
-    return {
-      id: newId(),
-      title: task.title,
-      phase: task.scope,
-      owner: task.owner || "",
-      status: "not started",
-      date: "",
-      blocker: "",
-      priority: task.priority || "medium",
-      comments: "",
-      days,
-      startDate: weekStart || "",
-      dueDate: taskDueDate(weekStart, days),
-      subtasks: [],
-    };
-  });
+  return tasks.map((task) => templateTaskToUpdateTask(task, weekStart,
+    toInputDate(shiftDays(new Date(`${weekStart}T00:00:00`), resolveTaskOffset(task, cycleWeeks) % 7))));
+}
+
+/* The master sheet gives a completion date, not a duration, so a task runs from the start of
+   the week it is reported in to the day it is due. */
+function templateTaskToUpdateTask(task, weekStart, dueDate) {
+  const due = dueDate || taskDueDate(weekStart, templateDefaultDays());
+  return {
+    id: newId(),
+    title: task.title,
+    phase: task.scope,
+    owner: task.owner || "",
+    status: "not started",
+    date: "",
+    blocker: "",
+    priority: task.priority || "medium",
+    comments: "",
+    days: daysBetweenInclusive(weekStart, due),
+    startDate: weekStart || "",
+    dueDate: due,
+    subtasks: [],
+  };
+}
+
+function daysBetweenInclusive(startValue, endValue) {
+  if (!startValue || !endValue) return templateDefaultDays();
+  const start = new Date(`${startValue}T00:00:00`);
+  const end = new Date(`${endValue}T00:00:00`);
+  if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) return templateDefaultDays();
+  return Math.max(1, Math.round((end - start) / 86400000) + 1);
 }
 
 /* ---------- Timeline ---------- */
@@ -4352,9 +4332,8 @@ function refileTasksIntoWeeks(projectId) {
 
 /* ---------- Task durations ---------- */
 
-/* How long a task takes depends on the project's cycle length. `daysByCycle` holds explicit
-   values per cycle; anything not listed is scaled pro rata from `days`, so adding a 9- or
-   10-week cycle needs no edits to the task list. */
+/* The cycle length the master sheet is written around; used when a task has no offset for
+   the project's own cycle and one has to be scaled from the nearest plan. */
 function templateBaseCycle() {
   const value = Number(templateMeta.baseCycleWeeks);
   return Number.isFinite(value) && value > 0 ? value : BASE_CYCLE_WEEKS;
@@ -4365,23 +4344,11 @@ function templateDefaultDays() {
   return Number.isFinite(value) && value > 0 ? value : DEFAULT_TASK_DAYS;
 }
 
+/* Durations now come from the master sheet's completion offsets (see resolveTaskOffset), so
+   a task added by hand in the report editor is the only thing that still needs a default. */
 function resolveTaskDays(task, cycleWeeks) {
-  const cycle = Number(cycleWeeks) || DEFAULT_CYCLE_WEEKS;
-  const overrides = task.daysByCycle || {};
-
-  if (overrides[String(cycle)] !== undefined) {
-    return Math.max(1, Number(overrides[String(cycle)]) || 1);
-  }
-
-  const base = Number(task.days);
-  const days = Number.isFinite(base) && base > 0 ? base : templateDefaultDays();
-
-  /* Only elastic work stretches or compresses with the project length. SDK setup, user
-     tracking, channel setup and the like take a fixed amount of effort whether the project
-     runs 4 weeks or 12 — it is the event tracking phase that absorbs the difference. */
-  if (!task.elastic) return Math.max(1, Math.round(days));
-
-  return Math.max(1, Math.round(days * cycle / templateBaseCycle()));
+  const offset = resolveTaskOffset(task, cycleWeeks);
+  return offset ? Math.max(1, (offset % 7) + 1) : templateDefaultDays();
 }
 
 /* Parallel within a week: every task starts on its own week's Monday. A task longer than a
@@ -4424,108 +4391,65 @@ function refreshProjectGoLive(projectId) {
    added, edited or removed per project from the Create Report screen afterwards. */
 /* ---------- Fitting the master plan to the project's cycle ---------- */
 
-/* The master plan is an ordered list of stages, not a fixed number of weeks. The project's
-   cycle length decides how many weeks each stage spans, and every stage always appears: a
-   short cycle merges stages into a week, a long one spreads them out. Nothing is ever
-   dropped, so Go-Live survives a 3-week project and a 12-week project has no empty weeks.
-
-   Stages marked `elastic` (in practice event tracking) absorb the slack; every other stage
-   keeps one week, because SDK setup, channel setup and the rest take as long as they take. */
-function stageSpans(stages, cycleWeeks) {
-  const spans = new Map();
-  if (!stages.length) return spans;
-
-  const cycle = Math.max(1, Number(cycleWeeks) || DEFAULT_CYCLE_WEEKS);
-  const elasticCount = stages.filter((stage) => stage.elastic).length;
-  const fixedCount = stages.length - elasticCount;
-
-  /* Elastic stages take whatever the fixed ones leave, and never less than a week each.
-     With no elastic stage at all the whole plan is simply scaled pro rata. */
-  const elasticTotal = elasticCount ? Math.max(elasticCount, cycle - fixedCount) : 0;
-  const fixedWidth = fixedCount ? (cycle - elasticTotal) / fixedCount : 0;
-  const elasticWidth = elasticCount ? elasticTotal / elasticCount : 0;
-
-  let position = 0;
-  stages.forEach((stage) => {
-    const start = Math.min(cycle, Math.floor(position) + 1);
-    position += stage.elastic ? elasticWidth : fixedWidth;
-    const end = Math.min(cycle, Math.max(start, Math.ceil(position)));
-    spans.set(stage.week, { start, end });
-  });
-
-  return spans;
+/* Every task carries its completion date as a day offset from the kickoff ("N + 10" in the
+   master sheet), given separately for each cycle length the sheet plans for. That is where
+   elasticity now lives: SDK setup stays at N+5 whether the project runs 4 weeks or 12, while
+   event tracking moves N+10 -> N+15 -> N+30. Nothing is scaled by guesswork. */
+function templateCyclesWithData() {
+  const listed = (templateMeta.cycleWeeksWithData || [])
+    .map(Number)
+    .filter((value) => Number.isFinite(value) && value > 0)
+    .sort((left, right) => left - right);
+  return listed.length ? listed : [templateBaseCycle()];
 }
 
-/* Deal a stage's tasks across the weeks it spans, in template order and breaking only
-   between domains so one domain's work never straddles a week boundary. Domains are split
-   further only when there are fewer of them than weeks to fill, which is what stops a
-   stretched stage from leaving a week with nothing to report. */
-function dealTasksAcrossWeeks(tasks, weeks) {
-  const buckets = Array.from({ length: Math.max(1, weeks) }, () => []);
-  if (buckets.length === 1 || !tasks.length) {
-    buckets[0].push(...tasks);
-    return buckets;
+/* A cycle length the sheet does not plan for is interpolated between the two nearest ones it
+   does, so 8 weeks sits between the 6- and 12-week plans. Outside the range the nearest plan
+   is scaled pro rata. Either way a new cycle length needs no edit to the master list. */
+function resolveTaskOffset(task, cycleWeeks) {
+  const cycle = Math.max(1, Number(cycleWeeks) || DEFAULT_CYCLE_WEEKS);
+  const table = task.offsetByCycle || {};
+  const known = templateCyclesWithData().filter((weeks) => table[String(weeks)] !== undefined);
+  if (!known.length) return 0;
+
+  const at = (weeks) => Number(table[String(weeks)]) || 0;
+  if (table[String(cycle)] !== undefined) return Math.max(0, at(cycle));
+
+  const below = [...known].reverse().find((weeks) => weeks < cycle);
+  const above = known.find((weeks) => weeks > cycle);
+
+  if (below && above) {
+    const ratio = (cycle - below) / (above - below);
+    return Math.max(0, Math.round(at(below) + (at(above) - at(below)) * ratio));
   }
 
-  const groups = [];
-  tasks.forEach((task) => {
-    const last = groups[groups.length - 1];
-    if (last && last.scope === (task.scope || "")) last.items.push(task);
-    else groups.push({ scope: task.scope || "", items: [task] });
-  });
-
-  while (groups.length < buckets.length && groups.some((group) => group.items.length > 1)) {
-    let largest = 0;
-    groups.forEach((group, index) => {
-      if (group.items.length > groups[largest].items.length) largest = index;
-    });
-    const { scope, items } = groups[largest];
-    const half = Math.ceil(items.length / 2);
-    groups.splice(largest, 1, { scope, items: items.slice(0, half) }, { scope, items: items.slice(half) });
-  }
-
-  let index = 0;
-  let placed = 0;
-  groups.forEach((group) => {
-    const held = buckets[index].length;
-    if (held && index < buckets.length - 1) {
-      const share = (tasks.length - placed + held) / (buckets.length - index);
-      // Start the next week when adding this domain would overshoot the fair share by
-      // more than leaving the week short of it.
-      if (held + group.items.length - share > share - held) index += 1;
-    }
-    buckets[index].push(...group.items);
-    placed += group.items.length;
-  });
-
-  return buckets;
+  const nearest = below || above;
+  return Math.max(0, Math.round(at(nearest) * cycle / nearest));
 }
 
 function generateWeeklyPlan(project) {
   const weeks = Math.min(Math.max(Number(project.cycleWeeks) || DEFAULT_CYCLE_WEEKS, MIN_CYCLE_WEEKS), MAX_CYCLE_WEEKS);
-  const firstMonday = mondayOnOrAfter(project.kickoffDate);
-  const stages = [...state.weekTemplates].sort((left, right) => left.week - right.week);
-  const spans = stageSpans(stages, weeks);
+  /* Week 1 is the week the kickoff falls in, so an N+0 task lands in it whatever weekday
+     the project starts on. */
+  const firstStart = mondayOnOrBefore(project.kickoffDate);
+  const base = new Date(`${firstStart}T00:00:00`);
+  const kickoff = new Date(`${project.kickoffDate || firstStart}T00:00:00`);
+  const lead = Math.round((kickoff - base) / 86400000);
   const plan = Array.from({ length: weeks }, () => ({ labels: [], stageWeeks: [], tasks: [] }));
 
-  stages.forEach((stage) => {
-    const span = spans.get(stage.week);
-    if (!span) return;
-    const width = span.end - span.start + 1;
-    const buckets = dealTasksAcrossWeeks(templateTasksForProject(stage.tasks || [], project), width);
-
-    buckets.forEach((bucket, offset) => {
-      const slot = plan[span.start - 1 + offset];
-      if (!slot) return;
-      const label = width > 1 ? `${stage.label} (${offset + 1} of ${width})` : stage.label;
-      if (!slot.labels.includes(label)) slot.labels.push(label);
+  [...state.weekTemplates].sort((left, right) => left.week - right.week).forEach((stage) => {
+    templateTasksForProject(stage.tasks || [], project).forEach((task) => {
+      const offset = resolveTaskOffset(task, weeks);
+      const index = Math.min(weeks - 1, Math.max(0, Math.floor((lead + offset) / 7)));
+      const slot = plan[index];
+      if (!slot.labels.includes(stage.label)) slot.labels.push(stage.label);
       if (!slot.stageWeeks.includes(stage.week)) slot.stageWeeks.push(stage.week);
-      slot.tasks.push(...bucket);
+      slot.tasks.push({ task, dueDate: toInputDate(shiftDays(kickoff, offset)) });
     });
   });
 
   plan.forEach((slot, index) => {
-    const weekStart = toInputDate(shiftDays(new Date(`${firstMonday}T00:00:00`), index * 7));
+    const weekStart = toInputDate(shiftDays(base, index * 7));
     state.updates.push({
       id: newId(),
       projectId: project.id,
@@ -4536,12 +4460,18 @@ function generateWeeklyPlan(project) {
       fromTemplate: true,
       templateWeek: slot.stageWeeks[0] || index + 1,
       templateLabel: slot.labels.join(" + ") || `Week ${index + 1}`,
-      tasks: templateTasksToUpdateTasks(slot.tasks, weekStart, weeks),
+      tasks: slot.tasks.map(({ task, dueDate }) => templateTaskToUpdateTask(task, weekStart, dueDate)),
       createdAt: new Date().toISOString(),
     });
   });
 
   return plan.length;
+}
+
+function mondayOnOrBefore(dateValue) {
+  const base = dateValue ? new Date(`${dateValue}T00:00:00`) : new Date();
+  if (Number.isNaN(base.getTime())) return toInputDate(new Date());
+  return toInputDate(shiftDays(base, -((base.getDay() + 6) % 7)));
 }
 
 function mondayOnOrAfter(dateValue) {

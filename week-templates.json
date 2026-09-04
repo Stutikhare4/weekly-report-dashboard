@@ -1,1105 +1,1829 @@
 {
-  "$comment": "Master week-wise plan. `platforms` scopes a task to the platforms a project selected; an empty list means every project. `days` is how long the task takes in the base cycle (baseCycleWeeks). `daysByCycle` overrides that for specific cycle lengths, e.g. {\"7\": 10, \"8\": 14}. A cycle with no override is scaled from `days` pro rata, so a new cycle length needs no changes here. A task with no `days` defaults to 7 (spans its week).",
-  "baseCycleWeeks": 6,
-  "defaultTaskDays": 7,
+  "source": "https://docs.google.com/spreadsheets/d/1szgspVwOpiUgsS3DKoybF_UKB8t6LXRNXBAnr_pmO7E/edit?gid=1829939363",
+  "sourceTabs": {
+    "4": "Week 4",
+    "6": "Week 6",
+    "12": "Week 12"
+  },
+  "baseCycleWeeks": 4,
+  "cycleWeeksWithData": [
+    4,
+    6,
+    12
+  ],
   "weeks": [
     {
       "week": 1,
-      "label": "Kickoff & Discovery",
+      "label": "Kickoff",
       "tasks": [
         {
-          "scope": "Kickoff call",
-          "title": "Onboarding mail thread initiated",
-          "owner": "",
+          "scope": "Kickoff",
+          "title": "Kick-off Meeting",
+          "owner": "Webengage OBM",
           "priority": "medium",
-          "platforms": []
+          "platforms": [],
+          "channels": [],
+          "offsetByCycle": {
+            "4": 0,
+            "6": 0,
+            "12": 0
+          },
+          "elastic": false
         },
         {
-          "scope": "Kickoff call",
-          "title": "Channel form",
-          "owner": "",
+          "scope": "Kickoff",
+          "title": "Discovery",
+          "owner": "Webengage OBM",
           "priority": "medium",
-          "platforms": []
+          "platforms": [],
+          "channels": [],
+          "offsetByCycle": {
+            "4": 0,
+            "6": 0,
+            "12": 0
+          },
+          "elastic": false
         },
         {
-          "scope": "Kickoff call",
-          "title": "Tech doc",
-          "owner": "",
+          "scope": "Kickoff",
+          "title": "Data Modelling",
+          "owner": "Webengage OBM",
           "priority": "medium",
-          "platforms": []
+          "platforms": [],
+          "channels": [],
+          "offsetByCycle": {
+            "4": 3,
+            "6": 3,
+            "12": 3
+          },
+          "elastic": false
         },
         {
-          "scope": "Kickoff call",
+          "scope": "Kickoff",
           "title": "Scope of Work",
-          "owner": "",
+          "owner": "Webengage OBM",
           "priority": "medium",
-          "platforms": []
+          "platforms": [],
+          "channels": [],
+          "offsetByCycle": {
+            "4": 0,
+            "6": 0,
+            "12": 0
+          },
+          "elastic": false
         },
         {
-          "scope": "Tech Team connect",
-          "title": "Tech team connect - Website",
-          "owner": "",
-          "priority": "high",
-          "platforms": [
-            "Website"
-          ]
+          "scope": "Kickoff",
+          "title": "Create Staging Dashboard",
+          "owner": "Webengage OBM",
+          "priority": "medium",
+          "platforms": [],
+          "channels": [],
+          "offsetByCycle": {
+            "4": 0,
+            "6": 0,
+            "12": 0
+          },
+          "elastic": false
         },
         {
-          "scope": "Tech Team connect",
-          "title": "Tech team connect - Android",
-          "owner": "",
-          "priority": "high",
-          "platforms": [
-            "Android"
-          ]
-        },
-        {
-          "scope": "Tech Team connect",
-          "title": "Tech team connect - iOS",
-          "owner": "",
-          "priority": "high",
-          "platforms": [
-            "iOS"
-          ]
-        },
-        {
-          "scope": "Tech Team connect",
-          "title": "Tech team connect - Web App",
-          "owner": "",
-          "priority": "high",
-          "platforms": [
-            "Web App"
-          ]
-        },
-        {
-          "scope": "Tech Team connect",
-          "title": "Tech team connect - REST API",
-          "owner": "",
-          "priority": "high",
-          "platforms": [
-            "REST API"
-          ]
-        },
-        {
-          "scope": "User Id",
-          "title": "Finalise the unique user identifier",
-          "owner": "",
-          "priority": "high",
-          "platforms": []
-        },
-        {
-          "scope": "Data Model",
-          "title": "Data model - Website",
-          "owner": "",
-          "priority": "high",
-          "platforms": [
-            "Website"
-          ]
-        },
-        {
-          "scope": "Data Model",
-          "title": "Data model - Android",
-          "owner": "",
-          "priority": "high",
-          "platforms": [
-            "Android"
-          ]
-        },
-        {
-          "scope": "Data Model",
-          "title": "Data model - iOS",
-          "owner": "",
-          "priority": "high",
-          "platforms": [
-            "iOS"
-          ]
-        },
-        {
-          "scope": "Data Model",
-          "title": "Data model - Web App",
-          "owner": "",
-          "priority": "high",
-          "platforms": [
-            "Web App"
-          ]
-        },
-        {
-          "scope": "Data Model",
-          "title": "Data model - REST API",
-          "owner": "",
-          "priority": "high",
-          "platforms": [
-            "REST API"
-          ]
+          "scope": "Kickoff",
+          "title": "Data Model Finalised",
+          "owner": "Client team",
+          "priority": "medium",
+          "platforms": [],
+          "channels": [],
+          "offsetByCycle": {
+            "4": 2,
+            "6": 2,
+            "12": 2
+          },
+          "elastic": false
         }
-      ]
+      ],
+      "elastic": false
     },
     {
       "week": 2,
-      "label": "Staging Setup",
+      "label": "Staging Deployment",
       "tasks": [
         {
-          "scope": "Data Model",
-          "title": "Data model finalisation & sign-off",
-          "owner": "",
-          "priority": "high",
-          "platforms": []
-        },
-        {
-          "scope": "Staging",
-          "title": "SDK setup - Website",
-          "owner": "",
-          "priority": "high",
+          "scope": "Website",
+          "title": "SDK Set Up",
+          "owner": "Client tech team",
+          "priority": "medium",
           "platforms": [
             "Website"
-          ]
+          ],
+          "channels": [],
+          "offsetByCycle": {
+            "4": 5,
+            "6": 5,
+            "12": 5
+          },
+          "elastic": false
         },
         {
-          "scope": "Staging",
-          "title": "SDK setup - Android",
-          "owner": "",
-          "priority": "high",
-          "platforms": [
-            "Android"
-          ]
-        },
-        {
-          "scope": "Staging",
-          "title": "SDK setup - iOS",
-          "owner": "",
-          "priority": "high",
-          "platforms": [
-            "iOS"
-          ]
-        },
-        {
-          "scope": "Staging",
-          "title": "SDK setup - Web App",
-          "owner": "",
-          "priority": "high",
+          "scope": "Web App",
+          "title": "SDK Set Up",
+          "owner": "Client tech team",
+          "priority": "medium",
           "platforms": [
             "Web App"
-          ]
-        },
-        {
-          "scope": "Staging",
-          "title": "User tracking setup - Website",
-          "owner": "",
-          "priority": "high",
-          "platforms": [
-            "Website"
-          ]
-        },
-        {
-          "scope": "Staging",
-          "title": "User tracking setup - Android",
-          "owner": "",
-          "priority": "high",
-          "platforms": [
-            "Android"
-          ]
-        },
-        {
-          "scope": "Staging",
-          "title": "User tracking setup - iOS",
-          "owner": "",
-          "priority": "high",
-          "platforms": [
-            "iOS"
-          ]
-        },
-        {
-          "scope": "Staging",
-          "title": "User tracking setup - Web App",
-          "owner": "",
-          "priority": "high",
-          "platforms": [
-            "Web App"
-          ]
-        },
-        {
-          "scope": "Historical Data",
-          "title": "Preparation of CSV containing historical user and historical transactional data",
-          "owner": "",
-          "priority": "high",
-          "platforms": []
+          ],
+          "channels": [],
+          "offsetByCycle": {
+            "4": 5,
+            "6": 5,
+            "12": 5
+          },
+          "elastic": false
         },
         {
           "scope": "Website",
-          "title": "User Attributes",
-          "owner": "",
-          "priority": "high",
-          "platforms": [
-            "Website"
-          ]
-        },
-        {
-          "scope": "Website",
-          "title": "Custom Events",
-          "owner": "",
-          "priority": "high",
-          "platforms": [
-            "Website"
-          ],
-          "elastic": true
-        },
-        {
-          "scope": "Website",
-          "title": "Event Attributes",
-          "owner": "",
-          "priority": "high",
-          "platforms": [
-            "Website"
-          ],
-          "elastic": true
-        },
-        {
-          "scope": "Website",
-          "title": "Login / Logout",
-          "owner": "",
-          "priority": "high",
-          "platforms": [
-            "Website"
-          ]
-        },
-        {
-          "scope": "Website",
-          "title": "Signup",
-          "owner": "",
-          "priority": "high",
-          "platforms": [
-            "Website"
-          ]
-        },
-        {
-          "scope": "Android",
-          "title": "SDK Initialization",
-          "owner": "",
-          "priority": "high",
-          "platforms": [
-            "Android"
-          ]
-        },
-        {
-          "scope": "Android",
-          "title": "User Attributes",
-          "owner": "",
-          "priority": "high",
-          "platforms": [
-            "Android"
-          ]
-        },
-        {
-          "scope": "Android",
-          "title": "Custom Events",
-          "owner": "",
-          "priority": "high",
-          "platforms": [
-            "Android"
-          ],
-          "elastic": true
-        },
-        {
-          "scope": "Android",
-          "title": "Event Attributes",
-          "owner": "",
-          "priority": "high",
-          "platforms": [
-            "Android"
-          ],
-          "elastic": true
-        },
-        {
-          "scope": "Android",
-          "title": "Login / Logout",
-          "owner": "",
-          "priority": "high",
-          "platforms": [
-            "Android"
-          ]
-        },
-        {
-          "scope": "Android",
-          "title": "Signup",
-          "owner": "",
-          "priority": "high",
-          "platforms": [
-            "Android"
-          ]
-        },
-        {
-          "scope": "iOS",
-          "title": "SDK Initialization",
-          "owner": "",
-          "priority": "high",
-          "platforms": [
-            "iOS"
-          ]
-        },
-        {
-          "scope": "iOS",
-          "title": "User Attributes",
-          "owner": "",
-          "priority": "high",
-          "platforms": [
-            "iOS"
-          ]
-        },
-        {
-          "scope": "iOS",
-          "title": "Custom Events",
-          "owner": "",
-          "priority": "high",
-          "platforms": [
-            "iOS"
-          ],
-          "elastic": true
-        },
-        {
-          "scope": "iOS",
-          "title": "Login / Logout",
-          "owner": "",
-          "priority": "high",
-          "platforms": [
-            "iOS"
-          ]
-        },
-        {
-          "scope": "iOS",
-          "title": "Signup",
-          "owner": "",
-          "priority": "high",
-          "platforms": [
-            "iOS"
-          ]
-        },
-        {
-          "scope": "REST API",
-          "title": "API key configuration",
-          "owner": "",
-          "priority": "high",
-          "platforms": [
-            "REST API"
-          ]
-        },
-        {
-          "scope": "REST API",
           "title": "User Tracking",
-          "owner": "",
-          "priority": "high",
+          "owner": "Client tech team",
+          "priority": "medium",
           "platforms": [
-            "REST API"
-          ]
+            "Website"
+          ],
+          "channels": [],
+          "offsetByCycle": {
+            "4": 5,
+            "6": 5,
+            "12": 5
+          },
+          "elastic": false
         },
         {
-          "scope": "REST API",
+          "scope": "Web App",
+          "title": "User Tracking",
+          "owner": "Client tech team",
+          "priority": "medium",
+          "platforms": [
+            "Web App"
+          ],
+          "channels": [],
+          "offsetByCycle": {
+            "4": 5,
+            "6": 5,
+            "12": 5
+          },
+          "elastic": false
+        },
+        {
+          "scope": "Website",
           "title": "Event Tracking",
-          "owner": "",
-          "priority": "high",
+          "owner": "Client tech team",
+          "priority": "medium",
+          "platforms": [
+            "Website"
+          ],
+          "channels": [],
+          "offsetByCycle": {
+            "4": 7,
+            "6": 10,
+            "12": 17
+          },
+          "elastic": true
+        },
+        {
+          "scope": "Web App",
+          "title": "Event Tracking",
+          "owner": "Client tech team",
+          "priority": "medium",
+          "platforms": [
+            "Web App"
+          ],
+          "channels": [],
+          "offsetByCycle": {
+            "4": 10,
+            "6": 15,
+            "12": 30
+          },
+          "elastic": true
+        },
+        {
+          "scope": "Website",
+          "title": "Web Push Setup",
+          "owner": "Client tech team",
+          "priority": "medium",
+          "platforms": [
+            "Website"
+          ],
+          "channels": [
+            "Web Push",
+            "Push"
+          ],
+          "offsetByCycle": {
+            "4": 5,
+            "6": 5,
+            "12": 5
+          },
+          "elastic": false
+        },
+        {
+          "scope": "Web App",
+          "title": "Web Push Setup",
+          "owner": "Client tech team",
+          "priority": "medium",
+          "platforms": [
+            "Web App"
+          ],
+          "channels": [
+            "Web Push",
+            "Push"
+          ],
+          "offsetByCycle": {
+            "4": 5,
+            "6": 5,
+            "12": 5
+          },
+          "elastic": false
+        },
+        {
+          "scope": "Android",
+          "title": "SDK Set Up",
+          "owner": "Client tech team",
+          "priority": "medium",
+          "platforms": [
+            "Android"
+          ],
+          "channels": [],
+          "offsetByCycle": {
+            "4": 5,
+            "6": 5,
+            "12": 5
+          },
+          "elastic": false
+        },
+        {
+          "scope": "Android",
+          "title": "User Tracking",
+          "owner": "Client tech team",
+          "priority": "medium",
+          "platforms": [
+            "Android"
+          ],
+          "channels": [],
+          "offsetByCycle": {
+            "4": 5,
+            "6": 5,
+            "12": 5
+          },
+          "elastic": false
+        },
+        {
+          "scope": "Android",
+          "title": "Event Tracking",
+          "owner": "Client tech team",
+          "priority": "medium",
+          "platforms": [
+            "Android"
+          ],
+          "channels": [],
+          "offsetByCycle": {
+            "4": 10,
+            "6": 15,
+            "12": 30
+          },
+          "elastic": true
+        },
+        {
+          "scope": "Android",
+          "title": "Push Setup",
+          "owner": "Client tech team",
+          "priority": "medium",
+          "platforms": [
+            "Android"
+          ],
+          "channels": [
+            "Push"
+          ],
+          "offsetByCycle": {
+            "4": 5,
+            "6": 5,
+            "12": 5
+          },
+          "elastic": false
+        },
+        {
+          "scope": "Android",
+          "title": "Push credentials",
+          "owner": "Client tech team",
+          "priority": "medium",
+          "platforms": [
+            "Android"
+          ],
+          "channels": [
+            "Push"
+          ],
+          "offsetByCycle": {
+            "4": 5,
+            "6": 5,
+            "12": 5
+          },
+          "elastic": false
+        },
+        {
+          "scope": "Android",
+          "title": "Screen Tracking",
+          "owner": "Client tech team",
+          "priority": "medium",
+          "platforms": [
+            "Android"
+          ],
+          "channels": [],
+          "offsetByCycle": {
+            "4": 10,
+            "6": 15,
+            "12": 30
+          },
+          "elastic": true
+        },
+        {
+          "scope": "Android",
+          "title": "Deeplinks",
+          "owner": "Client tech team",
+          "priority": "medium",
+          "platforms": [
+            "Android"
+          ],
+          "channels": [],
+          "offsetByCycle": {
+            "4": 5,
+            "6": 5,
+            "12": 5
+          },
+          "elastic": false
+        },
+        {
+          "scope": "Android",
+          "title": "Silent / Force Login",
+          "owner": "Client tech team",
+          "priority": "medium",
+          "platforms": [
+            "Android"
+          ],
+          "channels": [],
+          "offsetByCycle": {
+            "4": 5,
+            "6": 5,
+            "12": 5
+          },
+          "elastic": false
+        },
+        {
+          "scope": "iOS",
+          "title": "SDK Set Up",
+          "owner": "Client tech team",
+          "priority": "medium",
+          "platforms": [
+            "iOS"
+          ],
+          "channels": [],
+          "offsetByCycle": {
+            "4": 5,
+            "6": 5,
+            "12": 5
+          },
+          "elastic": false
+        },
+        {
+          "scope": "iOS",
+          "title": "User Tracking",
+          "owner": "Client tech team",
+          "priority": "medium",
+          "platforms": [
+            "iOS"
+          ],
+          "channels": [],
+          "offsetByCycle": {
+            "4": 5,
+            "6": 5,
+            "12": 5
+          },
+          "elastic": false
+        },
+        {
+          "scope": "iOS",
+          "title": "Event Tracking",
+          "owner": "Client tech team",
+          "priority": "medium",
+          "platforms": [
+            "iOS"
+          ],
+          "channels": [],
+          "offsetByCycle": {
+            "4": 10,
+            "6": 15,
+            "12": 30
+          },
+          "elastic": true
+        },
+        {
+          "scope": "iOS",
+          "title": "Push Setup",
+          "owner": "Client tech team",
+          "priority": "medium",
+          "platforms": [
+            "iOS"
+          ],
+          "channels": [
+            "Push"
+          ],
+          "offsetByCycle": {
+            "4": 5,
+            "6": 5,
+            "12": 5
+          },
+          "elastic": false
+        },
+        {
+          "scope": "iOS",
+          "title": "Rich Push Setup",
+          "owner": "Client tech team",
+          "priority": "medium",
+          "platforms": [
+            "iOS"
+          ],
+          "channels": [
+            "Push"
+          ],
+          "offsetByCycle": {
+            "4": 5,
+            "6": 5,
+            "12": 5
+          },
+          "elastic": false
+        },
+        {
+          "scope": "iOS",
+          "title": "Screen Tracking",
+          "owner": "Client tech team",
+          "priority": "medium",
+          "platforms": [
+            "iOS"
+          ],
+          "channels": [],
+          "offsetByCycle": {
+            "4": 10,
+            "6": 15,
+            "12": 30
+          },
+          "elastic": true
+        },
+        {
+          "scope": "iOS",
+          "title": "Deeplinks",
+          "owner": "Client tech team",
+          "priority": "medium",
+          "platforms": [
+            "iOS"
+          ],
+          "channels": [],
+          "offsetByCycle": {
+            "4": 5,
+            "6": 5,
+            "12": 5
+          },
+          "elastic": false
+        },
+        {
+          "scope": "iOS",
+          "title": "Push credentials",
+          "owner": "Client tech team",
+          "priority": "medium",
+          "platforms": [
+            "iOS"
+          ],
+          "channels": [
+            "Push"
+          ],
+          "offsetByCycle": {
+            "4": 5,
+            "6": 5,
+            "12": 5
+          },
+          "elastic": false
+        },
+        {
+          "scope": "Communication Channels",
+          "title": "Email setup",
+          "owner": "Cpaas / Client team",
+          "priority": "medium",
+          "platforms": [],
+          "channels": [
+            "Email"
+          ],
+          "offsetByCycle": {
+            "4": 10,
+            "6": 10,
+            "12": 10
+          },
+          "elastic": false
+        },
+        {
+          "scope": "Communication Channels",
+          "title": "SMS setup",
+          "owner": "Cpaas / Client team",
+          "priority": "medium",
+          "platforms": [],
+          "channels": [
+            "SMS"
+          ],
+          "offsetByCycle": {
+            "4": 10,
+            "6": 10,
+            "12": 10
+          },
+          "elastic": false
+        },
+        {
+          "scope": "Communication Channels",
+          "title": "Whatsapp setup",
+          "owner": "Cpaas / Client team",
+          "priority": "medium",
+          "platforms": [],
+          "channels": [
+            "WhatsApp"
+          ],
+          "offsetByCycle": {
+            "4": 10,
+            "6": 10,
+            "12": 10
+          },
+          "elastic": false
+        },
+        {
+          "scope": "Communication Channels",
+          "title": "RCS setup",
+          "owner": "Cpaas / Client team",
+          "priority": "medium",
+          "platforms": [],
+          "channels": [
+            "RCS"
+          ],
+          "offsetByCycle": {
+            "4": 10,
+            "6": 10,
+            "12": 10
+          },
+          "elastic": false
+        },
+        {
+          "scope": "Communication Channels",
+          "title": "IVR setup",
+          "owner": "Cpaas / Client team",
+          "priority": "medium",
+          "platforms": [],
+          "channels": [
+            "IVR"
+          ],
+          "offsetByCycle": {
+            "4": 10,
+            "6": 10,
+            "12": 10
+          },
+          "elastic": false
+        },
+        {
+          "scope": "Rest API",
+          "title": "User Tracking",
+          "owner": "Client tech team",
+          "priority": "medium",
           "platforms": [
             "REST API"
           ],
+          "channels": [],
+          "offsetByCycle": {
+            "4": 10,
+            "6": 15,
+            "12": 15
+          },
+          "elastic": true
+        },
+        {
+          "scope": "Rest API",
+          "title": "Event Tracking",
+          "owner": "Client tech team",
+          "priority": "medium",
+          "platforms": [
+            "REST API"
+          ],
+          "channels": [],
+          "offsetByCycle": {
+            "4": 10,
+            "6": 15,
+            "12": 15
+          },
+          "elastic": true
+        },
+        {
+          "scope": "Website",
+          "title": "Users and Events Audit",
+          "owner": "Webengage OBM",
+          "priority": "medium",
+          "platforms": [
+            "Website"
+          ],
+          "channels": [],
+          "offsetByCycle": {
+            "4": 15,
+            "6": 17,
+            "12": 30
+          },
+          "elastic": true
+        },
+        {
+          "scope": "Web App",
+          "title": "Users and Events Audit",
+          "owner": "Webengage OBM",
+          "priority": "medium",
+          "platforms": [
+            "Web App"
+          ],
+          "channels": [],
+          "offsetByCycle": {
+            "4": 17,
+            "6": 21,
+            "12": 40
+          },
+          "elastic": true
+        },
+        {
+          "scope": "Website",
+          "title": "WebPush Audit",
+          "owner": "Webengage OBM",
+          "priority": "medium",
+          "platforms": [
+            "Website"
+          ],
+          "channels": [
+            "Web Push",
+            "Push"
+          ],
+          "offsetByCycle": {
+            "4": 15,
+            "6": 17,
+            "12": 30
+          },
+          "elastic": true
+        },
+        {
+          "scope": "Web App",
+          "title": "WebPush Audit",
+          "owner": "Webengage OBM",
+          "priority": "medium",
+          "platforms": [
+            "Web App"
+          ],
+          "channels": [
+            "Web Push",
+            "Push"
+          ],
+          "offsetByCycle": {
+            "4": 17,
+            "6": 21,
+            "12": 40
+          },
+          "elastic": true
+        },
+        {
+          "scope": "Website",
+          "title": "Onsite Notification Audit",
+          "owner": "Webengage OBM",
+          "priority": "medium",
+          "platforms": [
+            "Website"
+          ],
+          "channels": [
+            "On-site Notification"
+          ],
+          "offsetByCycle": {
+            "4": 15,
+            "6": 17,
+            "12": 30
+          },
+          "elastic": true
+        },
+        {
+          "scope": "Web App",
+          "title": "Onsite Notification Audit",
+          "owner": "Webengage OBM",
+          "priority": "medium",
+          "platforms": [
+            "Web App"
+          ],
+          "channels": [
+            "On-site Notification"
+          ],
+          "offsetByCycle": {
+            "4": 17,
+            "6": 21,
+            "12": 40
+          },
+          "elastic": true
+        },
+        {
+          "scope": "Website",
+          "title": "Fixes or Changes",
+          "owner": "Client tech team",
+          "priority": "medium",
+          "platforms": [
+            "Website"
+          ],
+          "channels": [],
+          "offsetByCycle": {
+            "4": 17,
+            "6": 21,
+            "12": 35
+          },
+          "elastic": true
+        },
+        {
+          "scope": "Web App",
+          "title": "Fixes or Changes",
+          "owner": "Client tech team",
+          "priority": "medium",
+          "platforms": [
+            "Web App"
+          ],
+          "channels": [],
+          "offsetByCycle": {
+            "4": 21,
+            "6": 25,
+            "12": 50
+          },
+          "elastic": true
+        },
+        {
+          "scope": "Android",
+          "title": "Users and Events Audit",
+          "owner": "Webengage OBM",
+          "priority": "medium",
+          "platforms": [
+            "Android"
+          ],
+          "channels": [],
+          "offsetByCycle": {
+            "4": 17,
+            "6": 21,
+            "12": 40
+          },
+          "elastic": true
+        },
+        {
+          "scope": "Android",
+          "title": "Push Android",
+          "owner": "Webengage OBM",
+          "priority": "medium",
+          "platforms": [
+            "Android"
+          ],
+          "channels": [
+            "Push"
+          ],
+          "offsetByCycle": {
+            "4": 17,
+            "6": 21,
+            "12": 40
+          },
+          "elastic": true
+        },
+        {
+          "scope": "Android",
+          "title": "In-App Android",
+          "owner": "Webengage OBM",
+          "priority": "medium",
+          "platforms": [
+            "Android"
+          ],
+          "channels": [
+            "In-App"
+          ],
+          "offsetByCycle": {
+            "4": 17,
+            "6": 21,
+            "12": 40
+          },
+          "elastic": true
+        },
+        {
+          "scope": "Android",
+          "title": "Deeplinks",
+          "owner": "Webengage OBM",
+          "priority": "medium",
+          "platforms": [
+            "Android"
+          ],
+          "channels": [],
+          "offsetByCycle": {
+            "4": 17,
+            "6": 21,
+            "12": 40
+          },
+          "elastic": true
+        },
+        {
+          "scope": "Android",
+          "title": "Fixes or Changes",
+          "owner": "Client tech team",
+          "priority": "medium",
+          "platforms": [
+            "Android"
+          ],
+          "channels": [],
+          "offsetByCycle": {
+            "4": 21,
+            "6": 25,
+            "12": 50
+          },
+          "elastic": true
+        },
+        {
+          "scope": "iOS",
+          "title": "Users and Events Audit",
+          "owner": "Webengage OBM",
+          "priority": "medium",
+          "platforms": [
+            "iOS"
+          ],
+          "channels": [],
+          "offsetByCycle": {
+            "4": 17,
+            "6": 21,
+            "12": 40
+          },
+          "elastic": true
+        },
+        {
+          "scope": "iOS",
+          "title": "Push, Rich Push iOS",
+          "owner": "Webengage OBM",
+          "priority": "medium",
+          "platforms": [
+            "iOS"
+          ],
+          "channels": [
+            "Push"
+          ],
+          "offsetByCycle": {
+            "4": 17,
+            "6": 21,
+            "12": 40
+          },
+          "elastic": true
+        },
+        {
+          "scope": "iOS",
+          "title": "In-App iOS",
+          "owner": "Webengage OBM",
+          "priority": "medium",
+          "platforms": [
+            "iOS"
+          ],
+          "channels": [
+            "In-App"
+          ],
+          "offsetByCycle": {
+            "4": 17,
+            "6": 21,
+            "12": 40
+          },
+          "elastic": true
+        },
+        {
+          "scope": "iOS",
+          "title": "Deeplinks",
+          "owner": "Webengage OBM",
+          "priority": "medium",
+          "platforms": [
+            "iOS"
+          ],
+          "channels": [],
+          "offsetByCycle": {
+            "4": 17,
+            "6": 21,
+            "12": 40
+          },
+          "elastic": true
+        },
+        {
+          "scope": "iOS",
+          "title": "Fixes or Changes",
+          "owner": "Client tech team",
+          "priority": "medium",
+          "platforms": [
+            "iOS"
+          ],
+          "channels": [],
+          "offsetByCycle": {
+            "4": 21,
+            "6": 25,
+            "12": 50
+          },
+          "elastic": true
+        },
+        {
+          "scope": "Rest API",
+          "title": "Data Validation",
+          "owner": "Webengage OBM",
+          "priority": "medium",
+          "platforms": [
+            "REST API"
+          ],
+          "channels": [],
+          "offsetByCycle": {
+            "4": 17,
+            "6": 21,
+            "12": 40
+          },
+          "elastic": true
+        },
+        {
+          "scope": "Rest API",
+          "title": "Count Matching",
+          "owner": "Webengage team + Client team",
+          "priority": "medium",
+          "platforms": [
+            "REST API"
+          ],
+          "channels": [],
+          "offsetByCycle": {
+            "4": 17,
+            "6": 21,
+            "12": 40
+          },
+          "elastic": true
+        },
+        {
+          "scope": "Communication Channels",
+          "title": "Email Audit",
+          "owner": "Webengage OBM",
+          "priority": "medium",
+          "platforms": [],
+          "channels": [
+            "Email"
+          ],
+          "offsetByCycle": {
+            "4": 15,
+            "6": 25,
+            "12": 35
+          },
+          "elastic": true
+        },
+        {
+          "scope": "Communication Channels",
+          "title": "SMS Audit",
+          "owner": "Webengage OBM",
+          "priority": "medium",
+          "platforms": [],
+          "channels": [
+            "SMS"
+          ],
+          "offsetByCycle": {
+            "4": 15,
+            "6": 25,
+            "12": 35
+          },
+          "elastic": true
+        },
+        {
+          "scope": "Communication Channels",
+          "title": "Whatsapp Audit",
+          "owner": "Webengage OBM",
+          "priority": "medium",
+          "platforms": [],
+          "channels": [
+            "WhatsApp"
+          ],
+          "offsetByCycle": {
+            "4": 15,
+            "6": 25,
+            "12": 35
+          },
+          "elastic": true
+        },
+        {
+          "scope": "Communication Channels",
+          "title": "RCS Audit",
+          "owner": "Webengage OBM",
+          "priority": "medium",
+          "platforms": [],
+          "channels": [
+            "RCS"
+          ],
+          "offsetByCycle": {
+            "4": 15,
+            "6": 25,
+            "12": 35
+          },
           "elastic": true
         }
-      ]
+      ],
+      "elastic": true
     },
     {
       "week": 3,
-      "label": "Event Tracking & Channels",
+      "label": "Production Deployment",
       "tasks": [
         {
-          "scope": "Staging",
-          "title": "Event tracking setup - Website",
-          "owner": "",
-          "priority": "high",
+          "scope": "Production Deployment",
+          "title": "Create Production Dashboard",
+          "owner": "Webengage OBM",
+          "priority": "medium",
+          "platforms": [],
+          "channels": [],
+          "offsetByCycle": {
+            "4": 21,
+            "6": 21,
+            "12": 35
+          },
+          "elastic": true
+        },
+        {
+          "scope": "Website",
+          "title": "Production Migration",
+          "owner": "Client tech team",
+          "priority": "medium",
           "platforms": [
             "Website"
           ],
+          "channels": [],
+          "offsetByCycle": {
+            "4": 22,
+            "6": 27,
+            "12": 40
+          },
           "elastic": true
         },
         {
-          "scope": "Staging",
-          "title": "Event tracking setup - Android",
-          "owner": "",
-          "priority": "high",
-          "platforms": [
-            "Android"
-          ],
-          "elastic": true
-        },
-        {
-          "scope": "Staging",
-          "title": "Event tracking setup - iOS",
-          "owner": "",
-          "priority": "high",
-          "platforms": [
-            "iOS"
-          ],
-          "elastic": true
-        },
-        {
-          "scope": "Staging",
-          "title": "Event tracking setup - Web App",
-          "owner": "",
-          "priority": "high",
+          "scope": "Web App",
+          "title": "Production Migration",
+          "owner": "Client tech team",
+          "priority": "medium",
           "platforms": [
             "Web App"
           ],
+          "channels": [],
+          "offsetByCycle": {
+            "4": 22,
+            "6": 27,
+            "12": 60
+          },
           "elastic": true
         },
         {
-          "scope": "App Implementation",
-          "title": "Screen tracking - Android",
-          "owner": "",
-          "priority": "high",
-          "platforms": [
-            "Android"
-          ]
-        },
-        {
-          "scope": "App Implementation",
-          "title": "Screen tracking - iOS",
-          "owner": "",
-          "priority": "high",
-          "platforms": [
-            "iOS"
-          ]
-        },
-        {
-          "scope": "Channels - Staging",
-          "title": "Email channel setup",
-          "owner": "",
-          "priority": "medium",
-          "platforms": []
-        },
-        {
-          "scope": "Channels - Staging",
-          "title": "SMS channel setup",
-          "owner": "",
-          "priority": "high",
-          "platforms": []
-        },
-        {
-          "scope": "Channels - Staging",
-          "title": "WhatsApp channel setup",
-          "owner": "",
-          "priority": "high",
-          "platforms": []
-        },
-        {
-          "scope": "Channels - Staging",
-          "title": "Web Push setup",
-          "owner": "",
+          "scope": "Website",
+          "title": "Web Push Setup on dashboard",
+          "owner": "Client tech team",
           "priority": "medium",
           "platforms": [
-            "Website",
+            "Website"
+          ],
+          "channels": [
+            "Web Push",
+            "Push"
+          ],
+          "offsetByCycle": {
+            "4": 22,
+            "6": 27,
+            "12": 40
+          },
+          "elastic": true
+        },
+        {
+          "scope": "Web App",
+          "title": "Web Push Setup on dashboard",
+          "owner": "Client tech team",
+          "priority": "medium",
+          "platforms": [
             "Web App"
-          ]
+          ],
+          "channels": [
+            "Web Push",
+            "Push"
+          ],
+          "offsetByCycle": {
+            "4": 22,
+            "6": 27,
+            "12": 60
+          },
+          "elastic": true
         },
         {
-          "scope": "Channels - Staging",
-          "title": "On-site Notification setup",
-          "owner": "",
+          "scope": "Android",
+          "title": "Production Migration",
+          "owner": "Client tech team",
           "priority": "medium",
           "platforms": [
-            "Website",
+            "Android"
+          ],
+          "channels": [],
+          "offsetByCycle": {
+            "4": 22,
+            "6": 27,
+            "12": 60
+          },
+          "elastic": true
+        },
+        {
+          "scope": "Android",
+          "title": "Push credentials",
+          "owner": "Client tech team",
+          "priority": "medium",
+          "platforms": [
+            "Android"
+          ],
+          "channels": [
+            "Push"
+          ],
+          "offsetByCycle": {
+            "4": 22,
+            "6": 27,
+            "12": 60
+          },
+          "elastic": true
+        },
+        {
+          "scope": "iOS",
+          "title": "Production Migration",
+          "owner": "Client tech team",
+          "priority": "medium",
+          "platforms": [
+            "iOS"
+          ],
+          "channels": [],
+          "offsetByCycle": {
+            "4": 22,
+            "6": 27,
+            "12": 60
+          },
+          "elastic": true
+        },
+        {
+          "scope": "iOS",
+          "title": "Push credentials",
+          "owner": "Client tech team",
+          "priority": "medium",
+          "platforms": [
+            "iOS"
+          ],
+          "channels": [
+            "Push"
+          ],
+          "offsetByCycle": {
+            "4": 22,
+            "6": 27,
+            "12": 60
+          },
+          "elastic": true
+        },
+        {
+          "scope": "Rest API",
+          "title": "Production Migration",
+          "owner": "Client tech team",
+          "priority": "medium",
+          "platforms": [
+            "REST API"
+          ],
+          "channels": [],
+          "offsetByCycle": {
+            "4": 22,
+            "6": 27,
+            "12": 60
+          },
+          "elastic": true
+        },
+        {
+          "scope": "Communication Channels",
+          "title": "Email setup",
+          "owner": "Cpaas / Client team",
+          "priority": "medium",
+          "platforms": [],
+          "channels": [
+            "Email"
+          ],
+          "offsetByCycle": {
+            "4": 22,
+            "6": 10,
+            "12": 10
+          },
+          "elastic": true
+        },
+        {
+          "scope": "Communication Channels",
+          "title": "SMS setup",
+          "owner": "Cpaas / Client team",
+          "priority": "medium",
+          "platforms": [],
+          "channels": [
+            "SMS"
+          ],
+          "offsetByCycle": {
+            "4": 22,
+            "6": 10,
+            "12": 10
+          },
+          "elastic": true
+        },
+        {
+          "scope": "Communication Channels",
+          "title": "Whatsapp setup",
+          "owner": "Cpaas / Client team",
+          "priority": "medium",
+          "platforms": [],
+          "channels": [
+            "WhatsApp"
+          ],
+          "offsetByCycle": {
+            "4": 22,
+            "6": 10,
+            "12": 10
+          },
+          "elastic": true
+        },
+        {
+          "scope": "Communication Channels",
+          "title": "RCS setup",
+          "owner": "Cpaas / Client team",
+          "priority": "medium",
+          "platforms": [],
+          "channels": [
+            "RCS"
+          ],
+          "offsetByCycle": {
+            "4": 22,
+            "6": 10,
+            "12": 10
+          },
+          "elastic": true
+        },
+        {
+          "scope": "Communication Channels",
+          "title": "IVR setup",
+          "owner": "Cpaas / Client team",
+          "priority": "medium",
+          "platforms": [],
+          "channels": [
+            "IVR"
+          ],
+          "offsetByCycle": {
+            "4": 23,
+            "6": 10,
+            "12": 10
+          },
+          "elastic": true
+        },
+        {
+          "scope": "Website",
+          "title": "Users and Events Audit",
+          "owner": "Webengage OBM",
+          "priority": "medium",
+          "platforms": [
+            "Website"
+          ],
+          "channels": [],
+          "offsetByCycle": {
+            "4": 23,
+            "6": 28,
+            "12": 50
+          },
+          "elastic": true
+        },
+        {
+          "scope": "Web App",
+          "title": "Users and Events Audit",
+          "owner": "Webengage OBM",
+          "priority": "medium",
+          "platforms": [
             "Web App"
-          ]
-        },
-        {
-          "scope": "Channels - Staging",
-          "title": "Push setup - FCM",
-          "owner": "",
-          "priority": "high",
-          "platforms": [
-            "Android"
-          ]
-        },
-        {
-          "scope": "Channels - Staging",
-          "title": "Push setup - APNS certificate",
-          "owner": "",
-          "priority": "high",
-          "platforms": [
-            "iOS"
-          ]
-        },
-        {
-          "scope": "Channels - Staging",
-          "title": "In-App setup",
-          "owner": "",
-          "priority": "high",
-          "platforms": [
-            "Android",
-            "iOS"
-          ]
-        },
-        {
-          "scope": "Channels - Staging",
-          "title": "Rich Push setup",
-          "owner": "",
-          "priority": "medium",
-          "platforms": [
-            "iOS"
-          ]
-        },
-        {
-          "scope": "REST API",
-          "title": "Custom event API",
-          "owner": "",
-          "priority": "high",
-          "platforms": [
-            "REST API"
           ],
+          "channels": [],
+          "offsetByCycle": {
+            "4": 24,
+            "6": 31,
+            "12": 63
+          },
           "elastic": true
         },
         {
-          "scope": "REST API",
-          "title": "Backend event tracking",
-          "owner": "",
-          "priority": "high",
+          "scope": "Website",
+          "title": "WebPush Audit",
+          "owner": "Webengage OBM",
+          "priority": "medium",
           "platforms": [
-            "REST API"
+            "Website"
           ],
+          "channels": [
+            "Web Push",
+            "Push"
+          ],
+          "offsetByCycle": {
+            "4": 23,
+            "6": 28,
+            "12": 50
+          },
           "elastic": true
         },
         {
-          "scope": "REST API",
-          "title": "Historical user data migration",
-          "owner": "",
-          "priority": "high",
+          "scope": "Web App",
+          "title": "WebPush Audit",
+          "owner": "Webengage OBM",
+          "priority": "medium",
           "platforms": [
-            "REST API"
-          ]
+            "Web App"
+          ],
+          "channels": [
+            "Web Push",
+            "Push"
+          ],
+          "offsetByCycle": {
+            "4": 24,
+            "6": 31,
+            "12": 63
+          },
+          "elastic": true
         },
         {
-          "scope": "REST API",
-          "title": "Historical event migration",
-          "owner": "",
-          "priority": "high",
+          "scope": "Website",
+          "title": "Onsite Notification Audit",
+          "owner": "Webengage OBM",
+          "priority": "medium",
           "platforms": [
-            "REST API"
+            "Website"
           ],
+          "channels": [
+            "On-site Notification"
+          ],
+          "offsetByCycle": {
+            "4": 23,
+            "6": 28,
+            "12": 50
+          },
+          "elastic": true
+        },
+        {
+          "scope": "Web App",
+          "title": "Onsite Notification Audit",
+          "owner": "Webengage OBM",
+          "priority": "medium",
+          "platforms": [
+            "Web App"
+          ],
+          "channels": [
+            "On-site Notification"
+          ],
+          "offsetByCycle": {
+            "4": 24,
+            "6": 31,
+            "12": 63
+          },
+          "elastic": true
+        },
+        {
+          "scope": "Website",
+          "title": "Fixes or Changes",
+          "owner": "Client tech team",
+          "priority": "medium",
+          "platforms": [
+            "Website"
+          ],
+          "channels": [],
+          "offsetByCycle": {
+            "4": 24,
+            "6": 31,
+            "12": 60
+          },
+          "elastic": true
+        },
+        {
+          "scope": "Web App",
+          "title": "Fixes or Changes",
+          "owner": "Client tech team",
+          "priority": "medium",
+          "platforms": [
+            "Web App"
+          ],
+          "channels": [],
+          "offsetByCycle": {
+            "4": 25,
+            "6": 36,
+            "12": 70
+          },
           "elastic": true
         },
         {
           "scope": "Android",
-          "title": "Push Token Registration",
-          "owner": "",
-          "priority": "high",
+          "title": "Users and Events Audit",
+          "owner": "Webengage OBM",
+          "priority": "medium",
           "platforms": [
             "Android"
-          ]
+          ],
+          "channels": [],
+          "offsetByCycle": {
+            "4": 24,
+            "6": 31,
+            "12": 63
+          },
+          "elastic": true
         },
         {
           "scope": "Android",
-          "title": "Firebase / FCM Setup",
-          "owner": "",
-          "priority": "high",
+          "title": "Push Android",
+          "owner": "Webengage OBM",
+          "priority": "medium",
           "platforms": [
             "Android"
-          ]
+          ],
+          "channels": [
+            "Push"
+          ],
+          "offsetByCycle": {
+            "4": 24,
+            "6": 31,
+            "12": 63
+          },
+          "elastic": true
         },
         {
           "scope": "Android",
-          "title": "Push Notification Setup",
-          "owner": "",
-          "priority": "high",
+          "title": "In-App Android",
+          "owner": "Webengage OBM",
+          "priority": "medium",
           "platforms": [
             "Android"
-          ]
+          ],
+          "channels": [
+            "In-App"
+          ],
+          "offsetByCycle": {
+            "4": 24,
+            "6": 31,
+            "12": 63
+          },
+          "elastic": true
         },
         {
           "scope": "Android",
-          "title": "Rich Push",
-          "owner": "",
-          "priority": "high",
+          "title": "Deeplinks",
+          "owner": "Webengage OBM",
+          "priority": "medium",
           "platforms": [
             "Android"
-          ]
+          ],
+          "channels": [],
+          "offsetByCycle": {
+            "4": 24,
+            "6": 31,
+            "12": 63
+          },
+          "elastic": true
         },
         {
           "scope": "Android",
-          "title": "In-App Setup",
-          "owner": "",
-          "priority": "high",
+          "title": "Fixes or Changes",
+          "owner": "Client tech team",
+          "priority": "medium",
           "platforms": [
             "Android"
-          ]
-        },
-        {
-          "scope": "Android",
-          "title": "In-App Testing",
-          "owner": "",
-          "priority": "high",
-          "platforms": [
-            "Android"
-          ]
-        },
-        {
-          "scope": "Android",
-          "title": "App Inline",
-          "owner": "",
-          "priority": "high",
-          "platforms": [
-            "Android"
-          ]
+          ],
+          "channels": [],
+          "offsetByCycle": {
+            "4": 25,
+            "6": 36,
+            "12": 70
+          },
+          "elastic": true
         },
         {
           "scope": "iOS",
-          "title": "Push Token Registration",
-          "owner": "",
-          "priority": "high",
+          "title": "Users and Events Audit",
+          "owner": "Webengage OBM",
+          "priority": "medium",
           "platforms": [
             "iOS"
-          ]
+          ],
+          "channels": [],
+          "offsetByCycle": {
+            "4": 24,
+            "6": 31,
+            "12": 63
+          },
+          "elastic": true
         },
         {
           "scope": "iOS",
-          "title": "APNs Setup",
-          "owner": "",
-          "priority": "high",
+          "title": "Push, Rich Push iOS",
+          "owner": "Webengage OBM",
+          "priority": "medium",
           "platforms": [
             "iOS"
-          ]
+          ],
+          "channels": [
+            "Push"
+          ],
+          "offsetByCycle": {
+            "4": 24,
+            "6": 31,
+            "12": 63
+          },
+          "elastic": true
         },
         {
           "scope": "iOS",
-          "title": "Push Notification Setup",
-          "owner": "",
-          "priority": "high",
+          "title": "In-App iOS",
+          "owner": "Webengage OBM",
+          "priority": "medium",
           "platforms": [
             "iOS"
-          ]
+          ],
+          "channels": [
+            "In-App"
+          ],
+          "offsetByCycle": {
+            "4": 24,
+            "6": 31,
+            "12": 63
+          },
+          "elastic": true
         },
         {
           "scope": "iOS",
-          "title": "Rich Push",
-          "owner": "",
-          "priority": "high",
+          "title": "Deeplinks",
+          "owner": "Webengage OBM",
+          "priority": "medium",
           "platforms": [
             "iOS"
-          ]
+          ],
+          "channels": [],
+          "offsetByCycle": {
+            "4": 24,
+            "6": 31,
+            "12": 63
+          },
+          "elastic": true
         },
         {
           "scope": "iOS",
-          "title": "In-App Setup",
-          "owner": "",
-          "priority": "high",
+          "title": "Fixes or Changes",
+          "owner": "Client tech team",
+          "priority": "medium",
           "platforms": [
             "iOS"
-          ]
+          ],
+          "channels": [],
+          "offsetByCycle": {
+            "4": 24,
+            "6": 36,
+            "12": 70
+          },
+          "elastic": true
         },
         {
-          "scope": "iOS",
-          "title": "In-App Testing",
-          "owner": "",
-          "priority": "high",
+          "scope": "Rest API",
+          "title": "Data Validation",
+          "owner": "Webengage OBM",
+          "priority": "medium",
           "platforms": [
-            "iOS"
-          ]
+            "REST API"
+          ],
+          "channels": [],
+          "offsetByCycle": {
+            "4": 25,
+            "6": 37,
+            "12": 70
+          },
+          "elastic": true
         },
         {
-          "scope": "iOS",
-          "title": "App Inline",
-          "owner": "",
-          "priority": "high",
+          "scope": "Rest API",
+          "title": "Count Matching",
+          "owner": "Webengage team + Client team",
+          "priority": "medium",
           "platforms": [
-            "iOS"
-          ]
+            "REST API"
+          ],
+          "channels": [],
+          "offsetByCycle": {
+            "4": 25,
+            "6": 37,
+            "12": 70
+          },
+          "elastic": true
         },
         {
-          "scope": "Channels - Email",
-          "title": "Email Provider Setup",
-          "owner": "",
+          "scope": "Communication Channels",
+          "title": "Email Audit",
+          "owner": "Webengage OBM",
           "priority": "medium",
-          "platforms": []
+          "platforms": [],
+          "channels": [
+            "Email"
+          ],
+          "offsetByCycle": {
+            "4": 23,
+            "6": 31,
+            "12": 50
+          },
+          "elastic": true
         },
         {
-          "scope": "Channels - SMS",
-          "title": "SMS Provider Setup",
-          "owner": "",
-          "priority": "high",
-          "platforms": []
-        },
-        {
-          "scope": "Channels - WhatsApp",
-          "title": "WhatsApp Business Setup",
-          "owner": "",
-          "priority": "high",
-          "platforms": []
-        },
-        {
-          "scope": "Channels - Push",
-          "title": "Push Token",
-          "owner": "",
-          "priority": "high",
-          "platforms": []
-        },
-        {
-          "scope": "Channels - Push",
-          "title": "Notification Permission",
-          "owner": "",
-          "priority": "high",
-          "platforms": []
-        },
-        {
-          "scope": "Channels - Push",
-          "title": "Push Templates",
-          "owner": "",
+          "scope": "Communication Channels",
+          "title": "SMS Audit",
+          "owner": "Webengage OBM",
           "priority": "medium",
-          "platforms": []
+          "platforms": [],
+          "channels": [
+            "SMS"
+          ],
+          "offsetByCycle": {
+            "4": 23,
+            "6": 31,
+            "12": 50
+          },
+          "elastic": true
         },
         {
-          "scope": "Channels - Push",
-          "title": "Rich Push",
-          "owner": "",
+          "scope": "Communication Channels",
+          "title": "Whatsapp Audit",
+          "owner": "Webengage OBM",
           "priority": "medium",
-          "platforms": []
+          "platforms": [],
+          "channels": [
+            "WhatsApp"
+          ],
+          "offsetByCycle": {
+            "4": 23,
+            "6": 31,
+            "12": 50
+          },
+          "elastic": true
         },
         {
-          "scope": "Channels - Push",
-          "title": "Deep Links",
-          "owner": "",
+          "scope": "Communication Channels",
+          "title": "RCS Audit",
+          "owner": "Webengage OBM",
           "priority": "medium",
-          "platforms": []
+          "platforms": [],
+          "channels": [
+            "RCS"
+          ],
+          "offsetByCycle": {
+            "4": 23,
+            "6": 31,
+            "12": 50
+          },
+          "elastic": true
         },
         {
-          "scope": "Channels - Push",
-          "title": "CTA",
-          "owner": "",
+          "scope": "Communication Channels",
+          "title": "Historical User Data Upload",
+          "owner": "Client team",
           "priority": "medium",
-          "platforms": []
+          "platforms": [],
+          "channels": [],
+          "offsetByCycle": {
+            "4": 23,
+            "6": 31,
+            "12": 50
+          },
+          "elastic": true
         },
         {
-          "scope": "Channels - Push",
-          "title": "Test Push",
-          "owner": "",
+          "scope": "Communication Channels",
+          "title": "Historical Events Data Upload",
+          "owner": "Client team",
           "priority": "medium",
-          "platforms": []
-        },
-        {
-          "scope": "Channels - Push",
-          "title": "Delivery Validation",
-          "owner": "",
-          "priority": "high",
-          "platforms": []
-        },
-        {
-          "scope": "Channels - Web Push",
-          "title": "Web Push Configuration",
-          "owner": "",
-          "priority": "medium",
-          "platforms": []
-        },
-        {
-          "scope": "Channels - RCS",
-          "title": "RCS Provider Setup",
-          "owner": "",
-          "priority": "medium",
-          "platforms": []
-        },
-        {
-          "scope": "Channels - In-App",
-          "title": "SDK Configuration",
-          "owner": "",
-          "priority": "high",
-          "platforms": []
-        },
-        {
-          "scope": "Channels - On-site",
-          "title": "On-site Notification",
-          "owner": "",
-          "priority": "medium",
-          "platforms": []
-        },
-        {
-          "scope": "Channels - On-site",
-          "title": "On-site Survey",
-          "owner": "",
-          "priority": "medium",
-          "platforms": []
-        },
-        {
-          "scope": "Channels - On-site",
-          "title": "On-site Feedback",
-          "owner": "",
-          "priority": "medium",
-          "platforms": []
+          "platforms": [],
+          "channels": [],
+          "offsetByCycle": {
+            "4": 23,
+            "6": 31,
+            "12": 50
+          },
+          "elastic": true
         }
       ],
       "elastic": true
     },
     {
       "week": 4,
-      "label": "Audit & Templates",
+      "label": "Training and Use-Cases",
       "tasks": [
         {
-          "scope": "Staging Audit",
-          "title": "Website audit",
-          "owner": "",
-          "priority": "high",
-          "platforms": [
-            "Website"
-          ]
+          "scope": "Training and Use-Cases",
+          "title": "Training Session I",
+          "owner": "Webengage OBM",
+          "priority": "medium",
+          "platforms": [],
+          "channels": [],
+          "offsetByCycle": {
+            "4": 23,
+            "6": 36,
+            "12": 70
+          },
+          "elastic": true
         },
         {
-          "scope": "Staging Audit",
-          "title": "Android app audit",
-          "owner": "",
-          "priority": "high",
-          "platforms": [
-            "Android"
-          ]
+          "scope": "Training and Use-Cases",
+          "title": "Training Session II",
+          "owner": "Webengage OBM",
+          "priority": "medium",
+          "platforms": [],
+          "channels": [],
+          "offsetByCycle": {
+            "4": 23,
+            "6": 36,
+            "12": 70
+          },
+          "elastic": true
         },
         {
-          "scope": "Staging Audit",
-          "title": "iOS app audit",
-          "owner": "",
-          "priority": "high",
-          "platforms": [
-            "iOS"
-          ]
+          "scope": "Training and Use-Cases",
+          "title": "Training Session III",
+          "owner": "Webengage OBM",
+          "priority": "medium",
+          "platforms": [],
+          "channels": [],
+          "offsetByCycle": {
+            "4": 23,
+            "6": 36,
+            "12": 70
+          },
+          "elastic": true
         },
         {
-          "scope": "Staging Audit",
-          "title": "Web App audit",
-          "owner": "",
-          "priority": "high",
-          "platforms": [
-            "Web App"
-          ]
+          "scope": "Communication Channels",
+          "title": "Email Warmup Journey Live",
+          "owner": "Webengage OBM",
+          "priority": "medium",
+          "platforms": [],
+          "channels": [
+            "Email"
+          ],
+          "offsetByCycle": {
+            "4": 23,
+            "6": 36,
+            "12": 70
+          },
+          "elastic": true
         },
         {
-          "scope": "Staging Audit",
-          "title": "Changes shared with dev team and actioned",
-          "owner": "",
-          "priority": "high",
-          "platforms": []
+          "scope": "Communication Channels",
+          "title": "Whatsapp Warmup Journey Live",
+          "owner": "Webengage OBM",
+          "priority": "medium",
+          "platforms": [],
+          "channels": [
+            "WhatsApp"
+          ],
+          "offsetByCycle": {
+            "4": 23,
+            "6": 36,
+            "12": 70
+          },
+          "elastic": true
         },
         {
-          "scope": "Email Warmup",
-          "title": "Warmup content ready",
-          "owner": "",
-          "priority": "high",
-          "platforms": []
-        },
-        {
-          "scope": "SMS template",
-          "title": "Share template for provider testing",
-          "owner": "",
-          "priority": "high",
-          "platforms": []
-        },
-        {
-          "scope": "WhatsApp Template",
-          "title": "Add template on the dashboard for testing",
-          "owner": "",
-          "priority": "high",
-          "platforms": []
-        },
-        {
-          "scope": "Historic Data",
-          "title": "Historical transactional data uploaded",
-          "owner": "",
-          "priority": "high",
-          "platforms": []
-        },
-        {
-          "scope": "Website",
-          "title": "Website Testing & QA",
-          "owner": "",
-          "priority": "high",
-          "platforms": [
-            "Website"
-          ]
-        },
-        {
-          "scope": "Android",
-          "title": "Android Testing & QA",
-          "owner": "",
-          "priority": "high",
-          "platforms": [
-            "Android"
-          ]
-        },
-        {
-          "scope": "iOS",
-          "title": "iOS Testing & QA",
-          "owner": "",
-          "priority": "high",
-          "platforms": [
-            "iOS"
-          ]
-        },
-        {
-          "scope": "REST API",
-          "title": "REST API testing",
-          "owner": "",
-          "priority": "high",
-          "platforms": [
-            "REST API"
-          ]
+          "scope": "Communication Channels",
+          "title": "Send Dashboard Recording",
+          "owner": "Webengage OBM",
+          "priority": "medium",
+          "platforms": [],
+          "channels": [],
+          "offsetByCycle": {
+            "4": 23,
+            "6": 36,
+            "12": 70
+          },
+          "elastic": true
         }
-      ]
+      ],
+      "elastic": true
     },
     {
       "week": 5,
-      "label": "Production Movement",
+      "label": "Go Live",
       "tasks": [
         {
-          "scope": "Production",
-          "title": "Move integration to production - Website",
-          "owner": "",
-          "priority": "high",
-          "platforms": [
-            "Website"
-          ]
-        },
-        {
-          "scope": "Production",
-          "title": "Move integration to production - Android",
-          "owner": "",
-          "priority": "high",
-          "platforms": [
-            "Android"
-          ]
-        },
-        {
-          "scope": "Production",
-          "title": "Move integration to production - iOS",
-          "owner": "",
-          "priority": "high",
-          "platforms": [
-            "iOS"
-          ]
-        },
-        {
-          "scope": "Production",
-          "title": "Move integration to production - Web App",
-          "owner": "",
-          "priority": "high",
-          "platforms": [
-            "Web App"
-          ]
-        },
-        {
-          "scope": "Production",
-          "title": "Play Store release with SDK",
-          "owner": "",
-          "priority": "high",
-          "platforms": [
-            "Android"
-          ]
-        },
-        {
-          "scope": "Production",
-          "title": "App Store release with SDK",
-          "owner": "",
-          "priority": "high",
-          "platforms": [
-            "iOS"
-          ]
-        },
-        {
-          "scope": "Production",
-          "title": "Production testing",
-          "owner": "",
-          "priority": "high",
-          "platforms": []
-        },
-        {
-          "scope": "Channels - Production",
-          "title": "Channels enabled on production",
-          "owner": "",
-          "priority": "high",
-          "platforms": []
-        },
-        {
-          "scope": "Email Warmup",
-          "title": "Warmup journey live",
-          "owner": "",
-          "priority": "high",
-          "platforms": []
-        },
-        {
-          "scope": "Production",
-          "title": "Production API testing",
-          "owner": "",
-          "priority": "high",
-          "platforms": [
-            "REST API"
-          ]
-        },
-        {
-          "scope": "Website",
-          "title": "Production Validation",
-          "owner": "",
-          "priority": "high",
-          "platforms": [
-            "Website"
-          ]
-        },
-        {
-          "scope": "Android",
-          "title": "Production Validation",
-          "owner": "",
-          "priority": "high",
-          "platforms": [
-            "Android"
-          ]
-        },
-        {
-          "scope": "iOS",
-          "title": "Production Validation",
-          "owner": "",
-          "priority": "high",
-          "platforms": [
-            "iOS"
-          ]
-        }
-      ]
-    },
-    {
-      "week": 6,
-      "label": "Go-Live",
-      "tasks": [
-        {
-          "scope": "Go-Live",
-          "title": "Demo dashboard walkthrough with client",
-          "owner": "",
+          "scope": "All Integrated Domains",
+          "title": "Integration / Domains check",
+          "owner": "Webengage OBM",
           "priority": "medium",
-          "platforms": []
-        },
-        {
-          "scope": "Go-Live",
-          "title": "2 or more recurring campaigns / journeys live",
-          "owner": "",
-          "priority": "high",
-          "platforms": []
-        },
-        {
-          "scope": "Go-Live",
-          "title": "Key events and attributes verified on production",
-          "owner": "",
-          "priority": "high",
-          "platforms": []
-        },
-        {
-          "scope": "Go-Live",
-          "title": "Confirmation from client on billing start",
-          "owner": "",
-          "priority": "high",
-          "platforms": []
-        },
-        {
-          "scope": "Go-Live",
-          "title": "Handover to CSM",
-          "owner": "",
-          "priority": "medium",
-          "platforms": []
+          "platforms": [],
+          "channels": [],
+          "offsetByCycle": {
+            "4": 27,
+            "6": 40,
+            "12": 77
+          },
+          "elastic": true
         }
-      ]
+      ],
+      "elastic": true
     }
   ]
 }
