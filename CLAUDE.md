@@ -81,6 +81,11 @@ owner, due date, status and comments, with sub-tasks nested underneath, all writ
 state on change. There is no separate form below the list, so a week's tasks are never rendered
 twice. "Edit" opens a week in place; "+ New report" appends a week and opens it.
 
+Two date columns, deliberately distinct: **Planned** is `task.dueDate`, set from the master
+plan's offset and the thing that decides which week a task sits in; **Completed On** is
+`task.date`, what actually happened and what the generated report prints. Setting a task's
+status to completed fills Completed On with today if it is still blank.
+
 Structural changes (add/remove a task or sub-task) re-render the list and restore the open row;
 field edits patch the summary line by hand instead, since re-rendering would blur the input
 mid-edit.

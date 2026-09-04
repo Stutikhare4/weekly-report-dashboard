@@ -4538,7 +4538,7 @@ function applyWeekStructureChange(button) {
     update.tasks = update.tasks.filter((item) => item.id !== task.id);
   } else if (button.dataset.addSubtask && task) {
     task.subtasks = task.subtasks || [];
-    task.subtasks.push({ id: newId(), title: "", owner: task.owner || "", status: "not started", date: update.weekStart || "", details: "" });
+    task.subtasks.push({ id: newId(), title: "", owner: task.owner || "", status: "not started", date: "", blocker: "", priority: "medium", comments: "" });
   } else if (button.dataset.removeSubtask && task) {
     task.subtasks = (task.subtasks || []).filter((item) => item.id !== button.dataset.removeSubtask);
   }
@@ -4558,7 +4558,8 @@ function renderReportRowTasks(update) {
         <td><input type="text" data-task-field="title" value="${escapeHtml(task.title || "")}" placeholder="Task" /></td>
         <td><input type="text" data-task-field="phase" value="${escapeHtml(task.phase || "")}" placeholder="Domain" /></td>
         <td><input type="text" list="ownerOptions" data-task-field="owner" value="${escapeHtml(task.owner || "")}" placeholder="Owner" /></td>
-        <td><input type="date" data-task-field="dueDate" value="${escapeHtml(task.dueDate || "")}" /></td>
+        <td><input type="date" data-task-field="dueDate" value="${escapeHtml(task.dueDate || "")}" title="Planned from the master plan — moving it re-files the task into that week" /></td>
+        <td><input type="date" data-task-field="date" value="${escapeHtml(task.date || "")}" title="The date the work actually finished — this is what the generated report prints" /></td>
         <td>${statusSelect("task-field", task.status)}</td>
         <td><input type="text" data-task-field="comments" value="${escapeHtml(task.comments || "")}" placeholder="Comments" /></td>
         <td class="week-task-actions">
@@ -4571,9 +4572,10 @@ function renderReportRowTasks(update) {
           <td class="week-subtask-title"><span aria-hidden="true">&#8627;</span><input type="text" data-subtask-field="title" value="${escapeHtml(sub.title || "")}" placeholder="Sub-task" /></td>
           <td></td>
           <td><input type="text" list="ownerOptions" data-subtask-field="owner" value="${escapeHtml(sub.owner || "")}" placeholder="Owner" /></td>
-          <td><input type="date" data-subtask-field="date" value="${escapeHtml(sub.date || "")}" /></td>
+          <td></td>
+          <td><input type="date" data-subtask-field="date" value="${escapeHtml(sub.date || "")}" title="The date this sub-task finished" /></td>
           <td>${statusSelect("subtask-field", sub.status)}</td>
-          <td><input type="text" data-subtask-field="details" value="${escapeHtml(sub.details || "")}" placeholder="Details" /></td>
+          <td><input type="text" data-subtask-field="comments" value="${escapeHtml(sub.comments || "")}" placeholder="Comments" /></td>
           <td class="week-task-actions">
             <button type="button" class="row-remove" data-remove-subtask="${sub.id}" data-task="${task.id}" title="Remove this sub-task">&times;</button>
           </td>
@@ -4597,7 +4599,7 @@ function renderReportRowTasks(update) {
       ${tasks.length ? `
         <div class="week-editor-scroll">
           <table class="report-row-task-table">
-            <thead><tr><th>Task</th><th>Domain</th><th>Owner</th><th>Due</th><th>Status</th><th>Comments</th><th></th></tr></thead>
+            <thead><tr><th>Task</th><th>Domain</th><th>Owner</th><th>Planned</th><th>Completed On</th><th>Status</th><th>Comments</th><th></th></tr></thead>
             <tbody>${rows}</tbody>
           </table>
         </div>` : `<p class="muted">No tasks due this week. Use “+ Add task” to add one.</p>`}
@@ -4632,6 +4634,13 @@ function handleReportsIndexInput(event) {
   if (field.dataset.taskField) {
     task[field.dataset.taskField] = field.value;
     if (field.dataset.taskField === "dueDate") task.days = daysBetweenInclusive(task.startDate, field.value);
+    /* Marking work done fills in when, so the report's "Completed On" column is not left
+       blank by someone who only flipped the status. */
+    if (field.dataset.taskField === "status" && field.value === "completed" && !task.date) {
+      task.date = toInputDate(new Date());
+      const cell = row.querySelector('[data-task-field="date"]');
+      if (cell) cell.value = task.date;
+    }
   } else if (field.dataset.subtaskField) {
     const sub = (task.subtasks || []).find((item) => item.id === row.dataset.subtask);
     if (!sub) return;
