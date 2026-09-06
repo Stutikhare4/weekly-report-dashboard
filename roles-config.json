@@ -16,6 +16,13 @@
       "lastName": "Khare",
       "role": "admin",
       "passwordHash": "e89f0e0f77c934974dcbc69c702dce140298911b57d30bc58045c8c18bbacef1"
-    }
+    },
+    {
+  "email": "ajwanda.shrivastav@webengage.com",
+  "firstName": "Ajwanda",
+  "lastName": "Shrivastav",
+  "role": "viewer",
+  "passwordHash": "c39bb579dfe5734135aae305d2c0d7b88e5e7d0420083180e3828cd4f5c9dbaa"
+}
   ]
 }
