@@ -4458,6 +4458,11 @@ function renderReportsIndex(projectId) {
 
   refreshOwnerOptions(projectId);
 
+  /* Which week contains today, so the list says where the project actually is. Compared as
+     ISO strings: parsing "YYYY-MM-DD" with `new Date` reads it as UTC while `new Date()` is
+     local, which puts the boundary a day out for anyone behind UTC. */
+  const today = toInputDate(new Date());
+
   const updates = state.updates
     .filter((update) => update.projectId === projectId)
     .sort((left, right) => left.weekStart.localeCompare(right.weekStart));
@@ -4471,6 +4476,7 @@ function renderReportsIndex(projectId) {
     const tasks = update.tasks || [];
     const done = tasks.filter((task) => task.status === "completed").length;
     const open = uiState.openReportRows.has(update.id);
+    const isCurrentWeek = isDateInUpdateWeek(today, update);
     /* Weeks are numbered by position in the project. The template label names the phase the
        week's work belongs to, which is not the same thing — several weeks share a phase. */
     const label = update.templateLabel && !/^Week \d+$/.test(update.templateLabel)
@@ -4478,12 +4484,13 @@ function renderReportsIndex(projectId) {
       : (tasks.length ? "Custom week" : "No tasks due");
 
     return `
-      <article class="report-row">
+      <article class="report-row${isCurrentWeek ? " is-current-week" : ""}"${isCurrentWeek ? ' aria-current="date"' : ""}>
         <div class="report-row-week">
           <button type="button" class="report-row-toggle${open ? " is-open" : ""}" data-toggle-report="${update.id}"
             aria-expanded="${open ? "true" : "false"}" aria-controls="report-tasks-${update.id}"
             title="${open ? "Hide" : "Show"} this week's tasks">&#9656;</button>
           <span class="template-week-badge">Week ${index + 1}</span>
+          ${isCurrentWeek ? `<span class="current-week-flag">This week</span>` : ""}
           <div>
             <div class="report-row-range">${escapeHtml(update.weekRange)}</div>
             <div class="meta">${escapeHtml(label)} · ${tasks.length} task${tasks.length === 1 ? "" : "s"} · ${done} completed</div>

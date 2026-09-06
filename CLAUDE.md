@@ -104,6 +104,11 @@ plan's offset and the thing that decides which week a task sits in; **Completed 
 `task.date`, what actually happened and what the generated report prints. Setting a task's
 status to completed fills Completed On with today if it is still blank.
 
+The week containing today is marked with a left rule, a tinted row and a "This week" badge.
+Membership comes from `isDateInUpdateWeek`, which compares ISO date strings — parsing
+`YYYY-MM-DD` with `new Date` reads it as UTC while `new Date()` is local, which would put the
+boundary a day out for anyone behind UTC. Nothing is marked when today falls outside the cycle.
+
 Structural changes (add/remove a task or sub-task) re-render the list and restore the open row;
 field edits patch the summary line by hand instead, since re-rendering would blur the input
 mid-edit.

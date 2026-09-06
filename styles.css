@@ -2274,6 +2274,32 @@ button {
   border: 1px solid var(--border-soft);
 }
 
+/* The week containing today. Uses the theme's own accent rather than a fixed green so it
+   stays legible in both light and dark, and marks the row with a left rule plus a label --
+   colour alone would not carry for a colour-blind reader. */
+.report-row.is-current-week {
+  border-color: var(--accent-3);
+  border-left: 4px solid var(--accent-3);
+  background: color-mix(in srgb, var(--accent-3) 8%, var(--surface-2));
+}
+
+@supports not (background: color-mix(in srgb, red 8%, blue)) {
+  .report-row.is-current-week { background: var(--surface-2); }
+}
+
+.current-week-flag {
+  flex: none;
+  padding: 3px 9px;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #06281c;
+  background: var(--accent-3);
+  white-space: nowrap;
+}
+
 .report-row-week {
   display: flex;
   align-items: center;
