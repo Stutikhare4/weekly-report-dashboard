@@ -19,6 +19,8 @@ A client-side PWA for tracking weekly status updates across multiple projects (C
 - `tools/hash-password.py` — prints the SHA-256 hash to put in `roles-config.json`
 - `supabase-config.json` — Supabase URL + anon key; unused while sign-in is the local demo gate
 - `supabase/schema.sql` — run once in the Supabase SQL editor to create tables, RLS and stats
+- `plan-engine.js` — the shared scheduling engine (offsets, interpolation, week bucketing)
+- `tools/generate-weekly-report.js` — plan generator and validator; `--artifacts` writes `artifacts/`
 - `build-standalone.py` — bundles everything into `weekly-report-dashboard.html`
 - `weekly-report-dashboard.html` — generated single-file build (do not edit by hand)
 
@@ -51,6 +53,12 @@ with different timings. Each task carries `offsetByCycle`, the completion date a
 from kickoff per cycle: `{"4": 5, "6": 5, "12": 5}` for SDK setup (fixed) versus
 `{"4": 10, "6": 15, "12": 30}` for event tracking (elastic). Elasticity is therefore data, not
 a rule the code applies — `elastic` on a task is just "this offset varies", derived on edit.
+
+The scheduling rules live in **`plan-engine.js`**, loaded as a plain script by the browser and
+required as a module by `tools/`, so the dashboard and the generated artifacts cannot drift
+apart. `tools/generate-weekly-report.js` builds a plan for any cycle and validates it;
+`--artifacts` writes `artifacts/task_registry.json`, `interpolation_test.json` and
+`sample_5_week_report.json`. Re-run it after changing the master plan.
 
 `resolveTaskOffset()` returns the offset for the project's cycle: exact when a tab exists,
 linearly interpolated between the two nearest when not (8 weeks sits between the 6- and

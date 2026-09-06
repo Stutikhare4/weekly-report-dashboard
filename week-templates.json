@@ -1,11 +1,11 @@
 {
-  "source": "https://docs.google.com/spreadsheets/d/1szgspVwOpiUgsS3DKoybF_UKB8t6LXRNXBAnr_pmO7E/edit?gid=1829939363",
+  "source": "https://docs.google.com/spreadsheets/d/1szgspVwOpiUgsS3DKoybF_UKB8t6LXRNXBAnr_pmO7E/edit",
   "sourceTabs": {
     "4": "Week 4",
     "6": "Week 6",
     "12": "Week 12"
   },
-  "version": "2026-09-04-google-sheet",
+  "version": "2026-09-06-google-sheet",
   "baseCycleWeeks": 4,
   "cycleWeeksWithData": [
     4,
@@ -54,10 +54,10 @@
           "channels": [],
           "offsetByCycle": {
             "4": 3,
-            "6": 3,
-            "12": 3
+            "6": 5,
+            "12": 10
           },
-          "elastic": false
+          "elastic": true
         },
         {
           "scope": "Kickoff",
@@ -68,10 +68,10 @@
           "channels": [],
           "offsetByCycle": {
             "4": 0,
-            "6": 0,
-            "12": 0
+            "6": 3,
+            "12": 3
           },
-          "elastic": false
+          "elastic": true
         },
         {
           "scope": "Kickoff",
@@ -83,9 +83,9 @@
           "offsetByCycle": {
             "4": 0,
             "6": 0,
-            "12": 0
+            "12": 3
           },
-          "elastic": false
+          "elastic": true
         },
         {
           "scope": "Kickoff",
@@ -95,14 +95,14 @@
           "platforms": [],
           "channels": [],
           "offsetByCycle": {
-            "4": 2,
-            "6": 2,
-            "12": 2
+            "4": 5,
+            "6": 7,
+            "12": 14
           },
-          "elastic": false
+          "elastic": true
         }
       ],
-      "elastic": false
+      "elastic": true
     },
     {
       "week": 2,
@@ -120,9 +120,9 @@
           "offsetByCycle": {
             "4": 5,
             "6": 5,
-            "12": 5
+            "12": 14
           },
-          "elastic": false
+          "elastic": true
         },
         {
           "scope": "Web App",
@@ -136,9 +136,9 @@
           "offsetByCycle": {
             "4": 5,
             "6": 5,
-            "12": 5
+            "12": 28
           },
-          "elastic": false
+          "elastic": true
         },
         {
           "scope": "Website",
@@ -152,9 +152,9 @@
           "offsetByCycle": {
             "4": 5,
             "6": 5,
-            "12": 5
+            "12": 14
           },
-          "elastic": false
+          "elastic": true
         },
         {
           "scope": "Web App",
@@ -168,9 +168,9 @@
           "offsetByCycle": {
             "4": 5,
             "6": 5,
-            "12": 5
+            "12": 28
           },
-          "elastic": false
+          "elastic": true
         },
         {
           "scope": "Website",
@@ -182,9 +182,9 @@
           ],
           "channels": [],
           "offsetByCycle": {
-            "4": 7,
-            "6": 10,
-            "12": 17
+            "4": 10,
+            "6": 15,
+            "12": 21
           },
           "elastic": true
         },
@@ -200,7 +200,7 @@
           "offsetByCycle": {
             "4": 10,
             "6": 15,
-            "12": 30
+            "12": 35
           },
           "elastic": true
         },
@@ -219,9 +219,9 @@
           "offsetByCycle": {
             "4": 5,
             "6": 5,
-            "12": 5
+            "12": 14
           },
-          "elastic": false
+          "elastic": true
         },
         {
           "scope": "Web App",
@@ -236,11 +236,11 @@
             "Push"
           ],
           "offsetByCycle": {
-            "4": 5,
-            "6": 5,
-            "12": 5
+            "4": 10,
+            "6": 15,
+            "12": 28
           },
-          "elastic": false
+          "elastic": true
         },
         {
           "scope": "Android",
@@ -254,9 +254,9 @@
           "offsetByCycle": {
             "4": 5,
             "6": 5,
-            "12": 5
+            "12": 28
           },
-          "elastic": false
+          "elastic": true
         },
         {
           "scope": "Android",
@@ -270,9 +270,9 @@
           "offsetByCycle": {
             "4": 5,
             "6": 5,
-            "12": 5
+            "12": 28
           },
-          "elastic": false
+          "elastic": true
         },
         {
           "scope": "Android",
@@ -286,7 +286,7 @@
           "offsetByCycle": {
             "4": 10,
             "6": 15,
-            "12": 30
+            "12": 35
           },
           "elastic": true
         },
@@ -302,29 +302,11 @@
             "Push"
           ],
           "offsetByCycle": {
-            "4": 5,
-            "6": 5,
-            "12": 5
+            "4": 10,
+            "6": 15,
+            "12": 28
           },
-          "elastic": false
-        },
-        {
-          "scope": "Android",
-          "title": "Push credentials",
-          "owner": "Client tech team",
-          "priority": "medium",
-          "platforms": [
-            "Android"
-          ],
-          "channels": [
-            "Push"
-          ],
-          "offsetByCycle": {
-            "4": 5,
-            "6": 5,
-            "12": 5
-          },
-          "elastic": false
+          "elastic": true
         },
         {
           "scope": "Android",
@@ -338,7 +320,7 @@
           "offsetByCycle": {
             "4": 10,
             "6": 15,
-            "12": 30
+            "12": 35
           },
           "elastic": true
         },
@@ -352,11 +334,11 @@
           ],
           "channels": [],
           "offsetByCycle": {
-            "4": 5,
-            "6": 5,
-            "12": 5
+            "4": 10,
+            "6": 15,
+            "12": 28
           },
-          "elastic": false
+          "elastic": true
         },
         {
           "scope": "Android",
@@ -368,11 +350,11 @@
           ],
           "channels": [],
           "offsetByCycle": {
-            "4": 5,
-            "6": 5,
-            "12": 5
+            "4": 10,
+            "6": 15,
+            "12": 28
           },
-          "elastic": false
+          "elastic": true
         },
         {
           "scope": "iOS",
@@ -386,9 +368,9 @@
           "offsetByCycle": {
             "4": 5,
             "6": 5,
-            "12": 5
+            "12": 28
           },
-          "elastic": false
+          "elastic": true
         },
         {
           "scope": "iOS",
@@ -402,9 +384,9 @@
           "offsetByCycle": {
             "4": 5,
             "6": 5,
-            "12": 5
+            "12": 28
           },
-          "elastic": false
+          "elastic": true
         },
         {
           "scope": "iOS",
@@ -418,7 +400,7 @@
           "offsetByCycle": {
             "4": 10,
             "6": 15,
-            "12": 30
+            "12": 35
           },
           "elastic": true
         },
@@ -434,11 +416,11 @@
             "Push"
           ],
           "offsetByCycle": {
-            "4": 5,
-            "6": 5,
-            "12": 5
+            "4": 10,
+            "6": 15,
+            "12": 28
           },
-          "elastic": false
+          "elastic": true
         },
         {
           "scope": "iOS",
@@ -452,11 +434,11 @@
             "Push"
           ],
           "offsetByCycle": {
-            "4": 5,
-            "6": 5,
-            "12": 5
+            "4": 10,
+            "6": 15,
+            "12": 28
           },
-          "elastic": false
+          "elastic": true
         },
         {
           "scope": "iOS",
@@ -470,7 +452,23 @@
           "offsetByCycle": {
             "4": 10,
             "6": 15,
-            "12": 30
+            "12": 35
+          },
+          "elastic": true
+        },
+        {
+          "scope": "iOS",
+          "title": "Silent / Force Login",
+          "owner": "Client tech team",
+          "priority": "medium",
+          "platforms": [
+            "iOS"
+          ],
+          "channels": [],
+          "offsetByCycle": {
+            "4": 10,
+            "6": 15,
+            "12": 28
           },
           "elastic": true
         },
@@ -484,29 +482,11 @@
           ],
           "channels": [],
           "offsetByCycle": {
-            "4": 5,
-            "6": 5,
-            "12": 5
+            "4": 10,
+            "6": 15,
+            "12": 28
           },
-          "elastic": false
-        },
-        {
-          "scope": "iOS",
-          "title": "Push credentials",
-          "owner": "Client tech team",
-          "priority": "medium",
-          "platforms": [
-            "iOS"
-          ],
-          "channels": [
-            "Push"
-          ],
-          "offsetByCycle": {
-            "4": 5,
-            "6": 5,
-            "12": 5
-          },
-          "elastic": false
+          "elastic": true
         },
         {
           "scope": "Communication Channels",
@@ -520,9 +500,9 @@
           "offsetByCycle": {
             "4": 10,
             "6": 10,
-            "12": 10
+            "12": 21
           },
-          "elastic": false
+          "elastic": true
         },
         {
           "scope": "Communication Channels",
@@ -536,9 +516,9 @@
           "offsetByCycle": {
             "4": 10,
             "6": 10,
-            "12": 10
+            "12": 21
           },
-          "elastic": false
+          "elastic": true
         },
         {
           "scope": "Communication Channels",
@@ -552,9 +532,9 @@
           "offsetByCycle": {
             "4": 10,
             "6": 10,
-            "12": 10
+            "12": 21
           },
-          "elastic": false
+          "elastic": true
         },
         {
           "scope": "Communication Channels",
@@ -568,9 +548,9 @@
           "offsetByCycle": {
             "4": 10,
             "6": 10,
-            "12": 10
+            "12": 21
           },
-          "elastic": false
+          "elastic": true
         },
         {
           "scope": "Communication Channels",
@@ -584,9 +564,9 @@
           "offsetByCycle": {
             "4": 10,
             "6": 10,
-            "12": 10
+            "12": 21
           },
-          "elastic": false
+          "elastic": true
         },
         {
           "scope": "Rest API",
@@ -600,7 +580,7 @@
           "offsetByCycle": {
             "4": 10,
             "6": 15,
-            "12": 15
+            "12": 35
           },
           "elastic": true
         },
@@ -616,7 +596,7 @@
           "offsetByCycle": {
             "4": 10,
             "6": 15,
-            "12": 15
+            "12": 35
           },
           "elastic": true
         },
@@ -632,7 +612,7 @@
           "offsetByCycle": {
             "4": 15,
             "6": 17,
-            "12": 30
+            "12": 42
           },
           "elastic": true
         },
@@ -648,7 +628,7 @@
           "offsetByCycle": {
             "4": 17,
             "6": 21,
-            "12": 40
+            "12": 49
           },
           "elastic": true
         },
@@ -667,7 +647,7 @@
           "offsetByCycle": {
             "4": 15,
             "6": 17,
-            "12": 30
+            "12": 42
           },
           "elastic": true
         },
@@ -686,7 +666,7 @@
           "offsetByCycle": {
             "4": 17,
             "6": 21,
-            "12": 40
+            "12": 49
           },
           "elastic": true
         },
@@ -704,7 +684,7 @@
           "offsetByCycle": {
             "4": 15,
             "6": 17,
-            "12": 30
+            "12": 42
           },
           "elastic": true
         },
@@ -722,13 +702,13 @@
           "offsetByCycle": {
             "4": 17,
             "6": 21,
-            "12": 40
+            "12": 49
           },
           "elastic": true
         },
         {
           "scope": "Website",
-          "title": "Fixes or Changes",
+          "title": "Staging Fixes as per Audit Report",
           "owner": "Client tech team",
           "priority": "medium",
           "platforms": [
@@ -738,13 +718,13 @@
           "offsetByCycle": {
             "4": 17,
             "6": 21,
-            "12": 35
+            "12": 42
           },
           "elastic": true
         },
         {
           "scope": "Web App",
-          "title": "Fixes or Changes",
+          "title": "Staging Fixes as per Audit Report",
           "owner": "Client tech team",
           "priority": "medium",
           "platforms": [
@@ -754,7 +734,7 @@
           "offsetByCycle": {
             "4": 21,
             "6": 25,
-            "12": 50
+            "12": 49
           },
           "elastic": true
         },
@@ -770,7 +750,7 @@
           "offsetByCycle": {
             "4": 17,
             "6": 21,
-            "12": 40
+            "12": 49
           },
           "elastic": true
         },
@@ -788,7 +768,7 @@
           "offsetByCycle": {
             "4": 17,
             "6": 21,
-            "12": 40
+            "12": 49
           },
           "elastic": true
         },
@@ -806,7 +786,7 @@
           "offsetByCycle": {
             "4": 17,
             "6": 21,
-            "12": 40
+            "12": 49
           },
           "elastic": true
         },
@@ -822,13 +802,13 @@
           "offsetByCycle": {
             "4": 17,
             "6": 21,
-            "12": 40
+            "12": 49
           },
           "elastic": true
         },
         {
           "scope": "Android",
-          "title": "Fixes or Changes",
+          "title": "Staging Fixes as per Audit Report",
           "owner": "Client tech team",
           "priority": "medium",
           "platforms": [
@@ -838,7 +818,7 @@
           "offsetByCycle": {
             "4": 21,
             "6": 25,
-            "12": 50
+            "12": 49
           },
           "elastic": true
         },
@@ -854,7 +834,7 @@
           "offsetByCycle": {
             "4": 17,
             "6": 21,
-            "12": 40
+            "12": 49
           },
           "elastic": true
         },
@@ -872,7 +852,7 @@
           "offsetByCycle": {
             "4": 17,
             "6": 21,
-            "12": 40
+            "12": 49
           },
           "elastic": true
         },
@@ -890,7 +870,7 @@
           "offsetByCycle": {
             "4": 17,
             "6": 21,
-            "12": 40
+            "12": 49
           },
           "elastic": true
         },
@@ -906,13 +886,13 @@
           "offsetByCycle": {
             "4": 17,
             "6": 21,
-            "12": 40
+            "12": 49
           },
           "elastic": true
         },
         {
           "scope": "iOS",
-          "title": "Fixes or Changes",
+          "title": "Staging Fixes as per Audit Report",
           "owner": "Client tech team",
           "priority": "medium",
           "platforms": [
@@ -922,7 +902,7 @@
           "offsetByCycle": {
             "4": 21,
             "6": 25,
-            "12": 50
+            "12": 49
           },
           "elastic": true
         },
@@ -937,8 +917,8 @@
           "channels": [],
           "offsetByCycle": {
             "4": 17,
-            "6": 21,
-            "12": 40
+            "6": 25,
+            "12": 49
           },
           "elastic": true
         },
@@ -953,72 +933,8 @@
           "channels": [],
           "offsetByCycle": {
             "4": 17,
-            "6": 21,
-            "12": 40
-          },
-          "elastic": true
-        },
-        {
-          "scope": "Communication Channels",
-          "title": "Email Audit",
-          "owner": "Webengage OBM",
-          "priority": "medium",
-          "platforms": [],
-          "channels": [
-            "Email"
-          ],
-          "offsetByCycle": {
-            "4": 15,
             "6": 25,
-            "12": 35
-          },
-          "elastic": true
-        },
-        {
-          "scope": "Communication Channels",
-          "title": "SMS Audit",
-          "owner": "Webengage OBM",
-          "priority": "medium",
-          "platforms": [],
-          "channels": [
-            "SMS"
-          ],
-          "offsetByCycle": {
-            "4": 15,
-            "6": 25,
-            "12": 35
-          },
-          "elastic": true
-        },
-        {
-          "scope": "Communication Channels",
-          "title": "Whatsapp Audit",
-          "owner": "Webengage OBM",
-          "priority": "medium",
-          "platforms": [],
-          "channels": [
-            "WhatsApp"
-          ],
-          "offsetByCycle": {
-            "4": 15,
-            "6": 25,
-            "12": 35
-          },
-          "elastic": true
-        },
-        {
-          "scope": "Communication Channels",
-          "title": "RCS Audit",
-          "owner": "Webengage OBM",
-          "priority": "medium",
-          "platforms": [],
-          "channels": [
-            "RCS"
-          ],
-          "offsetByCycle": {
-            "4": 15,
-            "6": 25,
-            "12": 35
+            "12": 49
           },
           "elastic": true
         }
@@ -1039,7 +955,7 @@
           "offsetByCycle": {
             "4": 21,
             "6": 21,
-            "12": 35
+            "12": 42
           },
           "elastic": true
         },
@@ -1055,7 +971,7 @@
           "offsetByCycle": {
             "4": 22,
             "6": 27,
-            "12": 40
+            "12": 56
           },
           "elastic": true
         },
@@ -1071,7 +987,7 @@
           "offsetByCycle": {
             "4": 22,
             "6": 27,
-            "12": 60
+            "12": 56
           },
           "elastic": true
         },
@@ -1090,7 +1006,7 @@
           "offsetByCycle": {
             "4": 22,
             "6": 27,
-            "12": 40
+            "12": 56
           },
           "elastic": true
         },
@@ -1109,7 +1025,7 @@
           "offsetByCycle": {
             "4": 22,
             "6": 27,
-            "12": 60
+            "12": 56
           },
           "elastic": true
         },
@@ -1125,7 +1041,7 @@
           "offsetByCycle": {
             "4": 22,
             "6": 27,
-            "12": 60
+            "12": 56
           },
           "elastic": true
         },
@@ -1143,7 +1059,7 @@
           "offsetByCycle": {
             "4": 22,
             "6": 27,
-            "12": 60
+            "12": 56
           },
           "elastic": true
         },
@@ -1159,7 +1075,7 @@
           "offsetByCycle": {
             "4": 22,
             "6": 27,
-            "12": 60
+            "12": 56
           },
           "elastic": true
         },
@@ -1177,7 +1093,7 @@
           "offsetByCycle": {
             "4": 22,
             "6": 27,
-            "12": 60
+            "12": 56
           },
           "elastic": true
         },
@@ -1193,7 +1109,7 @@
           "offsetByCycle": {
             "4": 22,
             "6": 27,
-            "12": 60
+            "12": 56
           },
           "elastic": true
         },
@@ -1209,7 +1125,7 @@
           "offsetByCycle": {
             "4": 22,
             "6": 10,
-            "12": 10
+            "12": 21
           },
           "elastic": true
         },
@@ -1225,7 +1141,7 @@
           "offsetByCycle": {
             "4": 22,
             "6": 10,
-            "12": 10
+            "12": 21
           },
           "elastic": true
         },
@@ -1241,7 +1157,7 @@
           "offsetByCycle": {
             "4": 22,
             "6": 10,
-            "12": 10
+            "12": 21
           },
           "elastic": true
         },
@@ -1257,7 +1173,7 @@
           "offsetByCycle": {
             "4": 22,
             "6": 10,
-            "12": 10
+            "12": 21
           },
           "elastic": true
         },
@@ -1273,7 +1189,7 @@
           "offsetByCycle": {
             "4": 23,
             "6": 10,
-            "12": 10
+            "12": 21
           },
           "elastic": true
         },
@@ -1289,7 +1205,7 @@
           "offsetByCycle": {
             "4": 23,
             "6": 28,
-            "12": 50
+            "12": 63
           },
           "elastic": true
         },
@@ -1324,7 +1240,7 @@
           "offsetByCycle": {
             "4": 23,
             "6": 28,
-            "12": 50
+            "12": 63
           },
           "elastic": true
         },
@@ -1361,7 +1277,7 @@
           "offsetByCycle": {
             "4": 23,
             "6": 28,
-            "12": 50
+            "12": 63
           },
           "elastic": true
         },
@@ -1385,7 +1301,7 @@
         },
         {
           "scope": "Website",
-          "title": "Fixes or Changes",
+          "title": "Prod Fixes as per Audit Report",
           "owner": "Client tech team",
           "priority": "medium",
           "platforms": [
@@ -1395,13 +1311,13 @@
           "offsetByCycle": {
             "4": 24,
             "6": 31,
-            "12": 60
+            "12": 63
           },
           "elastic": true
         },
         {
           "scope": "Web App",
-          "title": "Fixes or Changes",
+          "title": "Prod Fixes as per Audit Report",
           "owner": "Client tech team",
           "priority": "medium",
           "platforms": [
@@ -1485,7 +1401,7 @@
         },
         {
           "scope": "Android",
-          "title": "Fixes or Changes",
+          "title": "Prod Fixes as per Audit Report",
           "owner": "Client tech team",
           "priority": "medium",
           "platforms": [
@@ -1569,7 +1485,7 @@
         },
         {
           "scope": "iOS",
-          "title": "Fixes or Changes",
+          "title": "Prod Fixes as per Audit Report",
           "owner": "Client tech team",
           "priority": "medium",
           "platforms": [
@@ -1616,94 +1532,34 @@
           "elastic": true
         },
         {
-          "scope": "Communication Channels",
-          "title": "Email Audit",
-          "owner": "Webengage OBM",
-          "priority": "medium",
-          "platforms": [],
-          "channels": [
-            "Email"
-          ],
-          "offsetByCycle": {
-            "4": 23,
-            "6": 31,
-            "12": 50
-          },
-          "elastic": true
-        },
-        {
-          "scope": "Communication Channels",
-          "title": "SMS Audit",
-          "owner": "Webengage OBM",
-          "priority": "medium",
-          "platforms": [],
-          "channels": [
-            "SMS"
-          ],
-          "offsetByCycle": {
-            "4": 23,
-            "6": 31,
-            "12": 50
-          },
-          "elastic": true
-        },
-        {
-          "scope": "Communication Channels",
-          "title": "Whatsapp Audit",
-          "owner": "Webengage OBM",
-          "priority": "medium",
-          "platforms": [],
-          "channels": [
-            "WhatsApp"
-          ],
-          "offsetByCycle": {
-            "4": 23,
-            "6": 31,
-            "12": 50
-          },
-          "elastic": true
-        },
-        {
-          "scope": "Communication Channels",
-          "title": "RCS Audit",
-          "owner": "Webengage OBM",
-          "priority": "medium",
-          "platforms": [],
-          "channels": [
-            "RCS"
-          ],
-          "offsetByCycle": {
-            "4": 23,
-            "6": 31,
-            "12": 50
-          },
-          "elastic": true
-        },
-        {
-          "scope": "Communication Channels",
+          "scope": "Rest API",
           "title": "Historical User Data Upload",
           "owner": "Client team",
           "priority": "medium",
-          "platforms": [],
+          "platforms": [
+            "REST API"
+          ],
           "channels": [],
           "offsetByCycle": {
             "4": 23,
             "6": 31,
-            "12": 50
+            "12": 63
           },
           "elastic": true
         },
         {
-          "scope": "Communication Channels",
+          "scope": "Rest API",
           "title": "Historical Events Data Upload",
           "owner": "Client team",
           "priority": "medium",
-          "platforms": [],
+          "platforms": [
+            "REST API"
+          ],
           "channels": [],
           "offsetByCycle": {
             "4": 23,
             "6": 31,
-            "12": 50
+            "12": 63
           },
           "elastic": true
         }
@@ -1724,7 +1580,7 @@
           "offsetByCycle": {
             "4": 23,
             "6": 36,
-            "12": 70
+            "12": 77
           },
           "elastic": true
         },
@@ -1738,7 +1594,7 @@
           "offsetByCycle": {
             "4": 23,
             "6": 36,
-            "12": 70
+            "12": 77
           },
           "elastic": true
         },
@@ -1752,7 +1608,7 @@
           "offsetByCycle": {
             "4": 23,
             "6": 36,
-            "12": 70
+            "12": 77
           },
           "elastic": true
         },
@@ -1768,7 +1624,7 @@
           "offsetByCycle": {
             "4": 23,
             "6": 36,
-            "12": 70
+            "12": 77
           },
           "elastic": true
         },
@@ -1784,7 +1640,7 @@
           "offsetByCycle": {
             "4": 23,
             "6": 36,
-            "12": 70
+            "12": 77
           },
           "elastic": true
         },
@@ -1798,7 +1654,7 @@
           "offsetByCycle": {
             "4": 23,
             "6": 36,
-            "12": 70
+            "12": 77
           },
           "elastic": true
         }
@@ -1819,7 +1675,7 @@
           "offsetByCycle": {
             "4": 27,
             "6": 40,
-            "12": 77
+            "12": 82
           },
           "elastic": true
         }

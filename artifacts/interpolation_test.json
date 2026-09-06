@@ -1,0 +1,302 @@
+{
+  "generated_from": "2026-09-06-google-sheet",
+  "cases": [
+    {
+      "cycle_length": 2,
+      "interpolated": true,
+      "expected_tasks": 100,
+      "tasks_placed": 100,
+      "weeks_with_tasks": 2,
+      "empty_weeks": [],
+      "tasks_per_week": [
+        36,
+        64
+      ],
+      "go_live_offset": 13,
+      "passes": true,
+      "problems": [],
+      "sample_task_offsets": {
+        "Event Tracking (Website)": 5,
+        "Event Tracking (Android)": 5,
+        "Production Migration (Website)": 11,
+        "Training Session I (Training and Use-Cases)": 11,
+        "Integration / Domains check (All Integrated Domains)": 13
+      }
+    },
+    {
+      "cycle_length": 3,
+      "interpolated": true,
+      "expected_tasks": 100,
+      "tasks_placed": 100,
+      "weeks_with_tasks": 3,
+      "empty_weeks": [],
+      "tasks_per_week": [
+        15,
+        38,
+        47
+      ],
+      "go_live_offset": 20,
+      "passes": true,
+      "problems": [],
+      "sample_task_offsets": {
+        "Event Tracking (Website)": 7,
+        "Event Tracking (Android)": 7,
+        "Production Migration (Website)": 16,
+        "Training Session I (Training and Use-Cases)": 17,
+        "Integration / Domains check (All Integrated Domains)": 20
+      }
+    },
+    {
+      "cycle_length": 4,
+      "interpolated": false,
+      "expected_tasks": 100,
+      "tasks_placed": 100,
+      "weeks_with_tasks": 4,
+      "empty_weeks": [],
+      "tasks_per_week": [
+        15,
+        21,
+        17,
+        47
+      ],
+      "go_live_offset": 27,
+      "passes": true,
+      "problems": [],
+      "sample_task_offsets": {
+        "Event Tracking (Website)": 10,
+        "Event Tracking (Android)": 10,
+        "Production Migration (Website)": 22,
+        "Training Session I (Training and Use-Cases)": 23,
+        "Integration / Domains check (All Integrated Domains)": 27
+      }
+    },
+    {
+      "cycle_length": 5,
+      "interpolated": true,
+      "expected_tasks": 100,
+      "tasks_placed": 100,
+      "weeks_with_tasks": 5,
+      "empty_weeks": [],
+      "tasks_per_week": [
+        15,
+        21,
+        20,
+        32,
+        12
+      ],
+      "go_live_offset": 33,
+      "passes": true,
+      "problems": [],
+      "sample_task_offsets": {
+        "Event Tracking (Website)": 12,
+        "Event Tracking (Android)": 12,
+        "Production Migration (Website)": 24,
+        "Training Session I (Training and Use-Cases)": 29,
+        "Integration / Domains check (All Integrated Domains)": 33
+      }
+    },
+    {
+      "cycle_length": 6,
+      "interpolated": false,
+      "expected_tasks": 100,
+      "tasks_placed": 100,
+      "weeks_with_tasks": 6,
+      "empty_weeks": [],
+      "tasks_per_week": [
+        14,
+        11,
+        19,
+        27,
+        17,
+        12
+      ],
+      "go_live_offset": 40,
+      "passes": true,
+      "problems": [],
+      "sample_task_offsets": {
+        "Event Tracking (Website)": 15,
+        "Event Tracking (Android)": 15,
+        "Production Migration (Website)": 27,
+        "Training Session I (Training and Use-Cases)": 36,
+        "Integration / Domains check (All Integrated Domains)": 40
+      }
+    },
+    {
+      "cycle_length": 7,
+      "interpolated": true,
+      "expected_tasks": 100,
+      "tasks_placed": 100,
+      "weeks_with_tasks": 7,
+      "empty_weeks": [],
+      "tasks_per_week": [
+        8,
+        17,
+        16,
+        16,
+        17,
+        14,
+        12
+      ],
+      "go_live_offset": 47,
+      "passes": true,
+      "problems": [],
+      "sample_task_offsets": {
+        "Event Tracking (Website)": 16,
+        "Event Tracking (Android)": 18,
+        "Production Migration (Website)": 32,
+        "Training Session I (Training and Use-Cases)": 43,
+        "Integration / Domains check (All Integrated Domains)": 47
+      }
+    },
+    {
+      "cycle_length": 8,
+      "interpolated": true,
+      "expected_tasks": 100,
+      "tasks_placed": 100,
+      "weeks_with_tasks": 8,
+      "empty_weeks": [],
+      "tasks_per_week": [
+        4,
+        11,
+        19,
+        10,
+        18,
+        12,
+        19,
+        7
+      ],
+      "go_live_offset": 54,
+      "passes": true,
+      "problems": [],
+      "sample_task_offsets": {
+        "Event Tracking (Website)": 17,
+        "Event Tracking (Android)": 22,
+        "Production Migration (Website)": 37,
+        "Training Session I (Training and Use-Cases)": 50,
+        "Integration / Domains check (All Integrated Domains)": 54
+      }
+    },
+    {
+      "cycle_length": 9,
+      "interpolated": true,
+      "expected_tasks": 100,
+      "tasks_placed": 100,
+      "weeks_with_tasks": 9,
+      "empty_weeks": [],
+      "tasks_per_week": [
+        4,
+        5,
+        17,
+        15,
+        5,
+        25,
+        17,
+        5,
+        7
+      ],
+      "go_live_offset": 61,
+      "passes": true,
+      "problems": [],
+      "sample_task_offsets": {
+        "Event Tracking (Website)": 18,
+        "Event Tracking (Android)": 25,
+        "Production Migration (Website)": 41,
+        "Training Session I (Training and Use-Cases)": 56,
+        "Integration / Domains check (All Integrated Domains)": 61
+      }
+    },
+    {
+      "cycle_length": 10,
+      "interpolated": true,
+      "expected_tasks": 100,
+      "tasks_placed": 100,
+      "weeks_with_tasks": 10,
+      "empty_weeks": [],
+      "tasks_per_week": [
+        4,
+        5,
+        17,
+        8,
+        10,
+        18,
+        9,
+        17,
+        5,
+        7
+      ],
+      "go_live_offset": 68,
+      "passes": true,
+      "problems": [],
+      "sample_task_offsets": {
+        "Event Tracking (Website)": 19,
+        "Event Tracking (Android)": 28,
+        "Production Migration (Website)": 46,
+        "Training Session I (Training and Use-Cases)": 63,
+        "Integration / Domains check (All Integrated Domains)": 68
+      }
+    },
+    {
+      "cycle_length": 11,
+      "interpolated": true,
+      "expected_tasks": 100,
+      "tasks_placed": 100,
+      "weeks_with_tasks": 11,
+      "empty_weeks": [],
+      "tasks_per_week": [
+        4,
+        5,
+        11,
+        14,
+        7,
+        5,
+        16,
+        9,
+        17,
+        5,
+        7
+      ],
+      "go_live_offset": 75,
+      "passes": true,
+      "problems": [],
+      "sample_task_offsets": {
+        "Event Tracking (Website)": 20,
+        "Event Tracking (Android)": 32,
+        "Production Migration (Website)": 51,
+        "Training Session I (Training and Use-Cases)": 70,
+        "Integration / Domains check (All Integrated Domains)": 75
+      }
+    },
+    {
+      "cycle_length": 12,
+      "interpolated": false,
+      "expected_tasks": 100,
+      "tasks_placed": 100,
+      "weeks_with_tasks": 12,
+      "empty_weeks": [],
+      "tasks_per_week": [
+        4,
+        1,
+        4,
+        11,
+        14,
+        7,
+        5,
+        16,
+        9,
+        17,
+        5,
+        7
+      ],
+      "go_live_offset": 82,
+      "passes": true,
+      "problems": [],
+      "sample_task_offsets": {
+        "Event Tracking (Website)": 21,
+        "Event Tracking (Android)": 35,
+        "Production Migration (Website)": 56,
+        "Training Session I (Training and Use-Cases)": 77,
+        "Integration / Domains check (All Integrated Domains)": 82
+      }
+    }
+  ]
+}

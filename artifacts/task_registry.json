@@ -1,0 +1,1748 @@
+{
+  "source": "https://docs.google.com/spreadsheets/d/1szgspVwOpiUgsS3DKoybF_UKB8t6LXRNXBAnr_pmO7E/edit",
+  "version": "2026-09-06-google-sheet",
+  "cycles_with_data": [
+    4,
+    6,
+    12
+  ],
+  "total_tasks": 100,
+  "elastic_tasks": 98,
+  "fixed_tasks": 2,
+  "tasks": [
+    {
+      "task_id": "task_001",
+      "domain": "Kickoff",
+      "task_name": "Kick-off Meeting",
+      "phase": "Kickoff",
+      "owner": "Webengage OBM",
+      "platforms": [],
+      "channels": [],
+      "is_elastic": false,
+      "offsets": {
+        "4": 0,
+        "6": 0,
+        "12": 0
+      }
+    },
+    {
+      "task_id": "task_002",
+      "domain": "Kickoff",
+      "task_name": "Discovery",
+      "phase": "Kickoff",
+      "owner": "Webengage OBM",
+      "platforms": [],
+      "channels": [],
+      "is_elastic": false,
+      "offsets": {
+        "4": 0,
+        "6": 0,
+        "12": 0
+      }
+    },
+    {
+      "task_id": "task_003",
+      "domain": "Kickoff",
+      "task_name": "Data Modelling",
+      "phase": "Kickoff",
+      "owner": "Webengage OBM",
+      "platforms": [],
+      "channels": [],
+      "is_elastic": true,
+      "offsets": {
+        "4": 3,
+        "6": 5,
+        "12": 10
+      }
+    },
+    {
+      "task_id": "task_004",
+      "domain": "Kickoff",
+      "task_name": "Scope of Work",
+      "phase": "Kickoff",
+      "owner": "Webengage OBM",
+      "platforms": [],
+      "channels": [],
+      "is_elastic": true,
+      "offsets": {
+        "4": 0,
+        "6": 3,
+        "12": 3
+      }
+    },
+    {
+      "task_id": "task_005",
+      "domain": "Kickoff",
+      "task_name": "Create Staging Dashboard",
+      "phase": "Kickoff",
+      "owner": "Webengage OBM",
+      "platforms": [],
+      "channels": [],
+      "is_elastic": true,
+      "offsets": {
+        "4": 0,
+        "6": 0,
+        "12": 3
+      }
+    },
+    {
+      "task_id": "task_006",
+      "domain": "Kickoff",
+      "task_name": "Data Model Finalised",
+      "phase": "Kickoff",
+      "owner": "Client team",
+      "platforms": [],
+      "channels": [],
+      "is_elastic": true,
+      "offsets": {
+        "4": 5,
+        "6": 7,
+        "12": 14
+      }
+    },
+    {
+      "task_id": "task_007",
+      "domain": "Website",
+      "task_name": "SDK Set Up",
+      "phase": "Staging Deployment",
+      "owner": "Client tech team",
+      "platforms": [
+        "Website"
+      ],
+      "channels": [],
+      "is_elastic": true,
+      "offsets": {
+        "4": 5,
+        "6": 5,
+        "12": 14
+      }
+    },
+    {
+      "task_id": "task_008",
+      "domain": "Web App",
+      "task_name": "SDK Set Up",
+      "phase": "Staging Deployment",
+      "owner": "Client tech team",
+      "platforms": [
+        "Web App"
+      ],
+      "channels": [],
+      "is_elastic": true,
+      "offsets": {
+        "4": 5,
+        "6": 5,
+        "12": 28
+      }
+    },
+    {
+      "task_id": "task_009",
+      "domain": "Website",
+      "task_name": "User Tracking",
+      "phase": "Staging Deployment",
+      "owner": "Client tech team",
+      "platforms": [
+        "Website"
+      ],
+      "channels": [],
+      "is_elastic": true,
+      "offsets": {
+        "4": 5,
+        "6": 5,
+        "12": 14
+      }
+    },
+    {
+      "task_id": "task_010",
+      "domain": "Web App",
+      "task_name": "User Tracking",
+      "phase": "Staging Deployment",
+      "owner": "Client tech team",
+      "platforms": [
+        "Web App"
+      ],
+      "channels": [],
+      "is_elastic": true,
+      "offsets": {
+        "4": 5,
+        "6": 5,
+        "12": 28
+      }
+    },
+    {
+      "task_id": "task_011",
+      "domain": "Website",
+      "task_name": "Event Tracking",
+      "phase": "Staging Deployment",
+      "owner": "Client tech team",
+      "platforms": [
+        "Website"
+      ],
+      "channels": [],
+      "is_elastic": true,
+      "offsets": {
+        "4": 10,
+        "6": 15,
+        "12": 21
+      }
+    },
+    {
+      "task_id": "task_012",
+      "domain": "Web App",
+      "task_name": "Event Tracking",
+      "phase": "Staging Deployment",
+      "owner": "Client tech team",
+      "platforms": [
+        "Web App"
+      ],
+      "channels": [],
+      "is_elastic": true,
+      "offsets": {
+        "4": 10,
+        "6": 15,
+        "12": 35
+      }
+    },
+    {
+      "task_id": "task_013",
+      "domain": "Website",
+      "task_name": "Web Push Setup",
+      "phase": "Staging Deployment",
+      "owner": "Client tech team",
+      "platforms": [
+        "Website"
+      ],
+      "channels": [
+        "Web Push",
+        "Push"
+      ],
+      "is_elastic": true,
+      "offsets": {
+        "4": 5,
+        "6": 5,
+        "12": 14
+      }
+    },
+    {
+      "task_id": "task_014",
+      "domain": "Web App",
+      "task_name": "Web Push Setup",
+      "phase": "Staging Deployment",
+      "owner": "Client tech team",
+      "platforms": [
+        "Web App"
+      ],
+      "channels": [
+        "Web Push",
+        "Push"
+      ],
+      "is_elastic": true,
+      "offsets": {
+        "4": 10,
+        "6": 15,
+        "12": 28
+      }
+    },
+    {
+      "task_id": "task_015",
+      "domain": "Android",
+      "task_name": "SDK Set Up",
+      "phase": "Staging Deployment",
+      "owner": "Client tech team",
+      "platforms": [
+        "Android"
+      ],
+      "channels": [],
+      "is_elastic": true,
+      "offsets": {
+        "4": 5,
+        "6": 5,
+        "12": 28
+      }
+    },
+    {
+      "task_id": "task_016",
+      "domain": "Android",
+      "task_name": "User Tracking",
+      "phase": "Staging Deployment",
+      "owner": "Client tech team",
+      "platforms": [
+        "Android"
+      ],
+      "channels": [],
+      "is_elastic": true,
+      "offsets": {
+        "4": 5,
+        "6": 5,
+        "12": 28
+      }
+    },
+    {
+      "task_id": "task_017",
+      "domain": "Android",
+      "task_name": "Event Tracking",
+      "phase": "Staging Deployment",
+      "owner": "Client tech team",
+      "platforms": [
+        "Android"
+      ],
+      "channels": [],
+      "is_elastic": true,
+      "offsets": {
+        "4": 10,
+        "6": 15,
+        "12": 35
+      }
+    },
+    {
+      "task_id": "task_018",
+      "domain": "Android",
+      "task_name": "Push Setup",
+      "phase": "Staging Deployment",
+      "owner": "Client tech team",
+      "platforms": [
+        "Android"
+      ],
+      "channels": [
+        "Push"
+      ],
+      "is_elastic": true,
+      "offsets": {
+        "4": 10,
+        "6": 15,
+        "12": 28
+      }
+    },
+    {
+      "task_id": "task_019",
+      "domain": "Android",
+      "task_name": "Screen Tracking",
+      "phase": "Staging Deployment",
+      "owner": "Client tech team",
+      "platforms": [
+        "Android"
+      ],
+      "channels": [],
+      "is_elastic": true,
+      "offsets": {
+        "4": 10,
+        "6": 15,
+        "12": 35
+      }
+    },
+    {
+      "task_id": "task_020",
+      "domain": "Android",
+      "task_name": "Deeplinks",
+      "phase": "Staging Deployment",
+      "owner": "Client tech team",
+      "platforms": [
+        "Android"
+      ],
+      "channels": [],
+      "is_elastic": true,
+      "offsets": {
+        "4": 10,
+        "6": 15,
+        "12": 28
+      }
+    },
+    {
+      "task_id": "task_021",
+      "domain": "Android",
+      "task_name": "Silent / Force Login",
+      "phase": "Staging Deployment",
+      "owner": "Client tech team",
+      "platforms": [
+        "Android"
+      ],
+      "channels": [],
+      "is_elastic": true,
+      "offsets": {
+        "4": 10,
+        "6": 15,
+        "12": 28
+      }
+    },
+    {
+      "task_id": "task_022",
+      "domain": "iOS",
+      "task_name": "SDK Set Up",
+      "phase": "Staging Deployment",
+      "owner": "Client tech team",
+      "platforms": [
+        "iOS"
+      ],
+      "channels": [],
+      "is_elastic": true,
+      "offsets": {
+        "4": 5,
+        "6": 5,
+        "12": 28
+      }
+    },
+    {
+      "task_id": "task_023",
+      "domain": "iOS",
+      "task_name": "User Tracking",
+      "phase": "Staging Deployment",
+      "owner": "Client tech team",
+      "platforms": [
+        "iOS"
+      ],
+      "channels": [],
+      "is_elastic": true,
+      "offsets": {
+        "4": 5,
+        "6": 5,
+        "12": 28
+      }
+    },
+    {
+      "task_id": "task_024",
+      "domain": "iOS",
+      "task_name": "Event Tracking",
+      "phase": "Staging Deployment",
+      "owner": "Client tech team",
+      "platforms": [
+        "iOS"
+      ],
+      "channels": [],
+      "is_elastic": true,
+      "offsets": {
+        "4": 10,
+        "6": 15,
+        "12": 35
+      }
+    },
+    {
+      "task_id": "task_025",
+      "domain": "iOS",
+      "task_name": "Push Setup",
+      "phase": "Staging Deployment",
+      "owner": "Client tech team",
+      "platforms": [
+        "iOS"
+      ],
+      "channels": [
+        "Push"
+      ],
+      "is_elastic": true,
+      "offsets": {
+        "4": 10,
+        "6": 15,
+        "12": 28
+      }
+    },
+    {
+      "task_id": "task_026",
+      "domain": "iOS",
+      "task_name": "Rich Push Setup",
+      "phase": "Staging Deployment",
+      "owner": "Client tech team",
+      "platforms": [
+        "iOS"
+      ],
+      "channels": [
+        "Push"
+      ],
+      "is_elastic": true,
+      "offsets": {
+        "4": 10,
+        "6": 15,
+        "12": 28
+      }
+    },
+    {
+      "task_id": "task_027",
+      "domain": "iOS",
+      "task_name": "Screen Tracking",
+      "phase": "Staging Deployment",
+      "owner": "Client tech team",
+      "platforms": [
+        "iOS"
+      ],
+      "channels": [],
+      "is_elastic": true,
+      "offsets": {
+        "4": 10,
+        "6": 15,
+        "12": 35
+      }
+    },
+    {
+      "task_id": "task_028",
+      "domain": "iOS",
+      "task_name": "Silent / Force Login",
+      "phase": "Staging Deployment",
+      "owner": "Client tech team",
+      "platforms": [
+        "iOS"
+      ],
+      "channels": [],
+      "is_elastic": true,
+      "offsets": {
+        "4": 10,
+        "6": 15,
+        "12": 28
+      }
+    },
+    {
+      "task_id": "task_029",
+      "domain": "iOS",
+      "task_name": "Deeplinks",
+      "phase": "Staging Deployment",
+      "owner": "Client tech team",
+      "platforms": [
+        "iOS"
+      ],
+      "channels": [],
+      "is_elastic": true,
+      "offsets": {
+        "4": 10,
+        "6": 15,
+        "12": 28
+      }
+    },
+    {
+      "task_id": "task_030",
+      "domain": "Communication Channels",
+      "task_name": "Email setup",
+      "phase": "Staging Deployment",
+      "owner": "Cpaas / Client team",
+      "platforms": [],
+      "channels": [
+        "Email"
+      ],
+      "is_elastic": true,
+      "offsets": {
+        "4": 10,
+        "6": 10,
+        "12": 21
+      }
+    },
+    {
+      "task_id": "task_031",
+      "domain": "Communication Channels",
+      "task_name": "SMS setup",
+      "phase": "Staging Deployment",
+      "owner": "Cpaas / Client team",
+      "platforms": [],
+      "channels": [
+        "SMS"
+      ],
+      "is_elastic": true,
+      "offsets": {
+        "4": 10,
+        "6": 10,
+        "12": 21
+      }
+    },
+    {
+      "task_id": "task_032",
+      "domain": "Communication Channels",
+      "task_name": "Whatsapp setup",
+      "phase": "Staging Deployment",
+      "owner": "Cpaas / Client team",
+      "platforms": [],
+      "channels": [
+        "WhatsApp"
+      ],
+      "is_elastic": true,
+      "offsets": {
+        "4": 10,
+        "6": 10,
+        "12": 21
+      }
+    },
+    {
+      "task_id": "task_033",
+      "domain": "Communication Channels",
+      "task_name": "RCS setup",
+      "phase": "Staging Deployment",
+      "owner": "Cpaas / Client team",
+      "platforms": [],
+      "channels": [
+        "RCS"
+      ],
+      "is_elastic": true,
+      "offsets": {
+        "4": 10,
+        "6": 10,
+        "12": 21
+      }
+    },
+    {
+      "task_id": "task_034",
+      "domain": "Communication Channels",
+      "task_name": "IVR setup",
+      "phase": "Staging Deployment",
+      "owner": "Cpaas / Client team",
+      "platforms": [],
+      "channels": [
+        "IVR"
+      ],
+      "is_elastic": true,
+      "offsets": {
+        "4": 10,
+        "6": 10,
+        "12": 21
+      }
+    },
+    {
+      "task_id": "task_035",
+      "domain": "Rest API",
+      "task_name": "User Tracking",
+      "phase": "Staging Deployment",
+      "owner": "Client tech team",
+      "platforms": [
+        "REST API"
+      ],
+      "channels": [],
+      "is_elastic": true,
+      "offsets": {
+        "4": 10,
+        "6": 15,
+        "12": 35
+      }
+    },
+    {
+      "task_id": "task_036",
+      "domain": "Rest API",
+      "task_name": "Event Tracking",
+      "phase": "Staging Deployment",
+      "owner": "Client tech team",
+      "platforms": [
+        "REST API"
+      ],
+      "channels": [],
+      "is_elastic": true,
+      "offsets": {
+        "4": 10,
+        "6": 15,
+        "12": 35
+      }
+    },
+    {
+      "task_id": "task_037",
+      "domain": "Website",
+      "task_name": "Users and Events Audit",
+      "phase": "Staging Deployment",
+      "owner": "Webengage OBM",
+      "platforms": [
+        "Website"
+      ],
+      "channels": [],
+      "is_elastic": true,
+      "offsets": {
+        "4": 15,
+        "6": 17,
+        "12": 42
+      }
+    },
+    {
+      "task_id": "task_038",
+      "domain": "Web App",
+      "task_name": "Users and Events Audit",
+      "phase": "Staging Deployment",
+      "owner": "Webengage OBM",
+      "platforms": [
+        "Web App"
+      ],
+      "channels": [],
+      "is_elastic": true,
+      "offsets": {
+        "4": 17,
+        "6": 21,
+        "12": 49
+      }
+    },
+    {
+      "task_id": "task_039",
+      "domain": "Website",
+      "task_name": "WebPush Audit",
+      "phase": "Staging Deployment",
+      "owner": "Webengage OBM",
+      "platforms": [
+        "Website"
+      ],
+      "channels": [
+        "Web Push",
+        "Push"
+      ],
+      "is_elastic": true,
+      "offsets": {
+        "4": 15,
+        "6": 17,
+        "12": 42
+      }
+    },
+    {
+      "task_id": "task_040",
+      "domain": "Web App",
+      "task_name": "WebPush Audit",
+      "phase": "Staging Deployment",
+      "owner": "Webengage OBM",
+      "platforms": [
+        "Web App"
+      ],
+      "channels": [
+        "Web Push",
+        "Push"
+      ],
+      "is_elastic": true,
+      "offsets": {
+        "4": 17,
+        "6": 21,
+        "12": 49
+      }
+    },
+    {
+      "task_id": "task_041",
+      "domain": "Website",
+      "task_name": "Onsite Notification Audit",
+      "phase": "Staging Deployment",
+      "owner": "Webengage OBM",
+      "platforms": [
+        "Website"
+      ],
+      "channels": [
+        "On-site Notification"
+      ],
+      "is_elastic": true,
+      "offsets": {
+        "4": 15,
+        "6": 17,
+        "12": 42
+      }
+    },
+    {
+      "task_id": "task_042",
+      "domain": "Web App",
+      "task_name": "Onsite Notification Audit",
+      "phase": "Staging Deployment",
+      "owner": "Webengage OBM",
+      "platforms": [
+        "Web App"
+      ],
+      "channels": [
+        "On-site Notification"
+      ],
+      "is_elastic": true,
+      "offsets": {
+        "4": 17,
+        "6": 21,
+        "12": 49
+      }
+    },
+    {
+      "task_id": "task_043",
+      "domain": "Website",
+      "task_name": "Staging Fixes as per Audit Report",
+      "phase": "Staging Deployment",
+      "owner": "Client tech team",
+      "platforms": [
+        "Website"
+      ],
+      "channels": [],
+      "is_elastic": true,
+      "offsets": {
+        "4": 17,
+        "6": 21,
+        "12": 42
+      }
+    },
+    {
+      "task_id": "task_044",
+      "domain": "Web App",
+      "task_name": "Staging Fixes as per Audit Report",
+      "phase": "Staging Deployment",
+      "owner": "Client tech team",
+      "platforms": [
+        "Web App"
+      ],
+      "channels": [],
+      "is_elastic": true,
+      "offsets": {
+        "4": 21,
+        "6": 25,
+        "12": 49
+      }
+    },
+    {
+      "task_id": "task_045",
+      "domain": "Android",
+      "task_name": "Users and Events Audit",
+      "phase": "Staging Deployment",
+      "owner": "Webengage OBM",
+      "platforms": [
+        "Android"
+      ],
+      "channels": [],
+      "is_elastic": true,
+      "offsets": {
+        "4": 17,
+        "6": 21,
+        "12": 49
+      }
+    },
+    {
+      "task_id": "task_046",
+      "domain": "Android",
+      "task_name": "Push Android",
+      "phase": "Staging Deployment",
+      "owner": "Webengage OBM",
+      "platforms": [
+        "Android"
+      ],
+      "channels": [
+        "Push"
+      ],
+      "is_elastic": true,
+      "offsets": {
+        "4": 17,
+        "6": 21,
+        "12": 49
+      }
+    },
+    {
+      "task_id": "task_047",
+      "domain": "Android",
+      "task_name": "In-App Android",
+      "phase": "Staging Deployment",
+      "owner": "Webengage OBM",
+      "platforms": [
+        "Android"
+      ],
+      "channels": [
+        "In-App"
+      ],
+      "is_elastic": true,
+      "offsets": {
+        "4": 17,
+        "6": 21,
+        "12": 49
+      }
+    },
+    {
+      "task_id": "task_048",
+      "domain": "Android",
+      "task_name": "Deeplinks",
+      "phase": "Staging Deployment",
+      "owner": "Webengage OBM",
+      "platforms": [
+        "Android"
+      ],
+      "channels": [],
+      "is_elastic": true,
+      "offsets": {
+        "4": 17,
+        "6": 21,
+        "12": 49
+      }
+    },
+    {
+      "task_id": "task_049",
+      "domain": "Android",
+      "task_name": "Staging Fixes as per Audit Report",
+      "phase": "Staging Deployment",
+      "owner": "Client tech team",
+      "platforms": [
+        "Android"
+      ],
+      "channels": [],
+      "is_elastic": true,
+      "offsets": {
+        "4": 21,
+        "6": 25,
+        "12": 49
+      }
+    },
+    {
+      "task_id": "task_050",
+      "domain": "iOS",
+      "task_name": "Users and Events Audit",
+      "phase": "Staging Deployment",
+      "owner": "Webengage OBM",
+      "platforms": [
+        "iOS"
+      ],
+      "channels": [],
+      "is_elastic": true,
+      "offsets": {
+        "4": 17,
+        "6": 21,
+        "12": 49
+      }
+    },
+    {
+      "task_id": "task_051",
+      "domain": "iOS",
+      "task_name": "Push, Rich Push iOS",
+      "phase": "Staging Deployment",
+      "owner": "Webengage OBM",
+      "platforms": [
+        "iOS"
+      ],
+      "channels": [
+        "Push"
+      ],
+      "is_elastic": true,
+      "offsets": {
+        "4": 17,
+        "6": 21,
+        "12": 49
+      }
+    },
+    {
+      "task_id": "task_052",
+      "domain": "iOS",
+      "task_name": "In-App iOS",
+      "phase": "Staging Deployment",
+      "owner": "Webengage OBM",
+      "platforms": [
+        "iOS"
+      ],
+      "channels": [
+        "In-App"
+      ],
+      "is_elastic": true,
+      "offsets": {
+        "4": 17,
+        "6": 21,
+        "12": 49
+      }
+    },
+    {
+      "task_id": "task_053",
+      "domain": "iOS",
+      "task_name": "Deeplinks",
+      "phase": "Staging Deployment",
+      "owner": "Webengage OBM",
+      "platforms": [
+        "iOS"
+      ],
+      "channels": [],
+      "is_elastic": true,
+      "offsets": {
+        "4": 17,
+        "6": 21,
+        "12": 49
+      }
+    },
+    {
+      "task_id": "task_054",
+      "domain": "iOS",
+      "task_name": "Staging Fixes as per Audit Report",
+      "phase": "Staging Deployment",
+      "owner": "Client tech team",
+      "platforms": [
+        "iOS"
+      ],
+      "channels": [],
+      "is_elastic": true,
+      "offsets": {
+        "4": 21,
+        "6": 25,
+        "12": 49
+      }
+    },
+    {
+      "task_id": "task_055",
+      "domain": "Rest API",
+      "task_name": "Data Validation",
+      "phase": "Staging Deployment",
+      "owner": "Webengage OBM",
+      "platforms": [
+        "REST API"
+      ],
+      "channels": [],
+      "is_elastic": true,
+      "offsets": {
+        "4": 17,
+        "6": 25,
+        "12": 49
+      }
+    },
+    {
+      "task_id": "task_056",
+      "domain": "Rest API",
+      "task_name": "Count Matching",
+      "phase": "Staging Deployment",
+      "owner": "Webengage team + Client team",
+      "platforms": [
+        "REST API"
+      ],
+      "channels": [],
+      "is_elastic": true,
+      "offsets": {
+        "4": 17,
+        "6": 25,
+        "12": 49
+      }
+    },
+    {
+      "task_id": "task_057",
+      "domain": "Production Deployment",
+      "task_name": "Create Production Dashboard",
+      "phase": "Production Deployment",
+      "owner": "Webengage OBM",
+      "platforms": [],
+      "channels": [],
+      "is_elastic": true,
+      "offsets": {
+        "4": 21,
+        "6": 21,
+        "12": 42
+      }
+    },
+    {
+      "task_id": "task_058",
+      "domain": "Website",
+      "task_name": "Production Migration",
+      "phase": "Production Deployment",
+      "owner": "Client tech team",
+      "platforms": [
+        "Website"
+      ],
+      "channels": [],
+      "is_elastic": true,
+      "offsets": {
+        "4": 22,
+        "6": 27,
+        "12": 56
+      }
+    },
+    {
+      "task_id": "task_059",
+      "domain": "Web App",
+      "task_name": "Production Migration",
+      "phase": "Production Deployment",
+      "owner": "Client tech team",
+      "platforms": [
+        "Web App"
+      ],
+      "channels": [],
+      "is_elastic": true,
+      "offsets": {
+        "4": 22,
+        "6": 27,
+        "12": 56
+      }
+    },
+    {
+      "task_id": "task_060",
+      "domain": "Website",
+      "task_name": "Web Push Setup on dashboard",
+      "phase": "Production Deployment",
+      "owner": "Client tech team",
+      "platforms": [
+        "Website"
+      ],
+      "channels": [
+        "Web Push",
+        "Push"
+      ],
+      "is_elastic": true,
+      "offsets": {
+        "4": 22,
+        "6": 27,
+        "12": 56
+      }
+    },
+    {
+      "task_id": "task_061",
+      "domain": "Web App",
+      "task_name": "Web Push Setup on dashboard",
+      "phase": "Production Deployment",
+      "owner": "Client tech team",
+      "platforms": [
+        "Web App"
+      ],
+      "channels": [
+        "Web Push",
+        "Push"
+      ],
+      "is_elastic": true,
+      "offsets": {
+        "4": 22,
+        "6": 27,
+        "12": 56
+      }
+    },
+    {
+      "task_id": "task_062",
+      "domain": "Android",
+      "task_name": "Production Migration",
+      "phase": "Production Deployment",
+      "owner": "Client tech team",
+      "platforms": [
+        "Android"
+      ],
+      "channels": [],
+      "is_elastic": true,
+      "offsets": {
+        "4": 22,
+        "6": 27,
+        "12": 56
+      }
+    },
+    {
+      "task_id": "task_063",
+      "domain": "Android",
+      "task_name": "Push credentials",
+      "phase": "Production Deployment",
+      "owner": "Client tech team",
+      "platforms": [
+        "Android"
+      ],
+      "channels": [
+        "Push"
+      ],
+      "is_elastic": true,
+      "offsets": {
+        "4": 22,
+        "6": 27,
+        "12": 56
+      }
+    },
+    {
+      "task_id": "task_064",
+      "domain": "iOS",
+      "task_name": "Production Migration",
+      "phase": "Production Deployment",
+      "owner": "Client tech team",
+      "platforms": [
+        "iOS"
+      ],
+      "channels": [],
+      "is_elastic": true,
+      "offsets": {
+        "4": 22,
+        "6": 27,
+        "12": 56
+      }
+    },
+    {
+      "task_id": "task_065",
+      "domain": "iOS",
+      "task_name": "Push credentials",
+      "phase": "Production Deployment",
+      "owner": "Client tech team",
+      "platforms": [
+        "iOS"
+      ],
+      "channels": [
+        "Push"
+      ],
+      "is_elastic": true,
+      "offsets": {
+        "4": 22,
+        "6": 27,
+        "12": 56
+      }
+    },
+    {
+      "task_id": "task_066",
+      "domain": "Rest API",
+      "task_name": "Production Migration",
+      "phase": "Production Deployment",
+      "owner": "Client tech team",
+      "platforms": [
+        "REST API"
+      ],
+      "channels": [],
+      "is_elastic": true,
+      "offsets": {
+        "4": 22,
+        "6": 27,
+        "12": 56
+      }
+    },
+    {
+      "task_id": "task_067",
+      "domain": "Communication Channels",
+      "task_name": "Email setup",
+      "phase": "Production Deployment",
+      "owner": "Cpaas / Client team",
+      "platforms": [],
+      "channels": [
+        "Email"
+      ],
+      "is_elastic": true,
+      "offsets": {
+        "4": 22,
+        "6": 10,
+        "12": 21
+      }
+    },
+    {
+      "task_id": "task_068",
+      "domain": "Communication Channels",
+      "task_name": "SMS setup",
+      "phase": "Production Deployment",
+      "owner": "Cpaas / Client team",
+      "platforms": [],
+      "channels": [
+        "SMS"
+      ],
+      "is_elastic": true,
+      "offsets": {
+        "4": 22,
+        "6": 10,
+        "12": 21
+      }
+    },
+    {
+      "task_id": "task_069",
+      "domain": "Communication Channels",
+      "task_name": "Whatsapp setup",
+      "phase": "Production Deployment",
+      "owner": "Cpaas / Client team",
+      "platforms": [],
+      "channels": [
+        "WhatsApp"
+      ],
+      "is_elastic": true,
+      "offsets": {
+        "4": 22,
+        "6": 10,
+        "12": 21
+      }
+    },
+    {
+      "task_id": "task_070",
+      "domain": "Communication Channels",
+      "task_name": "RCS setup",
+      "phase": "Production Deployment",
+      "owner": "Cpaas / Client team",
+      "platforms": [],
+      "channels": [
+        "RCS"
+      ],
+      "is_elastic": true,
+      "offsets": {
+        "4": 22,
+        "6": 10,
+        "12": 21
+      }
+    },
+    {
+      "task_id": "task_071",
+      "domain": "Communication Channels",
+      "task_name": "IVR setup",
+      "phase": "Production Deployment",
+      "owner": "Cpaas / Client team",
+      "platforms": [],
+      "channels": [
+        "IVR"
+      ],
+      "is_elastic": true,
+      "offsets": {
+        "4": 23,
+        "6": 10,
+        "12": 21
+      }
+    },
+    {
+      "task_id": "task_072",
+      "domain": "Website",
+      "task_name": "Users and Events Audit",
+      "phase": "Production Deployment",
+      "owner": "Webengage OBM",
+      "platforms": [
+        "Website"
+      ],
+      "channels": [],
+      "is_elastic": true,
+      "offsets": {
+        "4": 23,
+        "6": 28,
+        "12": 63
+      }
+    },
+    {
+      "task_id": "task_073",
+      "domain": "Web App",
+      "task_name": "Users and Events Audit",
+      "phase": "Production Deployment",
+      "owner": "Webengage OBM",
+      "platforms": [
+        "Web App"
+      ],
+      "channels": [],
+      "is_elastic": true,
+      "offsets": {
+        "4": 24,
+        "6": 31,
+        "12": 63
+      }
+    },
+    {
+      "task_id": "task_074",
+      "domain": "Website",
+      "task_name": "WebPush Audit",
+      "phase": "Production Deployment",
+      "owner": "Webengage OBM",
+      "platforms": [
+        "Website"
+      ],
+      "channels": [
+        "Web Push",
+        "Push"
+      ],
+      "is_elastic": true,
+      "offsets": {
+        "4": 23,
+        "6": 28,
+        "12": 63
+      }
+    },
+    {
+      "task_id": "task_075",
+      "domain": "Web App",
+      "task_name": "WebPush Audit",
+      "phase": "Production Deployment",
+      "owner": "Webengage OBM",
+      "platforms": [
+        "Web App"
+      ],
+      "channels": [
+        "Web Push",
+        "Push"
+      ],
+      "is_elastic": true,
+      "offsets": {
+        "4": 24,
+        "6": 31,
+        "12": 63
+      }
+    },
+    {
+      "task_id": "task_076",
+      "domain": "Website",
+      "task_name": "Onsite Notification Audit",
+      "phase": "Production Deployment",
+      "owner": "Webengage OBM",
+      "platforms": [
+        "Website"
+      ],
+      "channels": [
+        "On-site Notification"
+      ],
+      "is_elastic": true,
+      "offsets": {
+        "4": 23,
+        "6": 28,
+        "12": 63
+      }
+    },
+    {
+      "task_id": "task_077",
+      "domain": "Web App",
+      "task_name": "Onsite Notification Audit",
+      "phase": "Production Deployment",
+      "owner": "Webengage OBM",
+      "platforms": [
+        "Web App"
+      ],
+      "channels": [
+        "On-site Notification"
+      ],
+      "is_elastic": true,
+      "offsets": {
+        "4": 24,
+        "6": 31,
+        "12": 63
+      }
+    },
+    {
+      "task_id": "task_078",
+      "domain": "Website",
+      "task_name": "Prod Fixes as per Audit Report",
+      "phase": "Production Deployment",
+      "owner": "Client tech team",
+      "platforms": [
+        "Website"
+      ],
+      "channels": [],
+      "is_elastic": true,
+      "offsets": {
+        "4": 24,
+        "6": 31,
+        "12": 63
+      }
+    },
+    {
+      "task_id": "task_079",
+      "domain": "Web App",
+      "task_name": "Prod Fixes as per Audit Report",
+      "phase": "Production Deployment",
+      "owner": "Client tech team",
+      "platforms": [
+        "Web App"
+      ],
+      "channels": [],
+      "is_elastic": true,
+      "offsets": {
+        "4": 25,
+        "6": 36,
+        "12": 70
+      }
+    },
+    {
+      "task_id": "task_080",
+      "domain": "Android",
+      "task_name": "Users and Events Audit",
+      "phase": "Production Deployment",
+      "owner": "Webengage OBM",
+      "platforms": [
+        "Android"
+      ],
+      "channels": [],
+      "is_elastic": true,
+      "offsets": {
+        "4": 24,
+        "6": 31,
+        "12": 63
+      }
+    },
+    {
+      "task_id": "task_081",
+      "domain": "Android",
+      "task_name": "Push Android",
+      "phase": "Production Deployment",
+      "owner": "Webengage OBM",
+      "platforms": [
+        "Android"
+      ],
+      "channels": [
+        "Push"
+      ],
+      "is_elastic": true,
+      "offsets": {
+        "4": 24,
+        "6": 31,
+        "12": 63
+      }
+    },
+    {
+      "task_id": "task_082",
+      "domain": "Android",
+      "task_name": "In-App Android",
+      "phase": "Production Deployment",
+      "owner": "Webengage OBM",
+      "platforms": [
+        "Android"
+      ],
+      "channels": [
+        "In-App"
+      ],
+      "is_elastic": true,
+      "offsets": {
+        "4": 24,
+        "6": 31,
+        "12": 63
+      }
+    },
+    {
+      "task_id": "task_083",
+      "domain": "Android",
+      "task_name": "Deeplinks",
+      "phase": "Production Deployment",
+      "owner": "Webengage OBM",
+      "platforms": [
+        "Android"
+      ],
+      "channels": [],
+      "is_elastic": true,
+      "offsets": {
+        "4": 24,
+        "6": 31,
+        "12": 63
+      }
+    },
+    {
+      "task_id": "task_084",
+      "domain": "Android",
+      "task_name": "Prod Fixes as per Audit Report",
+      "phase": "Production Deployment",
+      "owner": "Client tech team",
+      "platforms": [
+        "Android"
+      ],
+      "channels": [],
+      "is_elastic": true,
+      "offsets": {
+        "4": 25,
+        "6": 36,
+        "12": 70
+      }
+    },
+    {
+      "task_id": "task_085",
+      "domain": "iOS",
+      "task_name": "Users and Events Audit",
+      "phase": "Production Deployment",
+      "owner": "Webengage OBM",
+      "platforms": [
+        "iOS"
+      ],
+      "channels": [],
+      "is_elastic": true,
+      "offsets": {
+        "4": 24,
+        "6": 31,
+        "12": 63
+      }
+    },
+    {
+      "task_id": "task_086",
+      "domain": "iOS",
+      "task_name": "Push, Rich Push iOS",
+      "phase": "Production Deployment",
+      "owner": "Webengage OBM",
+      "platforms": [
+        "iOS"
+      ],
+      "channels": [
+        "Push"
+      ],
+      "is_elastic": true,
+      "offsets": {
+        "4": 24,
+        "6": 31,
+        "12": 63
+      }
+    },
+    {
+      "task_id": "task_087",
+      "domain": "iOS",
+      "task_name": "In-App iOS",
+      "phase": "Production Deployment",
+      "owner": "Webengage OBM",
+      "platforms": [
+        "iOS"
+      ],
+      "channels": [
+        "In-App"
+      ],
+      "is_elastic": true,
+      "offsets": {
+        "4": 24,
+        "6": 31,
+        "12": 63
+      }
+    },
+    {
+      "task_id": "task_088",
+      "domain": "iOS",
+      "task_name": "Deeplinks",
+      "phase": "Production Deployment",
+      "owner": "Webengage OBM",
+      "platforms": [
+        "iOS"
+      ],
+      "channels": [],
+      "is_elastic": true,
+      "offsets": {
+        "4": 24,
+        "6": 31,
+        "12": 63
+      }
+    },
+    {
+      "task_id": "task_089",
+      "domain": "iOS",
+      "task_name": "Prod Fixes as per Audit Report",
+      "phase": "Production Deployment",
+      "owner": "Client tech team",
+      "platforms": [
+        "iOS"
+      ],
+      "channels": [],
+      "is_elastic": true,
+      "offsets": {
+        "4": 24,
+        "6": 36,
+        "12": 70
+      }
+    },
+    {
+      "task_id": "task_090",
+      "domain": "Rest API",
+      "task_name": "Data Validation",
+      "phase": "Production Deployment",
+      "owner": "Webengage OBM",
+      "platforms": [
+        "REST API"
+      ],
+      "channels": [],
+      "is_elastic": true,
+      "offsets": {
+        "4": 25,
+        "6": 37,
+        "12": 70
+      }
+    },
+    {
+      "task_id": "task_091",
+      "domain": "Rest API",
+      "task_name": "Count Matching",
+      "phase": "Production Deployment",
+      "owner": "Webengage team + Client team",
+      "platforms": [
+        "REST API"
+      ],
+      "channels": [],
+      "is_elastic": true,
+      "offsets": {
+        "4": 25,
+        "6": 37,
+        "12": 70
+      }
+    },
+    {
+      "task_id": "task_092",
+      "domain": "Rest API",
+      "task_name": "Historical User Data Upload",
+      "phase": "Production Deployment",
+      "owner": "Client team",
+      "platforms": [
+        "REST API"
+      ],
+      "channels": [],
+      "is_elastic": true,
+      "offsets": {
+        "4": 23,
+        "6": 31,
+        "12": 63
+      }
+    },
+    {
+      "task_id": "task_093",
+      "domain": "Rest API",
+      "task_name": "Historical Events Data Upload",
+      "phase": "Production Deployment",
+      "owner": "Client team",
+      "platforms": [
+        "REST API"
+      ],
+      "channels": [],
+      "is_elastic": true,
+      "offsets": {
+        "4": 23,
+        "6": 31,
+        "12": 63
+      }
+    },
+    {
+      "task_id": "task_094",
+      "domain": "Training and Use-Cases",
+      "task_name": "Training Session I",
+      "phase": "Training and Use-Cases",
+      "owner": "Webengage OBM",
+      "platforms": [],
+      "channels": [],
+      "is_elastic": true,
+      "offsets": {
+        "4": 23,
+        "6": 36,
+        "12": 77
+      }
+    },
+    {
+      "task_id": "task_095",
+      "domain": "Training and Use-Cases",
+      "task_name": "Training Session II",
+      "phase": "Training and Use-Cases",
+      "owner": "Webengage OBM",
+      "platforms": [],
+      "channels": [],
+      "is_elastic": true,
+      "offsets": {
+        "4": 23,
+        "6": 36,
+        "12": 77
+      }
+    },
+    {
+      "task_id": "task_096",
+      "domain": "Training and Use-Cases",
+      "task_name": "Training Session III",
+      "phase": "Training and Use-Cases",
+      "owner": "Webengage OBM",
+      "platforms": [],
+      "channels": [],
+      "is_elastic": true,
+      "offsets": {
+        "4": 23,
+        "6": 36,
+        "12": 77
+      }
+    },
+    {
+      "task_id": "task_097",
+      "domain": "Communication Channels",
+      "task_name": "Email Warmup Journey Live",
+      "phase": "Training and Use-Cases",
+      "owner": "Webengage OBM",
+      "platforms": [],
+      "channels": [
+        "Email"
+      ],
+      "is_elastic": true,
+      "offsets": {
+        "4": 23,
+        "6": 36,
+        "12": 77
+      }
+    },
+    {
+      "task_id": "task_098",
+      "domain": "Communication Channels",
+      "task_name": "Whatsapp Warmup Journey Live",
+      "phase": "Training and Use-Cases",
+      "owner": "Webengage OBM",
+      "platforms": [],
+      "channels": [
+        "WhatsApp"
+      ],
+      "is_elastic": true,
+      "offsets": {
+        "4": 23,
+        "6": 36,
+        "12": 77
+      }
+    },
+    {
+      "task_id": "task_099",
+      "domain": "Communication Channels",
+      "task_name": "Send Dashboard Recording",
+      "phase": "Training and Use-Cases",
+      "owner": "Webengage OBM",
+      "platforms": [],
+      "channels": [],
+      "is_elastic": true,
+      "offsets": {
+        "4": 23,
+        "6": 36,
+        "12": 77
+      }
+    },
+    {
+      "task_id": "task_100",
+      "domain": "All Integrated Domains",
+      "task_name": "Integration / Domains check",
+      "phase": "Go Live",
+      "owner": "Webengage OBM",
+      "platforms": [],
+      "channels": [],
+      "is_elastic": true,
+      "offsets": {
+        "4": 27,
+        "6": 40,
+        "12": 82
+      }
+    }
+  ]
+}

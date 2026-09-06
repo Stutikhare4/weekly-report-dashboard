@@ -31,6 +31,7 @@ def js_safe(text):
 def main():
     html = read("index.html")
     css = read("styles.css")
+    engine = read("plan-engine.js")
     app = read("app.js")
 
     demo_index = json.loads(read("demo-data/index.json"))
@@ -61,9 +62,11 @@ def main():
     html = html.replace('<link rel="stylesheet" href="styles.css" />', f"<style>\n{css}\n    </style>")
 
     # inline scripts ignore `defer`, so app.js moves to the end of <body> where the DOM exists
+    html = html.replace('<script defer src="plan-engine.js"></script>\n    ', "")
     html = html.replace('<script defer src="app.js"></script>\n  ', "")
     scripts = (
         f'<script>window.__BUNDLED_DATA__ = {js_safe(json.dumps(bundle, ensure_ascii=False))};</script>\n'
+        f'    <script>\n{js_safe(engine)}\n    </script>\n'
         f'    <script>\n{js_safe(app)}\n    </script>\n  '
     )
     html = html.replace("</body>", f"  {scripts}</body>")
@@ -74,7 +77,7 @@ def main():
     tasks = sum(len(w["tasks"]) for w in bundle["weekTemplates"]["weeks"])
     size = OUT.stat().st_size / 1024
     print(f"wrote {OUT.name}  ({size:.0f} KB)")
-    print(f"  inlined: styles.css, app.js, {weeks} template weeks / {tasks} tasks, {len(demos)} demo dataset(s)")
+    print(f"  inlined: styles.css, plan-engine.js, app.js, {weeks} template weeks / {tasks} tasks, {len(demos)} demo dataset(s)")
     leftover = re.findall(r'(?:src|href)="(?!data:|#)([^"]+)"', html)
     print(f"  external references remaining: {leftover or 'none'}")
 
