@@ -108,6 +108,20 @@ Structural changes (add/remove a task or sub-task) re-render the list and restor
 field edits patch the summary line by hand instead, since re-rendering would blur the input
 mid-edit.
 
+## Phase and domain on a task
+
+A task carries both: `phase` is the stage it belongs to (Kickoff, Staging Deployment, ...) and
+`domain` is what it is done against (Website, Android, Communication Channels, ...). The report
+shows them as the first two columns, each merged vertically over its run of rows — domain groups
+*within* a phase, so a domain appearing under two phases does not merge across the boundary.
+
+A task whose master-plan `scope` merely repeats its phase applies to the whole project, so its
+domain reads "All" rather than echoing the phase. An empty scope stays empty.
+
+Tasks saved before this split kept the domain in `phase`; `ensureDefaults` moves it to `domain`
+and recovers the phase from the master plan, preferring whichever phase the week is labelled
+with when a title appears in more than one (staging and production both run audits).
+
 ## Task timeline
 
 Tasks run in parallel within their week: each starts on its week's Monday and ends

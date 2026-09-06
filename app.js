@@ -4,9 +4,8 @@ const STATE_KEY = "multi-project-dashboard-state";
 const SUBTASK_STATUSES = ["not started", "in progress", "delayed", "blocked", "completed"];
 const WEEK_STATUSES = ["not started", "on track", "needs attention", "blocked", "completed"];
 
-/* Week-wise master plan, derived from the "Weekly status - Salad Days" workbook: each week
-   sheet there pairs a completed table with a "This Week" table, both grouped by an
-   "Integration Scope" column. That scope maps onto a task's `phase` field here.
+/* Master plan seed, generated from the team's Google Sheet by tools/import-sheet.py. A task's
+   `scope` is the domain it is done against; the phase it belongs to comes from its stage.
    This is only the SEED — the editable copy lives in state.weekTemplates (Templates screen). */
 const ROLES = ["admin", "viewer"];
 
@@ -1149,6 +1148,8 @@ function flattenTasksForReport(tasks) {
 
     subtasks.forEach((sub) => {
       rows.push({
+        phase: task.phase || "",
+        domain: task.domain || "",
         scope: task.phase || task.title,
         title: sub.title,
         priority: sub.priority || "medium",
@@ -1163,17 +1164,30 @@ function flattenTasksForReport(tasks) {
   return rows;
 }
 
+/* Merge equal, adjacent cells vertically. Phase groups on its own; Domain groups within a
+   phase, so a domain repeated under two phases does not merge across the boundary. */
 function withScopeSpans(rows) {
-  return rows.map((row, index) => {
-    const isFirstOfGroup = index === 0 || rows[index - 1].scope !== row.scope;
+  const runs = (keyOf) => rows.map((row, index) => {
+    const first = index === 0 || keyOf(rows[index - 1]) !== keyOf(row);
     let span = 0;
-    if (isFirstOfGroup) {
-      for (let i = index; i < rows.length && rows[i].scope === row.scope; i += 1) {
-        span += 1;
-      }
+    if (first) {
+      for (let i = index; i < rows.length && keyOf(rows[i]) === keyOf(row); i += 1) span += 1;
     }
-    return { ...row, showScope: isFirstOfGroup, scopeSpan: span };
+    return { first, span };
   });
+
+  const phases = runs((row) => row.phase || "");
+  const domains = runs((row) => `${row.phase || ""}||${row.domain || ""}`);
+
+  return rows.map((row, index) => ({
+    ...row,
+    showPhase: phases[index].first,
+    phaseSpan: phases[index].span,
+    showDomain: domains[index].first,
+    domainSpan: domains[index].span,
+    showScope: phases[index].first,
+    scopeSpan: phases[index].span,
+  }));
 }
 
 function buildReport(projectId) {
@@ -1258,7 +1272,8 @@ function toReportWeek(update, tag) {
 function reportRowsToText(rows, includeStatusColumns) {
   if (!rows.length) return " (no tasks entered)";
   return rows.map((row) => {
-    let line = ` - [${row.scope}] ${row.title} (Priority: ${row.priority}, Owner: ${row.owner || "Unassigned"}`;
+    const where = [row.phase, row.domain].filter(Boolean).join(" / ") || row.scope;
+    let line = ` - [${where}] ${row.title} (Priority: ${row.priority}, Owner: ${row.owner || "Unassigned"}`;
     if (includeStatusColumns) {
       line += `, Status: ${row.status}`;
     }
@@ -1301,12 +1316,13 @@ function buildSheetReportTable(title, rows, includeStatusColumns) {
   }
 
   const headCells = includeStatusColumns
-    ? ["Integration Scope", "Task / Milestone", "Priority", "Owner", "Status", "Blockers/Risk", "Completed On", "Comments"]
-    : ["Integration Scope", "Task / Milestone", "Priority", "Owner", "Comments"];
+    ? ["Phase", "Domain", "Task / Milestone", "Priority", "Owner", "Status", "Blockers/Risk", "Completed On", "Comments"]
+    : ["Phase", "Domain", "Task / Milestone", "Priority", "Owner", "Comments"];
 
   const bodyRows = rows.map((row) => `
     <tr>
-      ${row.showScope ? `<td rowspan="${row.scopeSpan}" class="sheet-scope-cell">${escapeHtml(row.scope)}</td>` : ""}
+      ${row.showPhase ? `<td rowspan="${row.phaseSpan}" class="sheet-scope-cell">${escapeHtml(row.phase || "—")}</td>` : ""}
+      ${row.showDomain ? `<td rowspan="${row.domainSpan}" class="sheet-scope-cell">${escapeHtml(row.domain || "—")}</td>` : ""}
       <td>${escapeHtml(row.title)}</td>
       <td>${priorityCellHtml(row.priority)}</td>
       <td>${escapeHtml(row.owner || "Unassigned")}</td>
@@ -1490,7 +1506,7 @@ function emailStatus(status) {
 }
 
 function buildReportEmailHtml(report) {
-  const head = ["Integration Scope", "Task / Milestone", "Priority", "Owner", "Status", "Blockers/Risk", "Completed On", "Comments"];
+  const head = ["Phase", "Domain", "Task / Milestone", "Priority", "Owner", "Status", "Blockers/Risk", "Completed On", "Comments"];
 
   const summaryRows = [
     ["Project name", report.projectName],
@@ -1504,7 +1520,8 @@ function buildReportEmailHtml(report) {
   const tables = report.weeks.map((week) => {
     const body = week.rows.map((row) => `
       <tr>
-        ${row.showScope ? `<td rowspan="${row.scopeSpan}" style="${EMAIL_STYLE.scope}">${escapeHtml(row.scope)}</td>` : ""}
+        ${row.showPhase ? `<td rowspan="${row.phaseSpan}" style="${EMAIL_STYLE.scope}">${escapeHtml(row.phase || "—")}</td>` : ""}
+        ${row.showDomain ? `<td rowspan="${row.domainSpan}" style="${EMAIL_STYLE.scope}">${escapeHtml(row.domain || "—")}</td>` : ""}
         <td style="${EMAIL_STYLE.td}">${escapeHtml(row.title)}</td>
         <td style="${EMAIL_STYLE.td}">${emailPriority(row.priority)}</td>
         <td style="${EMAIL_STYLE.td}">${escapeHtml(row.owner || "Unassigned")}</td>
@@ -1983,8 +2000,31 @@ function ensureDefaults(targetState) {
     });
   });
 
+  /* Tasks used to keep the domain in `phase`, because the report had a single "Integration
+     Scope" column. Now that phase and domain are separate columns, move the old value across
+     and recover the real phase from the master plan. */
+  const phaseByTask = new Map();
+  (targetState.weekTemplates || []).forEach((stage) => {
+    (stage.tasks || []).forEach((task) => {
+      const key = `${task.title}||${task.scope}`;
+      if (!phaseByTask.has(key)) phaseByTask.set(key, new Set());
+      phaseByTask.get(key).add(stage.label);
+    });
+  });
+
   targetState.updates.forEach((update) => {
     (update.tasks || []).forEach((task) => {
+      if (task.domain === undefined) {
+        const wasDomain = task.phase || "";
+        const candidates = [...(phaseByTask.get(`${task.title}||${wasDomain}`) || [])];
+        /* A title can appear in more than one phase (staging and production both audit), so
+           prefer whichever phase this week is already labelled with. */
+        const fromWeek = candidates.find((label) => (update.templateLabel || "").includes(label));
+        const phase = fromWeek || (candidates.length === 1 ? candidates[0] : "")
+          || (update.templateLabel || "").split(" + ")[0] || "";
+        task.phase = /^Week \d+$/.test(phase) ? "" : phase;
+        task.domain = (wasDomain && wasDomain === task.phase) ? "All" : wasDomain;
+      }
       if (task.date === undefined) task.date = "";
       if (task.comments === undefined) task.comments = "";
       (task.subtasks || []).forEach((sub) => {
@@ -3950,7 +3990,7 @@ function addWeekToProject(projectId) {
     fromTemplate: Boolean(template),
     templateWeek: weekNumber,
     templateLabel: template ? template.label : `Week ${weekNumber}`,
-    tasks: template ? templateTasksToUpdateTasks(templateTasksForProject(template.tasks, project), weekStart, project.cycleWeeks) : [],
+    tasks: template ? templateTasksToUpdateTasks(templateTasksForProject(template.tasks, project), weekStart, project.cycleWeeks, template.label) : [],
     createdAt: new Date().toISOString(),
   });
 
@@ -3976,19 +4016,23 @@ function templateTasksForProject(tasks, project) {
   });
 }
 
-function templateTasksToUpdateTasks(tasks, weekStart, cycleWeeks) {
+function templateTasksToUpdateTasks(tasks, weekStart, cycleWeeks, phase) {
   return tasks.map((task) => templateTaskToUpdateTask(task, weekStart,
-    toInputDate(shiftDays(new Date(`${weekStart}T00:00:00`), resolveTaskOffset(task, cycleWeeks) % 7))));
+    toInputDate(shiftDays(new Date(`${weekStart}T00:00:00`), resolveTaskOffset(task, cycleWeeks) % 7)), phase));
 }
 
 /* The master sheet gives a completion date, not a duration, so a task runs from the start of
    the week it is reported in to the day it is due. */
-function templateTaskToUpdateTask(task, weekStart, dueDate) {
+/* `phase` is the stage the work belongs to (Kickoff, Staging Deployment...) and `domain` is
+   what it is done against (Website, Android...). A task whose scope just repeats its phase
+   applies to the whole project, so its domain reads "All" rather than echoing the phase. */
+function templateTaskToUpdateTask(task, weekStart, dueDate, phase) {
   const due = dueDate || taskDueDate(weekStart, templateDefaultDays());
   return {
     id: newId(),
     title: task.title,
-    phase: task.scope,
+    phase: phase || "",
+    domain: (task.scope && task.scope === phase) ? "All" : (task.scope || ""),
     owner: task.owner || "",
     status: "not started",
     date: "",
@@ -4291,7 +4335,7 @@ function generateWeeklyPlan(project) {
       const slot = plan[PlanEngine.weekIndexFor(offset, weeks, lead)];
       if (!slot.labels.includes(stage.label)) slot.labels.push(stage.label);
       if (!slot.stageWeeks.includes(stage.week)) slot.stageWeeks.push(stage.week);
-      slot.tasks.push({ task, dueDate: toInputDate(shiftDays(kickoff, offset)) });
+      slot.tasks.push({ task, phase: stage.label, dueDate: toInputDate(shiftDays(kickoff, offset)) });
     });
   });
 
@@ -4307,7 +4351,7 @@ function generateWeeklyPlan(project) {
       fromTemplate: true,
       templateWeek: slot.stageWeeks[0] || index + 1,
       templateLabel: slot.labels.join(" + ") || `Week ${index + 1}`,
-      tasks: slot.tasks.map(({ task, dueDate }) => templateTaskToUpdateTask(task, weekStart, dueDate)),
+      tasks: slot.tasks.map(({ task, phase, dueDate }) => templateTaskToUpdateTask(task, weekStart, dueDate, phase)),
       createdAt: new Date().toISOString(),
     });
   });
@@ -4492,7 +4536,7 @@ function applyWeekStructureChange(button) {
 
   if (button.dataset.addTask) {
     update.tasks.push({
-      id: newId(), title: "", phase: "", owner: "", status: "not started", date: "",
+      id: newId(), title: "", phase: "", domain: "", owner: "", status: "not started", date: "",
       blocker: "", priority: "medium", comments: "",
       days: templateDefaultDays(), startDate: update.weekStart || "",
       dueDate: taskDueDate(update.weekStart, templateDefaultDays()), subtasks: [],
@@ -4519,7 +4563,8 @@ function renderReportRowTasks(update) {
     return `
       <tr class="week-task-row" data-task="${task.id}">
         <td><input type="text" data-task-field="title" value="${escapeHtml(task.title || "")}" placeholder="Task" /></td>
-        <td><input type="text" data-task-field="phase" value="${escapeHtml(task.phase || "")}" placeholder="Domain" /></td>
+        <td><input type="text" data-task-field="phase" value="${escapeHtml(task.phase || "")}" placeholder="Phase" /></td>
+        <td><input type="text" data-task-field="domain" value="${escapeHtml(task.domain || "")}" placeholder="Domain" /></td>
         <td><input type="text" list="ownerOptions" data-task-field="owner" value="${escapeHtml(task.owner || "")}" placeholder="Owner" /></td>
         <td><input type="date" data-task-field="dueDate" value="${escapeHtml(task.dueDate || "")}" title="Planned from the master plan — moving it re-files the task into that week" /></td>
         <td><input type="date" data-task-field="date" value="${escapeHtml(task.date || "")}" title="The date the work actually finished — this is what the generated report prints" /></td>
@@ -4533,6 +4578,7 @@ function renderReportRowTasks(update) {
       ${subtasks.map((sub) => `
         <tr class="week-subtask-row" data-task="${task.id}" data-subtask="${sub.id}">
           <td class="week-subtask-title"><span aria-hidden="true">&#8627;</span><input type="text" data-subtask-field="title" value="${escapeHtml(sub.title || "")}" placeholder="Sub-task" /></td>
+          <td></td>
           <td></td>
           <td><input type="text" list="ownerOptions" data-subtask-field="owner" value="${escapeHtml(sub.owner || "")}" placeholder="Owner" /></td>
           <td></td>
@@ -4562,7 +4608,7 @@ function renderReportRowTasks(update) {
       ${tasks.length ? `
         <div class="week-editor-scroll">
           <table class="report-row-task-table">
-            <thead><tr><th>Task</th><th>Domain</th><th>Owner</th><th>Planned</th><th>Completed On</th><th>Status</th><th>Comments</th><th></th></tr></thead>
+            <thead><tr><th>Task</th><th>Phase</th><th>Domain</th><th>Owner</th><th>Planned</th><th>Completed On</th><th>Status</th><th>Comments</th><th></th></tr></thead>
             <tbody>${rows}</tbody>
           </table>
         </div>` : `<p class="muted">No tasks due this week. Use “+ Add task” to add one.</p>`}
