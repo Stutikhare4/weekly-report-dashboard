@@ -298,7 +298,6 @@ const nodes = {
   projectReportState: document.getElementById("projectReportState"),
   generateReport: document.getElementById("generateReport"),
   downloadReport: document.getElementById("downloadReport"),
-  addWeeklyUpdate: document.getElementById("addWeeklyUpdate"),
   addWeekFromTemplate: document.getElementById("addWeekFromTemplate"),
 
   addProjectForm: document.getElementById("addProjectForm"),
@@ -485,7 +484,6 @@ function boot() {
     if (step && uiState.wizardStep < WIZARD_CONFIRM_STEP) goToWizardStep(Number(step.dataset.step));
   });
 
-  nodes.addWeeklyUpdate.addEventListener("click", () => addWeeklyReport(uiState.projectId));
   nodes.openWeeklyReport.addEventListener("click", () => setProjectView("report"));
   nodes.backToProjectDetails.addEventListener("click", () => setProjectView("details"));
   nodes.editWeeklyReports.addEventListener("click", () => openCreateReport(uiState.projectId, null, { editing: false }));

@@ -2320,6 +2320,16 @@ button {
   --card-done: #4caf50;
 }
 
+#projectDetailsView {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 40px;
+}
+
+@media (max-width: 900px) {
+  #projectDetailsView { padding: 0; }
+}
+
 .overview-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -2390,6 +2400,14 @@ button {
   margin: -6px -8px;
   border-radius: 8px;
   transition: background 0.2s ease;
+}
+
+/* Only the cards that can actually be edited invite a click, so the hover tint is scoped to
+   them rather than applied to read-only Overview. */
+#projectScope .overview-field:hover,
+#projectTimelineFields .overview-field:hover {
+  background: color-mix(in srgb, var(--card-accent) 8%, transparent);
+  cursor: pointer;
 }
 
 .overview-label {
@@ -2504,37 +2522,49 @@ button {
 /* The project page's two views. */
 .project-view-actions {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: 12px;
+  justify-content: center;
+  gap: 14px;
+  flex-wrap: wrap;
   margin-top: 18px;
 }
 
-.generate-report-button {
-  padding: 13px 30px;
-  border: 0;
-  border-radius: 14px;
-  font-size: 1rem;
-  font-weight: 700;
-  color: #04121f;
-  background: var(--accent-2);
-  cursor: pointer;
-  transition: filter 120ms ease, transform 120ms ease;
-}
-
-.generate-report-button:hover {
-  filter: brightness(0.92);
-}
-
-.generate-report-button:active {
-  transform: translateY(1px);
-}
-
-.project-view-secondary {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
+.overview-action {
+  /* Fixed line box: the emoji on the primary button otherwise renders taller than the text
+     on the other two and the row loses its common height. */
+  display: inline-flex;
+  align-items: center;
   justify-content: center;
+  line-height: 1.25;
+  min-height: 44px;
+  padding: 0 22px;
+  border-radius: 11px;
+  border: 2px solid var(--card-accent);
+  background: transparent;
+  color: var(--text);
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.3s ease, filter 0.3s ease, transform 0.12s ease;
+}
+
+.overview-action:hover {
+  background: color-mix(in srgb, var(--card-accent) 12%, transparent);
+}
+
+.overview-action.is-primary {
+  background: var(--card-accent);
+  border-color: var(--card-accent);
+  color: #ffffff;
+}
+
+.overview-action.is-primary:hover {
+  filter: brightness(0.92);
+  background: var(--card-accent);
+}
+
+.overview-action:active {
+  transform: translateY(1px);
 }
 
 .report-view-head {
@@ -3620,12 +3650,9 @@ button {
               </section>
 
               <div class="project-view-actions">
-                <button id="openWeeklyReport" class="generate-report-button" type="button">📊 Generate Report</button>
-                <div class="project-view-secondary">
-                  <button id="addWeekFromTemplate" data-requires="report.create" class="secondary-button small-button" type="button">+ Add week from template</button>
-                  <button id="addWeeklyUpdate" data-requires="report.create" class="ghost-button small-button" type="button">+ Add Update</button>
-                  <button id="editWeeklyReports" data-requires="report.edit" class="ghost-button small-button" type="button">Edit weekly reports</button>
-                </div>
+                <button id="addWeekFromTemplate" data-requires="report.create" class="overview-action" type="button">+ Add week from template</button>
+                <button id="openWeeklyReport" class="overview-action is-primary" type="button">📊 Generate Report</button>
+                <button id="editWeeklyReports" data-requires="report.edit" class="overview-action" type="button">Edit weekly reports</button>
               </div>
             </div>
 
@@ -4448,7 +4475,6 @@ const nodes = {
   projectReportState: document.getElementById("projectReportState"),
   generateReport: document.getElementById("generateReport"),
   downloadReport: document.getElementById("downloadReport"),
-  addWeeklyUpdate: document.getElementById("addWeeklyUpdate"),
   addWeekFromTemplate: document.getElementById("addWeekFromTemplate"),
 
   addProjectForm: document.getElementById("addProjectForm"),
@@ -4635,7 +4661,6 @@ function boot() {
     if (step && uiState.wizardStep < WIZARD_CONFIRM_STEP) goToWizardStep(Number(step.dataset.step));
   });
 
-  nodes.addWeeklyUpdate.addEventListener("click", () => addWeeklyReport(uiState.projectId));
   nodes.openWeeklyReport.addEventListener("click", () => setProjectView("report"));
   nodes.backToProjectDetails.addEventListener("click", () => setProjectView("details"));
   nodes.editWeeklyReports.addEventListener("click", () => openCreateReport(uiState.projectId, null, { editing: false }));
