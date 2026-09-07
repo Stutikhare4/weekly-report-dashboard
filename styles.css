@@ -2300,6 +2300,57 @@ button {
   white-space: nowrap;
 }
 
+/* The project page's two views. */
+.project-view-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.generate-report-button {
+  padding: 13px 30px;
+  border: 0;
+  border-radius: 14px;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #04121f;
+  background: var(--accent-2);
+  cursor: pointer;
+  transition: filter 120ms ease, transform 120ms ease;
+}
+
+.generate-report-button:hover {
+  filter: brightness(0.92);
+}
+
+.generate-report-button:active {
+  transform: translateY(1px);
+}
+
+.project-view-secondary {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.report-view-head {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-bottom: 18px;
+}
+
+.report-view-head h2 {
+  margin: 0;
+  flex: 1;
+  min-width: 0;
+  font-family: Georgia, "Times New Roman", serif;
+}
+
 .report-row-week {
   display: flex;
   align-items: center;

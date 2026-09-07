@@ -193,7 +193,8 @@
           </section>
 
           <section class="card screen" id="projectScreen" hidden>
-            <div class="screen-head">
+            <!-- Two views of one project: the details, and the weekly report on its own. -->
+            <div class="screen-head" id="projectScreenHead">
               <button id="backToCategory" class="ghost-button" type="button">Back</button>
               <div class="screen-title">
                 <p class="eyebrow">Project page</p>
@@ -205,75 +206,76 @@
               </div>
             </div>
 
-            <div class="project-detail-grid">
-              <section class="detail-panel">
-                <h3>Overview</h3>
-                <div id="projectOverview" class="detail-text"></div>
+            <div id="projectDetailsView">
+              <div class="project-detail-grid">
+                <section class="detail-panel">
+                  <h3>Overview</h3>
+                  <div id="projectOverview" class="detail-text"></div>
 
-                <div class="timeline-editor" id="projDetailsBlock">
-                  <div class="wizard-section-head static" style="margin-bottom:8px;">
-                    <h4 style="margin:0;">Project details</h4>
-                    <button type="button" id="projEditToggle" class="ghost-button small-button" data-requires="project.edit">Edit</button>
-                  </div>
-                  <p class="muted" id="projDetailsNote">Go-live is calculated from kickoff and cycle length. Changing either re-dates every weekly report.</p>
-
-                  <form id="projDetailsForm" class="timeline-fields" hidden>
-                    <label>Project name<input type="text" id="projName" /></label>
-                    <label>CSM<input type="text" id="projCsm" /></label>
-                    <label>Project owner<input type="text" id="projOwner" /></label>
-                    <label>Sales owner<input type="text" id="projSalesOwner" /></label>
-                    <label>Kickoff<input type="date" id="projKickoff" /></label>
-                    <label>Cycle length
-                      <select id="projCycleWeeks"></select>
-                    </label>
-                    <label>Target go-live<input type="date" id="projGoLive" readonly /></label>
-                    <label>Technical team
-                      <select id="projTechTeam">
-                        <option value="in-house">In-house</option>
-                        <option value="outsourced">Outsourced (third-party vendor)</option>
-                      </select>
-                    </label>
-                    <label id="projVendorField" hidden>Vendor<input type="text" id="projVendorName" /></label>
-                    <label class="span-full">Notes<textarea id="projNotes" rows="2"></textarea></label>
-                    <div class="actions span-full">
-                      <button type="submit" class="secondary-button small-button">Save details</button>
-                      <button type="button" id="projCancelEdit" class="ghost-button small-button">Cancel</button>
+                  <div class="timeline-editor" id="projDetailsBlock">
+                    <div class="wizard-section-head static" style="margin-bottom:8px;">
+                      <h4 style="margin:0;">Project details</h4>
+                      <button type="button" id="projEditToggle" class="ghost-button small-button" data-requires="project.edit">Edit</button>
                     </div>
-                  </form>
+                    <p class="muted" id="projDetailsNote">Go-live is calculated from kickoff and cycle length. Changing either re-dates every weekly report.</p>
 
-                  <p class="muted" id="projTimelineNote"></p>
-                </div>
-              </section>
+                    <form id="projDetailsForm" class="timeline-fields" hidden>
+                      <label>Project name<input type="text" id="projName" /></label>
+                      <label>CSM<input type="text" id="projCsm" /></label>
+                      <label>Project owner<input type="text" id="projOwner" /></label>
+                      <label>Sales owner<input type="text" id="projSalesOwner" /></label>
+                      <label>Kickoff<input type="date" id="projKickoff" /></label>
+                      <label>Cycle length
+                        <select id="projCycleWeeks"></select>
+                      </label>
+                      <label>Target go-live<input type="date" id="projGoLive" readonly /></label>
+                      <label>Technical team
+                        <select id="projTechTeam">
+                          <option value="in-house">In-house</option>
+                          <option value="outsourced">Outsourced (third-party vendor)</option>
+                        </select>
+                      </label>
+                      <label id="projVendorField" hidden>Vendor<input type="text" id="projVendorName" /></label>
+                      <label class="span-full">Notes<textarea id="projNotes" rows="2"></textarea></label>
+                      <div class="actions span-full">
+                        <button type="submit" class="secondary-button small-button">Save details</button>
+                        <button type="button" id="projCancelEdit" class="ghost-button small-button">Cancel</button>
+                      </div>
+                    </form>
 
-              <section class="detail-panel">
-                <div class="card-head" style="margin-bottom: 12px; align-items: center;">
-                  <h3 style="margin: 0;">Weekly updates</h3>
-                  <button id="addWeekFromTemplate" data-requires="report.create" class="secondary-button" type="button" style="padding: 8px 12px; font-size: 0.85rem; border-radius: 10px;">+ Add week from template</button>
-                  <button id="addWeeklyUpdate" data-requires="report.create" class="primary-button" type="button" style="padding: 8px 12px; font-size: 0.85rem; border-radius: 10px;">+ Add Update</button>
+                    <p class="muted" id="projTimelineNote"></p>
+                  </div>
+                </section>
+              </div>
+
+              <div class="project-view-actions">
+                <button id="openWeeklyReport" class="generate-report-button" type="button">📊 Generate Report</button>
+                <div class="project-view-secondary">
+                  <button id="addWeekFromTemplate" data-requires="report.create" class="secondary-button small-button" type="button">+ Add week from template</button>
+                  <button id="addWeeklyUpdate" data-requires="report.create" class="ghost-button small-button" type="button">+ Add Update</button>
+                  <button id="editWeeklyReports" data-requires="report.edit" class="ghost-button small-button" type="button">Edit weekly reports</button>
                 </div>
-                <div id="projectUpdates" class="log-list"></div>
+              </div>
+            </div>
+
+            <div id="projectReportView" hidden>
+              <div class="report-view-head">
+                <button id="backToProjectDetails" class="ghost-button" type="button">&larr; Back</button>
+                <h2 id="projectReportTitle">Weekly Report</h2>
+                <span id="projectReportState" class="pill pill-dark">Waiting</span>
+              </div>
+              <section class="detail-panel report-panel">
+                <div id="projectReportOutput" class="report-output">
+                  <p class="muted">Open a project name to generate a report for that project only.</p>
+                </div>
+                <div class="actions report-actions">
+                  <button id="generateReport" class="secondary-button" type="button">Generate report (PDF)</button>
+                  <button id="downloadReport" class="ghost-button" type="button">Copy HTML for email</button>
+                </div>
               </section>
             </div>
 
             <section class="detail-panel" id="projectSummary"></section>
-
-
-            <section class="detail-panel report-panel">
-              <div class="card-head">
-                <div>
-                  <p class="eyebrow">Project report</p>
-                  <h3>Generated summary</h3>
-                </div>
-                <span id="projectReportState" class="pill pill-dark">Waiting</span>
-              </div>
-              <div id="projectReportOutput" class="report-output">
-                <p class="muted">Open a project name to generate a report for that project only.</p>
-              </div>
-              <div class="actions report-actions">
-                <button id="generateReport" class="secondary-button" type="button">Generate report (PDF)</button>
-                <button id="downloadReport" class="ghost-button" type="button">Copy HTML for email</button>
-              </div>
-            </section>
           </section>
 
           <section class="card screen" id="addProjectScreen" hidden>

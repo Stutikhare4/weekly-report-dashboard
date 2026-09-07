@@ -272,7 +272,13 @@ const nodes = {
   npCycleHint: document.getElementById("npCycleHint"),
   projectOverview: document.getElementById("projectOverview"),
   projectSummary: document.getElementById("projectSummary"),
-  projectUpdates: document.getElementById("projectUpdates"),
+  projectDetailsView: document.getElementById("projectDetailsView"),
+  projectReportView: document.getElementById("projectReportView"),
+  projectScreenHead: document.getElementById("projectScreenHead"),
+  projectReportTitle: document.getElementById("projectReportTitle"),
+  openWeeklyReport: document.getElementById("openWeeklyReport"),
+  backToProjectDetails: document.getElementById("backToProjectDetails"),
+  editWeeklyReports: document.getElementById("editWeeklyReports"),
   projectReportOutput: document.getElementById("projectReportOutput"),
   projectReportState: document.getElementById("projectReportState"),
   generateReport: document.getElementById("generateReport"),
@@ -398,6 +404,7 @@ let uiState = {
   calendarSelectedDate: null,
   wizardStep: 1,
   wizardSavedId: null,
+  projectView: "details",
   openReportRows: new Set(),
 };
 let latestReportText = "";
@@ -464,6 +471,9 @@ function boot() {
   });
 
   nodes.addWeeklyUpdate.addEventListener("click", () => addWeeklyReport(uiState.projectId));
+  nodes.openWeeklyReport.addEventListener("click", () => setProjectView("report"));
+  nodes.backToProjectDetails.addEventListener("click", () => setProjectView("details"));
+  nodes.editWeeklyReports.addEventListener("click", () => openCreateReport(uiState.projectId, null, { editing: false }));
   nodes.addWeekFromTemplate.addEventListener("click", () => addWeekToProject(uiState.projectId));
   nodes.deleteProjectBtn.addEventListener("click", () => deleteProject(uiState.projectId));
   nodes.projEditToggle.addEventListener("click", () => toggleProjectDetails(true));
@@ -611,6 +621,21 @@ function templatesAreCurrent() {
   if ((state.weekTemplatesVersion || "") !== WEEK_TEMPLATE_VERSION) return false;
   return (state.weekTemplates || []).every((week) =>
     (week.tasks || []).every((task) => Object.keys(task.offsetByCycle || {}).length));
+}
+
+/* The project page has two views: its details, and the weekly report on its own. Kept as one
+   screen so the project stays loaded and Back is instant, rather than a second screen that
+   would have to re-resolve the project. */
+function setProjectView(view) {
+  uiState.projectView = view === "report" ? "report" : "details";
+  const showingReport = uiState.projectView === "report";
+  nodes.projectDetailsView.hidden = showingReport;
+  nodes.projectReportView.hidden = !showingReport;
+  nodes.projectScreenHead.hidden = showingReport;
+
+  const project = state.projects.find((item) => item.id === uiState.projectId);
+  nodes.projectReportTitle.textContent = project ? `${project.name} — Weekly Report` : "Weekly Report";
+  nodes.projectScreen.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
 function clearResetFlagFromUrl() {
@@ -1031,7 +1056,7 @@ function openProject(projectId) {
   uiState.activeNav = "dashboard";
   uiState.projectId = projectId;
   renderAll();
-  nodes.projectScreen.scrollIntoView({ behavior: "smooth", block: "start" });
+  setProjectView("details");
 }
 
 function renderCategoryScreen() {
@@ -1066,7 +1091,6 @@ function renderProjectScreen() {
     nodes.projectTitle.textContent = "Project";
     nodes.projectStatusBadge.textContent = "Waiting";
     nodes.projectOverview.innerHTML = `<p class="muted">Choose a project name to see its page.</p>`;
-    nodes.projectUpdates.innerHTML = "";
     nodes.projectSummary.innerHTML = "";
     nodes.projectReportState.textContent = "Waiting";
     nodes.projectReportOutput.innerHTML = `<p class="muted">Open a project name to generate a report for that project only.</p>`;
@@ -1094,45 +1118,7 @@ function renderProjectScreen() {
     ${buildIntegrationScopeHtml(project)}
   `;
 
-  nodes.projectUpdates.innerHTML = updates.length
-    ? updates
-        .map(
-          (update) => {
-            const taskList = update.tasks || [];
-            return `
-            <article class="log-card">
-              <header style="align-items: center;">
-                <div>
-                  <h4>${escapeHtml(update.weekRange)}</h4>
-                </div>
-                <div style="display: flex; align-items: center; gap: 8px;">
-                  <button class="ghost-button btn-edit-update" data-requires="report.edit" data-update-id="${update.id}" style="padding: 4px 10px; font-size: 0.75rem; border-radius: 8px;">Edit</button>
-                  <button class="row-remove btn-delete-update" data-requires="report.delete" data-update-id="${update.id}" style="padding: 4px 10px; font-size: 0.75rem;">Delete week</button>
-                  <span class="status-badge ${statusClass(update.statusTag)}">${escapeHtml(update.statusTag)}</span>
-                </div>
-              </header>
-              <div class="summary" style="display: grid; gap: 10px;">
-                ${taskList.length ? `
-                  <div style="margin-top: 8px;">
-                    ${buildSheetReportTable("", withScopeSpans(flattenTasksForReport(taskList)), true)}
-                  </div>
-                ` : `
-                  <div class="muted">No tasks entered.</div>
-                `}
-              </div>
-            </article>
-          `}
-        )
-        .join("")
-    : `<div class="empty-state">No weekly updates for this project yet.</div>`;
-
-  nodes.projectUpdates.querySelectorAll(".btn-edit-update").forEach((button) => {
-    button.addEventListener("click", () => openEditUpdate(button.dataset.updateId));
-  });
-
-  nodes.projectUpdates.querySelectorAll(".btn-delete-update").forEach((button) => {
-    button.addEventListener("click", () => deleteUpdate(button.dataset.updateId));
-  });
+  if (uiState.projectView === "report") nodes.projectReportTitle.textContent = `${project.name} — Weekly Report`;
 
   renderProjectTimeline(project);
   renderProjectSummary(project.id);

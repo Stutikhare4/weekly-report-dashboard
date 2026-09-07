@@ -2312,6 +2312,57 @@ button {
   white-space: nowrap;
 }
 
+/* The project page's two views. */
+.project-view-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.generate-report-button {
+  padding: 13px 30px;
+  border: 0;
+  border-radius: 14px;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #04121f;
+  background: var(--accent-2);
+  cursor: pointer;
+  transition: filter 120ms ease, transform 120ms ease;
+}
+
+.generate-report-button:hover {
+  filter: brightness(0.92);
+}
+
+.generate-report-button:active {
+  transform: translateY(1px);
+}
+
+.project-view-secondary {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.report-view-head {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-bottom: 18px;
+}
+
+.report-view-head h2 {
+  margin: 0;
+  flex: 1;
+  min-width: 0;
+  font-family: Georgia, "Times New Roman", serif;
+}
+
 .report-row-week {
   display: flex;
   align-items: center;
@@ -3270,7 +3321,8 @@ button {
           </section>
 
           <section class="card screen" id="projectScreen" hidden>
-            <div class="screen-head">
+            <!-- Two views of one project: the details, and the weekly report on its own. -->
+            <div class="screen-head" id="projectScreenHead">
               <button id="backToCategory" class="ghost-button" type="button">Back</button>
               <div class="screen-title">
                 <p class="eyebrow">Project page</p>
@@ -3282,75 +3334,76 @@ button {
               </div>
             </div>
 
-            <div class="project-detail-grid">
-              <section class="detail-panel">
-                <h3>Overview</h3>
-                <div id="projectOverview" class="detail-text"></div>
+            <div id="projectDetailsView">
+              <div class="project-detail-grid">
+                <section class="detail-panel">
+                  <h3>Overview</h3>
+                  <div id="projectOverview" class="detail-text"></div>
 
-                <div class="timeline-editor" id="projDetailsBlock">
-                  <div class="wizard-section-head static" style="margin-bottom:8px;">
-                    <h4 style="margin:0;">Project details</h4>
-                    <button type="button" id="projEditToggle" class="ghost-button small-button" data-requires="project.edit">Edit</button>
-                  </div>
-                  <p class="muted" id="projDetailsNote">Go-live is calculated from kickoff and cycle length. Changing either re-dates every weekly report.</p>
-
-                  <form id="projDetailsForm" class="timeline-fields" hidden>
-                    <label>Project name<input type="text" id="projName" /></label>
-                    <label>CSM<input type="text" id="projCsm" /></label>
-                    <label>Project owner<input type="text" id="projOwner" /></label>
-                    <label>Sales owner<input type="text" id="projSalesOwner" /></label>
-                    <label>Kickoff<input type="date" id="projKickoff" /></label>
-                    <label>Cycle length
-                      <select id="projCycleWeeks"></select>
-                    </label>
-                    <label>Target go-live<input type="date" id="projGoLive" readonly /></label>
-                    <label>Technical team
-                      <select id="projTechTeam">
-                        <option value="in-house">In-house</option>
-                        <option value="outsourced">Outsourced (third-party vendor)</option>
-                      </select>
-                    </label>
-                    <label id="projVendorField" hidden>Vendor<input type="text" id="projVendorName" /></label>
-                    <label class="span-full">Notes<textarea id="projNotes" rows="2"></textarea></label>
-                    <div class="actions span-full">
-                      <button type="submit" class="secondary-button small-button">Save details</button>
-                      <button type="button" id="projCancelEdit" class="ghost-button small-button">Cancel</button>
+                  <div class="timeline-editor" id="projDetailsBlock">
+                    <div class="wizard-section-head static" style="margin-bottom:8px;">
+                      <h4 style="margin:0;">Project details</h4>
+                      <button type="button" id="projEditToggle" class="ghost-button small-button" data-requires="project.edit">Edit</button>
                     </div>
-                  </form>
+                    <p class="muted" id="projDetailsNote">Go-live is calculated from kickoff and cycle length. Changing either re-dates every weekly report.</p>
 
-                  <p class="muted" id="projTimelineNote"></p>
-                </div>
-              </section>
+                    <form id="projDetailsForm" class="timeline-fields" hidden>
+                      <label>Project name<input type="text" id="projName" /></label>
+                      <label>CSM<input type="text" id="projCsm" /></label>
+                      <label>Project owner<input type="text" id="projOwner" /></label>
+                      <label>Sales owner<input type="text" id="projSalesOwner" /></label>
+                      <label>Kickoff<input type="date" id="projKickoff" /></label>
+                      <label>Cycle length
+                        <select id="projCycleWeeks"></select>
+                      </label>
+                      <label>Target go-live<input type="date" id="projGoLive" readonly /></label>
+                      <label>Technical team
+                        <select id="projTechTeam">
+                          <option value="in-house">In-house</option>
+                          <option value="outsourced">Outsourced (third-party vendor)</option>
+                        </select>
+                      </label>
+                      <label id="projVendorField" hidden>Vendor<input type="text" id="projVendorName" /></label>
+                      <label class="span-full">Notes<textarea id="projNotes" rows="2"></textarea></label>
+                      <div class="actions span-full">
+                        <button type="submit" class="secondary-button small-button">Save details</button>
+                        <button type="button" id="projCancelEdit" class="ghost-button small-button">Cancel</button>
+                      </div>
+                    </form>
 
-              <section class="detail-panel">
-                <div class="card-head" style="margin-bottom: 12px; align-items: center;">
-                  <h3 style="margin: 0;">Weekly updates</h3>
-                  <button id="addWeekFromTemplate" data-requires="report.create" class="secondary-button" type="button" style="padding: 8px 12px; font-size: 0.85rem; border-radius: 10px;">+ Add week from template</button>
-                  <button id="addWeeklyUpdate" data-requires="report.create" class="primary-button" type="button" style="padding: 8px 12px; font-size: 0.85rem; border-radius: 10px;">+ Add Update</button>
+                    <p class="muted" id="projTimelineNote"></p>
+                  </div>
+                </section>
+              </div>
+
+              <div class="project-view-actions">
+                <button id="openWeeklyReport" class="generate-report-button" type="button">📊 Generate Report</button>
+                <div class="project-view-secondary">
+                  <button id="addWeekFromTemplate" data-requires="report.create" class="secondary-button small-button" type="button">+ Add week from template</button>
+                  <button id="addWeeklyUpdate" data-requires="report.create" class="ghost-button small-button" type="button">+ Add Update</button>
+                  <button id="editWeeklyReports" data-requires="report.edit" class="ghost-button small-button" type="button">Edit weekly reports</button>
                 </div>
-                <div id="projectUpdates" class="log-list"></div>
+              </div>
+            </div>
+
+            <div id="projectReportView" hidden>
+              <div class="report-view-head">
+                <button id="backToProjectDetails" class="ghost-button" type="button">&larr; Back</button>
+                <h2 id="projectReportTitle">Weekly Report</h2>
+                <span id="projectReportState" class="pill pill-dark">Waiting</span>
+              </div>
+              <section class="detail-panel report-panel">
+                <div id="projectReportOutput" class="report-output">
+                  <p class="muted">Open a project name to generate a report for that project only.</p>
+                </div>
+                <div class="actions report-actions">
+                  <button id="generateReport" class="secondary-button" type="button">Generate report (PDF)</button>
+                  <button id="downloadReport" class="ghost-button" type="button">Copy HTML for email</button>
+                </div>
               </section>
             </div>
 
             <section class="detail-panel" id="projectSummary"></section>
-
-
-            <section class="detail-panel report-panel">
-              <div class="card-head">
-                <div>
-                  <p class="eyebrow">Project report</p>
-                  <h3>Generated summary</h3>
-                </div>
-                <span id="projectReportState" class="pill pill-dark">Waiting</span>
-              </div>
-              <div id="projectReportOutput" class="report-output">
-                <p class="muted">Open a project name to generate a report for that project only.</p>
-              </div>
-              <div class="actions report-actions">
-                <button id="generateReport" class="secondary-button" type="button">Generate report (PDF)</button>
-                <button id="downloadReport" class="ghost-button" type="button">Copy HTML for email</button>
-              </div>
-            </section>
           </section>
 
           <section class="card screen" id="addProjectScreen" hidden>
@@ -4126,7 +4179,13 @@ const nodes = {
   npCycleHint: document.getElementById("npCycleHint"),
   projectOverview: document.getElementById("projectOverview"),
   projectSummary: document.getElementById("projectSummary"),
-  projectUpdates: document.getElementById("projectUpdates"),
+  projectDetailsView: document.getElementById("projectDetailsView"),
+  projectReportView: document.getElementById("projectReportView"),
+  projectScreenHead: document.getElementById("projectScreenHead"),
+  projectReportTitle: document.getElementById("projectReportTitle"),
+  openWeeklyReport: document.getElementById("openWeeklyReport"),
+  backToProjectDetails: document.getElementById("backToProjectDetails"),
+  editWeeklyReports: document.getElementById("editWeeklyReports"),
   projectReportOutput: document.getElementById("projectReportOutput"),
   projectReportState: document.getElementById("projectReportState"),
   generateReport: document.getElementById("generateReport"),
@@ -4252,6 +4311,7 @@ let uiState = {
   calendarSelectedDate: null,
   wizardStep: 1,
   wizardSavedId: null,
+  projectView: "details",
   openReportRows: new Set(),
 };
 let latestReportText = "";
@@ -4318,6 +4378,9 @@ function boot() {
   });
 
   nodes.addWeeklyUpdate.addEventListener("click", () => addWeeklyReport(uiState.projectId));
+  nodes.openWeeklyReport.addEventListener("click", () => setProjectView("report"));
+  nodes.backToProjectDetails.addEventListener("click", () => setProjectView("details"));
+  nodes.editWeeklyReports.addEventListener("click", () => openCreateReport(uiState.projectId, null, { editing: false }));
   nodes.addWeekFromTemplate.addEventListener("click", () => addWeekToProject(uiState.projectId));
   nodes.deleteProjectBtn.addEventListener("click", () => deleteProject(uiState.projectId));
   nodes.projEditToggle.addEventListener("click", () => toggleProjectDetails(true));
@@ -4465,6 +4528,21 @@ function templatesAreCurrent() {
   if ((state.weekTemplatesVersion || "") !== WEEK_TEMPLATE_VERSION) return false;
   return (state.weekTemplates || []).every((week) =>
     (week.tasks || []).every((task) => Object.keys(task.offsetByCycle || {}).length));
+}
+
+/* The project page has two views: its details, and the weekly report on its own. Kept as one
+   screen so the project stays loaded and Back is instant, rather than a second screen that
+   would have to re-resolve the project. */
+function setProjectView(view) {
+  uiState.projectView = view === "report" ? "report" : "details";
+  const showingReport = uiState.projectView === "report";
+  nodes.projectDetailsView.hidden = showingReport;
+  nodes.projectReportView.hidden = !showingReport;
+  nodes.projectScreenHead.hidden = showingReport;
+
+  const project = state.projects.find((item) => item.id === uiState.projectId);
+  nodes.projectReportTitle.textContent = project ? `${project.name} — Weekly Report` : "Weekly Report";
+  nodes.projectScreen.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
 function clearResetFlagFromUrl() {
@@ -4885,7 +4963,7 @@ function openProject(projectId) {
   uiState.activeNav = "dashboard";
   uiState.projectId = projectId;
   renderAll();
-  nodes.projectScreen.scrollIntoView({ behavior: "smooth", block: "start" });
+  setProjectView("details");
 }
 
 function renderCategoryScreen() {
@@ -4920,7 +4998,6 @@ function renderProjectScreen() {
     nodes.projectTitle.textContent = "Project";
     nodes.projectStatusBadge.textContent = "Waiting";
     nodes.projectOverview.innerHTML = `<p class="muted">Choose a project name to see its page.</p>`;
-    nodes.projectUpdates.innerHTML = "";
     nodes.projectSummary.innerHTML = "";
     nodes.projectReportState.textContent = "Waiting";
     nodes.projectReportOutput.innerHTML = `<p class="muted">Open a project name to generate a report for that project only.</p>`;
@@ -4948,45 +5025,7 @@ function renderProjectScreen() {
     ${buildIntegrationScopeHtml(project)}
   `;
 
-  nodes.projectUpdates.innerHTML = updates.length
-    ? updates
-        .map(
-          (update) => {
-            const taskList = update.tasks || [];
-            return `
-            <article class="log-card">
-              <header style="align-items: center;">
-                <div>
-                  <h4>${escapeHtml(update.weekRange)}</h4>
-                </div>
-                <div style="display: flex; align-items: center; gap: 8px;">
-                  <button class="ghost-button btn-edit-update" data-requires="report.edit" data-update-id="${update.id}" style="padding: 4px 10px; font-size: 0.75rem; border-radius: 8px;">Edit</button>
-                  <button class="row-remove btn-delete-update" data-requires="report.delete" data-update-id="${update.id}" style="padding: 4px 10px; font-size: 0.75rem;">Delete week</button>
-                  <span class="status-badge ${statusClass(update.statusTag)}">${escapeHtml(update.statusTag)}</span>
-                </div>
-              </header>
-              <div class="summary" style="display: grid; gap: 10px;">
-                ${taskList.length ? `
-                  <div style="margin-top: 8px;">
-                    ${buildSheetReportTable("", withScopeSpans(flattenTasksForReport(taskList)), true)}
-                  </div>
-                ` : `
-                  <div class="muted">No tasks entered.</div>
-                `}
-              </div>
-            </article>
-          `}
-        )
-        .join("")
-    : `<div class="empty-state">No weekly updates for this project yet.</div>`;
-
-  nodes.projectUpdates.querySelectorAll(".btn-edit-update").forEach((button) => {
-    button.addEventListener("click", () => openEditUpdate(button.dataset.updateId));
-  });
-
-  nodes.projectUpdates.querySelectorAll(".btn-delete-update").forEach((button) => {
-    button.addEventListener("click", () => deleteUpdate(button.dataset.updateId));
-  });
+  if (uiState.projectView === "report") nodes.projectReportTitle.textContent = `${project.name} — Weekly Report`;
 
   renderProjectTimeline(project);
   renderProjectSummary(project.id);

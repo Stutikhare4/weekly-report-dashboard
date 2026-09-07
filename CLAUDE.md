@@ -91,6 +91,18 @@ Known data slips in the sheet, imported as written rather than silently correcte
 6 and Week 12 tabs the five *Production* channel-setup rows (Email/SMS/WhatsApp/RCS/IVR) still
 carry the staging value N+10, so they schedule before the production dashboard exists.
 
+## Project page: two views
+
+The project page holds two views of one project, toggled by `setProjectView()`: **details**
+(overview, integration scope, editable project details, and a Generate Report button) and
+**report** (the generated weekly report on its own, with its own Back button and heading).
+Opening a project always lands on details. They are two views of one screen rather than two
+screens, so the project stays loaded and Back is instant.
+
+The old "Weekly updates" list on the project page is gone — it was a third rendering of the
+same weeks, after the report itself and the reports accordion. Adding and editing weeks now
+happens on the Project Reports screen, reachable from the details view.
+
 ## Weekly reports screen
 
 Weeks are an accordion: collapsed to a summary line (week number, dates, phase, task count,
