@@ -99,10 +99,13 @@ owner, due date, status and comments, with sub-tasks nested underneath, all writ
 state on change. There is no separate form below the list, so a week's tasks are never rendered
 twice. "Edit" opens a week in place; "+ New report" appends a week and opens it.
 
-Two date columns, deliberately distinct: **Planned** is `task.dueDate`, set from the master
-plan's offset and the thing that decides which week a task sits in; **Completed On** is
-`task.date`, what actually happened and what the generated report prints. Setting a task's
-status to completed fills Completed On with today if it is still blank.
+Columns run **Phase | Domain | Task | Owner | Completed On | Status | Comments** in the editor
+and in every report output, so what is edited and what is sent read the same way.
+
+**Completed On** is `task.date` — what actually happened, and what the report prints. Setting a
+task's status to completed fills it with today if it is still blank. `task.dueDate` is still the
+planned date from the master plan and still decides which week a task sits in, but it is no
+longer editable: it is set at generation and adjusted when the project is re-dated.
 
 The week containing today is marked with a left rule, a tinted row and a "This week" badge.
 Membership comes from `isDateInUpdateWeek`, which compares ISO date strings — parsing

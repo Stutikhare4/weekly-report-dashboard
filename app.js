@@ -1273,22 +1273,15 @@ function reportRowsToText(rows, includeStatusColumns) {
   if (!rows.length) return " (no tasks entered)";
   return rows.map((row) => {
     const where = [row.phase, row.domain].filter(Boolean).join(" / ") || row.scope;
-    let line = ` - [${where}] ${row.title} (Priority: ${row.priority}, Owner: ${row.owner || "Unassigned"}`;
+    let line = ` - [${where}] ${row.title} (Owner: ${row.owner || "Unassigned"}`;
     if (includeStatusColumns) {
       line += `, Status: ${row.status}`;
     }
     line += ")";
-    if (includeStatusColumns && row.blocker) line += ` — Blocker: ${row.blocker}`;
     if (includeStatusColumns && row.date) line += ` — Completed On: ${formatOrdinalDate(new Date(`${row.date}T00:00:00`))}`;
     if (row.comments) line += ` — ${row.comments}`;
     return line;
   }).join("\n");
-}
-
-function priorityCellHtml(priority) {
-  const normalized = (priority || "medium").toLowerCase();
-  const colors = { high: "#dc2626", medium: "#b45309", low: "#15803d" };
-  return `<span style="color:${colors[normalized] || colors.medium}; font-weight:800;">${escapeHtml(formatStatus(normalized))}</span>`;
 }
 
 function statusCellHtml(status) {
@@ -1316,20 +1309,18 @@ function buildSheetReportTable(title, rows, includeStatusColumns) {
   }
 
   const headCells = includeStatusColumns
-    ? ["Phase", "Domain", "Task / Milestone", "Priority", "Owner", "Status", "Blockers/Risk", "Completed On", "Comments"]
-    : ["Phase", "Domain", "Task / Milestone", "Priority", "Owner", "Comments"];
+    ? ["Phase", "Domain", "Task / Milestone", "Owner", "Completed On", "Status", "Comments"]
+    : ["Phase", "Domain", "Task / Milestone", "Owner", "Comments"];
 
   const bodyRows = rows.map((row) => `
     <tr>
       ${row.showPhase ? `<td rowspan="${row.phaseSpan}" class="sheet-scope-cell">${escapeHtml(row.phase || "—")}</td>` : ""}
       ${row.showDomain ? `<td rowspan="${row.domainSpan}" class="sheet-scope-cell">${escapeHtml(row.domain || "—")}</td>` : ""}
       <td>${escapeHtml(row.title)}</td>
-      <td>${priorityCellHtml(row.priority)}</td>
       <td>${escapeHtml(row.owner || "Unassigned")}</td>
       ${includeStatusColumns ? `
-        <td>${statusCellHtml(row.status)}</td>
-        <td>${escapeHtml(row.blocker || "-")}</td>
         <td>${escapeHtml(row.date ? formatOrdinalDate(new Date(`${row.date}T00:00:00`)) : "")}</td>
+        <td>${statusCellHtml(row.status)}</td>
       ` : ""}
       <td>${escapeHtml(row.comments || "")}</td>
     </tr>
@@ -1493,12 +1484,6 @@ const EMAIL_STYLE = {
   scope: "padding:7px 9px;border:1px solid #d1d5db;font-size:13px;vertical-align:middle;font-weight:bold;background:#f9fafb;",
 };
 
-function emailPriority(priority) {
-  const normalized = (priority || "medium").toLowerCase();
-  const colors = { high: "#dc2626", medium: "#b45309", low: "#15803d" };
-  return `<span style="color:${colors[normalized] || colors.medium};font-weight:bold;">${escapeHtml(formatStatus(normalized))}</span>`;
-}
-
 function emailStatus(status) {
   const normalized = String(status || "").toLowerCase();
   const colors = { "completed": "#15803d", "in progress": "#b45309", "blocked": "#dc2626", "delayed": "#dc2626", "not started": "#475569" };
@@ -1506,7 +1491,7 @@ function emailStatus(status) {
 }
 
 function buildReportEmailHtml(report) {
-  const head = ["Phase", "Domain", "Task / Milestone", "Priority", "Owner", "Status", "Blockers/Risk", "Completed On", "Comments"];
+  const head = ["Phase", "Domain", "Task / Milestone", "Owner", "Completed On", "Status", "Comments"];
 
   const summaryRows = [
     ["Project name", report.projectName],
@@ -1523,11 +1508,9 @@ function buildReportEmailHtml(report) {
         ${row.showPhase ? `<td rowspan="${row.phaseSpan}" style="${EMAIL_STYLE.scope}">${escapeHtml(row.phase || "—")}</td>` : ""}
         ${row.showDomain ? `<td rowspan="${row.domainSpan}" style="${EMAIL_STYLE.scope}">${escapeHtml(row.domain || "—")}</td>` : ""}
         <td style="${EMAIL_STYLE.td}">${escapeHtml(row.title)}</td>
-        <td style="${EMAIL_STYLE.td}">${emailPriority(row.priority)}</td>
         <td style="${EMAIL_STYLE.td}">${escapeHtml(row.owner || "Unassigned")}</td>
-        <td style="${EMAIL_STYLE.td}">${emailStatus(row.status)}</td>
-        <td style="${EMAIL_STYLE.td}">${escapeHtml(row.blocker || "-")}</td>
         <td style="${EMAIL_STYLE.td}">${escapeHtml(row.date ? formatOrdinalDate(new Date(`${row.date}T00:00:00`)) : "")}</td>
+        <td style="${EMAIL_STYLE.td}">${emailStatus(row.status)}</td>
         <td style="${EMAIL_STYLE.td}">${escapeHtml(row.comments || "")}</td>
       </tr>`).join("");
 
@@ -4569,11 +4552,10 @@ function renderReportRowTasks(update) {
     const subtasks = task.subtasks || [];
     return `
       <tr class="week-task-row" data-task="${task.id}">
-        <td><input type="text" data-task-field="title" value="${escapeHtml(task.title || "")}" placeholder="Task" /></td>
         <td><input type="text" data-task-field="phase" value="${escapeHtml(task.phase || "")}" placeholder="Phase" /></td>
         <td><input type="text" data-task-field="domain" value="${escapeHtml(task.domain || "")}" placeholder="Domain" /></td>
+        <td><input type="text" data-task-field="title" value="${escapeHtml(task.title || "")}" placeholder="Task" /></td>
         <td><input type="text" list="ownerOptions" data-task-field="owner" value="${escapeHtml(task.owner || "")}" placeholder="Owner" /></td>
-        <td><input type="date" data-task-field="dueDate" value="${escapeHtml(task.dueDate || "")}" title="Planned from the master plan — moving it re-files the task into that week" /></td>
         <td><input type="date" data-task-field="date" value="${escapeHtml(task.date || "")}" title="The date the work actually finished — this is what the generated report prints" /></td>
         <td>${statusSelect("task-field", task.status)}</td>
         <td><input type="text" data-task-field="comments" value="${escapeHtml(task.comments || "")}" placeholder="Comments" /></td>
@@ -4584,11 +4566,10 @@ function renderReportRowTasks(update) {
       </tr>
       ${subtasks.map((sub) => `
         <tr class="week-subtask-row" data-task="${task.id}" data-subtask="${sub.id}">
+          <td></td>
+          <td></td>
           <td class="week-subtask-title"><span aria-hidden="true">&#8627;</span><input type="text" data-subtask-field="title" value="${escapeHtml(sub.title || "")}" placeholder="Sub-task" /></td>
-          <td></td>
-          <td></td>
           <td><input type="text" list="ownerOptions" data-subtask-field="owner" value="${escapeHtml(sub.owner || "")}" placeholder="Owner" /></td>
-          <td></td>
           <td><input type="date" data-subtask-field="date" value="${escapeHtml(sub.date || "")}" title="The date this sub-task finished" /></td>
           <td>${statusSelect("subtask-field", sub.status)}</td>
           <td><input type="text" data-subtask-field="comments" value="${escapeHtml(sub.comments || "")}" placeholder="Comments" /></td>
@@ -4615,7 +4596,7 @@ function renderReportRowTasks(update) {
       ${tasks.length ? `
         <div class="week-editor-scroll">
           <table class="report-row-task-table">
-            <thead><tr><th>Task</th><th>Phase</th><th>Domain</th><th>Owner</th><th>Planned</th><th>Completed On</th><th>Status</th><th>Comments</th><th></th></tr></thead>
+            <thead><tr><th>Phase</th><th>Domain</th><th>Task</th><th>Owner</th><th>Completed On</th><th>Status</th><th>Comments</th><th></th></tr></thead>
             <tbody>${rows}</tbody>
           </table>
         </div>` : `<p class="muted">No tasks due this week. Use “+ Add task” to add one.</p>`}
