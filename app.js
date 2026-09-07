@@ -2316,14 +2316,17 @@ function renderProjectPhases(project, updates) {
     return;
   }
 
-  nodes.projectPhases.innerHTML = phases.map((label) => {
+  nodes.projectPhases.innerHTML = phases.map((label, index) => {
     const mine = tasks.filter((task) => task.phase === label);
     const done = mine.filter((task) => task.status === "completed").length;
     const started = mine.some((task) => task.status !== "not started");
     const state_ = done === mine.length ? "done" : ((thisWeeksPhases.has(label) || started) ? "active" : "pending");
+    /* The dot carries a tick once the phase is finished and its position otherwise, so the
+       state reads without relying on colour alone. */
+    const mark = state_ === "done" ? "&#10003;" : String(index + 1);
     return `
       <div class="phase-step is-${state_}">
-        <span class="phase-dot" aria-hidden="true"></span>
+        <span class="phase-dot">${mark}</span>
         <span class="phase-name">${escapeHtml(label)}</span>
         <span class="phase-count">${done}/${mine.length}</span>
       </div>`;

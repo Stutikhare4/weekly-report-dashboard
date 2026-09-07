@@ -2313,11 +2313,30 @@ button {
 }
 
 /* Project overview page: two-column card grid, full-width phase strip, actions beneath.
-   Colours come from theme tokens so the page holds up in dark mode; --card-accent carries the
-   #667eea the design asks for in light. */
+   The WebEngage palette is the light theme; dark keeps the same roles at usable contrast, so
+   the page reads in both rather than only the one the design was drawn in. */
 :root {
-  --card-accent: #667eea;
-  --card-done: #4caf50;
+  --card-accent: #4d9fff;
+  --card-primary: #ff8c3d;
+  --card-primary-hover: #ff7a1f;
+  --card-done: #62d62a;
+  --card-border: rgba(148, 163, 184, 0.28);
+  --card-hover: rgba(77, 159, 255, 0.14);
+  --card-body: var(--muted);
+  --card-label: var(--muted);
+  --card-value: var(--text);
+}
+
+:root[data-theme="light"] {
+  --card-accent: #0066cc;
+  --card-primary: #ff8c3d;
+  --card-primary-hover: #ff7a1f;
+  --card-done: #52c41a;
+  --card-border: #dce5f0;
+  --card-hover: #f0f6ff;
+  --card-body: #4a5f7f;
+  --card-label: #7b8fa3;
+  --card-value: #1a202c;
 }
 
 #projectDetailsView {
@@ -2345,16 +2364,17 @@ button {
 .overview-card {
   min-width: 0;
   padding: 20px 22px;
-  border-radius: 14px;
+  border-radius: 8px;
   background: var(--surface-2);
-  border: 1px solid var(--border-soft);
-  border-top: 4px solid var(--card-accent);
+  border: 1px solid var(--card-border);
+  border-top: 3px solid var(--card-accent);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
 }
 
 /* The design marks Project Details with a left rule instead of a top one. */
 .overview-card-side {
-  border-top: 1px solid var(--border-soft);
-  border-left: 4px solid var(--card-accent);
+  border-top: 1px solid var(--card-border);
+  border-left: 3px solid var(--card-accent);
 }
 
 .overview-card-wide { margin-bottom: 32px; }
@@ -2369,24 +2389,25 @@ button {
 
 .overview-card-head h3 {
   margin: 0;
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 700;
+  color: var(--card-value);
 }
 
 .overview-edit {
-  padding: 8px 16px;
-  border-radius: 9px;
-  border: 2px solid var(--card-accent);
+  padding: 6px 14px;
+  border-radius: 4px;
+  border: 1.5px solid var(--card-accent);
   background: transparent;
   color: var(--text);
-  font-size: 0.82rem;
+  font-size: 13px;
   font-weight: 600;
   cursor: pointer;
-  transition: background 0.3s ease, color 0.3s ease;
+  transition: all 0.2s ease;
 }
 
 .overview-edit:hover:not(:disabled) {
-  background: color-mix(in srgb, var(--card-accent) 12%, transparent);
+  background: var(--card-hover);
 }
 
 .overview-edit:disabled { opacity: 0.5; cursor: default; }
@@ -2406,26 +2427,33 @@ button {
    them rather than applied to read-only Overview. */
 #projectScope .overview-field:hover,
 #projectTimelineFields .overview-field:hover {
-  background: color-mix(in srgb, var(--card-accent) 8%, transparent);
+  background: var(--card-hover);
   cursor: pointer;
 }
 
 .overview-label {
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 500;
-  color: var(--muted);
+  color: var(--card-label);
 }
 
 .overview-value {
   font-size: 14px;
   font-weight: 600;
-  color: var(--text);
+  color: var(--card-value);
   overflow-wrap: anywhere;
+}
+
+#projDetailsNote {
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--card-body);
 }
 
 .overview-highlight {
   margin: 10px 0 0;
-  font-weight: 600;
+  font-size: 13px;
+  font-weight: 700;
   color: var(--card-accent);
 }
 
@@ -2469,13 +2497,14 @@ button {
 
 .overview-check input { width: auto; accent-color: var(--card-accent); }
 
-/* Phase strip: a rule behind the row, dots sitting on it. */
+/* Phase strip: a rule behind the row with the numbered dots sitting on it. The rule is drawn
+   between the first and last dot centres rather than edge to edge, so it never pokes out. */
 .phase-track {
   position: relative;
   display: flex;
   justify-content: space-between;
   gap: 10px;
-  padding: 12px 0 4px;
+  padding: 8px 0 4px;
   overflow-x: auto;
 }
 
@@ -2484,35 +2513,51 @@ button {
   position: absolute;
   left: 6%;
   right: 6%;
-  top: 26px;
+  top: 28px;
   height: 3px;
   border-radius: 2px;
-  background: linear-gradient(to right, var(--card-accent), var(--card-accent), var(--border-strong));
+  background: linear-gradient(to right, var(--card-accent), var(--card-accent), var(--card-border));
 }
 
 .phase-step {
   position: relative;
   display: grid;
   justify-items: center;
-  gap: 6px;
-  min-width: 96px;
+  gap: 8px;
+  min-width: 110px;
   flex: 1;
   text-align: center;
 }
 
 .phase-dot {
-  width: 18px;
-  height: 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
-  background: var(--border-strong);
-  border: 3px solid var(--surface-2);
-  box-shadow: 0 0 0 2px var(--border-strong);
-  transition: transform 0.2s ease;
+  border: 3px solid var(--card-border);
+  background: var(--surface-4);
+  color: var(--muted);
+  font-size: 14px;
+  font-weight: 700;
+  transition: all 0.2s ease;
 }
 
 .phase-step:hover .phase-dot { transform: scale(1.15); }
-.phase-step.is-done .phase-dot { background: var(--card-done); box-shadow: 0 0 0 2px var(--card-done); }
-.phase-step.is-active .phase-dot { background: var(--card-accent); box-shadow: 0 0 0 2px var(--card-accent); }
+
+.phase-step.is-done .phase-dot {
+  background: var(--card-done);
+  border-color: var(--card-done);
+  color: #ffffff;
+}
+
+.phase-step.is-active .phase-dot {
+  background: var(--card-accent);
+  border-color: var(--card-accent);
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(0, 102, 204, 0.3);
+}
 
 .phase-name { font-size: 13px; font-weight: 600; color: var(--text); }
 .phase-count { font-size: 12px; color: var(--muted); }
@@ -2536,31 +2581,32 @@ button {
   align-items: center;
   justify-content: center;
   line-height: 1.25;
-  min-height: 44px;
-  padding: 0 22px;
-  border-radius: 11px;
-  border: 2px solid var(--card-accent);
+  min-height: 40px;
+  padding: 10px 24px;
+  border-radius: 6px;
+  border: 1.5px solid var(--card-accent);
   background: transparent;
   color: var(--text);
-  font-size: 0.9rem;
+  font-size: 13px;
   font-weight: 600;
   cursor: pointer;
-  transition: background 0.3s ease, filter 0.3s ease, transform 0.12s ease;
+  transition: all 0.2s ease;
 }
 
 .overview-action:hover {
-  background: color-mix(in srgb, var(--card-accent) 12%, transparent);
+  background: var(--card-hover);
 }
 
 .overview-action.is-primary {
-  background: var(--card-accent);
-  border-color: var(--card-accent);
+  background: var(--card-primary);
+  border-color: var(--card-primary);
   color: #ffffff;
 }
 
 .overview-action.is-primary:hover {
-  filter: brightness(0.92);
-  background: var(--card-accent);
+  background: var(--card-primary-hover);
+  border-color: var(--card-primary-hover);
+  box-shadow: 0 4px 12px rgba(255, 140, 61, 0.35);
 }
 
 .overview-action:active {
@@ -6493,14 +6539,17 @@ function renderProjectPhases(project, updates) {
     return;
   }
 
-  nodes.projectPhases.innerHTML = phases.map((label) => {
+  nodes.projectPhases.innerHTML = phases.map((label, index) => {
     const mine = tasks.filter((task) => task.phase === label);
     const done = mine.filter((task) => task.status === "completed").length;
     const started = mine.some((task) => task.status !== "not started");
     const state_ = done === mine.length ? "done" : ((thisWeeksPhases.has(label) || started) ? "active" : "pending");
+    /* The dot carries a tick once the phase is finished and its position otherwise, so the
+       state reads without relying on colour alone. */
+    const mark = state_ === "done" ? "&#10003;" : String(index + 1);
     return `
       <div class="phase-step is-${state_}">
-        <span class="phase-dot" aria-hidden="true"></span>
+        <span class="phase-dot">${mark}</span>
         <span class="phase-name">${escapeHtml(label)}</span>
         <span class="phase-count">${done}/${mine.length}</span>
       </div>`;
