@@ -1,7 +1,10 @@
 const LEGACY_STORAGE_KEY = "multi-project-weekly-dashboard";
 const USER_DATA_PREFIX = "multi-project-dashboard-state:";
 const STATE_KEY = "multi-project-dashboard-state";
-const SUBTASK_STATUSES = ["not started", "in progress", "delayed", "blocked", "completed"];
+/* "pending" means the work is deliberately being carried in the week it now sits in, rather
+   than merely unfinished. It is a first-class status so the report and the accordion editor
+   show it too, not just the week modal. */
+const SUBTASK_STATUSES = ["not started", "in progress", "delayed", "blocked", "completed", "pending"];
 const WEEK_STATUSES = ["not started", "on track", "needs attention", "blocked", "completed"];
 
 /* Master plan seed, generated from the team's Google Sheet by tools/import-sheet.py. A task's
@@ -525,6 +528,11 @@ function boot() {
   });
   nodes.weekModalCarried.addEventListener("click", (e) => handleWeekModalClick(e));
   nodes.weekModalTasks.addEventListener("click", (e) => handleWeekModalClick(e));
+  [nodes.weekModalCarried, nodes.weekModalTasks].forEach((list) => {
+    list.addEventListener("change", (e) => {
+      if (e.target.dataset.weekStatus) handleWeekModalStatus(e.target);
+    });
+  });
   nodes.projScopeCancel.addEventListener("click", () => toggleProjectScope(false));
   nodes.projScopeForm.addEventListener("submit", (e) => saveProjectScope(e));
   nodes.projScopeTechTeam.addEventListener("change", () => {
@@ -790,8 +798,9 @@ function renderWeekModal() {
 
 function weekTaskRow(task, source) {
   const done = task.status === "completed";
+  const pending = task.status === "pending";
   return `
-    <div class="week-task${done ? " is-done" : ""}" data-week-task="${task.id}">
+    <div class="week-task${done ? " is-done" : ""}${pending ? " is-pending" : ""}" data-week-task="${task.id}">
       <label class="week-task-check">
         <input type="checkbox"${done ? " checked" : ""} data-week-toggle="${task.id}" />
       </label>
@@ -800,7 +809,10 @@ function weekTaskRow(task, source) {
         <div class="week-task-desc">${escapeHtml(weekTaskDescription(task))}</div>
         ${source ? `<div class="week-task-source">${escapeHtml(source)}</div>` : ""}
       </div>
-      <button type="button" class="week-task-shift" data-week-shift="${task.id}">&rarr; Shift to next week</button>
+      <select class="week-task-status" data-week-status="${task.id}">
+        ${SUBTASK_STATUSES.map((status) => `<option value="${status}"${status === task.status ? " selected" : ""}>${capitalize(status)}</option>`).join("")}
+      </select>
+      <button type="button" class="week-task-shift" data-week-shift="${task.id}"${pending ? " disabled title=\"Pending work stays in this week — change the status to move it on.\"" : ""}>&rarr; Shift to next week</button>
     </div>`;
 }
 
@@ -819,7 +831,7 @@ function handleWeekModalClick(event) {
   if (toggle) {
     const found = findDraftTask(toggle.dataset.weekToggle);
     if (!found) return;
-    found.task.status = toggle.checked ? "completed" : "not started";
+    found.task.status = toggle.checked ? "completed" : (found.task.status === "completed" ? "not started" : found.task.status);
     if (toggle.checked) {
       if (!found.task.date) found.task.date = toInputDate(new Date());
       weekDraft.tickedHere.add(found.task.id);
@@ -830,6 +842,7 @@ function handleWeekModalClick(event) {
   }
 
   const shift = event.target.closest("[data-week-shift]");
+  if (shift && shift.disabled) return;
   if (shift) {
     const weeks = draftWeeks();
     const target = weeks[draftIndex() + 1];
@@ -846,6 +859,30 @@ function handleWeekModalClick(event) {
     weekDraft.dirty = true;
     renderWeekModal();
   }
+}
+
+/* Marking work "pending" is a decision that it is being carried now, so it moves into the week
+   being triaged rather than staying filed under a week it did not get done in. That is a
+   deliberate action by the person editing, which is why it is allowed to move the task where
+   the automatic carryover is not. */
+function handleWeekModalStatus(select) {
+  const found = findDraftTask(select.dataset.weekStatus);
+  if (!found) return;
+
+  found.task.status = select.value;
+  if (select.value === "completed" && !found.task.date) found.task.date = toInputDate(new Date());
+  if (select.value === "completed") weekDraft.tickedHere.add(found.task.id);
+
+  const current = draftWeeks()[draftIndex()];
+  if (select.value === "pending" && current && found.week.id !== current.id) {
+    found.week.tasks = found.week.tasks.filter((item) => item.id !== found.task.id);
+    found.task.startDate = current.weekStart;
+    found.task.dueDate = taskDueDate(current.weekStart, found.task.days || templateDefaultDays());
+    current.tasks.push(found.task);
+  }
+
+  weekDraft.dirty = true;
+  renderWeekModal();
 }
 
 function addWeekModalTask() {
@@ -2402,6 +2439,7 @@ function statusClass(value) {
   if (normalized === "blocked") return "status-blocked";
   if (normalized === "delayed") return "status-delayed";
   if (normalized === "not-started") return "status-not-started";
+  if (normalized === "pending") return "status-pending";
   if (normalized === "in-progress") return "status-in-progress";
   if (normalized === "completed") return "status-on-track";
   if (normalized === "needs-attention") return "status-needs-attention";

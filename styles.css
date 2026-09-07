@@ -970,6 +970,11 @@ button {
   background: rgba(99, 102, 241, 0.12);
 }
 
+.status-pending {
+  color: #fcd34d;
+  background: rgba(234, 179, 8, 0.14);
+}
+
 :root[data-theme="light"] .status-on-track {
   color: #15803d;
   background: rgba(22, 163, 74, 0.12);
@@ -1003,6 +1008,11 @@ button {
 :root[data-theme="light"] .status-closed {
   color: #4338ca;
   background: rgba(99, 102, 241, 0.12);
+}
+
+:root[data-theme="light"] .status-pending {
+  color: #854d0e;
+  background: rgba(234, 179, 8, 0.18);
 }
 
 .priority-badge {
@@ -3493,6 +3503,35 @@ button {
 }
 
 .week-task.is-done { opacity: 0.72; }
+
+.week-task-status {
+  flex: none;
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: 1px solid var(--card-border);
+  background: var(--surface-4);
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+/* Pending work is deliberately being carried, so it reads differently from merely unfinished. */
+.week-task.is-pending {
+  border-left-color: #eab308;
+  background: color-mix(in srgb, #eab308 8%, var(--surface-3));
+}
+
+.week-task-shift:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  color: var(--card-label);
+}
+
+.week-task-shift:disabled:hover {
+  background: transparent;
+  border-color: var(--card-border);
+}
 
 .week-task-shift {
   flex: none;

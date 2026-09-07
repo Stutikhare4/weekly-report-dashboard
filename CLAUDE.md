@@ -128,6 +128,11 @@ unfinished work is shown here labelled with its source, so opening a later week 
 what an earlier one contained. Moving a task between weeks is the explicit "Shift to next week"
 action, which re-dates it into the following week.
 
+Each row carries a status dropdown over the six statuses. **Pending** means the work is
+deliberately being carried in the week it now sits in, rather than merely unfinished: choosing
+it moves the task into the week being triaged and disables Shift, since the task has just been
+pinned there. It is a first-class status, so the report and the accordion show it too.
+
 The modal edits a deep copy of the project's weeks, so "Save Changes" is a real commit and
 "Back" genuinely discards. A carried task ticked here stays visible and struck through until the
 modal closes, rather than vanishing out of the list mid-click.
