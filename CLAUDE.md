@@ -93,6 +93,20 @@ carry the staging value N+10, so they schedule before the production dashboard e
 
 ## Project page: two views
 
+The details view is a card grid: Overview and Integration Scope side by side, Project Details
+and Timeline below them, a full-width phase strip, then the action buttons. Card accents come
+from `--card-accent` / `--card-done` tokens rather than fixed hex, so the page keeps its look in
+dark mode.
+
+The phase strip is derived, not drawn: phases come from the master plan, and each is done when
+every one of its tasks is, active when it holds this week's work or anything already started,
+pending otherwise. Editing phases means editing the plan, so its Edit button goes to Templates.
+
+Integration Scope is editable in place — platforms, channels, technical team, historical
+migration and user identifier. Changing them does **not** regenerate existing weeks, which would
+discard entered status; new domains need "Add week from template".
+
+
 The project page holds two views of one project, toggled by `setProjectView()`: **details**
 (overview, integration scope, editable project details, and a Generate Report button) and
 **report** (the generated weekly report on its own, with its own Back button and heading).

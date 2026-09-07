@@ -207,46 +207,100 @@
             </div>
 
             <div id="projectDetailsView">
-              <div class="project-detail-grid">
-                <section class="detail-panel">
-                  <h3>Overview</h3>
-                  <div id="projectOverview" class="detail-text"></div>
+              <div class="overview-grid">
+                <section class="overview-card">
+                  <div class="overview-card-head"><h3>Overview</h3></div>
+                  <div id="projectOverview" class="overview-fields"></div>
+                </section>
 
-                  <div class="timeline-editor" id="projDetailsBlock">
-                    <div class="wizard-section-head static" style="margin-bottom:8px;">
-                      <h4 style="margin:0;">Project details</h4>
-                      <button type="button" id="projEditToggle" class="ghost-button small-button" data-requires="project.edit">Edit</button>
-                    </div>
-                    <p class="muted" id="projDetailsNote">Go-live is calculated from kickoff and cycle length. Changing either re-dates every weekly report.</p>
-
-                    <form id="projDetailsForm" class="timeline-fields" hidden>
-                      <label>Project name<input type="text" id="projName" /></label>
-                      <label>CSM<input type="text" id="projCsm" /></label>
-                      <label>Project owner<input type="text" id="projOwner" /></label>
-                      <label>Sales owner<input type="text" id="projSalesOwner" /></label>
-                      <label>Kickoff<input type="date" id="projKickoff" /></label>
-                      <label>Cycle length
-                        <select id="projCycleWeeks"></select>
-                      </label>
-                      <label>Target go-live<input type="date" id="projGoLive" readonly /></label>
-                      <label>Technical team
-                        <select id="projTechTeam">
-                          <option value="in-house">In-house</option>
-                          <option value="outsourced">Outsourced (third-party vendor)</option>
-                        </select>
-                      </label>
-                      <label id="projVendorField" hidden>Vendor<input type="text" id="projVendorName" /></label>
-                      <label class="span-full">Notes<textarea id="projNotes" rows="2"></textarea></label>
-                      <div class="actions span-full">
-                        <button type="submit" class="secondary-button small-button">Save details</button>
-                        <button type="button" id="projCancelEdit" class="ghost-button small-button">Cancel</button>
-                      </div>
-                    </form>
-
-                    <p class="muted" id="projTimelineNote"></p>
+                <section class="overview-card">
+                  <div class="overview-card-head">
+                    <h3>Integration Scope</h3>
+                    <button type="button" id="projScopeEdit" class="overview-edit" data-requires="project.edit">Edit</button>
                   </div>
+                  <div id="projectScope" class="overview-fields"></div>
+                  <form id="projScopeForm" class="overview-form" hidden>
+                    <fieldset>
+                      <legend>Platforms</legend>
+                      <div id="projPlatforms" class="overview-checks"></div>
+                    </fieldset>
+                    <fieldset>
+                      <legend>Channels</legend>
+                      <div id="projChannels" class="overview-checks"></div>
+                    </fieldset>
+                    <label>Technical team
+                      <select id="projScopeTechTeam">
+                        <option value="in-house">In-house</option>
+                        <option value="outsourced">Outsourced (third-party vendor)</option>
+                      </select>
+                    </label>
+                    <label id="projScopeVendorField" hidden>Vendor<input type="text" id="projScopeVendor" /></label>
+                    <label>Historical data migration
+                      <select id="projScopeHistorical">
+                        <option value="">Not set</option>
+                        <option value="yes">Yes</option>
+                        <option value="no">No</option>
+                      </select>
+                    </label>
+                    <label>User identifier<input type="text" id="projScopeIdentifier" placeholder="e.g. email, customer id" /></label>
+                    <div class="actions">
+                      <button type="submit" class="secondary-button small-button">Save scope</button>
+                      <button type="button" id="projScopeCancel" class="ghost-button small-button">Cancel</button>
+                    </div>
+                  </form>
                 </section>
               </div>
+
+              <div class="overview-grid">
+                <section class="overview-card overview-card-side" id="projDetailsBlock">
+                  <div class="overview-card-head">
+                    <h3>Project Details</h3>
+                    <button type="button" id="projEditToggle" class="overview-edit" data-requires="project.edit">Edit</button>
+                  </div>
+                  <p class="muted" id="projDetailsNote">Go-live is calculated from kickoff and cycle length. Changing either re-dates every weekly report.</p>
+                  <p class="overview-highlight" id="projTimelineNote"></p>
+
+                  <form id="projDetailsForm" class="timeline-fields" hidden>
+                    <label>Project name<input type="text" id="projName" /></label>
+                    <label>CSM<input type="text" id="projCsm" /></label>
+                    <label>Project owner<input type="text" id="projOwner" /></label>
+                    <label>Sales owner<input type="text" id="projSalesOwner" /></label>
+                    <label>Kickoff<input type="date" id="projKickoff" /></label>
+                    <label>Cycle length
+                      <select id="projCycleWeeks"></select>
+                    </label>
+                    <label>Target go-live<input type="date" id="projGoLive" readonly /></label>
+                    <label>Technical team
+                      <select id="projTechTeam">
+                        <option value="in-house">In-house</option>
+                        <option value="outsourced">Outsourced (third-party vendor)</option>
+                      </select>
+                    </label>
+                    <label id="projVendorField" hidden>Vendor<input type="text" id="projVendorName" /></label>
+                    <label class="span-full">Notes<textarea id="projNotes" rows="2"></textarea></label>
+                    <div class="actions span-full">
+                      <button type="submit" class="secondary-button small-button">Save details</button>
+                      <button type="button" id="projCancelEdit" class="ghost-button small-button">Cancel</button>
+                    </div>
+                  </form>
+                </section>
+
+                <section class="overview-card">
+                  <div class="overview-card-head">
+                    <h3>📅 Timeline</h3>
+                    <button type="button" id="projTimelineEdit" class="overview-edit" data-requires="project.edit">Edit</button>
+                  </div>
+                  <div id="projectTimelineFields" class="overview-fields"></div>
+                </section>
+              </div>
+
+              <section class="overview-card overview-card-wide">
+                <div class="overview-card-head">
+                  <h3>🗓️ Project Phases</h3>
+                  <button type="button" id="projPhasesEdit" class="overview-edit" data-requires="template.edit">Edit</button>
+                </div>
+                <div id="projectPhases" class="phase-track"></div>
+              </section>
 
               <div class="project-view-actions">
                 <button id="openWeeklyReport" class="generate-report-button" type="button">📊 Generate Report</button>

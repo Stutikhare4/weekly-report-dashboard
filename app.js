@@ -271,6 +271,21 @@ const nodes = {
   projTimelineNote: document.getElementById("projTimelineNote"),
   npCycleHint: document.getElementById("npCycleHint"),
   projectOverview: document.getElementById("projectOverview"),
+  projectScope: document.getElementById("projectScope"),
+  projectTimelineFields: document.getElementById("projectTimelineFields"),
+  projectPhases: document.getElementById("projectPhases"),
+  projScopeEdit: document.getElementById("projScopeEdit"),
+  projScopeForm: document.getElementById("projScopeForm"),
+  projScopeCancel: document.getElementById("projScopeCancel"),
+  projPlatforms: document.getElementById("projPlatforms"),
+  projChannels: document.getElementById("projChannels"),
+  projScopeTechTeam: document.getElementById("projScopeTechTeam"),
+  projScopeVendorField: document.getElementById("projScopeVendorField"),
+  projScopeVendor: document.getElementById("projScopeVendor"),
+  projScopeHistorical: document.getElementById("projScopeHistorical"),
+  projScopeIdentifier: document.getElementById("projScopeIdentifier"),
+  projTimelineEdit: document.getElementById("projTimelineEdit"),
+  projPhasesEdit: document.getElementById("projPhasesEdit"),
   projectSummary: document.getElementById("projectSummary"),
   projectDetailsView: document.getElementById("projectDetailsView"),
   projectReportView: document.getElementById("projectReportView"),
@@ -477,6 +492,16 @@ function boot() {
   nodes.addWeekFromTemplate.addEventListener("click", () => addWeekToProject(uiState.projectId));
   nodes.deleteProjectBtn.addEventListener("click", () => deleteProject(uiState.projectId));
   nodes.projEditToggle.addEventListener("click", () => toggleProjectDetails(true));
+  /* Kickoff, go-live and cycle length live in the project details form, so the Timeline card's
+     Edit opens that rather than duplicating the fields. */
+  nodes.projTimelineEdit.addEventListener("click", () => toggleProjectDetails(true));
+  nodes.projPhasesEdit.addEventListener("click", () => navigateToScreen("templates"));
+  nodes.projScopeEdit.addEventListener("click", () => toggleProjectScope(true));
+  nodes.projScopeCancel.addEventListener("click", () => toggleProjectScope(false));
+  nodes.projScopeForm.addEventListener("submit", (e) => saveProjectScope(e));
+  nodes.projScopeTechTeam.addEventListener("change", () => {
+    nodes.projScopeVendorField.hidden = nodes.projScopeTechTeam.value !== "outsourced";
+  });
   nodes.projCancelEdit.addEventListener("click", () => toggleProjectDetails(false));
   nodes.projDetailsForm.addEventListener("submit", (e) => saveProjectDetails(e));
   nodes.projTechTeam.addEventListener("change", () => {
@@ -1106,17 +1131,27 @@ function renderProjectScreen() {
   nodes.projectTitle.textContent = project.name;
   nodes.projectStatusBadge.textContent = formatStatus(project.status);
   nodes.projectStatusBadge.className = `pill pill-dark status-badge ${statusClass(project.status)}`;
-  nodes.projectOverview.innerHTML = `
-    <div class="detail-text">
-      <div><strong>Status:</strong> ${escapeHtml(formatStatus(project.status))}</div>
-      <div><strong>Notes:</strong> ${escapeHtml(project.notes || "No notes yet")}</div>
-      <div><strong>Weekly updates:</strong> ${updates.length}</div>
-      <div><strong>Latest range:</strong> ${escapeHtml(latestUpdate ? latestUpdate.weekRange : "No weekly entries yet")}</div>
-      <div><strong>Latest status:</strong> ${escapeHtml(latestUpdate ? latestUpdate.statusTag : "none")}</div>
-      <div><strong>Latest tasks:</strong> ${escapeHtml(latestUpdate && latestUpdate.tasks && latestUpdate.tasks.length ? latestUpdate.tasks.map(t => `${t.title} (${t.status})`).join(", ") : "No tasks yet")}</div>
-    </div>
-    ${buildIntegrationScopeHtml(project)}
-  `;
+  nodes.projectOverview.innerHTML = overviewFields([
+    ["Status", formatStatus(project.status)],
+    ["Notes", project.notes || "No notes yet"],
+    ["Weekly updates", String(updates.length)],
+    ["Latest range", latestUpdate ? latestUpdate.weekRange : "No weekly entries yet"],
+    ["Latest status", latestUpdate ? latestUpdate.statusTag : "none"],
+    /* Capped: a week can hold fifty tasks, and listing them all made this card several times
+       the height of the one beside it. */
+    ["Latest tasks", latestUpdate && (latestUpdate.tasks || []).length
+      ? latestUpdate.tasks.slice(0, 4).map((task) => `${task.title} (${task.status})`).join(", ")
+        + (latestUpdate.tasks.length > 4 ? ` … and ${latestUpdate.tasks.length - 4} more` : "")
+      : "No tasks yet"],
+  ]);
+
+  nodes.projectScope.innerHTML = buildIntegrationScopeHtml(project);
+  nodes.projectTimelineFields.innerHTML = overviewFields([
+    ["Kickoff Date", project.kickoffDate ? formatSummaryDate(project.kickoffDate) : "Not set"],
+    ["Go Live Date", project.goLiveDate ? formatSummaryDate(project.goLiveDate) : "Not set"],
+    ["Cycle Length", `${project.cycleWeeks || DEFAULT_CYCLE_WEEKS} Weeks`],
+  ]);
+  renderProjectPhases(project, updates);
 
   if (uiState.projectView === "report") nodes.projectReportTitle.textContent = `${project.name} — Weekly Report`;
 
@@ -2183,13 +2218,21 @@ function priorityClass(value) {
 const SPA_LABELS = { yes: "Yes", no: "No" };
 const TECH_TEAM_LABELS = { "in-house": "In-house" };
 
-function buildIntegrationScopeHtml(project) {
-  const platforms = project.platforms || [];
-  const builtOn = project.builtOn || [];
+function overviewFields(rows) {
+  const kept = rows.filter(([, value]) => value !== undefined && value !== null && value !== "");
+  if (!kept.length) return `<p class="muted">Nothing recorded yet.</p>`;
+  return kept.map(([label, value]) => `
+    <div class="overview-field">
+      <span class="overview-label">${escapeHtml(label)}</span>
+      <span class="overview-value">${escapeHtml(value)}</span>
+    </div>`).join("");
+}
 
-  const rows = [
-    ["Platform", platforms.map(platformLabel).join(", ")],
-    ["Built On", builtOn.join(", ")],
+function buildIntegrationScopeHtml(project) {
+  const data = project.dataRequirements || {};
+  return overviewFields([
+    ["Platform", (project.platforms || []).map(platformLabel).join(", ")],
+    ["Built On", (project.builtOn || []).join(", ")],
     ["Platform Link(s)", project.platformLink],
     ["Website is SPA", project.isSpa ? (SPA_LABELS[project.isSpa] || project.isSpa) : ""],
     ["Technical Team", project.techTeam === "outsourced"
@@ -2197,22 +2240,96 @@ function buildIntegrationScopeHtml(project) {
       : (project.techTeam ? (TECH_TEAM_LABELS[project.techTeam] || project.techTeam) : "")],
     ["Client POCs", (project.clientPocs || []).map(formatPoc).join(", ")],
     ["Channels", (project.channels || []).join(", ")],
-    ["Historical Data Migration", project.dataRequirements && project.dataRequirements.historicalMigration === "yes" ? "Yes" : ""],
-    ["User Identifier", project.dataRequirements ? project.dataRequirements.userIdentifier : ""],
-    ["Known Blockers", project.knownBlockers],
-    ["Dependencies", project.dependencies],
-  ].filter(([, value]) => value);
+    ["Historical Data Migration", data.historicalMigration === "yes" ? "Yes" : (data.historicalMigration === "no" ? "No" : "")],
+    ["User Identifier", data.userIdentifier],
+  ]);
+}
 
-  if (!rows.length) {
-    return "";
+/* The phase strip reads the project's own tasks rather than a fixed picture: a phase is done
+   when every one of its tasks is, active when it holds this week's work or anything already
+   under way, and pending otherwise. Phases come from the master plan, so the strip follows
+   the plan if the team edits it. */
+/* Platforms and channels could only be set in the creation wizard, so a project whose scope
+   changed later could not be corrected. This edits them in place; changing platforms or
+   channels does not regenerate existing weeks, since that would discard entered status. */
+function toggleProjectScope(editing) {
+  const project = state.projects.find((item) => item.id === uiState.projectId);
+  if (!project) return;
+  if (editing && !requirePermission("project.edit", "edit this project")) return;
+
+  nodes.projScopeForm.hidden = !editing;
+  nodes.projectScope.hidden = editing;
+  nodes.projScopeEdit.disabled = editing;
+  nodes.projScopeEdit.textContent = editing ? "Editing…" : "Edit";
+  if (!editing) return;
+
+  const chosenPlatforms = project.platforms || [];
+  nodes.projPlatforms.innerHTML = ALL_PLATFORMS.map((platform) => `
+    <label class="overview-check"><input type="checkbox" value="${escapeHtml(platform)}"${chosenPlatforms.includes(platform) ? " checked" : ""} />
+    <span>${escapeHtml(platformLabel(platform))}</span></label>`).join("");
+
+  const chosenChannels = project.channels || [];
+  nodes.projChannels.innerHTML = ALL_CHANNELS.map((channel) => `
+    <label class="overview-check"><input type="checkbox" value="${escapeHtml(channel)}"${chosenChannels.includes(channel) ? " checked" : ""} />
+    <span>${escapeHtml(channel)}</span></label>`).join("");
+
+  const data = project.dataRequirements || {};
+  nodes.projScopeTechTeam.value = project.techTeam || "in-house";
+  nodes.projScopeVendor.value = project.vendorName || "";
+  nodes.projScopeVendorField.hidden = nodes.projScopeTechTeam.value !== "outsourced";
+  nodes.projScopeHistorical.value = data.historicalMigration || "";
+  nodes.projScopeIdentifier.value = data.userIdentifier || "";
+}
+
+function saveProjectScope(event) {
+  event.preventDefault();
+  const project = state.projects.find((item) => item.id === uiState.projectId);
+  if (!project) return;
+  if (!requirePermission("project.edit", "edit this project")) return;
+
+  const picked = (container) => [...container.querySelectorAll("input:checked")].map((box) => box.value);
+  project.platforms = picked(nodes.projPlatforms);
+  project.channels = picked(nodes.projChannels);
+  project.techTeam = nodes.projScopeTechTeam.value;
+  project.vendorName = project.techTeam === "outsourced" ? nodes.projScopeVendor.value.trim() : "";
+  project.dataRequirements = {
+    ...(project.dataRequirements || {}),
+    historicalMigration: nodes.projScopeHistorical.value,
+    userIdentifier: nodes.projScopeIdentifier.value.trim(),
+  };
+
+  saveState();
+  toggleProjectScope(false);
+  renderAll();
+  showAppInfo("Integration scope updated. Weeks already generated keep their tasks — use “Add week from template” if new domains need new work.");
+}
+
+function renderProjectPhases(project, updates) {
+  const tasks = (updates || []).flatMap((update) => update.tasks || []);
+  const today = toInputDate(new Date());
+  const currentWeek = (updates || []).find((update) => isDateInUpdateWeek(today, update));
+  const thisWeeksPhases = new Set(((currentWeek && currentWeek.tasks) || []).map((task) => task.phase));
+
+  const order = [...state.weekTemplates].sort((left, right) => left.week - right.week).map((stage) => stage.label);
+  const phases = order.filter((label) => tasks.some((task) => task.phase === label));
+
+  if (!phases.length) {
+    nodes.projectPhases.innerHTML = `<p class="muted">No phases yet — this project has no weekly reports.</p>`;
+    return;
   }
 
-  return `
-    <div class="detail-text" style="margin-top: 14px; padding-top: 14px; border-top: 1px solid rgba(148, 163, 184, 0.12);">
-      <div><strong>Integration Scope</strong></div>
-      ${rows.map(([label, value]) => `<div><strong>${escapeHtml(label)}:</strong> ${escapeHtml(value)}</div>`).join("")}
-    </div>
-  `;
+  nodes.projectPhases.innerHTML = phases.map((label) => {
+    const mine = tasks.filter((task) => task.phase === label);
+    const done = mine.filter((task) => task.status === "completed").length;
+    const started = mine.some((task) => task.status !== "not started");
+    const state_ = done === mine.length ? "done" : ((thisWeeksPhases.has(label) || started) ? "active" : "pending");
+    return `
+      <div class="phase-step is-${state_}">
+        <span class="phase-dot" aria-hidden="true"></span>
+        <span class="phase-name">${escapeHtml(label)}</span>
+        <span class="phase-count">${done}/${mine.length}</span>
+      </div>`;
+  }).join("");
 }
 
 function formatStatus(value) {
