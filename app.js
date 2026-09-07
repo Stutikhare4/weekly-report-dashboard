@@ -1309,8 +1309,8 @@ function buildSheetReportTable(title, rows, includeStatusColumns) {
   }
 
   const headCells = includeStatusColumns
-    ? ["Phase", "Domain", "Task / Milestone", "Owner", "Completed On", "Status", "Comments"]
-    : ["Phase", "Domain", "Task / Milestone", "Owner", "Comments"];
+    ? ["Phase", "Domain", "Tasks", "Owner", "Completed On", "Status", "Comments"]
+    : ["Phase", "Domain", "Tasks", "Owner", "Comments"];
 
   const bodyRows = rows.map((row) => `
     <tr>
@@ -1491,7 +1491,7 @@ function emailStatus(status) {
 }
 
 function buildReportEmailHtml(report) {
-  const head = ["Phase", "Domain", "Task / Milestone", "Owner", "Completed On", "Status", "Comments"];
+  const head = ["Phase", "Domain", "Tasks", "Owner", "Completed On", "Status", "Comments"];
 
   const summaryRows = [
     ["Project name", report.projectName],
