@@ -131,7 +131,9 @@ action, which re-dates it into the following week.
 Each row carries a status dropdown over the six statuses. **Pending** means the work is
 deliberately being carried in the week it now sits in, rather than merely unfinished: choosing
 it moves the task into the week being triaged and disables Shift, since the task has just been
-pinned there. It is a first-class status, so the report and the accordion show it too.
+pinned there. It is a first-class status, so the report and the accordion show it too. The move records
+`carriedFrom` on the task, so the row keeps saying where the work was originally planned
+instead of looking like it had always been this week's — and keeps saying it after a save.
 
 The modal edits a deep copy of the project's weeks, so "Save Changes" is a real commit and
 "Back" genuinely discards. A carried task ticked here stays visible and struck through until the

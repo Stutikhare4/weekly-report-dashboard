@@ -5183,8 +5183,10 @@ function closeWeekModal() {
 }
 
 function saveWeekModal() {
-  if (!weekDraft) return;
+  if (!weekDraft || weekDraft.saving) return;
   if (!requirePermission("report.edit", "edit a weekly report")) return;
+  weekDraft.saving = true;
+  nodes.weekModalSave.disabled = true;
 
   const byId = new Map(weekDraft.updates.map((item) => [item.id, item]));
   state.updates = state.updates.map((item) => byId.get(item.id) || item);
@@ -5227,11 +5229,24 @@ function renderWeekModal() {
   nodes.weekModalCarriedSection.hidden = !carried.length;
   nodes.weekModalCarried.innerHTML = carried
     .map(({ task, from }) => weekTaskRow(task, `⬅ Carried from Week ${from}`)).join("");
+  const weekNumberOf = (weekStart) => {
+    const position = weeks.findIndex((week) => week.weekStart === weekStart);
+    return position >= 0 ? position + 1 : null;
+  };
+
   nodes.weekModalTasks.innerHTML = (current.tasks || []).length
-    ? current.tasks.map((task) => weekTaskRow(task, "")).join("")
+    ? current.tasks.map((task) => {
+        const from = task.carriedFrom && task.carriedFrom !== current.weekStart
+          ? weekNumberOf(task.carriedFrom) : null;
+        return weekTaskRow(task, from ? `⬅ Carried from Week ${from}` : "");
+      }).join("")
     : `<p class="muted">No tasks in this week yet.</p>`;
 
   nodes.weekModalSave.disabled = !weekDraft.dirty;
+  /* An asterisk while there is something to save, so the button says whether the work in front
+     of you has been committed. */
+  nodes.weekModalSave.textContent = weekDraft.dirty ? "💾 Save Changes *" : "💾 Save Changes";
+  nodes.weekModalSave.title = weekDraft.dirty ? "You have unsaved changes" : "Nothing to save";
 }
 
 function weekTaskRow(task, source) {
@@ -5313,6 +5328,9 @@ function handleWeekModalStatus(select) {
 
   const current = draftWeeks()[draftIndex()];
   if (select.value === "pending" && current && found.week.id !== current.id) {
+    /* Record where the work was originally planned before moving it, so the row keeps saying
+       it was carried rather than looking like it was always this week's. */
+    if (!found.task.carriedFrom) found.task.carriedFrom = found.week.weekStart;
     found.week.tasks = found.week.tasks.filter((item) => item.id !== found.task.id);
     found.task.startDate = current.weekStart;
     found.task.dueDate = taskDueDate(current.weekStart, found.task.days || templateDefaultDays());
