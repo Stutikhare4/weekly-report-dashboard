@@ -117,6 +117,21 @@ The old "Weekly updates" list on the project page is gone — it was a third ren
 same weeks, after the report itself and the reports accordion. Adding and editing weeks now
 happens on the Project Reports screen, reachable from the details view.
 
+## Week modal
+
+"Open week" on a row in the reports list opens a focused view of that week: what is still
+outstanding from earlier weeks, what is planned for this one, tick-to-complete, shift-to-next-
+week, and add-a-task.
+
+Carryover is **display only**. A task stays owned by the week it was planned in; earlier weeks'
+unfinished work is shown here labelled with its source, so opening a later week never rewrites
+what an earlier one contained. Moving a task between weeks is the explicit "Shift to next week"
+action, which re-dates it into the following week.
+
+The modal edits a deep copy of the project's weeks, so "Save Changes" is a real commit and
+"Back" genuinely discards. A carried task ticked here stays visible and struck through until the
+modal closes, rather than vanishing out of the list mid-click.
+
 ## Weekly reports screen
 
 Weeks are an accordion: collapsed to a summary line (week number, dates, phase, task count,

@@ -274,6 +274,17 @@ const nodes = {
   projectScope: document.getElementById("projectScope"),
   projectTimelineFields: document.getElementById("projectTimelineFields"),
   projectPhases: document.getElementById("projectPhases"),
+  weekModalOverlay: document.getElementById("weekModalOverlay"),
+  weekModalTitle: document.getElementById("weekModalTitle"),
+  weekModalStatus: document.getElementById("weekModalStatus"),
+  weekModalClose: document.getElementById("weekModalClose"),
+  weekModalCarriedSection: document.getElementById("weekModalCarriedSection"),
+  weekModalCarried: document.getElementById("weekModalCarried"),
+  weekModalTasks: document.getElementById("weekModalTasks"),
+  weekModalNewTask: document.getElementById("weekModalNewTask"),
+  weekModalAdd: document.getElementById("weekModalAdd"),
+  weekModalBack: document.getElementById("weekModalBack"),
+  weekModalSave: document.getElementById("weekModalSave"),
   projScopeEdit: document.getElementById("projScopeEdit"),
   projScopeForm: document.getElementById("projScopeForm"),
   projScopeCancel: document.getElementById("projScopeCancel"),
@@ -495,6 +506,25 @@ function boot() {
   nodes.projTimelineEdit.addEventListener("click", () => toggleProjectDetails(true));
   nodes.projPhasesEdit.addEventListener("click", () => navigateToScreen("templates"));
   nodes.projScopeEdit.addEventListener("click", () => toggleProjectScope(true));
+  nodes.weekModalClose.addEventListener("click", () => closeWeekModal());
+  nodes.weekModalBack.addEventListener("click", () => closeWeekModal());
+  nodes.weekModalSave.addEventListener("click", () => saveWeekModal());
+  nodes.weekModalAdd.addEventListener("click", () => addWeekModalTask());
+  nodes.weekModalNewTask.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") { e.preventDefault(); addWeekModalTask(); }
+  });
+  nodes.weekModalStatus.addEventListener("change", () => {
+    const current = draftWeeks()[draftIndex()];
+    if (!current) return;
+    current.statusTag = nodes.weekModalStatus.value;
+    weekDraft.dirty = true;
+    renderWeekModal();
+  });
+  nodes.weekModalOverlay.addEventListener("click", (e) => {
+    if (e.target === nodes.weekModalOverlay) closeWeekModal();
+  });
+  nodes.weekModalCarried.addEventListener("click", (e) => handleWeekModalClick(e));
+  nodes.weekModalTasks.addEventListener("click", (e) => handleWeekModalClick(e));
   nodes.projScopeCancel.addEventListener("click", () => toggleProjectScope(false));
   nodes.projScopeForm.addEventListener("submit", (e) => saveProjectScope(e));
   nodes.projScopeTechTeam.addEventListener("change", () => {
@@ -659,6 +689,181 @@ function setProjectView(view) {
   const project = state.projects.find((item) => item.id === uiState.projectId);
   nodes.projectReportTitle.textContent = project ? `${project.name} — Weekly Report` : "Weekly Report";
   nodes.projectScreen.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+
+/* ---------- Week modal ---------- */
+
+/* Edits a working copy of the project's weeks, so Back can walk away and Save is a real
+   commit rather than a decoration over changes already written. */
+let weekDraft = null;
+
+function draftWeeks() {
+  return [...weekDraft.updates].sort((left, right) => left.weekStart.localeCompare(right.weekStart));
+}
+
+function draftIndex() {
+  return draftWeeks().findIndex((update) => update.id === weekDraft.weekId);
+}
+
+function openWeekModal(updateId) {
+  const update = state.updates.find((item) => item.id === updateId);
+  if (!update) return;
+  if (!requirePermission("report.edit", "edit a weekly report")) return;
+
+  weekDraft = {
+    projectId: update.projectId,
+    weekId: updateId,
+    dirty: false,
+    /* Carried rows are the ones still outstanding, so ticking one would drop it out of the
+       list mid-click. Anything ticked here stays put until the modal closes. */
+    tickedHere: new Set(),
+    updates: state.updates
+      .filter((item) => item.projectId === update.projectId)
+      .map((item) => JSON.parse(JSON.stringify(item))),
+  };
+
+  nodes.weekModalStatus.innerHTML = WEEK_STATUSES
+    .map((status) => `<option value="${status}">${capitalize(status)}</option>`).join("");
+  nodes.weekModalOverlay.hidden = false;
+  renderWeekModal();
+  nodes.weekModalNewTask.value = "";
+}
+
+function closeWeekModal() {
+  if (weekDraft && weekDraft.dirty && !confirm("Discard the changes made in this week?")) return;
+  weekDraft = null;
+  nodes.weekModalOverlay.hidden = true;
+}
+
+function saveWeekModal() {
+  if (!weekDraft) return;
+  if (!requirePermission("report.edit", "edit a weekly report")) return;
+
+  const byId = new Map(weekDraft.updates.map((item) => [item.id, item]));
+  state.updates = state.updates.map((item) => byId.get(item.id) || item);
+
+  refreshProjectGoLive(weekDraft.projectId);
+  saveState();
+  weekDraft = null;
+  nodes.weekModalOverlay.hidden = true;
+  renderAll();
+  showAppSuccess("Week saved.");
+}
+
+function weekTaskDescription(task) {
+  return [task.phase, task.domain].filter(Boolean).join(" · ") || task.owner || "";
+}
+
+/* A task stays owned by the week it was planned in. Earlier weeks' unfinished work is shown
+   here, labelled with where it came from, so the history of what a week actually contained is
+   not rewritten every time someone opens a later week. Moving a task between weeks is the
+   explicit "Shift to next week" action. */
+function renderWeekModal() {
+  if (!weekDraft) return;
+  const weeks = draftWeeks();
+  const index = draftIndex();
+  const current = weeks[index];
+  if (!current) return closeWeekModal();
+
+  nodes.weekModalTitle.textContent = `📅 Week ${index + 1} (${current.weekRange})`;
+  nodes.weekModalStatus.value = current.statusTag;
+
+  const carried = [];
+  weeks.slice(0, index).forEach((week, position) => {
+    (week.tasks || []).forEach((task) => {
+      if (task.status !== "completed" || weekDraft.tickedHere.has(task.id)) {
+        carried.push({ task, from: position + 1, weekId: week.id });
+      }
+    });
+  });
+
+  nodes.weekModalCarriedSection.hidden = !carried.length;
+  nodes.weekModalCarried.innerHTML = carried
+    .map(({ task, from }) => weekTaskRow(task, `⬅ Carried from Week ${from}`)).join("");
+  nodes.weekModalTasks.innerHTML = (current.tasks || []).length
+    ? current.tasks.map((task) => weekTaskRow(task, "")).join("")
+    : `<p class="muted">No tasks in this week yet.</p>`;
+
+  nodes.weekModalSave.disabled = !weekDraft.dirty;
+}
+
+function weekTaskRow(task, source) {
+  const done = task.status === "completed";
+  return `
+    <div class="week-task${done ? " is-done" : ""}" data-week-task="${task.id}">
+      <label class="week-task-check">
+        <input type="checkbox"${done ? " checked" : ""} data-week-toggle="${task.id}" />
+      </label>
+      <div class="week-task-body">
+        <div class="week-task-title">${escapeHtml(task.title || "Untitled task")}</div>
+        <div class="week-task-desc">${escapeHtml(weekTaskDescription(task))}</div>
+        ${source ? `<div class="week-task-source">${escapeHtml(source)}</div>` : ""}
+      </div>
+      <button type="button" class="week-task-shift" data-week-shift="${task.id}">&rarr; Shift to next week</button>
+    </div>`;
+}
+
+function findDraftTask(taskId) {
+  for (const week of weekDraft.updates) {
+    const task = (week.tasks || []).find((item) => item.id === taskId);
+    if (task) return { week, task };
+  }
+  return null;
+}
+
+function handleWeekModalClick(event) {
+  if (!weekDraft) return;
+
+  const toggle = event.target.closest("[data-week-toggle]");
+  if (toggle) {
+    const found = findDraftTask(toggle.dataset.weekToggle);
+    if (!found) return;
+    found.task.status = toggle.checked ? "completed" : "not started";
+    if (toggle.checked) {
+      if (!found.task.date) found.task.date = toInputDate(new Date());
+      weekDraft.tickedHere.add(found.task.id);
+    }
+    weekDraft.dirty = true;
+    renderWeekModal();
+    return;
+  }
+
+  const shift = event.target.closest("[data-week-shift]");
+  if (shift) {
+    const weeks = draftWeeks();
+    const target = weeks[draftIndex() + 1];
+    if (!target) {
+      showAppInfo("This is the last week of the project — add a week before shifting work into it.");
+      return;
+    }
+    const found = findDraftTask(shift.dataset.weekShift);
+    if (!found) return;
+    found.week.tasks = found.week.tasks.filter((item) => item.id !== found.task.id);
+    found.task.startDate = target.weekStart;
+    found.task.dueDate = taskDueDate(target.weekStart, found.task.days || templateDefaultDays());
+    target.tasks.push(found.task);
+    weekDraft.dirty = true;
+    renderWeekModal();
+  }
+}
+
+function addWeekModalTask() {
+  if (!weekDraft) return;
+  const title = nodes.weekModalNewTask.value.trim();
+  if (!title) return;
+
+  const current = draftWeeks()[draftIndex()];
+  current.tasks = current.tasks || [];
+  current.tasks.push({
+    id: newId(), title, phase: "", domain: "", owner: "", status: "not started",
+    date: "", blocker: "", priority: "medium", comments: "",
+    days: templateDefaultDays(), startDate: current.weekStart,
+    dueDate: taskDueDate(current.weekStart, templateDefaultDays()), subtasks: [],
+  });
+  nodes.weekModalNewTask.value = "";
+  weekDraft.dirty = true;
+  renderWeekModal();
 }
 
 function clearResetFlagFromUrl() {
@@ -4585,6 +4790,7 @@ function renderReportsIndex(projectId) {
         </div>
         <div class="report-row-actions">
           <span class="status-badge ${statusClass(update.statusTag)}">${escapeHtml(update.statusTag)}</span>
+          <button type="button" class="ghost-button small-button" data-requires="report.edit" data-open-week="${update.id}">Open week</button>
           <button type="button" class="ghost-button small-button" data-requires="report.edit" data-edit-report="${update.id}">Edit</button>
           <button type="button" class="row-remove" data-requires="report.delete" data-delete-report="${update.id}">Delete</button>
         </div>
@@ -4789,6 +4995,12 @@ function handleReportsIndexClick(event) {
   if (structural) {
     if (!requirePermission("report.edit", "edit a weekly report")) return;
     applyWeekStructureChange(structural);
+    return;
+  }
+
+  const open = event.target.closest("[data-open-week]");
+  if (open) {
+    openWeekModal(open.dataset.openWeek);
     return;
   }
 

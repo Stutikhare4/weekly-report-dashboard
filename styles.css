@@ -3392,3 +3392,145 @@ button {
     flex-direction: column;
   }
 }
+
+
+/* Week modal: a focused view of one week — what is still outstanding from earlier weeks,
+   what is planned for this one, and the two moves that matter (tick it off, or push it on). */
+.week-modal {
+  max-width: 800px;
+  width: 100%;
+  background: var(--surface-2);
+  border-radius: 8px;
+  border-top: 3px solid var(--card-accent);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.week-modal-head {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.week-modal-head h2 {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--card-value);
+}
+
+.week-modal-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--card-label);
+}
+
+.week-modal-status select {
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: 1px solid var(--card-border);
+  background: var(--surface-4);
+  color: var(--text);
+  font-size: 13px;
+}
+
+.week-modal-body { display: grid; gap: 22px; padding: 22px 0; }
+.week-modal-section { display: grid; gap: 10px; }
+
+.week-modal-subtitle {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--card-value);
+}
+
+.week-task-list { display: grid; gap: 10px; }
+
+.week-task {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 16px;
+  border-radius: 6px;
+  background: var(--surface-3);
+  border-left: 3px solid var(--card-accent);
+}
+
+.week-task-check input {
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  accent-color: var(--card-accent);
+  cursor: pointer;
+}
+
+.week-task-body { flex: 1; min-width: 0; display: grid; gap: 3px; }
+
+.week-task-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--card-value);
+  overflow-wrap: anywhere;
+}
+
+.week-task-desc { font-size: 12px; color: var(--card-label); }
+
+.week-task-source {
+  font-size: 12px;
+  font-style: italic;
+  color: var(--card-label);
+}
+
+/* A completed task stays readable but visibly settled. */
+.week-task.is-done .week-task-title {
+  text-decoration: line-through;
+  color: var(--card-label);
+}
+
+.week-task.is-done { opacity: 0.72; }
+
+.week-task-shift {
+  flex: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  border: 1px solid var(--card-border);
+  background: transparent;
+  color: var(--card-accent);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+}
+
+.week-task-shift:hover { background: var(--card-hover); border-color: var(--card-accent); }
+
+.week-modal-add { display: flex; gap: 10px; flex-wrap: wrap; }
+
+.week-modal-add input {
+  flex: 1;
+  min-width: 200px;
+  padding: 10px 14px;
+  font-size: 13px;
+  border-radius: 6px;
+  border: 1px solid var(--card-border);
+  background: var(--surface-4);
+  color: var(--text);
+}
+
+.overview-action.is-add {
+  background: var(--card-accent);
+  border-color: var(--card-accent);
+  color: #ffffff;
+}
+
+.overview-action.is-add:hover { filter: brightness(0.93); background: var(--card-accent); }
+
+.week-modal-foot { display: flex; justify-content: center; gap: 14px; flex-wrap: wrap; }
+
+.overview-action:disabled { opacity: 0.5; cursor: default; }

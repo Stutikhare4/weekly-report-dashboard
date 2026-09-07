@@ -731,5 +731,39 @@
       </div>
     </div>
 
+    <div id="weekModalOverlay" class="modal-overlay" hidden>
+      <div class="modal-card week-modal" role="dialog" aria-modal="true" aria-labelledby="weekModalTitle">
+        <div class="modal-head week-modal-head">
+          <h2 id="weekModalTitle">Week</h2>
+          <label class="week-modal-status">Status
+            <select id="weekModalStatus"></select>
+          </label>
+          <button type="button" id="weekModalClose" class="ghost-button small-button" aria-label="Close">&times;</button>
+        </div>
+
+        <div class="modal-body week-modal-body">
+          <section class="week-modal-section" id="weekModalCarriedSection" hidden>
+            <h3 class="week-modal-subtitle">Pending from earlier weeks</h3>
+            <div id="weekModalCarried" class="week-task-list"></div>
+          </section>
+
+          <section class="week-modal-section">
+            <h3 class="week-modal-subtitle">Tasks for this week</h3>
+            <div id="weekModalTasks" class="week-task-list"></div>
+          </section>
+
+          <div class="week-modal-add">
+            <input type="text" id="weekModalNewTask" placeholder="Add new task…" />
+            <button type="button" id="weekModalAdd" class="overview-action is-add">+ Add task</button>
+          </div>
+        </div>
+
+        <div class="modal-foot week-modal-foot">
+          <button type="button" id="weekModalBack" class="overview-action">&larr; Back</button>
+          <button type="button" id="weekModalSave" class="overview-action is-primary">💾 Save Changes</button>
+        </div>
+      </div>
+    </div>
+
   </body>
 </html>
