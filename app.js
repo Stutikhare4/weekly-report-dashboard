@@ -465,8 +465,10 @@ function boot() {
     });
   });
 
-  nodes.openCurrent.addEventListener("click", () => openCurrentProject());
-  nodes.openClosed.addEventListener("click", () => openClosedProject());
+  /* Both folders open their list. They used to jump straight to the first project by name
+     whenever the folder had one, so the list only ever appeared when the folder was empty. */
+  nodes.openCurrent.addEventListener("click", () => openCategory("current"));
+  nodes.openClosed.addEventListener("click", () => openCategory("closed"));
   nodes.backToHome.addEventListener("click", () => openDashboard());
   nodes.backToCategory.addEventListener("click", () => openCategory(uiState.category));
   nodes.generateReport.addEventListener("click", () => generateReportPdf());
@@ -1316,32 +1318,6 @@ function renderFolderCounts() {
 }
 
 /* ---------- Weekly Reports (folder / category / project) ---------- */
-
-function openCurrentProject() {
-  const currentProject = state.projects
-    .filter((project) => project.status === "current")
-    .sort((left, right) => left.name.localeCompare(right.name))[0];
-
-  if (currentProject) {
-    openProject(currentProject.id);
-    return;
-  }
-
-  openCategory("current");
-}
-
-function openClosedProject() {
-  const closedProject = state.projects
-    .filter((project) => project.status === "closed")
-    .sort((left, right) => left.name.localeCompare(right.name))[0];
-
-  if (closedProject) {
-    openProject(closedProject.id);
-    return;
-  }
-
-  openCategory("closed");
-}
 
 function openCategory(category) {
   /* Only start again from the first page when the folder actually changes — coming back from a
