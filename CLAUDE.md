@@ -112,6 +112,14 @@ In the week modal a pinned task shows a lock, cannot be shifted, and is not move
 rule. Its status stays editable — the point is that the work happens first, not that nobody may
 record it.
 
+## Create-project wizard
+
+Three steps — Basic Details, Platform Integration, Review & Summary — inside one screen as
+`.wizard-panel` elements, not separate screens. `WIZARD_LAST_STEP` is 3; step 3's button reads
+"Create Project" and creates the project, then opens it. There is no confirmation step: a screen
+whose only job was to say "done" and offer a button to where the person was already going. What
+it usefully said — how many weeks were pre-created — survives as a self-clearing banner.
+
 ## Projects list (folder screen)
 
 Dashboard → Ongoing / Completed opens the folder screen as a stacked list: one full-width row

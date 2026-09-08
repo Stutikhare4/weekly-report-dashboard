@@ -4059,7 +4059,6 @@ button {
               <li class="wizard-step" data-step="1"><span class="wizard-step-dot">1</span><span class="wizard-step-label">Basic Details</span></li>
               <li class="wizard-step" data-step="2"><span class="wizard-step-dot">2</span><span class="wizard-step-label">Platform Integration</span></li>
               <li class="wizard-step" data-step="3"><span class="wizard-step-dot">3</span><span class="wizard-step-label">Review &amp; Summary</span></li>
-              <li class="wizard-step" data-step="4"><span class="wizard-step-dot">4</span><span class="wizard-step-label">Confirmation</span></li>
             </ol>
 
             <div class="wizard-layout">
@@ -4204,19 +4203,6 @@ button {
                   <div class="wizard-section">
                     <h3 class="wizard-section-title">Review &amp; Summary</h3>
                     <div id="npReviewBody" class="review-body"></div>
-                  </div>
-                </div>
-
-                <!-- Step 4 : Confirmation -->
-                <div class="wizard-panel" data-panel="4" hidden>
-                  <div class="wizard-section confirmation-block">
-                    <div class="confirmation-mark">✓</div>
-                    <h3 class="wizard-section-title" id="npConfirmTitle">Project created</h3>
-                    <p class="muted" id="npConfirmText"></p>
-                    <div class="actions" style="justify-content: center;">
-                      <button type="button" id="npGoToProject" class="primary-button">Open project</button>
-                      <button type="button" id="npCreateAnother" class="ghost-button">Create another</button>
-                    </div>
                   </div>
                 </div>
 
@@ -4936,10 +4922,6 @@ const nodes = {
   npSummaryPanel: document.getElementById("npSummaryPanel"),
   npSummary: document.getElementById("npSummary"),
   npReviewBody: document.getElementById("npReviewBody"),
-  npConfirmTitle: document.getElementById("npConfirmTitle"),
-  npConfirmText: document.getElementById("npConfirmText"),
-  npGoToProject: document.getElementById("npGoToProject"),
-  npCreateAnother: document.getElementById("npCreateAnother"),
   npPlatforms: document.getElementById("npPlatforms"),
   npVendorNameField: document.getElementById("npVendorNameField"),
   npPocList: document.getElementById("npPocList"),
@@ -5079,8 +5061,6 @@ function boot() {
       throw error;
     }
   });
-  nodes.npGoToProject.addEventListener("click", () => { if (uiState.wizardSavedId) openProject(uiState.wizardSavedId); });
-  nodes.npCreateAnother.addEventListener("click", () => openAddProject());
   nodes.npAddPoc.addEventListener("click", () => addPocRow());
   nodes.addProjectForm.addEventListener("change", (e) => handleWizardChange(e));
   nodes.addProjectForm.addEventListener("input", (e) => {
@@ -5092,7 +5072,7 @@ function boot() {
   });
   nodes.wizardSteps.addEventListener("click", (e) => {
     const step = e.target.closest(".wizard-step");
-    if (step && uiState.wizardStep < WIZARD_CONFIRM_STEP) goToWizardStep(Number(step.dataset.step));
+    if (step) goToWizardStep(Number(step.dataset.step));
   });
 
   nodes.openWeeklyReport.addEventListener("click", () => setProjectView("report"));
@@ -7310,7 +7290,10 @@ const WIZARD_NEXT_LABELS = {
   3: "Create Project",
 };
 const WIZARD_REVIEW_STEP = 3;
-const WIZARD_CONFIRM_STEP = 4;
+/* Three steps: the last one creates the project and opens it. There is no confirmation step —
+   a screen whose only job is to say "done" and offer a button to go where the person was
+   already going. */
+const WIZARD_LAST_STEP = 3;
 
 const ALL_PLATFORMS = ["Website", "Android", "iOS", "Web App", "REST API"];
 const PLATFORM_SHORT = { "Website": "Web", "Android": "And", "iOS": "iOS", "Web App": "App", "REST API": "CRM" };
@@ -7448,7 +7431,7 @@ function showWizardError(message) {
 }
 
 function goToWizardStep(step) {
-  const target = Math.min(Math.max(step, 1), WIZARD_CONFIRM_STEP);
+  const target = Math.min(Math.max(step, 1), WIZARD_LAST_STEP);
 
   if (target > uiState.wizardStep && !validateWizardUpTo(target)) {
     return;
@@ -7487,12 +7470,9 @@ function renderWizardStep() {
     item.classList.toggle("done", value < step);
   });
 
-  const onConfirm = step === WIZARD_CONFIRM_STEP;
-  nodes.npNav.hidden = onConfirm;
-  nodes.npSummaryPanel.hidden = onConfirm;
   nodes.npBack.hidden = step === 1;
   nodes.npNext.textContent = WIZARD_NEXT_LABELS[step] || "Next";
-  nodes.npProgress.textContent = `Step ${step} of ${WIZARD_CONFIRM_STEP}`;
+  nodes.npProgress.textContent = `Step ${step} of ${WIZARD_LAST_STEP}`;
 
   if (step === WIZARD_REVIEW_STEP) {
     renderWizardReview();
@@ -7713,16 +7693,13 @@ function saveProject({ asDraft } = { asDraft: false }) {
   saveState();
   uiState.wizardSavedId = newProject.id;
 
-  if (asDraft) {
-    openProject(newProject.id);
-    return;
-  }
+  openProject(newProject.id);
 
-  nodes.npConfirmTitle.textContent = `${newProject.name} created`;
-  nodes.npConfirmText.textContent = `${createdWeeks} weekly report${createdWeeks === 1 ? "" : "s"} were pre-created from the master template. Open the project to fill in status, owners and dates week by week.`;
-  uiState.wizardStep = WIZARD_CONFIRM_STEP;
-  renderWizardStep();
-  renderAll();
+  /* The confirmation step used to carry this. It is worth saying once — the weeks appear
+     without being asked for — so it survives as a banner that clears itself. */
+  if (!asDraft) {
+    showAppSuccess(`${newProject.name} created — ${createdWeeks} weekly report${createdWeeks === 1 ? "" : "s"} pre-created from the master template.`);
+  }
 }
 
 /* ---------- Templates screen (editable master plan) ---------- */
