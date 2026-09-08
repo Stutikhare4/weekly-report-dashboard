@@ -114,10 +114,8 @@ record it.
 
 ## Projects list (folder screen)
 
-Dashboard → Ongoing / Completed opens the folder screen as a card grid. Both buttons call
-`openCategory()` directly: they used to jump straight to the first project by name whenever the
-folder had one, so the list only ever appeared when the folder was empty — which is why testing
-`openCategory()` rather than the button hid the bug. Each card carries the project's domains,
+Dashboard → Ongoing / Completed opens the folder screen, which was already the list step in the
+flow; it is now a card grid rather than a bare list. Each card carries the project's domains,
 cycle length, go-live and an Active/Idle dot, and the whole card opens the project.
 
 Activity has no field of its own on a project, so `projectLastActivity()` takes the newest of
