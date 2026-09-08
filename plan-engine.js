@@ -77,16 +77,27 @@
     return Math.min(Math.max(index, 0), Math.max(0, cycleWeeks - 1));
   }
 
+  /* Foundational work sits in a named week rather than wherever its offset lands. Placing it by
+     offset alone would only hold for a Monday or Tuesday kickoff: with `lead` counted in, an
+     N+5 task slides into week 2 for a project starting on a Wednesday or later. */
+  function placementFor(task, cycleWeeks, lead, meta) {
+    const pinned = Number(task && task.fixedWeek);
+    if (Number.isFinite(pinned) && pinned > 0) {
+      return Math.min(pinned - 1, Math.max(0, cycleWeeks - 1));
+    }
+    return weekIndexFor(resolveTaskOffset(task, cycleWeeks, meta), cycleWeeks, lead);
+  }
+
   /* Group a flat task list into one bucket per project week. */
   function distribute(tasks, cycleWeeks, meta, lead) {
     const weeks = Array.from({ length: cycleWeeks }, () => []);
     (tasks || []).forEach((task) => {
       const offset = resolveTaskOffset(task, cycleWeeks, meta);
-      weeks[weekIndexFor(offset, cycleWeeks, lead)].push({ task, offset });
+      weeks[placementFor(task, cycleWeeks, lead, meta)].push({ task, offset });
     });
     weeks.forEach((bucket) => bucket.sort((left, right) => left.offset - right.offset));
     return weeks;
   }
 
-  return { cyclesWithData, baseCycle, roundHalfDown, resolveTaskOffset, isElastic, weekIndexFor, distribute };
+  return { cyclesWithData, baseCycle, roundHalfDown, resolveTaskOffset, isElastic, weekIndexFor, placementFor, distribute };
 });

@@ -91,6 +91,27 @@ Known data slips in the sheet, imported as written rather than silently correcte
 6 and Week 12 tabs the five *Production* channel-setup rows (Email/SMS/WhatsApp/RCS/IVR) still
 carry the staging value N+10, so they schedule before the production dashboard exists.
 
+## Fixed foundational weeks
+
+SDK Set Up and User Tracking are pinned: `fixedWeek: 1` and `fixedWeek: 2` on the task, with
+offsets flattened to 5 and 10 across every cycle. `PlanEngine.placementFor()` puts a pinned task
+in its named week directly rather than deriving one from its offset — offset alone only holds
+for a Monday or Tuesday kickoff, since `lead` slides an N+5 task into week 2 for a project
+starting Wednesday or later.
+
+Nothing was added to do this; the tasks already existed in Staging Deployment and were moved
+rather than copied. There is no CRM SDK Set Up, by decision. Domain filtering still applies — a
+website-only project gets the Website one only.
+
+The pin is applied by **`tools/import-sheet.py`** (`PINNED_WEEKS`), not by hand, so a re-import
+cannot hand these tasks back their elastic offsets. It is carried through `toTemplateWeeks`,
+`ensureDefaults` and the seed writer; that whitelist rebuilds each task field by field, so a new
+field not named in all three is silently dropped.
+
+In the week modal a pinned task shows a lock, cannot be shifted, and is not moved by the pending
+rule. Its status stays editable — the point is that the work happens first, not that nobody may
+record it.
+
 ## Project page: two views
 
 The details view is a card grid: Overview and Integration Scope side by side, Project Details

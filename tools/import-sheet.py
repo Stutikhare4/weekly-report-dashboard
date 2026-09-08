@@ -28,6 +28,11 @@ CHANNEL_RULES = [("Web Push", "Web Push"), ("WebPush", "Web Push"),
                  ("Rich Push", "Push"), ("Push", "Push"), ("Email", "Email"), ("SMS", "SMS"),
                  ("Whatsapp", "WhatsApp"), ("RCS", "RCS"), ("IVR", "IVR")]
 TYPOS = {"Histroical": "Historical", "Jounery": "Journey"}
+# Foundational work that every project does first, pinned to a week rather than scheduled from
+# the sheet: SDK setup is week 1 and user tracking week 2, whatever the cycle length. Applied
+# here so a re-import cannot quietly hand them back their elastic offsets.
+PINNED_WEEKS = {"SDK Set Up": 1, "User Tracking": 2}
+PINNED_OFFSETS = {1: 5, 2: 10}
 # Web App is not in the sheet: it mirrors Website's tasks with Android/iOS timing.
 WEBAPP_TIMING = {"SDK Set Up": "SDK Set Up", "User Tracking": "User Tracking",
                  "Event Tracking": "Event Tracking", "Web Push Setup": "Push Setup",
@@ -147,11 +152,18 @@ def build(seq):
         for bad, good in TYPOS.items():
             title = title.replace(bad, good)
 
+        pinned = PINNED_WEEKS.get(title)
+
         def task(scope, platforms, offsets):
             seen = {str(c): offsets[c] for c in CYCLE_TABS}
-            return {"scope": scope, "title": title, "owner": row["owner"], "priority": "medium",
-                    "platforms": platforms, "channels": list(dict.fromkeys(channels_for(title))),
-                    "offsetByCycle": seen, "elastic": len(set(seen.values())) > 1}
+            if pinned:
+                seen = {str(c): PINNED_OFFSETS[pinned] for c in CYCLE_TABS}
+            entry = {"scope": scope, "title": title, "owner": row["owner"], "priority": "medium",
+                     "platforms": platforms, "channels": list(dict.fromkeys(channels_for(title))),
+                     "offsetByCycle": seen, "elastic": len(set(seen.values())) > 1}
+            if pinned:
+                entry["fixedWeek"] = pinned
+            return entry
 
         own = {c: seq[CYCLE_TABS[c]][i]["offset"] for c in CYCLE_TABS}
         phases[-1]["tasks"].append(task(row["domain"] or row["phase"],
@@ -176,11 +188,12 @@ def write_seed(phases):
                   f'    elastic: {"true" if phase["elastic"] else "false"},', "    tasks: ["]
         for task in phase["tasks"]:
             offsets = ", ".join(f'"{k}": {v}' for k, v in task["offsetByCycle"].items())
+            pin = f', fixedWeek: {task["fixedWeek"]}' if task.get("fixedWeek") else ""
             lines.append(
                 f'      {{ scope: {dump(task["scope"])}, title: {dump(task["title"])}, '
                 f'owner: {dump(task["owner"])}, priority: "{task["priority"]}", '
                 f'platforms: {dump(task["platforms"])}, channels: {dump(task["channels"])}, '
-                f'elastic: {"true" if task["elastic"] else "false"}, offsetByCycle: {{ {offsets} }} }},')
+                f'elastic: {"true" if task["elastic"] else "false"}{pin}, offsetByCycle: {{ {offsets} }} }},')
         lines += ["    ],", "  },"]
     lines.append("];")
 
@@ -214,7 +227,13 @@ def main():
 
     phases, web_app = build(seq)
     total = sum(len(p["tasks"]) for p in phases)
+    pinned = [(t["scope"], t["title"], t["fixedWeek"])
+              for p in phases for t in p["tasks"] if t.get("fixedWeek")]
     print(f"\n{len(phases)} phases, {total} tasks ({total - web_app} from the sheet + {web_app} Web App)")
+    if pinned:
+        print(f"  pinned to a fixed week ({len(pinned)}):")
+        for scope, title, week in pinned:
+            print(f"    week {week}  {scope:<12} {title}")
     for phase in phases:
         print(f'  {phase["week"]}. {phase["label"]:<24} {len(phase["tasks"]):3d}')
 

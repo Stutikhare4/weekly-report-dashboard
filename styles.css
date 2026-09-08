@@ -3522,6 +3522,15 @@ button {
   background: color-mix(in srgb, #eab308 8%, var(--surface-3));
 }
 
+.week-task.is-pinned {
+  border-left-color: var(--card-label);
+}
+
+.week-task-lock {
+  font-size: 11px;
+  opacity: 0.75;
+}
+
 .week-task-shift:disabled {
   opacity: 0.4;
   cursor: not-allowed;

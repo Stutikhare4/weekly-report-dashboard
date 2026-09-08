@@ -62,7 +62,7 @@ const MAX_CYCLE_WEEKS = 12;
 
 /* Bump this whenever the master plan changes shape or content: a browser holding an older
    version re-seeds itself on the next load instead of silently keeping the stale plan. */
-const WEEK_TEMPLATE_VERSION = "2026-09-06-google-sheet";
+const WEEK_TEMPLATE_VERSION = "2026-09-07-fixed-weeks";
 
 const WEEK_TEMPLATE_SEED = [
   {
@@ -83,23 +83,23 @@ const WEEK_TEMPLATE_SEED = [
     label: "Staging Deployment",
     elastic: true,
     tasks: [
-      { scope: "Website", title: "SDK Set Up", owner: "Client tech team", priority: "medium", platforms: ["Website"], channels: [], elastic: true, offsetByCycle: { "4": 5, "6": 5, "12": 14 } },
-      { scope: "Web App", title: "SDK Set Up", owner: "Client tech team", priority: "medium", platforms: ["Web App"], channels: [], elastic: true, offsetByCycle: { "4": 5, "6": 5, "12": 28 } },
-      { scope: "Website", title: "User Tracking", owner: "Client tech team", priority: "medium", platforms: ["Website"], channels: [], elastic: true, offsetByCycle: { "4": 5, "6": 5, "12": 14 } },
-      { scope: "Web App", title: "User Tracking", owner: "Client tech team", priority: "medium", platforms: ["Web App"], channels: [], elastic: true, offsetByCycle: { "4": 5, "6": 5, "12": 28 } },
+      { scope: "Website", title: "SDK Set Up", owner: "Client tech team", priority: "medium", platforms: ["Website"], channels: [], elastic: false, fixedWeek: 1, offsetByCycle: { "4": 5, "6": 5, "12": 5 } },
+      { scope: "Web App", title: "SDK Set Up", owner: "Client tech team", priority: "medium", platforms: ["Web App"], channels: [], elastic: false, fixedWeek: 1, offsetByCycle: { "4": 5, "6": 5, "12": 5 } },
+      { scope: "Website", title: "User Tracking", owner: "Client tech team", priority: "medium", platforms: ["Website"], channels: [], elastic: false, fixedWeek: 2, offsetByCycle: { "4": 10, "6": 10, "12": 10 } },
+      { scope: "Web App", title: "User Tracking", owner: "Client tech team", priority: "medium", platforms: ["Web App"], channels: [], elastic: false, fixedWeek: 2, offsetByCycle: { "4": 10, "6": 10, "12": 10 } },
       { scope: "Website", title: "Event Tracking", owner: "Client tech team", priority: "medium", platforms: ["Website"], channels: [], elastic: true, offsetByCycle: { "4": 10, "6": 15, "12": 21 } },
       { scope: "Web App", title: "Event Tracking", owner: "Client tech team", priority: "medium", platforms: ["Web App"], channels: [], elastic: true, offsetByCycle: { "4": 10, "6": 15, "12": 35 } },
       { scope: "Website", title: "Web Push Setup", owner: "Client tech team", priority: "medium", platforms: ["Website"], channels: ["Web Push", "Push"], elastic: true, offsetByCycle: { "4": 5, "6": 5, "12": 14 } },
       { scope: "Web App", title: "Web Push Setup", owner: "Client tech team", priority: "medium", platforms: ["Web App"], channels: ["Web Push", "Push"], elastic: true, offsetByCycle: { "4": 10, "6": 15, "12": 28 } },
-      { scope: "Android", title: "SDK Set Up", owner: "Client tech team", priority: "medium", platforms: ["Android"], channels: [], elastic: true, offsetByCycle: { "4": 5, "6": 5, "12": 28 } },
-      { scope: "Android", title: "User Tracking", owner: "Client tech team", priority: "medium", platforms: ["Android"], channels: [], elastic: true, offsetByCycle: { "4": 5, "6": 5, "12": 28 } },
+      { scope: "Android", title: "SDK Set Up", owner: "Client tech team", priority: "medium", platforms: ["Android"], channels: [], elastic: false, fixedWeek: 1, offsetByCycle: { "4": 5, "6": 5, "12": 5 } },
+      { scope: "Android", title: "User Tracking", owner: "Client tech team", priority: "medium", platforms: ["Android"], channels: [], elastic: false, fixedWeek: 2, offsetByCycle: { "4": 10, "6": 10, "12": 10 } },
       { scope: "Android", title: "Event Tracking", owner: "Client tech team", priority: "medium", platforms: ["Android"], channels: [], elastic: true, offsetByCycle: { "4": 10, "6": 15, "12": 35 } },
       { scope: "Android", title: "Push Setup", owner: "Client tech team", priority: "medium", platforms: ["Android"], channels: ["Push"], elastic: true, offsetByCycle: { "4": 10, "6": 15, "12": 28 } },
       { scope: "Android", title: "Screen Tracking", owner: "Client tech team", priority: "medium", platforms: ["Android"], channels: [], elastic: true, offsetByCycle: { "4": 10, "6": 15, "12": 35 } },
       { scope: "Android", title: "Deeplinks", owner: "Client tech team", priority: "medium", platforms: ["Android"], channels: [], elastic: true, offsetByCycle: { "4": 10, "6": 15, "12": 28 } },
       { scope: "Android", title: "Silent / Force Login", owner: "Client tech team", priority: "medium", platforms: ["Android"], channels: [], elastic: true, offsetByCycle: { "4": 10, "6": 15, "12": 28 } },
-      { scope: "iOS", title: "SDK Set Up", owner: "Client tech team", priority: "medium", platforms: ["iOS"], channels: [], elastic: true, offsetByCycle: { "4": 5, "6": 5, "12": 28 } },
-      { scope: "iOS", title: "User Tracking", owner: "Client tech team", priority: "medium", platforms: ["iOS"], channels: [], elastic: true, offsetByCycle: { "4": 5, "6": 5, "12": 28 } },
+      { scope: "iOS", title: "SDK Set Up", owner: "Client tech team", priority: "medium", platforms: ["iOS"], channels: [], elastic: false, fixedWeek: 1, offsetByCycle: { "4": 5, "6": 5, "12": 5 } },
+      { scope: "iOS", title: "User Tracking", owner: "Client tech team", priority: "medium", platforms: ["iOS"], channels: [], elastic: false, fixedWeek: 2, offsetByCycle: { "4": 10, "6": 10, "12": 10 } },
       { scope: "iOS", title: "Event Tracking", owner: "Client tech team", priority: "medium", platforms: ["iOS"], channels: [], elastic: true, offsetByCycle: { "4": 10, "6": 15, "12": 35 } },
       { scope: "iOS", title: "Push Setup", owner: "Client tech team", priority: "medium", platforms: ["iOS"], channels: ["Push"], elastic: true, offsetByCycle: { "4": 10, "6": 15, "12": 28 } },
       { scope: "iOS", title: "Rich Push Setup", owner: "Client tech team", priority: "medium", platforms: ["iOS"], channels: ["Push"], elastic: true, offsetByCycle: { "4": 10, "6": 15, "12": 28 } },
@@ -111,7 +111,7 @@ const WEEK_TEMPLATE_SEED = [
       { scope: "Communication Channels", title: "Whatsapp setup", owner: "Cpaas / Client team", priority: "medium", platforms: [], channels: ["WhatsApp"], elastic: true, offsetByCycle: { "4": 10, "6": 10, "12": 21 } },
       { scope: "Communication Channels", title: "RCS setup", owner: "Cpaas / Client team", priority: "medium", platforms: [], channels: ["RCS"], elastic: true, offsetByCycle: { "4": 10, "6": 10, "12": 21 } },
       { scope: "Communication Channels", title: "IVR setup", owner: "Cpaas / Client team", priority: "medium", platforms: [], channels: ["IVR"], elastic: true, offsetByCycle: { "4": 10, "6": 10, "12": 21 } },
-      { scope: "Rest API", title: "User Tracking", owner: "Client tech team", priority: "medium", platforms: ["REST API"], channels: [], elastic: true, offsetByCycle: { "4": 10, "6": 15, "12": 35 } },
+      { scope: "Rest API", title: "User Tracking", owner: "Client tech team", priority: "medium", platforms: ["REST API"], channels: [], elastic: false, fixedWeek: 2, offsetByCycle: { "4": 10, "6": 10, "12": 10 } },
       { scope: "Rest API", title: "Event Tracking", owner: "Client tech team", priority: "medium", platforms: ["REST API"], channels: [], elastic: true, offsetByCycle: { "4": 10, "6": 15, "12": 35 } },
       { scope: "Website", title: "Users and Events Audit", owner: "Webengage OBM", priority: "medium", platforms: ["Website"], channels: [], elastic: true, offsetByCycle: { "4": 15, "6": 17, "12": 42 } },
       { scope: "Web App", title: "Users and Events Audit", owner: "Webengage OBM", priority: "medium", platforms: ["Web App"], channels: [], elastic: true, offsetByCycle: { "4": 17, "6": 21, "12": 49 } },
@@ -814,20 +814,26 @@ function renderWeekModal() {
 function weekTaskRow(task, source) {
   const done = task.status === "completed";
   const pending = task.status === "pending";
+  /* Foundational work is pinned to its week, so it cannot be shifted out of it. Status stays
+     editable — the point is that the work happens first, not that nobody may record it. */
+  const pinned = Number(task.fixedWeek) > 0;
   return `
-    <div class="week-task${done ? " is-done" : ""}${pending ? " is-pending" : ""}" data-week-task="${task.id}">
+    <div class="week-task${done ? " is-done" : ""}${pending ? " is-pending" : ""}${pinned ? " is-pinned" : ""}" data-week-task="${task.id}">
       <label class="week-task-check">
         <input type="checkbox"${done ? " checked" : ""} data-week-toggle="${task.id}" />
       </label>
       <div class="week-task-body">
-        <div class="week-task-title">${escapeHtml(task.title || "Untitled task")}</div>
+        <div class="week-task-title">${pinned ? `<span class="week-task-lock" title="Fixed to week ${task.fixedWeek}">🔒</span> ` : ""}${escapeHtml(task.title || "Untitled task")}</div>
         <div class="week-task-desc">${escapeHtml(weekTaskDescription(task))}</div>
         ${source ? `<div class="week-task-source">${escapeHtml(source)}</div>` : ""}
       </div>
       <select class="week-task-status" data-week-status="${task.id}">
         ${SUBTASK_STATUSES.map((status) => `<option value="${status}"${status === task.status ? " selected" : ""}>${capitalize(status)}</option>`).join("")}
       </select>
-      <button type="button" class="week-task-shift" data-week-shift="${task.id}"${pending ? " disabled title=\"Pending work stays in this week — change the status to move it on.\"" : ""}>&rarr; Shift to next week</button>
+      <button type="button" class="week-task-shift" data-week-shift="${task.id}"${
+        pinned ? ` disabled title="Fixed to week ${task.fixedWeek} — foundational work the rest of the plan depends on."`
+        : (pending ? " disabled title=\"Pending work stays in this week — change the status to move it on.\"" : "")
+      }>&rarr; Shift to next week</button>
     </div>`;
 }
 
@@ -889,7 +895,7 @@ function handleWeekModalStatus(select) {
   if (select.value === "completed") weekDraft.tickedHere.add(found.task.id);
 
   const current = draftWeeks()[draftIndex()];
-  if (select.value === "pending" && current && found.week.id !== current.id) {
+  if (select.value === "pending" && current && found.week.id !== current.id && !Number(found.task.fixedWeek)) {
     /* Record where the work was originally planned before moving it, so the row keeps saying
        it was carried rather than looking like it was always this week's. */
     if (!found.task.carriedFrom) found.task.carriedFrom = found.week.weekStart;
@@ -2258,6 +2264,7 @@ function ensureDefaults(targetState) {
       if (!Array.isArray(task.platforms)) task.platforms = [];
       if (!Array.isArray(task.channels)) task.channels = [];
       if (task.elastic === undefined) task.elastic = false;
+      if (task.fixedWeek === undefined) task.fixedWeek = null;
       if (!task.offsetByCycle || typeof task.offsetByCycle !== "object") task.offsetByCycle = {};
     });
   });
@@ -3230,6 +3237,9 @@ function toTemplateWeeks(weeks) {
       platforms: Array.isArray(task.platforms) ? task.platforms : [],
       channels: Array.isArray(task.channels) ? task.channels : [],
       offsetByCycle: (task.offsetByCycle && typeof task.offsetByCycle === "object") ? task.offsetByCycle : {},
+      /* Must be carried: this whitelist rebuilds each task field by field, so anything not
+         named here is silently dropped on the way in. */
+      fixedWeek: Number(task.fixedWeek) > 0 ? Number(task.fixedWeek) : null,
     })),
   }));
 }
@@ -4381,6 +4391,7 @@ function templateTaskToUpdateTask(task, weekStart, dueDate, phase) {
     title: task.title,
     phase: phase || "",
     domain: (task.scope && task.scope === phase) ? "All" : (task.scope || ""),
+    fixedWeek: task.fixedWeek || null,
     owner: task.owner || "",
     status: "not started",
     date: "",
@@ -4582,6 +4593,7 @@ function refileTasksIntoWeeks(projectId) {
     (update.tasks || []).forEach((task) => {
       if (!task.startDate) return;
 
+      if (Number(task.fixedWeek)) return;
       const target = weekContaining(updates, task.startDate);
       if (target && target.id !== update.id) {
         moves.push({ task, from: update, to: target });
@@ -4680,7 +4692,7 @@ function generateWeeklyPlan(project) {
   [...state.weekTemplates].sort((left, right) => left.week - right.week).forEach((stage) => {
     templateTasksForProject(stage.tasks || [], project).forEach((task) => {
       const offset = resolveTaskOffset(task, weeks);
-      const slot = plan[PlanEngine.weekIndexFor(offset, weeks, lead)];
+      const slot = plan[PlanEngine.placementFor(task, weeks, lead, templateMeta)];
       if (!slot.labels.includes(stage.label)) slot.labels.push(stage.label);
       if (!slot.stageWeeks.includes(stage.week)) slot.stageWeeks.push(stage.week);
       slot.tasks.push({ task, phase: stage.label, dueDate: toInputDate(shiftDays(kickoff, offset)) });
