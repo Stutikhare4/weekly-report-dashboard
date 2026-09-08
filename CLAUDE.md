@@ -114,9 +114,13 @@ record it.
 
 ## Projects list (folder screen)
 
-Dashboard → Ongoing / Completed opens the folder screen, which was already the list step in the
-flow; it is now a card grid rather than a bare list. Each card carries the project's domains,
-cycle length, go-live and an Active/Idle dot, and the whole card opens the project.
+Dashboard → Ongoing / Completed opens the folder screen as a stacked list: one full-width row
+per project, the name and Active/Idle status on the first line, the domains, cycle length,
+go-live and last-touched time sharing the second. The whole row opens the project.
+
+Note the folder buttons themselves jump straight to the first project by name when the folder
+has one, so this screen is currently only reached when a folder is empty, or via `openCategory`.
+That jump was removed once and restored on request (`201fc6f`).
 
 Activity has no field of its own on a project, so `projectLastActivity()` takes the newest of
 `updatedAt`, `createdAt` and the project's weekly reports' `createdAt` — older projects predate
