@@ -3582,3 +3582,106 @@ button {
 .week-modal-foot { display: flex; justify-content: center; gap: 14px; flex-wrap: wrap; }
 
 .overview-action:disabled { opacity: 0.5; cursor: default; }
+
+
+/* Ongoing / completed projects list: a card grid rather than a bare list, so a project can be
+   recognised by its scope and how recently it moved. */
+.project-card-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+@media (max-width: 1024px) {
+  .project-card-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 768px) {
+  .project-card-grid { grid-template-columns: minmax(0, 1fr); }
+}
+
+.project-card {
+  display: grid;
+  gap: 12px;
+  align-content: start;
+  min-height: 160px;
+  padding: 16px;
+  text-align: left;
+  border-radius: 8px;
+  border: 1px solid var(--card-border);
+  background: var(--surface-2);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  color: var(--text);
+  cursor: pointer;
+  font: inherit;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.project-card:hover {
+  border-color: var(--card-accent);
+  box-shadow: 0 2px 8px color-mix(in srgb, var(--card-accent) 20%, transparent);
+}
+
+.project-card-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.project-card-name {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--card-value);
+  overflow-wrap: anywhere;
+}
+
+.project-card-status {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.project-card-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.project-card-status.is-active { color: var(--card-done); }
+.project-card-status.is-idle { color: var(--card-label); }
+
+.project-card-rows { display: grid; gap: 4px; }
+
+.project-card-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 13px;
+  color: var(--card-label);
+}
+
+.project-card-row span:last-child {
+  color: var(--text);
+  text-align: right;
+  overflow-wrap: anywhere;
+}
+
+.project-card-foot {
+  font-size: 12px;
+  color: var(--card-label);
+}
+
+.category-more {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-top: 18px;
+}

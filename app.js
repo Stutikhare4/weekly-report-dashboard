@@ -254,6 +254,10 @@ const nodes = {
   categoryTitle: document.getElementById("categoryTitle"),
   categoryBadge: document.getElementById("categoryBadge"),
   categoryList: document.getElementById("categoryList"),
+  categorySubtitle: document.getElementById("categorySubtitle"),
+  categoryMore: document.getElementById("categoryMore"),
+  categoryCount: document.getElementById("categoryCount"),
+  categoryLoadMore: document.getElementById("categoryLoadMore"),
   projectTitle: document.getElementById("projectTitle"),
   projectStatusBadge: document.getElementById("projectStatusBadge"),
   deleteProjectBtn: document.getElementById("deleteProjectBtn"),
@@ -433,6 +437,7 @@ let uiState = {
   wizardStep: 1,
   wizardSavedId: null,
   projectView: "details",
+  categoryShown: 12,
   openReportRows: new Set(),
 };
 let latestReportText = "";
@@ -508,6 +513,10 @@ function boot() {
      Edit opens that rather than duplicating the fields. */
   nodes.projTimelineEdit.addEventListener("click", () => toggleProjectDetails(true));
   nodes.projPhasesEdit.addEventListener("click", () => navigateToScreen("templates"));
+  nodes.categoryLoadMore.addEventListener("click", () => {
+    uiState.categoryShown += CATEGORY_PAGE_SIZE;
+    renderCategoryScreen();
+  });
   nodes.projScopeEdit.addEventListener("click", () => toggleProjectScope(true));
   nodes.weekModalClose.addEventListener("click", () => closeWeekModal());
   nodes.weekModalBack.addEventListener("click", () => closeWeekModal());
@@ -752,6 +761,9 @@ function saveWeekModal() {
 
   const byId = new Map(weekDraft.updates.map((item) => [item.id, item]));
   state.updates = state.updates.map((item) => byId.get(item.id) || item);
+
+  const project = state.projects.find((item) => item.id === weekDraft.projectId);
+  if (project) project.updatedAt = new Date().toISOString();
 
   refreshProjectGoLive(weekDraft.projectId);
   saveState();
@@ -1332,6 +1344,9 @@ function openClosedProject() {
 }
 
 function openCategory(category) {
+  /* Only start again from the first page when the folder actually changes — coming back from a
+     project should leave you where you were, not throw away a Load more. */
+  if (uiState.category !== category) uiState.categoryShown = CATEGORY_PAGE_SIZE;
   uiState.screen = "reports-category";
   uiState.activeNav = "dashboard";
   uiState.category = category;
@@ -1348,29 +1363,84 @@ function openProject(projectId) {
   setProjectView("details");
 }
 
+const CATEGORY_PAGE_SIZE = 12;
+const ACTIVE_WINDOW_DAYS = 7;
+
+/* Projects carry no "modified" stamp of their own, so activity is the most recent thing that
+   happened to them: an explicit save, the project's own creation, or the newest weekly report
+   added to it. Older projects predate the stamp and fall back to the other two. */
+function projectLastActivity(project) {
+  const stamps = [project.updatedAt, project.createdAt];
+  state.updates.forEach((update) => {
+    if (update.projectId === project.id) stamps.push(update.createdAt);
+  });
+  const times = stamps.map((value) => Date.parse(value)).filter((value) => Number.isFinite(value));
+  return times.length ? Math.max(...times) : null;
+}
+
+function relativeDay(time) {
+  if (!time) return "No activity yet";
+  const days = Math.floor((Date.now() - time) / 86400000);
+  if (days <= 0) return "Updated today";
+  if (days === 1) return "Updated yesterday";
+  if (days < 30) return `Updated ${days} days ago`;
+  return `Updated ${formatSummaryDate(toInputDate(new Date(time)))}`;
+}
+
 function renderCategoryScreen() {
-  const projects = state.projects.filter((project) => project.status === uiState.category);
-  const label = uiState.category === "current" ? "Ongoing projects" : "Completed projects";
+  const projects = state.projects
+    .filter((project) => project.status === uiState.category)
+    .sort((left, right) => (projectLastActivity(right) || 0) - (projectLastActivity(left) || 0));
+
+  const ongoing = uiState.category === "current";
+  const label = ongoing ? "Ongoing projects" : "Completed projects";
   nodes.categoryTitle.textContent = label;
+  nodes.categorySubtitle.textContent = ongoing
+    ? "Active integrations in progress"
+    : "Integrations that have gone live or been closed";
   nodes.categoryBadge.textContent = `${projects.length} project${projects.length === 1 ? "" : "s"}`;
 
+  const shown = Math.min(uiState.categoryShown, projects.length);
+  const cutoff = Date.now() - ACTIVE_WINDOW_DAYS * 86400000;
+
   nodes.categoryList.innerHTML = projects.length
-    ? projects
-        .map((project) => {
-          const latestUpdate = getLatestUpdateForProject(project.id);
-          return `
-            <button class="project-name-card" type="button" data-project-id="${project.id}">
-              <span class="project-name">${escapeHtml(project.name)}</span>
-              <span class="project-meta">${escapeHtml(latestUpdate ? latestUpdate.weekRange : "No weekly entries yet")}</span>
-            </button>
-          `;
-        })
-        .join("")
-    : `<div class="empty-state">No ${escapeHtml(label.toLowerCase())} yet.</div>`;
+    ? projects.slice(0, shown).map((project) => {
+        const activity = projectLastActivity(project);
+        const active = activity !== null && activity > cutoff;
+        const domains = (project.platforms || []).map(platformLabel).join(", ");
+        return `
+          <button class="project-card" type="button" data-project-id="${project.id}">
+            <span class="project-card-head">
+              <span class="project-card-name">${escapeHtml(project.name)}</span>
+              <span class="project-card-status ${active ? "is-active" : "is-idle"}">
+                <span class="project-card-dot" aria-hidden="true"></span>${active ? "Active" : "Idle"}
+              </span>
+            </span>
+            <span class="project-card-rows">
+              ${projectCardRow("Domains", domains || "None selected")}
+              ${projectCardRow("Duration", `${project.cycleWeeks || DEFAULT_CYCLE_WEEKS} weeks`)}
+              ${projectCardRow("Go live", project.goLiveDate ? formatSummaryDate(project.goLiveDate) : "Not set")}
+            </span>
+            <span class="project-card-foot">${escapeHtml(relativeDay(activity))}</span>
+          </button>`;
+      }).join("")
+    : `<div class="empty-state">
+         <p><strong>No ${escapeHtml(label.toLowerCase())}</strong></p>
+         <p class="muted">${ongoing ? "Every project is completed or closed." : "Nothing has been closed yet."}</p>
+       </div>`;
+
+  const more = projects.length > shown;
+  nodes.categoryMore.hidden = projects.length <= CATEGORY_PAGE_SIZE;
+  nodes.categoryCount.textContent = `Showing ${shown} of ${projects.length}`;
+  nodes.categoryLoadMore.hidden = !more;
 
   nodes.categoryList.querySelectorAll("[data-project-id]").forEach((button) => {
     button.addEventListener("click", () => openProject(button.dataset.projectId));
   });
+}
+
+function projectCardRow(label, value) {
+  return `<span class="project-card-row"><span>${escapeHtml(label)}</span><span>${escapeHtml(value)}</span></span>`;
 }
 
 function renderProjectScreen() {
@@ -2564,6 +2634,7 @@ function saveProjectScope(event) {
     userIdentifier: nodes.projScopeIdentifier.value.trim(),
   };
 
+  project.updatedAt = new Date().toISOString();
   saveState();
   toggleProjectScope(false);
   renderAll();
@@ -4528,6 +4599,7 @@ function saveProjectDetails(event) {
   }
 
   refileTasksIntoWeeks(project.id);
+  project.updatedAt = new Date().toISOString();
   refreshProjectGoLive(project.id);
   saveState();
   toggleProjectDetails(false);

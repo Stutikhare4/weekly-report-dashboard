@@ -112,6 +112,20 @@ In the week modal a pinned task shows a lock, cannot be shifted, and is not move
 rule. Its status stays editable — the point is that the work happens first, not that nobody may
 record it.
 
+## Projects list (folder screen)
+
+Dashboard → Ongoing / Completed opens the folder screen, which was already the list step in the
+flow; it is now a card grid rather than a bare list. Each card carries the project's domains,
+cycle length, go-live and an Active/Idle dot, and the whole card opens the project.
+
+Activity has no field of its own on a project, so `projectLastActivity()` takes the newest of
+`updatedAt`, `createdAt` and the project's weekly reports' `createdAt` — older projects predate
+the stamp and fall back to the other two. `updatedAt` is stamped when details, scope or a week
+are saved. Active means activity inside `ACTIVE_WINDOW_DAYS` (7).
+
+12 per page with Load more. `uiState.categoryShown` only resets when the folder changes, so
+coming back from a project leaves the page where it was.
+
 ## Project page: two views
 
 The details view is a card grid: Overview and Integration Scope side by side, Project Details
