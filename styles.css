@@ -3584,27 +3584,24 @@ button {
 .overview-action:disabled { opacity: 0.5; cursor: default; }
 
 
-/* Ongoing / completed projects list: a card grid rather than a bare list, so a project can be
-   recognised by its scope and how recently it moved. */
+/* Ongoing / completed projects list: one full-width row per project, stacked. The name and
+   status sit on the first line, the details and the last-touched time share the second. */
 .project-card-grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 16px;
-}
-
-@media (max-width: 1024px) {
-  .project-card-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-}
-
-@media (max-width: 768px) {
-  .project-card-grid { grid-template-columns: minmax(0, 1fr); }
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 24px;
 }
 
 .project-card {
+  width: 100%;
   display: grid;
-  gap: 12px;
-  align-content: start;
-  min-height: 160px;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas:
+    "head head"
+    "rows foot";
+  gap: 10px 20px;
+  align-items: end;
   padding: 16px;
   text-align: left;
   border-radius: 8px;
@@ -3614,7 +3611,7 @@ button {
   color: var(--text);
   cursor: pointer;
   font: inherit;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  transition: all 0.2s ease;
 }
 
 .project-card:hover {
@@ -3623,8 +3620,9 @@ button {
 }
 
 .project-card-head {
+  grid-area: head;
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
   gap: 10px;
 }
@@ -3656,25 +3654,53 @@ button {
 .project-card-status.is-active { color: var(--card-done); }
 .project-card-status.is-idle { color: var(--card-label); }
 
-.project-card-rows { display: grid; gap: 4px; }
+/* The details run along one line; each keeps its label above its value so the row stays
+   readable without separators. */
+.project-card-rows {
+  grid-area: rows;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 28px;
+  min-width: 0;
+}
 
 .project-card-row {
   display: flex;
-  justify-content: space-between;
-  gap: 10px;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
   font-size: 13px;
+}
+
+.project-card-row span:first-child {
+  font-size: 11px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
   color: var(--card-label);
 }
 
 .project-card-row span:last-child {
   color: var(--text);
-  text-align: right;
   overflow-wrap: anywhere;
 }
 
 .project-card-foot {
+  grid-area: foot;
   font-size: 12px;
   color: var(--card-label);
+  white-space: nowrap;
+  text-align: right;
+}
+
+/* Narrow screens: the time drops below the details rather than squeezing them. */
+@media (max-width: 640px) {
+  .project-card {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas: "head" "rows" "foot";
+  }
+
+  .project-card-foot { text-align: left; }
 }
 
 .category-more {
