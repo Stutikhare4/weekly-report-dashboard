@@ -126,9 +126,10 @@ Dashboard → Ongoing / Completed opens the folder screen as a stacked list: one
 per project, the name and Active/Idle status on the first line, the domains, cycle length,
 go-live and last-touched time sharing the second. The whole row opens the project.
 
-Note the folder buttons themselves jump straight to the first project by name when the folder
-has one, so this screen is currently only reached when a folder is empty, or via `openCategory`.
-That jump was removed once and restored on request (`201fc6f`).
+Both folder buttons call `openCategory()`. They used to jump straight to the first project by
+name whenever the folder had one, so the list only appeared when a folder was empty. That jump
+was removed, restored on request, and removed again — if it comes back, it is the two listeners
+next to `openCurrent` / `openClosed`.
 
 Activity has no field of its own on a project, so `projectLastActivity()` takes the newest of
 `updatedAt`, `createdAt` and the project's weekly reports' `createdAt` — older projects predate
