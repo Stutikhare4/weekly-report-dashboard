@@ -5859,7 +5859,19 @@ function renderDashboardScreen() {
   nodes.dashUpdateCount.textContent = `${state.updates.length}`;
   nodes.dashAlertCount.textContent = `${alerts.length}`;
 
-  const recent = [...state.updates].sort((a, b) => b.weekStart.localeCompare(a.weekStart)).slice(0, 5);
+  /* One row per project. Listing every weekly report meant a project with eight weeks filled
+     the list on its own and pushed the others out. "Latest" is the greatest weekStart rather
+     than the last element: weeks are added by hand and moved between each other, so array
+     order is not chronological. */
+  const latestByProject = new Map();
+  state.updates.forEach((update) => {
+    const seen = latestByProject.get(update.projectId);
+    if (!seen || update.weekStart > seen.weekStart) latestByProject.set(update.projectId, update);
+  });
+
+  const recent = [...latestByProject.values()]
+    .sort((left, right) => right.weekStart.localeCompare(left.weekStart))
+    .slice(0, 10);
 
   nodes.dashRecentList.innerHTML = recent.length
     ? recent
