@@ -255,6 +255,18 @@ Note `app.js` contains `</head>` and `</body>` inside `buildReportPrintHtml`'s t
 literal — anything rewriting the bundled HTML must target the first/last occurrence, not
 replace all.
 
+## Typography
+
+One font for the whole app — `-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, …` — and one
+scale: h1 18px/600, h2 and h3 14px/600, body 13px, muted and small 12px, buttons and inputs 13px.
+The Georgia serif that used to carry every heading is gone from `styles.css`; heading colours use
+`--card-value` / `--card-label` rather than fixed hex, so they still adapt in dark mode.
+
+Two deliberate exceptions. The printed and emailed report keeps its serif headings — those styles
+live in `app.js` (`buildReportPrintHtml`, `EMAIL_STYLE`) and go to clients as a document, not as
+app chrome. And the `.brand-mark` square in the header is hidden, so the header is the wordmark
+alone.
+
 ## Conventions
 
 - Keep this a dependency-free static app unless the user explicitly asks to add a framework/build step or backend.
