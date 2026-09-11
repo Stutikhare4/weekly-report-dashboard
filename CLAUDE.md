@@ -171,6 +171,13 @@ happens on the Project Reports screen, reachable from the details view.
 outstanding from earlier weeks, what is planned for this one, tick-to-complete, shift-to-next-
 week, and add-a-task.
 
+**Carried means late**, not merely unfinished: `carriedTasksFor()` counts tasks from earlier
+weeks that have **ended** and are still not completed. Counting everything incomplete instead
+put "+14 carried" on week 6 of a project where nothing had started — work that is not due yet,
+not slippage. The accordion summary shows it as "4 tasks + 2 carried", the week modal's title
+as a badge, and both use the same function as the modal's carried list, so a count never
+disagrees with the rows it stands for. The generated report shows none of it.
+
 Carryover is **display only**. A task stays owned by the week it was planned in; earlier weeks'
 unfinished work is shown here labelled with its source, so opening a later week never rewrites
 what an earlier one contained. Everything not completed carries, not a chosen set of statuses.

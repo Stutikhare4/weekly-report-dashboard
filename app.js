@@ -780,6 +780,45 @@ function weekTaskDescription(task) {
    here, labelled with where it came from, so the history of what a week actually contained is
    not rewritten every time someone opens a later week. Moving a task between weeks is the
    explicit "Shift to next week" action. */
+/* Work carried from earlier weeks means work that is *late*: its week has ended and it is
+   still not done. Counting everything unfinished in every earlier week instead would put
+   "+14 carried" on week 6 of a project where nothing has started — which is not slippage, it
+   is work that is not due yet. Both the count and the modal's list use this, so they agree. */
+function weekHasEnded(week, today) {
+  const end = toInputDate(shiftDays(new Date(`${week.weekStart}T00:00:00`), 6));
+  return end < today;
+}
+
+function carriedTasksFor(weeks, index, keepIds) {
+  const today = toInputDate(new Date());
+  const carried = [];
+  weeks.slice(0, index).forEach((week, position) => {
+    if (!weekHasEnded(week, today)) return;
+    (week.tasks || []).forEach((task) => {
+      if (task.status !== "completed" || (keepIds && keepIds.has(task.id))) {
+        carried.push({ task, from: position + 1, weekId: week.id });
+      }
+    });
+  });
+  return carried;
+}
+
+function carriedCountFor(weeks, index) {
+  return carriedTasksFor(weeks, index).length;
+}
+
+/* Built in one place because two renderers need it: the list, and the live refresh that
+   rewrites this line on every keystroke in the inline editor. */
+function reportRowSummary(update, tasks, carried) {
+  const done = tasks.filter((task) => task.status === "completed").length;
+  const label = update.templateLabel && !/^Week \d+$/.test(update.templateLabel)
+    ? update.templateLabel
+    : (tasks.length ? "Custom week" : "No tasks due");
+  const own = `${tasks.length} task${tasks.length === 1 ? "" : "s"}`;
+  const slip = carried ? ` <span class="carried-count">+ ${carried} carried</span>` : "";
+  return `${escapeHtml(label)} · ${own}${slip} · ${done} completed`;
+}
+
 function renderWeekModal() {
   if (!weekDraft) return;
   const weeks = draftWeeks();
@@ -787,17 +826,12 @@ function renderWeekModal() {
   const current = weeks[index];
   if (!current) return closeWeekModal();
 
-  nodes.weekModalTitle.textContent = `📅 Week ${index + 1} (${current.weekRange})`;
+  const carriedHere = carriedCountFor(weeks, index);
+  nodes.weekModalTitle.innerHTML = `📅 Week ${index + 1} (${escapeHtml(current.weekRange)})`
+    + (carriedHere ? ` <span class="carried-indicator">${carriedHere} carried</span>` : "");
   nodes.weekModalStatus.value = current.statusTag;
 
-  const carried = [];
-  weeks.slice(0, index).forEach((week, position) => {
-    (week.tasks || []).forEach((task) => {
-      if (task.status !== "completed" || weekDraft.tickedHere.has(task.id)) {
-        carried.push({ task, from: position + 1, weekId: week.id });
-      }
-    });
-  });
+  const carried = carriedTasksFor(weeks, index, weekDraft.tickedHere);
 
   nodes.weekModalCarriedSection.hidden = !carried.length;
   nodes.weekModalCarried.innerHTML = carried
@@ -1112,6 +1146,7 @@ function renderAll() {
   safeRender(renderTeamScreen);
   safeRender(renderSettingsScreen);
   safeRender(renderTemplatesScreen);
+  safeRender(refreshReportsIndex);
   safeRender(applyRolePermissions);
 }
 
@@ -4889,6 +4924,16 @@ function openCreateReport(projectId, focusUpdateId, { editing = Boolean(focusUpd
 
 /* ---------- Reports index (existing reports for a project) ---------- */
 
+/* renderReportsIndex was missing from renderAll, so changing a week anywhere else left the
+   accordion showing stale counts until the screen was reopened. It rebuilds the list, which
+   would blow away a field being typed in, so it stands down while the editor has focus —
+   field edits keep their own lighter refresh (refreshReportRowSummary). */
+function refreshReportsIndex() {
+  if (!nodes.reportsIndexList || uiState.screen !== "create-report") return;
+  if (nodes.reportsIndexList.contains(document.activeElement)) return;
+  renderReportsIndex(nodes.reportsIndexProject.value || "");
+}
+
 function renderReportsIndex(projectId) {
   if (!nodes.reportsIndexList) return;
 
@@ -4918,11 +4963,7 @@ function renderReportsIndex(projectId) {
     const done = tasks.filter((task) => task.status === "completed").length;
     const open = uiState.openReportRows.has(update.id);
     const isCurrentWeek = isDateInUpdateWeek(today, update);
-    /* Weeks are numbered by position in the project. The template label names the phase the
-       week's work belongs to, which is not the same thing — several weeks share a phase. */
-    const label = update.templateLabel && !/^Week \d+$/.test(update.templateLabel)
-      ? update.templateLabel
-      : (tasks.length ? "Custom week" : "No tasks due");
+    const carried = carriedCountFor(updates, index);
 
     return `
       <article class="report-row${isCurrentWeek ? " is-current-week" : ""}"${isCurrentWeek ? ' aria-current="date"' : ""}>
@@ -4934,7 +4975,7 @@ function renderReportsIndex(projectId) {
           ${isCurrentWeek ? `<span class="current-week-flag">This week</span>` : ""}
           <div>
             <div class="report-row-range">${escapeHtml(update.weekRange)}</div>
-            <div class="meta">${escapeHtml(label)} · ${tasks.length} task${tasks.length === 1 ? "" : "s"} · ${done} completed</div>
+            <div class="meta">${reportRowSummary(update, tasks, carried)}</div>
           </div>
         </div>
         <div class="report-row-actions">
@@ -5114,14 +5155,15 @@ function refreshReportRowSummary(update) {
   if (!article) return;
 
   const tasks = update.tasks || [];
-  const done = tasks.filter((task) => task.status === "completed").length;
-  const label = update.templateLabel && !/^Week \d+$/.test(update.templateLabel)
-    ? update.templateLabel
-    : (tasks.length ? "Custom week" : "No tasks due");
+  const weeks = state.updates
+    .filter((item) => item.projectId === update.projectId)
+    .sort((left, right) => left.weekStart.localeCompare(right.weekStart));
+  const carried = carriedCountFor(weeks, weeks.findIndex((item) => item.id === update.id));
 
   article.querySelector(".report-row-range").textContent = update.weekRange;
-  article.querySelector(".meta").textContent =
-    `${label} · ${tasks.length} task${tasks.length === 1 ? "" : "s"} · ${done} completed`;
+  /* innerHTML, not textContent: the carried count carries a span of its own, and this line is
+     rewritten on every keystroke in the editor. */
+  article.querySelector(".meta").innerHTML = reportRowSummary(update, tasks, carried);
   const badge = article.querySelector(".report-row-actions .status-badge");
   badge.textContent = update.statusTag;
   badge.className = `status-badge ${statusClass(update.statusTag)}`;

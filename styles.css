@@ -2326,6 +2326,8 @@ button {
   --card-done: #62d62a;
   --card-border: rgba(148, 163, 184, 0.28);
   --card-hover: rgba(77, 159, 255, 0.14);
+  --card-warning: #fcd34d;
+  --card-warning-soft: rgba(234, 179, 8, 0.16);
   --card-body: var(--muted);
   --card-label: var(--muted);
   --card-value: var(--text);
@@ -2338,6 +2340,8 @@ button {
   --card-done: #52c41a;
   --card-border: #dce5f0;
   --card-hover: #f0f6ff;
+  --card-warning: #b45309;
+  --card-warning-soft: #fffbe6;
   --card-body: #4a5f7f;
   --card-label: #7b8fa3;
   --card-value: #1a202c;
@@ -3756,4 +3760,23 @@ small,
 /* The brand square is gone from the header — the wordmark carries it. */
 .brand-mark {
   display: none !important;
+}
+
+
+/* Slippage from earlier weeks, shown in the accordion summary and the week modal's title.
+   Amber to match the pending rows it usually stands for, and from a token so dark mode holds. */
+.carried-count,
+.carried-indicator {
+  color: var(--card-warning);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.carried-indicator {
+  margin-left: 8px;
+  padding: 2px 7px;
+  border-radius: 3px;
+  font-size: 12px;
+  font-weight: 500;
+  background: var(--card-warning-soft);
 }
