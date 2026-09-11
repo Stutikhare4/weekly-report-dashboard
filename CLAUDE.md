@@ -173,8 +173,12 @@ week, and add-a-task.
 
 Carryover is **display only**. A task stays owned by the week it was planned in; earlier weeks'
 unfinished work is shown here labelled with its source, so opening a later week never rewrites
-what an earlier one contained. Moving a task between weeks is the explicit "Shift to next week"
-action, which re-dates it into the following week.
+what an earlier one contained. Everything not completed carries, not a chosen set of statuses.
+
+Moving a task between weeks is the explicit **Move** control on its row — a native select rather
+than a floating menu, because `.modal-body` scrolls and would clip an absolutely positioned one.
+It lists every other week with the nearest ahead first, moves the task rather than copying it,
+and re-dates it into the target. It is disabled for pinned and pending tasks.
 
 Each row carries a status dropdown over the six statuses. **Pending** means the work is
 deliberately being carried in the week it now sits in, rather than merely unfinished: choosing

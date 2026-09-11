@@ -536,6 +536,9 @@ function boot() {
   [nodes.weekModalCarried, nodes.weekModalTasks].forEach((list) => {
     list.addEventListener("change", (e) => {
       if (e.target.dataset.weekStatus) handleWeekModalStatus(e.target);
+      else if (e.target.dataset.weekMove && e.target.value) {
+        moveDraftTaskToWeek(e.target.dataset.weekMove, e.target.value);
+      }
     });
   });
   nodes.projScopeCancel.addEventListener("click", () => toggleProjectScope(false));
@@ -838,11 +841,56 @@ function weekTaskRow(task, source) {
       <select class="week-task-status" data-week-status="${task.id}">
         ${SUBTASK_STATUSES.map((status) => `<option value="${status}"${status === task.status ? " selected" : ""}>${capitalize(status)}</option>`).join("")}
       </select>
-      <button type="button" class="week-task-shift" data-week-shift="${task.id}"${
-        pinned ? ` disabled title="Fixed to week ${task.fixedWeek} — foundational work the rest of the plan depends on."`
-        : (pending ? " disabled title=\"Pending work stays in this week — change the status to move it on.\"" : "")
-      }>&rarr; Shift to next week</button>
+      ${weekMoveControl(task, pinned, pending)}
     </div>`;
+}
+
+/* Moving a task anywhere in the project, not just one week on. A native select rather than a
+   floating menu: the modal body scrolls, so an absolutely positioned dropdown would be clipped
+   by it, and this needs no outside-click handling or keyboard work of its own. The next week is
+   listed first, so the common case is still one open and one click. */
+function weekMoveControl(task, pinned, pending) {
+  const weeks = draftWeeks();
+  const here = draftIndex();
+  const reason = pinned
+    ? `Fixed to week ${task.fixedWeek} — foundational work the rest of the plan depends on.`
+    : (pending ? "Pending work stays in this week — change the status to move it on." : "");
+
+  if (reason) {
+    return `<select class="week-task-move" disabled title="${escapeHtml(reason)}"><option>Move…</option></select>`;
+  }
+
+  /* Nearest weeks first in each direction, so "next week" is the top entry. */
+  const order = weeks
+    .map((week, index) => ({ week, index }))
+    .filter((entry) => entry.index !== here)
+    .sort((left, right) => (left.index > here ? 0 : 1) - (right.index > here ? 0 : 1)
+      || Math.abs(left.index - here) - Math.abs(right.index - here));
+
+  if (!order.length) {
+    return `<select class="week-task-move" disabled title="This project has only one week."><option>Move…</option></select>`;
+  }
+
+  return `
+    <select class="week-task-move" data-week-move="${task.id}" title="Move this task to another week">
+      <option value="">Move…</option>
+      ${order.map(({ week, index }) => `
+        <option value="${week.id}">Week ${index + 1} · ${escapeHtml(week.weekRange)}</option>`).join("")}
+    </select>`;
+}
+
+function moveDraftTaskToWeek(taskId, weekId) {
+  const target = weekDraft.updates.find((item) => item.id === weekId);
+  const found = findDraftTask(taskId);
+  if (!target || !found || found.week.id === target.id) return;
+  if (Number(found.task.fixedWeek)) return;
+
+  found.week.tasks = found.week.tasks.filter((item) => item.id !== found.task.id);
+  found.task.startDate = target.weekStart;
+  found.task.dueDate = taskDueDate(target.weekStart, found.task.days || templateDefaultDays());
+  target.tasks.push(found.task);
+  weekDraft.dirty = true;
+  renderWeekModal();
 }
 
 function findDraftTask(taskId) {
@@ -870,24 +918,6 @@ function handleWeekModalClick(event) {
     return;
   }
 
-  const shift = event.target.closest("[data-week-shift]");
-  if (shift && shift.disabled) return;
-  if (shift) {
-    const weeks = draftWeeks();
-    const target = weeks[draftIndex() + 1];
-    if (!target) {
-      showAppInfo("This is the last week of the project — add a week before shifting work into it.");
-      return;
-    }
-    const found = findDraftTask(shift.dataset.weekShift);
-    if (!found) return;
-    found.week.tasks = found.week.tasks.filter((item) => item.id !== found.task.id);
-    found.task.startDate = target.weekStart;
-    found.task.dueDate = taskDueDate(target.weekStart, found.task.days || templateDefaultDays());
-    target.tasks.push(found.task);
-    weekDraft.dirty = true;
-    renderWeekModal();
-  }
 }
 
 /* Marking work "pending" is a decision that it is being carried now, so it moves into the week

@@ -3537,32 +3537,28 @@ button {
   opacity: 0.75;
 }
 
-.week-task-shift:disabled {
+.week-task-move:disabled {
   opacity: 0.4;
   cursor: not-allowed;
   color: var(--card-label);
 }
 
-.week-task-shift:disabled:hover {
-  background: transparent;
-  border-color: var(--card-border);
-}
-
-.week-task-shift {
+.week-task-move {
   flex: none;
-  padding: 6px 12px;
+  max-width: 190px;
+  padding: 6px 10px;
   border-radius: 6px;
   border: 1px solid var(--card-border);
-  background: transparent;
+  background: var(--surface-4);
   color: var(--card-accent);
+  font-family: inherit;
   font-size: 12px;
   font-weight: 600;
   cursor: pointer;
-  white-space: nowrap;
   transition: all 0.2s ease;
 }
 
-.week-task-shift:hover { background: var(--card-hover); border-color: var(--card-accent); }
+.week-task-move:hover:not(:disabled) { background: var(--card-hover); border-color: var(--card-accent); }
 
 .week-modal-add { display: flex; gap: 10px; flex-wrap: wrap; }
 
