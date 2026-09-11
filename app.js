@@ -5091,6 +5091,8 @@ function renderReportRowTasks(update) {
         <label>Week starting
           <input type="date" data-week-field="weekStart" value="${escapeHtml(update.weekStart || "")}" />
         </label>
+        <button type="button" class="btn-save" data-week-saved="${update.id}" disabled
+          title="This editor saves as you type — there is nothing waiting to be saved.">Saved</button>
         <button type="button" class="secondary-button small-button" data-add-task="${update.id}">+ Add task</button>
       </div>
       ${tasks.length ? `
@@ -5121,6 +5123,7 @@ function handleReportsIndexInput(event) {
     if (weekField === "weekStart") update.weekRange = formatWeekRange(field.value);
     saveState();
     refreshReportRowSummary(update);
+    flashInlineSaved(update);
     return;
   }
 
@@ -5146,6 +5149,31 @@ function handleReportsIndexInput(event) {
 
   saveState();
   refreshReportRowSummary(update);
+  flashInlineSaved(update);
+}
+
+/* The inline editor writes on every change, so its Save can never sit in a "you have unsaved
+   work" state — there is never any. It reports instead: a green flash confirming the write
+   landed, then back to resting. Anything else would be a button that lies. */
+let inlineSavedTimers = [];
+
+function flashInlineSaved(update) {
+  const button = nodes.reportsIndexList.querySelector(`[data-week-saved="${update.id}"]`);
+  if (!button) return;
+
+  inlineSavedTimers.forEach(clearTimeout);
+  inlineSavedTimers = [];
+
+  button.textContent = "Saving…";
+  button.classList.remove("saved");
+  inlineSavedTimers.push(setTimeout(() => {
+    button.textContent = "Saved ✓";
+    button.classList.add("saved");
+  }, 120));
+  inlineSavedTimers.push(setTimeout(() => {
+    button.textContent = "Saved";
+    button.classList.remove("saved");
+  }, 1800));
 }
 
 /* Keep the collapsed summary honest while its week is open and being edited. */

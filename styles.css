@@ -3780,3 +3780,28 @@ small,
   font-weight: 500;
   background: var(--card-warning-soft);
 }
+
+
+/* Save state for the inline week editor. It writes as you type, so this reports rather than
+   acts: resting grey, a green tick as each change lands. Colours from tokens so it holds up in
+   dark mode — the design's #e8ecf1 / #7b8fa3 / #52c41a are the light values. */
+.btn-save {
+  padding: 8px 16px;
+  border-radius: 6px;
+  border: 1px solid var(--card-border);
+  background: var(--surface-3);
+  color: var(--card-label);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: not-allowed;
+  white-space: nowrap;
+  align-self: end;
+  transition: all 0.3s ease;
+}
+
+.btn-save.saved {
+  background: var(--card-done);
+  border-color: var(--card-done);
+  color: #ffffff;
+}

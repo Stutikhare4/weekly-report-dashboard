@@ -219,6 +219,12 @@ Membership comes from `isDateInUpdateWeek`, which compares ISO date strings — 
 `YYYY-MM-DD` with `new Date` reads it as UTC while `new Date()` is local, which would put the
 boundary a day out for anyone behind UTC. Nothing is marked when today falls outside the cycle.
 
+The editor's header carries a **Save state** next to Week Status and Week Starting. It reports
+rather than acts: the editor writes on every change, so there is never unsaved work for a button
+to commit. It rests grey reading "Saved" and flashes green "Saved ✓" as each write lands. A blue
+"click to save" state would be a lie; if the editor should instead hold a draft like the week
+modal does, that is a behaviour change, not a button.
+
 Structural changes (add/remove a task or sub-task) re-render the list and restore the open row;
 field edits patch the summary line by hand instead, since re-rendering would blur the input
 mid-edit.

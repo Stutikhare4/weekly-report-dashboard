@@ -3793,6 +3793,31 @@ small,
   background: var(--card-warning-soft);
 }
 
+
+/* Save state for the inline week editor. It writes as you type, so this reports rather than
+   acts: resting grey, a green tick as each change lands. Colours from tokens so it holds up in
+   dark mode — the design's #e8ecf1 / #7b8fa3 / #52c41a are the light values. */
+.btn-save {
+  padding: 8px 16px;
+  border-radius: 6px;
+  border: 1px solid var(--card-border);
+  background: var(--surface-3);
+  color: var(--card-label);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: not-allowed;
+  white-space: nowrap;
+  align-self: end;
+  transition: all 0.3s ease;
+}
+
+.btn-save.saved {
+  background: var(--card-done);
+  border-color: var(--card-done);
+  color: #ffffff;
+}
+
     </style>
     </head>
   <body>
@@ -9738,6 +9763,8 @@ function renderReportRowTasks(update) {
         <label>Week starting
           <input type="date" data-week-field="weekStart" value="${escapeHtml(update.weekStart || "")}" />
         </label>
+        <button type="button" class="btn-save" data-week-saved="${update.id}" disabled
+          title="This editor saves as you type — there is nothing waiting to be saved.">Saved</button>
         <button type="button" class="secondary-button small-button" data-add-task="${update.id}">+ Add task</button>
       </div>
       ${tasks.length ? `
@@ -9768,6 +9795,7 @@ function handleReportsIndexInput(event) {
     if (weekField === "weekStart") update.weekRange = formatWeekRange(field.value);
     saveState();
     refreshReportRowSummary(update);
+    flashInlineSaved(update);
     return;
   }
 
@@ -9793,6 +9821,31 @@ function handleReportsIndexInput(event) {
 
   saveState();
   refreshReportRowSummary(update);
+  flashInlineSaved(update);
+}
+
+/* The inline editor writes on every change, so its Save can never sit in a "you have unsaved
+   work" state — there is never any. It reports instead: a green flash confirming the write
+   landed, then back to resting. Anything else would be a button that lies. */
+let inlineSavedTimers = [];
+
+function flashInlineSaved(update) {
+  const button = nodes.reportsIndexList.querySelector(`[data-week-saved="${update.id}"]`);
+  if (!button) return;
+
+  inlineSavedTimers.forEach(clearTimeout);
+  inlineSavedTimers = [];
+
+  button.textContent = "Saving…";
+  button.classList.remove("saved");
+  inlineSavedTimers.push(setTimeout(() => {
+    button.textContent = "Saved ✓";
+    button.classList.add("saved");
+  }, 120));
+  inlineSavedTimers.push(setTimeout(() => {
+    button.textContent = "Saved";
+    button.classList.remove("saved");
+  }, 1800));
 }
 
 /* Keep the collapsed summary honest while its week is open and being edited. */
