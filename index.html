@@ -729,7 +729,7 @@
           <button type="button" id="weekModalClose" class="ghost-button small-button" aria-label="Close">&times;</button>
         </div>
 
-        <!-- Week-level fields, with a Save that commits and keeps the modal open. -->
+        <!-- Week-level fields. Saving is the footer's job. -->
         <div class="week-modal-fields">
           <label class="week-modal-field">Week status
             <select id="weekModalStatus"></select>
@@ -737,7 +737,6 @@
           <label class="week-modal-field">Week starting
             <input type="date" id="weekModalStart" />
           </label>
-          <button type="button" id="weekModalSaveTop" class="btn-save" disabled>Save</button>
         </div>
 
         <div class="modal-body week-modal-body">
@@ -759,7 +758,7 @@
 
         <div class="modal-foot week-modal-foot">
           <button type="button" id="weekModalBack" class="overview-action">&larr; Back</button>
-          <button type="button" id="weekModalSave" class="overview-action is-primary">💾 Save &amp; close</button>
+          <button type="button" id="weekModalSave" class="overview-action is-primary">💾 Save Changes</button>
         </div>
       </div>
     </div>

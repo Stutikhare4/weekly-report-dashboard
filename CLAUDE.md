@@ -194,12 +194,10 @@ pinned there. It is a first-class status, so the report and the accordion show i
 `carriedFrom` on the task, so the row keeps saying where the work was originally planned
 instead of looking like it had always been this week's — and keeps saying it after a save.
 
-The modal edits a deep copy of the project's weeks, and saves two ways through
-`commitWeekDraft()`: the header **Save**, beside Week status and Week starting, commits and keeps
-the modal open (grey → blue with unsaved work → green "✓ Saved" for two seconds); the footer
-**Save & close** commits and leaves. Both write a *copy* of the draft into state — handing over
-the draft objects would leave the open modal editing live state, and Back would have nothing to
-discard. "Back", ×, Escape, the backdrop and a tab reload all ask first while work is unsaved.
+The modal edits a deep copy of the project's weeks. Its only save is the footer's **Save
+Changes** (`commitWeekDraft()`), which commits and closes, writing a *copy* of the draft into
+state. A header Save beside Week status and Week starting was added and then removed on request.
+"Back", ×, Escape, the backdrop and a tab reload all ask first while work is unsaved.
 
 Unsaved means `weekDraftDirty()`: the draft compared with a snapshot taken on open and on each
 save, not a flag that only turns on — so changing something and changing it back leaves nothing

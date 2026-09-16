@@ -285,7 +285,6 @@ const nodes = {
   weekModalTitle: document.getElementById("weekModalTitle"),
   weekModalStatus: document.getElementById("weekModalStatus"),
   weekModalStart: document.getElementById("weekModalStart"),
-  weekModalSaveTop: document.getElementById("weekModalSaveTop"),
   weekModalClose: document.getElementById("weekModalClose"),
   weekModalCarriedSection: document.getElementById("weekModalCarriedSection"),
   weekModalCarried: document.getElementById("weekModalCarried"),
@@ -518,8 +517,7 @@ function boot() {
   nodes.projScopeEdit.addEventListener("click", () => toggleProjectScope(true));
   nodes.weekModalClose.addEventListener("click", () => closeWeekModal());
   nodes.weekModalBack.addEventListener("click", () => closeWeekModal());
-  nodes.weekModalSave.addEventListener("click", () => commitWeekDraft({ close: true }));
-  nodes.weekModalSaveTop.addEventListener("click", () => commitWeekDraft({ close: false }));
+  nodes.weekModalSave.addEventListener("click", () => commitWeekDraft());
   nodes.weekModalStart.addEventListener("change", () => {
     const current = weekDraft && draftWeeks()[draftIndex()];
     if (!current) return;
@@ -756,7 +754,6 @@ function openWeekModal(updateId) {
     /* The draft as last saved. "Dirty" is a comparison against this rather than a flag that
        only ever turns on, so changing something and changing it back leaves nothing to save. */
     baseline: "",
-    savedFlashUntil: 0,
     /* Completion dates this session filled in by itself, so unticking can take them back out
        and a tick-then-untick really does return the week to where it was. */
     autoDated: new Set(),
@@ -786,11 +783,9 @@ function closeWeekModal() {
   nodes.weekModalOverlay.hidden = true;
 }
 
-/* Two ways to save: the header's Save commits and keeps the modal open, so a long triage can be
-   saved as it goes; the footer's Save & close commits and leaves. Both write a *copy* of the
-   draft into state. Handing over the draft objects themselves would leave the still-open modal
-   editing live state, and Back would then have nothing left to discard. */
-function commitWeekDraft({ close }) {
+/* Commits the draft and closes. It writes a *copy* of the draft into state rather than the
+   draft objects themselves, so nothing the modal holds is ever live state. */
+function commitWeekDraft() {
   if (!weekDraft) return;
   if (!requirePermission("report.edit", "edit a weekly report")) return;
 
@@ -803,22 +798,12 @@ function commitWeekDraft({ close }) {
 
     refreshProjectGoLive(weekDraft.projectId);
     saveState();
-    weekDraft.baseline = JSON.stringify(weekDraft.updates);
-    weekDraft.autoDated.clear();
   }
 
-  if (close) {
-    weekDraft = null;
-    nodes.weekModalOverlay.hidden = true;
-    renderAll();
-    showAppSuccess("Week saved.");
-    return;
-  }
-
-  weekDraft.savedFlashUntil = Date.now() + 2000;
+  weekDraft = null;
+  nodes.weekModalOverlay.hidden = true;
   renderAll();
-  renderWeekModal();
-  setTimeout(() => { if (weekDraft) renderWeekModal(); }, 2050);
+  showAppSuccess("Week saved.");
 }
 
 function weekTaskDescription(task) {
@@ -900,22 +885,12 @@ function renderWeekModal() {
 
   if (document.activeElement !== nodes.weekModalStart) nodes.weekModalStart.value = current.weekStart;
 
-  const dirty = weekDraftDirty();
-  const flashing = !dirty && Date.now() < weekDraft.savedFlashUntil;
-  if (dirty) weekDraft.savedFlashUntil = 0;
-
-  /* Header Save: grey with nothing to save, blue when there is, green for two seconds once it
-     has saved. */
-  nodes.weekModalSaveTop.disabled = !dirty;
-  nodes.weekModalSaveTop.classList.toggle("saved", flashing);
-  nodes.weekModalSaveTop.textContent = flashing ? "✓ Saved" : "Save";
-  nodes.weekModalSaveTop.title = dirty ? "Save changes and keep working" : (flashing ? "Saved" : "Nothing to save");
-
   /* An asterisk while there is something to save, so the footer says whether the work in front
      of you has been committed. */
+  const dirty = weekDraftDirty();
   nodes.weekModalSave.disabled = !dirty;
-  nodes.weekModalSave.textContent = dirty ? "💾 Save & close *" : "💾 Save & close";
-  nodes.weekModalSave.title = dirty ? "Save changes and close" : "Nothing to save";
+  nodes.weekModalSave.textContent = dirty ? "💾 Save Changes *" : "💾 Save Changes";
+  nodes.weekModalSave.title = dirty ? "You have unsaved changes" : "Nothing to save";
 }
 
 function weekTaskRow(task, source) {
