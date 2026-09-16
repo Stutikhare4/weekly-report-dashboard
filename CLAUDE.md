@@ -49,10 +49,10 @@ offsets, so every task resolved to N+0 and piled into week 1. `templatesAreCurre
 on a version change, or when a stored task is missing offsets.
 
 `week-templates.json` is generated from the team's Google Sheet (its URL is in `source`), which
-has one tab per planned cycle length — **Week 4, Week 6, Week 12** — holding the *same* 95 tasks
+has one tab per planned cycle length — **Week 4, Week 6, Week 12** — holding the *same* 86 tasks
 with different timings. Each task carries `offsetByCycle`, the completion date as a day offset
-from kickoff per cycle: `{"4": 5, "6": 5, "12": 5}` for SDK setup (fixed) versus
-`{"4": 10, "6": 15, "12": 30}` for event tracking (elastic). Elasticity is therefore data, not
+from kickoff per cycle: `{"4": 10, "6": 15, "12": 35}` for Android event tracking (elastic)
+versus `{"4": 5, "6": 5, "12": 5}` for SDK setup (fixed — and pinned, see below). Elasticity is therefore data, not
 a rule the code applies — `elastic` on a task is just "this offset varies", derived on edit.
 
 **Re-importing the sheet:** `python3 tools/import-sheet.py` checks it and reports drift without
@@ -77,8 +77,8 @@ linearly interpolated between the two nearest when not (8 weeks sits between the
 `generateWeeklyPlan()` files each task into the week containing kickoff + offset, so **every
 task appears at every cycle length** and the dates are the sheet's own. Week 1 is the week the
 kickoff falls in (`mondayOnOrBefore`), so an N+0 task lands in it whatever weekday the project
-starts. A week with nothing due shows as empty — that reflects a real gap in the plan rather
-than a bug (the Week 12 tab has no task due in days 21-27 or 42-48).
+starts. A week with nothing due would show as empty, which would reflect a real gap in the plan
+rather than a bug; with the current sheet no cycle from 2 to 12 weeks has an empty week.
 
 Tasks are filtered to the project twice: by `platforms` (domain) and by `channels`. Channel
 filtering only applies once the project has chosen channels, so an early draft still gets the
@@ -87,9 +87,10 @@ full plan.
 The 14 **Web App** tasks are not in the sheet — they mirror the Website tasks with Android/iOS
 timing, per the team's instruction. Regenerate them if the sheet gains a Web App domain.
 
-Known data slips in the sheet, imported as written rather than silently corrected: in the Week
-6 and Week 12 tabs the five *Production* channel-setup rows (Email/SMS/WhatsApp/RCS/IVR) still
-carry the staging value N+10, so they schedule before the production dashboard exists.
+Known data slip in the sheet, imported as written rather than silently corrected: the five
+*Production* channel-setup rows (Email/SMS/WhatsApp/RCS/IVR) are due at N+10 in the Week 6 tab
+and N+21 in Week 12 — before Create Production Dashboard (N+21 and N+42), so they schedule
+ahead of the dashboard they configure. The Week 4 tab has them after it (N+22/23 vs N+21).
 
 ## Fixed foundational weeks
 
