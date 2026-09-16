@@ -726,10 +726,18 @@
       <div class="modal-card week-modal" role="dialog" aria-modal="true" aria-labelledby="weekModalTitle">
         <div class="modal-head week-modal-head">
           <h2 id="weekModalTitle">Week</h2>
-          <label class="week-modal-status">Status
+          <button type="button" id="weekModalClose" class="ghost-button small-button" aria-label="Close">&times;</button>
+        </div>
+
+        <!-- Week-level fields, with a Save that commits and keeps the modal open. -->
+        <div class="week-modal-fields">
+          <label class="week-modal-field">Week status
             <select id="weekModalStatus"></select>
           </label>
-          <button type="button" id="weekModalClose" class="ghost-button small-button" aria-label="Close">&times;</button>
+          <label class="week-modal-field">Week starting
+            <input type="date" id="weekModalStart" />
+          </label>
+          <button type="button" id="weekModalSaveTop" class="btn-save" disabled>Save</button>
         </div>
 
         <div class="modal-body week-modal-body">
@@ -751,7 +759,7 @@
 
         <div class="modal-foot week-modal-foot">
           <button type="button" id="weekModalBack" class="overview-action">&larr; Back</button>
-          <button type="button" id="weekModalSave" class="overview-action is-primary">💾 Save Changes</button>
+          <button type="button" id="weekModalSave" class="overview-action is-primary">💾 Save &amp; close</button>
         </div>
       </div>
     </div>

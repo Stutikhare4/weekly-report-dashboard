@@ -284,6 +284,8 @@ const nodes = {
   weekModalOverlay: document.getElementById("weekModalOverlay"),
   weekModalTitle: document.getElementById("weekModalTitle"),
   weekModalStatus: document.getElementById("weekModalStatus"),
+  weekModalStart: document.getElementById("weekModalStart"),
+  weekModalSaveTop: document.getElementById("weekModalSaveTop"),
   weekModalClose: document.getElementById("weekModalClose"),
   weekModalCarriedSection: document.getElementById("weekModalCarriedSection"),
   weekModalCarried: document.getElementById("weekModalCarried"),
@@ -516,7 +518,29 @@ function boot() {
   nodes.projScopeEdit.addEventListener("click", () => toggleProjectScope(true));
   nodes.weekModalClose.addEventListener("click", () => closeWeekModal());
   nodes.weekModalBack.addEventListener("click", () => closeWeekModal());
-  nodes.weekModalSave.addEventListener("click", () => saveWeekModal());
+  nodes.weekModalSave.addEventListener("click", () => commitWeekDraft({ close: true }));
+  nodes.weekModalSaveTop.addEventListener("click", () => commitWeekDraft({ close: false }));
+  nodes.weekModalStart.addEventListener("change", () => {
+    const current = weekDraft && draftWeeks()[draftIndex()];
+    if (!current) return;
+    if (!nodes.weekModalStart.value) {
+      nodes.weekModalStart.value = current.weekStart;
+      return;
+    }
+    current.weekStart = nodes.weekModalStart.value;
+    current.weekRange = formatWeekRange(current.weekStart);
+    renderWeekModal();
+  });
+  /* Closing the tab or reloading with an unsaved week open asks first, like the modal's own
+     close does; Escape closes the modal through the same prompt. */
+  window.addEventListener("beforeunload", (e) => {
+    if (!weekDraftDirty()) return;
+    e.preventDefault();
+    e.returnValue = "";
+  });
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && weekDraft && !nodes.weekModalOverlay.hidden) closeWeekModal();
+  });
   nodes.weekModalAdd.addEventListener("click", () => addWeekModalTask());
   nodes.weekModalNewTask.addEventListener("keydown", (e) => {
     if (e.key === "Enter") { e.preventDefault(); addWeekModalTask(); }
@@ -525,7 +549,6 @@ function boot() {
     const current = draftWeeks()[draftIndex()];
     if (!current) return;
     current.statusTag = nodes.weekModalStatus.value;
-    weekDraft.dirty = true;
     renderWeekModal();
   });
   nodes.weekModalOverlay.addEventListener("click", (e) => {
@@ -730,7 +753,13 @@ function openWeekModal(updateId) {
   weekDraft = {
     projectId: update.projectId,
     weekId: updateId,
-    dirty: false,
+    /* The draft as last saved. "Dirty" is a comparison against this rather than a flag that
+       only ever turns on, so changing something and changing it back leaves nothing to save. */
+    baseline: "",
+    savedFlashUntil: 0,
+    /* Completion dates this session filled in by itself, so unticking can take them back out
+       and a tick-then-untick really does return the week to where it was. */
+    autoDated: new Set(),
     /* Carried rows are the ones still outstanding, so ticking one would drop it out of the
        list mid-click. Anything ticked here stays put until the modal closes. */
     tickedHere: new Set(),
@@ -738,6 +767,7 @@ function openWeekModal(updateId) {
       .filter((item) => item.projectId === update.projectId)
       .map((item) => JSON.parse(JSON.stringify(item))),
   };
+  weekDraft.baseline = JSON.stringify(weekDraft.updates);
 
   nodes.weekModalStatus.innerHTML = WEEK_STATUSES
     .map((status) => `<option value="${status}">${capitalize(status)}</option>`).join("");
@@ -746,30 +776,49 @@ function openWeekModal(updateId) {
   nodes.weekModalNewTask.value = "";
 }
 
+function weekDraftDirty() {
+  return Boolean(weekDraft) && JSON.stringify(weekDraft.updates) !== weekDraft.baseline;
+}
+
 function closeWeekModal() {
-  if (weekDraft && weekDraft.dirty && !confirm("Discard the changes made in this week?")) return;
+  if (weekDraftDirty() && !confirm("Discard the changes made in this week?")) return;
   weekDraft = null;
   nodes.weekModalOverlay.hidden = true;
 }
 
-function saveWeekModal() {
-  if (!weekDraft || weekDraft.saving) return;
+/* Two ways to save: the header's Save commits and keeps the modal open, so a long triage can be
+   saved as it goes; the footer's Save & close commits and leaves. Both write a *copy* of the
+   draft into state. Handing over the draft objects themselves would leave the still-open modal
+   editing live state, and Back would then have nothing left to discard. */
+function commitWeekDraft({ close }) {
+  if (!weekDraft) return;
   if (!requirePermission("report.edit", "edit a weekly report")) return;
-  weekDraft.saving = true;
-  nodes.weekModalSave.disabled = true;
 
-  const byId = new Map(weekDraft.updates.map((item) => [item.id, item]));
-  state.updates = state.updates.map((item) => byId.get(item.id) || item);
+  if (weekDraftDirty()) {
+    const byId = new Map(weekDraft.updates.map((item) => [item.id, JSON.parse(JSON.stringify(item))]));
+    state.updates = state.updates.map((item) => byId.get(item.id) || item);
 
-  const project = state.projects.find((item) => item.id === weekDraft.projectId);
-  if (project) project.updatedAt = new Date().toISOString();
+    const project = state.projects.find((item) => item.id === weekDraft.projectId);
+    if (project) project.updatedAt = new Date().toISOString();
 
-  refreshProjectGoLive(weekDraft.projectId);
-  saveState();
-  weekDraft = null;
-  nodes.weekModalOverlay.hidden = true;
+    refreshProjectGoLive(weekDraft.projectId);
+    saveState();
+    weekDraft.baseline = JSON.stringify(weekDraft.updates);
+    weekDraft.autoDated.clear();
+  }
+
+  if (close) {
+    weekDraft = null;
+    nodes.weekModalOverlay.hidden = true;
+    renderAll();
+    showAppSuccess("Week saved.");
+    return;
+  }
+
+  weekDraft.savedFlashUntil = Date.now() + 2000;
   renderAll();
-  showAppSuccess("Week saved.");
+  renderWeekModal();
+  setTimeout(() => { if (weekDraft) renderWeekModal(); }, 2050);
 }
 
 function weekTaskDescription(task) {
@@ -849,11 +898,24 @@ function renderWeekModal() {
       }).join("")
     : `<p class="muted">No tasks in this week yet.</p>`;
 
-  nodes.weekModalSave.disabled = !weekDraft.dirty;
-  /* An asterisk while there is something to save, so the button says whether the work in front
+  if (document.activeElement !== nodes.weekModalStart) nodes.weekModalStart.value = current.weekStart;
+
+  const dirty = weekDraftDirty();
+  const flashing = !dirty && Date.now() < weekDraft.savedFlashUntil;
+  if (dirty) weekDraft.savedFlashUntil = 0;
+
+  /* Header Save: grey with nothing to save, blue when there is, green for two seconds once it
+     has saved. */
+  nodes.weekModalSaveTop.disabled = !dirty;
+  nodes.weekModalSaveTop.classList.toggle("saved", flashing);
+  nodes.weekModalSaveTop.textContent = flashing ? "✓ Saved" : "Save";
+  nodes.weekModalSaveTop.title = dirty ? "Save changes and keep working" : (flashing ? "Saved" : "Nothing to save");
+
+  /* An asterisk while there is something to save, so the footer says whether the work in front
      of you has been committed. */
-  nodes.weekModalSave.textContent = weekDraft.dirty ? "💾 Save Changes *" : "💾 Save Changes";
-  nodes.weekModalSave.title = weekDraft.dirty ? "You have unsaved changes" : "Nothing to save";
+  nodes.weekModalSave.disabled = !dirty;
+  nodes.weekModalSave.textContent = dirty ? "💾 Save & close *" : "💾 Save & close";
+  nodes.weekModalSave.title = dirty ? "Save changes and close" : "Nothing to save";
 }
 
 function weekTaskRow(task, source) {
@@ -923,7 +985,6 @@ function moveDraftTaskToWeek(taskId, weekId) {
   found.task.startDate = target.weekStart;
   found.task.dueDate = taskDueDate(target.weekStart, found.task.days || templateDefaultDays());
   target.tasks.push(found.task);
-  weekDraft.dirty = true;
   renderWeekModal();
 }
 
@@ -944,10 +1005,14 @@ function handleWeekModalClick(event) {
     if (!found) return;
     found.task.status = toggle.checked ? "completed" : (found.task.status === "completed" ? "not started" : found.task.status);
     if (toggle.checked) {
-      if (!found.task.date) found.task.date = toInputDate(new Date());
+      if (!found.task.date) {
+        found.task.date = toInputDate(new Date());
+        weekDraft.autoDated.add(found.task.id);
+      }
       weekDraft.tickedHere.add(found.task.id);
+    } else if (weekDraft.autoDated.delete(found.task.id)) {
+      found.task.date = "";
     }
-    weekDraft.dirty = true;
     renderWeekModal();
     return;
   }
@@ -963,8 +1028,12 @@ function handleWeekModalStatus(select) {
   if (!found) return;
 
   found.task.status = select.value;
-  if (select.value === "completed" && !found.task.date) found.task.date = toInputDate(new Date());
+  if (select.value === "completed" && !found.task.date) {
+    found.task.date = toInputDate(new Date());
+    weekDraft.autoDated.add(found.task.id);
+  }
   if (select.value === "completed") weekDraft.tickedHere.add(found.task.id);
+  if (select.value !== "completed" && weekDraft.autoDated.delete(found.task.id)) found.task.date = "";
 
   const current = draftWeeks()[draftIndex()];
   if (select.value === "pending" && current && found.week.id !== current.id && !Number(found.task.fixedWeek)) {
@@ -976,8 +1045,6 @@ function handleWeekModalStatus(select) {
     found.task.dueDate = taskDueDate(current.weekStart, found.task.days || templateDefaultDays());
     current.tasks.push(found.task);
   }
-
-  weekDraft.dirty = true;
   renderWeekModal();
 }
 
@@ -995,7 +1062,6 @@ function addWeekModalTask() {
     dueDate: taskDueDate(current.weekStart, templateDefaultDays()), subtasks: [],
   });
   nodes.weekModalNewTask.value = "";
-  weekDraft.dirty = true;
   renderWeekModal();
 }
 

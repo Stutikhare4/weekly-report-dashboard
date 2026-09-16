@@ -194,8 +194,21 @@ pinned there. It is a first-class status, so the report and the accordion show i
 `carriedFrom` on the task, so the row keeps saying where the work was originally planned
 instead of looking like it had always been this week's — and keeps saying it after a save.
 
-The modal edits a deep copy of the project's weeks, so "Save Changes" is a real commit and
-"Back" genuinely discards. A carried task ticked here stays visible and struck through until the
+The modal edits a deep copy of the project's weeks, and saves two ways through
+`commitWeekDraft()`: the header **Save**, beside Week status and Week starting, commits and keeps
+the modal open (grey → blue with unsaved work → green "✓ Saved" for two seconds); the footer
+**Save & close** commits and leaves. Both write a *copy* of the draft into state — handing over
+the draft objects would leave the open modal editing live state, and Back would have nothing to
+discard. "Back", ×, Escape, the backdrop and a tab reload all ask first while work is unsaved.
+
+Unsaved means `weekDraftDirty()`: the draft compared with a snapshot taken on open and on each
+save, not a flag that only turns on — so changing something and changing it back leaves nothing
+to save. Completion dates the modal fills in itself are tracked in `autoDated` and removed on
+untick, so tick-then-untick really does return to clean.
+
+(Headless Chrome's virtual clock does not advance CSS transitions, so a test that reads the
+button's `background` straight after a change sees the start colour. Disable the transition in
+tests; `cursor`, which does not animate, flips immediately.) A carried task ticked here stays visible and struck through until the
 modal closes, rather than vanishing out of the list mid-click.
 
 ## Weekly reports screen

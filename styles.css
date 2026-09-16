@@ -3441,22 +3441,38 @@ button {
   color: var(--card-value);
 }
 
-.week-modal-status {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
+/* Week-level fields sit in their own row under the title, with the Save that keeps the modal
+   open beside them — the same arrangement as the inline editor's header. */
+.week-modal-fields {
+  display: flex;
+  align-items: flex-end;
+  gap: 14px;
+  flex-wrap: wrap;
+  padding: 0 24px 14px;
+  border-bottom: 1px solid var(--card-border);
+}
+
+.week-modal-field {
+  display: grid;
+  gap: 4px;
   font-size: 12px;
   font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
   color: var(--card-label);
 }
 
-.week-modal-status select {
-  padding: 6px 10px;
+.week-modal-field select,
+.week-modal-field input {
+  padding: 7px 10px;
   border-radius: 6px;
   border: 1px solid var(--card-border);
   background: var(--surface-4);
   color: var(--text);
+  font-family: inherit;
   font-size: 13px;
+  text-transform: none;
+  letter-spacing: 0;
 }
 
 .week-modal-body { display: grid; gap: 22px; padding: 22px 0; }
@@ -3798,6 +3814,20 @@ small,
   white-space: nowrap;
   align-self: end;
   transition: all 0.3s ease;
+}
+
+/* Enabled only where saving is a real action (the week modal); the inline editor's copy is
+   always disabled and never reaches this state. */
+.btn-save:not(:disabled) {
+  background: var(--card-accent);
+  border-color: var(--card-accent);
+  color: #ffffff;
+  cursor: pointer;
+}
+
+.btn-save:not(:disabled):hover {
+  background: color-mix(in srgb, var(--card-accent) 82%, #000000);
+  box-shadow: 0 2px 6px color-mix(in srgb, var(--card-accent) 30%, transparent);
 }
 
 .btn-save.saved {
