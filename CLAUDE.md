@@ -157,7 +157,7 @@ discard entered status; new domains need "Add week from template".
 
 
 The project page holds two views of one project, toggled by `setProjectView()`: **details**
-(overview, integration scope, editable project details, and a Generate Report button) and
+(overview, integration scope, editable project details, and a View Report button) and
 **report** (the generated weekly report on its own, with its own Back button and heading).
 Opening a project always lands on details. They are two views of one screen rather than two
 screens, so the project stays loaded and Back is instant.

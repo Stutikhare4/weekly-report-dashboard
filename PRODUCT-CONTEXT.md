@@ -287,11 +287,11 @@ Opening a project always lands here.
   - **Active** (blue, numbered): the phase has this week's work or anything already started.
   - **Pending** (grey, numbered): everything else.
   - Each phase shows done/total. Its Edit button goes to Templates.
-- **Actions:** + Add week from template · 📊 Generate Report · Edit weekly reports.
+- **Actions:** + Add week from template · 📊 View Report · Edit weekly reports.
 - **Delete project** sits in the header, for admins.
 
 ### Project page — report view
-Opened by Generate Report. It shows "Project Name — Weekly Report", a Back button, the generated
+Opened by View Report. It shows "Project Name — Weekly Report", a Back button, the generated
 report, **Generate report (PDF)** (the browser print dialog) and **Copy HTML for email**.
 
 ### Create project wizard (3 steps)
