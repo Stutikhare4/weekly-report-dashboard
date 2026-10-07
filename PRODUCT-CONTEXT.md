@@ -200,7 +200,7 @@ SDK Set Up (Website, Web App, Android, iOS) is always in **week 1**, and User Tr
 Web App, Android, iOS, CRM) is always in **week 2**, whatever the cycle length or kickoff weekday.
 They are placed by week number rather than by date: placing them by date only works for a Monday
 or Tuesday kickoff. CRM has no SDK setup, by decision. They still follow the project's domains —
-a Website-only project gets only the Website ones. In the week modal they show a 🔒 and cannot be
+a Website-only project gets only the Website ones. In the week editor they show a 🔒 and cannot be
 moved.
 
 ### Editing the plan
@@ -310,46 +310,54 @@ step any more.
 ### Project Reports (the weeks list)
 A project picker and **+ New report**, which adds the week after the project's last and opens it.
 
-The weeks form an **accordion**: one open at a time, numbered by position. Each row shows:
+The weeks form an **accordion**, numbered by position, with **any number of weeks open at
+once**. Each row shows:
 - the dates and the phase(s) the week covers;
 - "4 tasks **+ 2 carried** · 0 completed", with the carried part in amber;
 - the week's status;
-- the buttons **Open week**, **Edit** and **Delete**.
+- the buttons **Edit** and **Delete**.
 
 The **week containing today** has a green left border, a tint and a "This week" badge.
 
-**Edit** opens the week in place:
-- A header with Week status, Week starting, a **Saved** indicator and **+ Add task**. The
-  indicator is always disabled: it rests grey reading "Saved" and flashes green "Saved ✓" as each
-  change is written.
-- A table: **Phase | Domain | Task | Owner | Completed On | Status | Comments**, with + Sub (add a
-  sub-task) and × (remove) on each row. Sub-tasks are nested under their task.
+**Edit** — and the chevron, which does the same thing — folds the week open or shut in place.
+There is no separate window: the open week *is* the editor, and it holds everything that used to
+need one.
+
+- A header with Week status, Week starting, an amber **"M carried"** badge when earlier weeks
+  have late work, a **Saved** indicator and **+ Add task**. The indicator is always disabled: it
+  rests grey reading "Saved" and flashes green "Saved ✓" as each change is written.
+- **Work carried from earlier weeks** appears at the top of the table as amber rows, each
+  labelled "⬅ Carried from Week N". They are editable in place, and an edit is written to the
+  week that actually owns the task, not to the week being viewed.
+- A table: **Phase | Domain | Task | Owner | Completed On | Status | Comments**, then **Move…**,
+  **+ Sub** (add a sub-task) and **×** (remove) on each row. Sub-tasks nest under their task.
+- **Move…** lists every other week, nearest ahead first, and moves the task there, re-dating it.
+  It is disabled for pinned tasks (which show 🔒 and the week they are fixed to) and for Pending
+  ones.
+- Setting a status to **completed** fills Completed On with today if it is blank. A carried task
+  completed here stays in the table struck through rather than disappearing mid-click.
+- Setting a task to **Pending** or **In Progress** copies it into the next week, **at the top of
+  that week's list**, so work running past this week is the first thing seen there.
+- Work **already** marked pending or in progress when its week ends is carried forward
+  automatically, without anyone touching it again: on load and on opening Project Reports, every
+  ended week hands its unfinished pending/in-progress work to the week after it. A task stranded
+  several weeks back steps forward through each week and arrives in the current one. Only ended
+  weeks forward, so the work advances one week per real week rather than filling the whole
+  remaining plan at once, and a notice says how many tasks moved. The copy is a separate record and its row reads
+  "⬅ Copied from Week N". Completed, delayed and blocked do not forward.
 - **Everything saves as you type.** Owner fields suggest the project's team and client contacts.
+- A **💾 Save Changes** button sits in the expanded week's footer. It confirms rather than
+  commits — the week is already saved, so clicking it writes state again and turns green reading
+  "✓ Saved". There is no unsaved-changes prompt: with several weeks open at once there is no
+  single draft for one to describe, and nothing is ever lost by navigating away.
+- **On a narrow screen** the accordion rows stack and the task table scrolls sideways inside its
+  own box; the page itself never scrolls horizontally at any width.
 
-### Week modal ("Open week")
-A focused view for working through one week.
-
-- **Title:** "📅 Week N (dates)", with an amber "M carried" badge when earlier weeks have late
-  work, and a close ×.
-- **Fields row:** Week status and Week starting.
-- **Pending from earlier weeks:** late work from weeks that have already ended, each row labelled
-  "⬅ Carried from Week N".
-- **Tasks for this week.**
-- **Each task row** has:
-  - a completion checkbox — ticking fills Completed On with today, and unticking removes a date
-    the modal filled in;
-  - the title (🔒 if pinned), then phase · domain;
-  - a status dropdown with all six statuses;
-  - a **Move…** dropdown listing every other week, nearest ahead first — disabled for pinned and
-    Pending tasks.
-- **Add a new task** field.
-- **Footer:** ← Back and **💾 Save Changes**. Save Changes is disabled until something changes,
-  shows `*` while there are unsaved changes, and saves and closes.
-- **"Unsaved"** is judged by comparing against the week as last saved, so changing something back
-  leaves nothing to save.
-- **Leaving with unsaved changes asks first** — Back, ×, Escape, clicking outside, or
-  closing/reloading the tab. Nothing asks when nothing has changed.
-- The modal works on a copy: nothing is stored until Save Changes, and Back discards everything.
+There used to be a second editor — a **week modal** opened by "Open week" — which worked on a
+copy of the project's weeks and saved on request. It has been removed and its functionality
+folded into the accordion. Two editors over the same weeks were two places a count could
+disagree, and a draft-based editor cannot allow two weeks open at once: two drafts over the same
+task would clobber each other silently.
 
 ### Templates
 The master plan by phase ("Phase 1 Kickoff"…). For each task you can edit:
@@ -396,16 +404,22 @@ and the record of what happened that week would change every time someone opened
 week put "+14 carried" on week 6 of a brand-new project — work that simply wasn't due yet. Now:
 - a project entirely in the future shows no carried work;
 - the count levels off instead of growing with the plan's length;
-- the accordion's count, the modal's badge and the modal's carried list all use the same rule,
+- the accordion's count, the open editor's badge and its carried rows all use the same rule,
   so they always agree;
 - the generated report shows none of it.
 
-**Moving a task between weeks is always deliberate.**
-- **Move…** sends a task to any other week and re-dates it. It is a move, never a copy.
-- **Pending** means the work is deliberately being carried in the week now open. Choosing it:
-  - moves the task into that week;
-  - keeps its "Carried from Week N" label — stored on the task, so it survives saving;
-  - disables Move, since the task has just been pinned to this week.
+**Move is deliberate; forwarding is automatic on marking.**
+- **Move…** sends a task to any other week and re-dates it. It is a move, never a copy. Only
+  pinned tasks cannot be moved.
+- **Pending or In Progress** copies the task into the next week. Marking it again does nothing
+  (one copy per task per week), the last week does not forward, and nothing is ever deleted —
+  completing a task stops further copies but keeps the ones made. Pinned work (SDK Set Up, User
+  Tracking) forwards like anything else; the copy is not pinned, since the pin only says where
+  the plan *places* the task, not that the work must finish there.
+- A task already continued into a later week is not also counted as carried; its copy stands
+  for it, or one job would read as two pieces of late work and then three.
+- **Pending no longer moves a task.** It did until 21 September; one status cannot both move a
+  task and copy it.
 
 ---
 
@@ -583,7 +597,7 @@ earlier commits used.
 - Report columns reordered; Priority and Blockers dropped; "Task / Milestone" renamed "Tasks".
 - The project page split into details and report views, then rebuilt as a card grid with the
   WebEngage palette and the phase strip.
-- The week modal: carryover, the per-task status dropdown, the Pending status, and the
+- The week editor: carryover, the per-task status dropdown, the Pending status, and the
   carried-from label that survives saving.
 
 **8 September**
@@ -601,13 +615,30 @@ earlier commits used.
 
 **11 September**
 - Shift-to-next-week replaced by Move-to-any-week.
-- Carried counts in the accordion and the modal title.
+- Carried counts in the accordion and the week editor's header.
 - The accordion now refreshes when data changes elsewhere.
 - The "Saved" indicator in the inline editor.
 
 **16 September**
 - A Save button added to the week modal's header, then removed on request; change detection and
   the leave prompts were kept.
+
+**5 October**
+- **Automatic carry-forward:** pending and in-progress work is no longer only forwarded at the
+  moment someone changes the status — a sweep moves anything still open when its week ends into
+  the following week, chaining up to the current week. Deleting a forwarded copy keeps it
+  deleted.
+
+**21 September**
+- **Auto-forwarding:** marking a task Pending or In Progress copies it into the next week as an
+  independent record labelled "⬅ Copied from Week N". Pending stopped moving tasks. Trade-off
+  accepted: a task forwarded across six weeks prints six times in the client report.
+- **The week modal removed and all week editing consolidated into the Project Reports
+  accordion.** "Edit" now folds a week open in place, several weeks can be open at once, and the
+  open editor carries everything the modal did: carried rows, Move…, Pending, the status
+  dropdown, Completed On, Comments and task/sub-task CRUD. Nothing is held in a draft, so the
+  footer's Save Changes button confirms rather than commits and there is no unsaved-changes
+  prompt. The page no longer scrolls sideways at any width; only the task table does.
 
 ---
 
@@ -623,9 +654,17 @@ earlier commits used.
   the existing ones were moved, and CRM gets no SDK setup.
 - **Web App is its own domain,** copying Website with Android/iOS timing.
 - **Carryover is display-only;** carried means late.
-- **Moving a task is always deliberate** (Move or Pending), never automatic.
-- **Pinned and Pending tasks can't be moved.**
-- **The inline editor saves as you type;** the week modal works on a copy and saves on request.
+- **Moving a task is always deliberate;** forwarding a task is automatic when it is marked
+  Pending or In Progress, and copies rather than moves.
+- **Only pinned tasks can't be moved.**
+- **Copies are never auto-deleted.** Completing work stops further copies; it does not remove
+  copies already made, which someone may have typed into.
+- **Each copy's Completed On is its own** — inheriting it would claim work finished in a week it
+  did not.
+- **The week editor saves as you type.** There is one editor, in the accordion, and no draft:
+  that is what allows several weeks to be open together, since two drafts over the same task
+  would clobber each other. The footer's Save Changes button confirms rather than commits,
+  chosen on 21 September over a permanently disabled one.
 - **The report stays a truthful record** of each week: no carried rows. Its columns are Phase |
   Domain | Tasks | Owner | Completed On | Status | Comments.
 - **Owners** come from the sheet's role names plus each project's team and client contacts.
@@ -677,7 +716,8 @@ These came up in requests and were declined or changed, with reasons.
 - **Dashboard folder buttons:** first made to open the list, then reverted to jump straight into
   the first project, then made to open the list again (current).
 - **Week modal header Save:** added on 16 September, removed the same day. The footer button went
-  from "Save & close" back to "Save Changes".
+  from "Save & close" back to "Save Changes". The modal itself was removed on 21 September, so
+  both are moot.
 - **Shift to next week:** replaced by Move… to any week.
 - **Scheduling:** first spread tasks across weeks by guesswork, then driven by the sheet's
   per-cycle days (current).
@@ -689,31 +729,27 @@ These came up in requests and were declined or changed, with reasons.
 **Need a decision**
 1. **What the report covers.** Only the current and next week, today. Options: keep it; show all
    weeks; or all weeks on screen with only current + next in the PDF and email.
-2. **Two ways to edit a week.** The inline editor edits every field but doesn't show carried
-   work. The week modal handles carryover, status, Move and Pending, but has no owner, comments,
-   Completed On or delete. Worth deciding whether one should absorb the other.
-3. **The inline editor's "Saved" indicator:** keep it or remove it?
-4. **Carried rows in the inline editor:** not shown today; only its count is.
-5. **Deleting tasks from the week modal:** not possible today; delete lives in the inline editor.
-6. **Page heading size:** page headings are 14px, smaller than the 18px top-bar title. A
+2. **The week editor's "Saved" indicator:** keep it or remove it? It cannot ever report unsaved
+   work, since the editor writes on every change.
+3. **Page heading size:** page headings are 14px, smaller than the 18px top-bar title. A
    one-line change would make them 20px.
-7. **Serif headings in the PDF and email:** match the app's sans-serif, or keep them?
-8. **Recent updates** show each project's *final* week, which can be months ahead. Showing the
+4. **Serif headings in the PDF and email:** match the app's sans-serif, or keep them?
+5. **Recent updates** show each project's *final* week, which can be months ahead. Showing the
    week containing today may be more useful.
-9. **Changing "Week starting"** renames the week but doesn't re-date its tasks.
+6. **Changing "Week starting"** renames the week but doesn't re-date its tasks.
 
 **In the sheet, not the tool**
 
-10. **Production channel setup is scheduled too early.** Email, SMS, WhatsApp, RCS and IVR setup
+7. **Production channel setup is scheduled too early.** Email, SMS, WhatsApp, RCS and IVR setup
     in the *Production* phase are due at N+10 in the Week 6 tab and N+21 in Week 12. Create
     Production Dashboard is at N+21 and N+42, so the setup work lands before the dashboard it
     configures. The Week 4 tab has it right (N+22/23, after N+21).
-11. **Five phases, not six:** designs have asked for a "Discovery" phase, but it is a task inside
+8. **Five phases, not six:** designs have asked for a "Discovery" phase, but it is a task inside
     Kickoff.
 
 **Security and exposure**
 
-12. **The live site serves the docs and `roles-config.json` publicly**, including both email
+9. **The live site serves the docs and `roles-config.json` publicly**, including both email
     addresses and password hashes. A small `vercel.json` could block the `.md` files. The roles
     file must stay readable for sign-in to work.
 
@@ -752,7 +788,10 @@ don't exist here. The real ones:
   - projects list: `.project-card`, `.project-card-head`, `.project-card-rows`,
     `.project-card-row`, `.project-card-foot` — not `.project-card-content`;
   - accordion: `.report-row`, `.meta`, `.report-row-range`, `.template-week-badge`;
-  - week modal: `#weekModalOverlay`, `#weekModalStatus`, `#weekModalStart`, `#weekModalSave`.
+  - week editor: `.week-editor`, `.week-editor-head`, `.report-row-task-table`,
+    `.week-task-row` (`.is-carried`, `.is-pinned`, `.is-pending`, `.is-resolved`),
+    `.week-task-actions`, `.week-task-move`, `.week-task-source`. There is no longer any
+    `#weekModal*` element or `weekDraft` state — the modal was removed.
 - **Screens and views:**
   - the projects list is `#categoryScreen`;
   - the project page's two views are toggled together, not as separate screens;

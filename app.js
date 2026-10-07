@@ -5,6 +5,9 @@ const STATE_KEY = "multi-project-dashboard-state";
    than merely unfinished. It is a first-class status so the report and the accordion editor
    show it too, not just the week modal. */
 const SUBTASK_STATUSES = ["not started", "in progress", "delayed", "blocked", "completed", "pending"];
+/* Marking a task one of these says the work runs past this week, so it is copied into the next
+   one. Completed, delayed and blocked all stop that: the work is done, or it is not moving. */
+const FORWARDING_STATUSES = ["pending", "in progress"];
 const WEEK_STATUSES = ["not started", "on track", "needs attention", "blocked", "completed"];
 
 /* Master plan seed, generated from the team's Google Sheet by tools/import-sheet.py. A task's
@@ -281,18 +284,6 @@ const nodes = {
   projectScope: document.getElementById("projectScope"),
   projectTimelineFields: document.getElementById("projectTimelineFields"),
   projectPhases: document.getElementById("projectPhases"),
-  weekModalOverlay: document.getElementById("weekModalOverlay"),
-  weekModalTitle: document.getElementById("weekModalTitle"),
-  weekModalStatus: document.getElementById("weekModalStatus"),
-  weekModalStart: document.getElementById("weekModalStart"),
-  weekModalClose: document.getElementById("weekModalClose"),
-  weekModalCarriedSection: document.getElementById("weekModalCarriedSection"),
-  weekModalCarried: document.getElementById("weekModalCarried"),
-  weekModalTasks: document.getElementById("weekModalTasks"),
-  weekModalNewTask: document.getElementById("weekModalNewTask"),
-  weekModalAdd: document.getElementById("weekModalAdd"),
-  weekModalBack: document.getElementById("weekModalBack"),
-  weekModalSave: document.getElementById("weekModalSave"),
   projScopeEdit: document.getElementById("projScopeEdit"),
   projScopeForm: document.getElementById("projScopeForm"),
   projScopeCancel: document.getElementById("projScopeCancel"),
@@ -515,53 +506,6 @@ function boot() {
     renderCategoryScreen();
   });
   nodes.projScopeEdit.addEventListener("click", () => toggleProjectScope(true));
-  nodes.weekModalClose.addEventListener("click", () => closeWeekModal());
-  nodes.weekModalBack.addEventListener("click", () => closeWeekModal());
-  nodes.weekModalSave.addEventListener("click", () => commitWeekDraft());
-  nodes.weekModalStart.addEventListener("change", () => {
-    const current = weekDraft && draftWeeks()[draftIndex()];
-    if (!current) return;
-    if (!nodes.weekModalStart.value) {
-      nodes.weekModalStart.value = current.weekStart;
-      return;
-    }
-    current.weekStart = nodes.weekModalStart.value;
-    current.weekRange = formatWeekRange(current.weekStart);
-    renderWeekModal();
-  });
-  /* Closing the tab or reloading with an unsaved week open asks first, like the modal's own
-     close does; Escape closes the modal through the same prompt. */
-  window.addEventListener("beforeunload", (e) => {
-    if (!weekDraftDirty()) return;
-    e.preventDefault();
-    e.returnValue = "";
-  });
-  document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape" && weekDraft && !nodes.weekModalOverlay.hidden) closeWeekModal();
-  });
-  nodes.weekModalAdd.addEventListener("click", () => addWeekModalTask());
-  nodes.weekModalNewTask.addEventListener("keydown", (e) => {
-    if (e.key === "Enter") { e.preventDefault(); addWeekModalTask(); }
-  });
-  nodes.weekModalStatus.addEventListener("change", () => {
-    const current = draftWeeks()[draftIndex()];
-    if (!current) return;
-    current.statusTag = nodes.weekModalStatus.value;
-    renderWeekModal();
-  });
-  nodes.weekModalOverlay.addEventListener("click", (e) => {
-    if (e.target === nodes.weekModalOverlay) closeWeekModal();
-  });
-  nodes.weekModalCarried.addEventListener("click", (e) => handleWeekModalClick(e));
-  nodes.weekModalTasks.addEventListener("click", (e) => handleWeekModalClick(e));
-  [nodes.weekModalCarried, nodes.weekModalTasks].forEach((list) => {
-    list.addEventListener("change", (e) => {
-      if (e.target.dataset.weekStatus) handleWeekModalStatus(e.target);
-      else if (e.target.dataset.weekMove && e.target.value) {
-        moveDraftTaskToWeek(e.target.dataset.weekMove, e.target.value);
-      }
-    });
-  });
   nodes.projScopeCancel.addEventListener("click", () => toggleProjectScope(false));
   nodes.projScopeForm.addEventListener("submit", (e) => saveProjectScope(e));
   nodes.projScopeTechTeam.addEventListener("change", () => {
@@ -703,6 +647,14 @@ renderDemoDataOptions();
     });
   }
 
+  /* On load as well as on opening the reports screen: a week can run out while nobody is
+     looking, and the work that outlived it should be on the next week's list by the time
+     anyone reads the dashboard. */
+  const carried = carryForwardOverdueTasks();
+  if (carried) {
+    renderAll();
+    announceCarriedForward(carried);
+  }
 }
 
 /* Stale either because the version moved on, or because the stored plan predates a field the
@@ -729,87 +681,6 @@ function setProjectView(view) {
 }
 
 
-/* ---------- Week modal ---------- */
-
-/* Edits a working copy of the project's weeks, so Back can walk away and Save is a real
-   commit rather than a decoration over changes already written. */
-let weekDraft = null;
-
-function draftWeeks() {
-  return [...weekDraft.updates].sort((left, right) => left.weekStart.localeCompare(right.weekStart));
-}
-
-function draftIndex() {
-  return draftWeeks().findIndex((update) => update.id === weekDraft.weekId);
-}
-
-function openWeekModal(updateId) {
-  const update = state.updates.find((item) => item.id === updateId);
-  if (!update) return;
-  if (!requirePermission("report.edit", "edit a weekly report")) return;
-
-  weekDraft = {
-    projectId: update.projectId,
-    weekId: updateId,
-    /* The draft as last saved. "Dirty" is a comparison against this rather than a flag that
-       only ever turns on, so changing something and changing it back leaves nothing to save. */
-    baseline: "",
-    /* Completion dates this session filled in by itself, so unticking can take them back out
-       and a tick-then-untick really does return the week to where it was. */
-    autoDated: new Set(),
-    /* Carried rows are the ones still outstanding, so ticking one would drop it out of the
-       list mid-click. Anything ticked here stays put until the modal closes. */
-    tickedHere: new Set(),
-    updates: state.updates
-      .filter((item) => item.projectId === update.projectId)
-      .map((item) => JSON.parse(JSON.stringify(item))),
-  };
-  weekDraft.baseline = JSON.stringify(weekDraft.updates);
-
-  nodes.weekModalStatus.innerHTML = WEEK_STATUSES
-    .map((status) => `<option value="${status}">${capitalize(status)}</option>`).join("");
-  nodes.weekModalOverlay.hidden = false;
-  renderWeekModal();
-  nodes.weekModalNewTask.value = "";
-}
-
-function weekDraftDirty() {
-  return Boolean(weekDraft) && JSON.stringify(weekDraft.updates) !== weekDraft.baseline;
-}
-
-function closeWeekModal() {
-  if (weekDraftDirty() && !confirm("Discard the changes made in this week?")) return;
-  weekDraft = null;
-  nodes.weekModalOverlay.hidden = true;
-}
-
-/* Commits the draft and closes. It writes a *copy* of the draft into state rather than the
-   draft objects themselves, so nothing the modal holds is ever live state. */
-function commitWeekDraft() {
-  if (!weekDraft) return;
-  if (!requirePermission("report.edit", "edit a weekly report")) return;
-
-  if (weekDraftDirty()) {
-    const byId = new Map(weekDraft.updates.map((item) => [item.id, JSON.parse(JSON.stringify(item))]));
-    state.updates = state.updates.map((item) => byId.get(item.id) || item);
-
-    const project = state.projects.find((item) => item.id === weekDraft.projectId);
-    if (project) project.updatedAt = new Date().toISOString();
-
-    refreshProjectGoLive(weekDraft.projectId);
-    saveState();
-  }
-
-  weekDraft = null;
-  nodes.weekModalOverlay.hidden = true;
-  renderAll();
-  showAppSuccess("Week saved.");
-}
-
-function weekTaskDescription(task) {
-  return [task.phase, task.domain].filter(Boolean).join(" · ") || task.owner || "";
-}
-
 /* A task stays owned by the week it was planned in. Earlier weeks' unfinished work is shown
    here, labelled with where it came from, so the history of what a week actually contained is
    not rewritten every time someone opens a later week. Moving a task between weeks is the
@@ -829,9 +700,11 @@ function carriedTasksFor(weeks, index, keepIds) {
   weeks.slice(0, index).forEach((week, position) => {
     if (!weekHasEnded(week, today)) return;
     (week.tasks || []).forEach((task) => {
-      if (task.status !== "completed" || (keepIds && keepIds.has(task.id))) {
-        carried.push({ task, from: position + 1, weekId: week.id });
-      }
+      if (task.status === "completed" && !(keepIds && keepIds.has(task.id))) return;
+      /* A task already continued into a later week is represented by that copy, so listing it
+         here as well would show one job as two pieces of late work, then three. */
+      if (taskWasForwarded(task, weeks, position)) return;
+      carried.push({ task, from: position + 1, weekId: week.id });
     });
   });
   return carried;
@@ -851,193 +724,6 @@ function reportRowSummary(update, tasks, carried) {
   const own = `${tasks.length} task${tasks.length === 1 ? "" : "s"}`;
   const slip = carried ? ` <span class="carried-count">+ ${carried} carried</span>` : "";
   return `${escapeHtml(label)} · ${own}${slip} · ${done} completed`;
-}
-
-function renderWeekModal() {
-  if (!weekDraft) return;
-  const weeks = draftWeeks();
-  const index = draftIndex();
-  const current = weeks[index];
-  if (!current) return closeWeekModal();
-
-  const carriedHere = carriedCountFor(weeks, index);
-  nodes.weekModalTitle.innerHTML = `📅 Week ${index + 1} (${escapeHtml(current.weekRange)})`
-    + (carriedHere ? ` <span class="carried-indicator">${carriedHere} carried</span>` : "");
-  nodes.weekModalStatus.value = current.statusTag;
-
-  const carried = carriedTasksFor(weeks, index, weekDraft.tickedHere);
-
-  nodes.weekModalCarriedSection.hidden = !carried.length;
-  nodes.weekModalCarried.innerHTML = carried
-    .map(({ task, from }) => weekTaskRow(task, `⬅ Carried from Week ${from}`)).join("");
-  const weekNumberOf = (weekStart) => {
-    const position = weeks.findIndex((week) => week.weekStart === weekStart);
-    return position >= 0 ? position + 1 : null;
-  };
-
-  nodes.weekModalTasks.innerHTML = (current.tasks || []).length
-    ? current.tasks.map((task) => {
-        const from = task.carriedFrom && task.carriedFrom !== current.weekStart
-          ? weekNumberOf(task.carriedFrom) : null;
-        return weekTaskRow(task, from ? `⬅ Carried from Week ${from}` : "");
-      }).join("")
-    : `<p class="muted">No tasks in this week yet.</p>`;
-
-  if (document.activeElement !== nodes.weekModalStart) nodes.weekModalStart.value = current.weekStart;
-
-  /* An asterisk while there is something to save, so the footer says whether the work in front
-     of you has been committed. */
-  const dirty = weekDraftDirty();
-  nodes.weekModalSave.disabled = !dirty;
-  nodes.weekModalSave.textContent = dirty ? "💾 Save Changes *" : "💾 Save Changes";
-  nodes.weekModalSave.title = dirty ? "You have unsaved changes" : "Nothing to save";
-}
-
-function weekTaskRow(task, source) {
-  const done = task.status === "completed";
-  const pending = task.status === "pending";
-  /* Foundational work is pinned to its week, so it cannot be shifted out of it. Status stays
-     editable — the point is that the work happens first, not that nobody may record it. */
-  const pinned = Number(task.fixedWeek) > 0;
-  return `
-    <div class="week-task${done ? " is-done" : ""}${pending ? " is-pending" : ""}${pinned ? " is-pinned" : ""}" data-week-task="${task.id}">
-      <label class="week-task-check">
-        <input type="checkbox"${done ? " checked" : ""} data-week-toggle="${task.id}" />
-      </label>
-      <div class="week-task-body">
-        <div class="week-task-title">${pinned ? `<span class="week-task-lock" title="Fixed to week ${task.fixedWeek}">🔒</span> ` : ""}${escapeHtml(task.title || "Untitled task")}</div>
-        <div class="week-task-desc">${escapeHtml(weekTaskDescription(task))}</div>
-        ${source ? `<div class="week-task-source">${escapeHtml(source)}</div>` : ""}
-      </div>
-      <select class="week-task-status" data-week-status="${task.id}">
-        ${SUBTASK_STATUSES.map((status) => `<option value="${status}"${status === task.status ? " selected" : ""}>${capitalize(status)}</option>`).join("")}
-      </select>
-      ${weekMoveControl(task, pinned, pending)}
-    </div>`;
-}
-
-/* Moving a task anywhere in the project, not just one week on. A native select rather than a
-   floating menu: the modal body scrolls, so an absolutely positioned dropdown would be clipped
-   by it, and this needs no outside-click handling or keyboard work of its own. The next week is
-   listed first, so the common case is still one open and one click. */
-function weekMoveControl(task, pinned, pending) {
-  const weeks = draftWeeks();
-  const here = draftIndex();
-  const reason = pinned
-    ? `Fixed to week ${task.fixedWeek} — foundational work the rest of the plan depends on.`
-    : (pending ? "Pending work stays in this week — change the status to move it on." : "");
-
-  if (reason) {
-    return `<select class="week-task-move" disabled title="${escapeHtml(reason)}"><option>Move…</option></select>`;
-  }
-
-  /* Nearest weeks first in each direction, so "next week" is the top entry. */
-  const order = weeks
-    .map((week, index) => ({ week, index }))
-    .filter((entry) => entry.index !== here)
-    .sort((left, right) => (left.index > here ? 0 : 1) - (right.index > here ? 0 : 1)
-      || Math.abs(left.index - here) - Math.abs(right.index - here));
-
-  if (!order.length) {
-    return `<select class="week-task-move" disabled title="This project has only one week."><option>Move…</option></select>`;
-  }
-
-  return `
-    <select class="week-task-move" data-week-move="${task.id}" title="Move this task to another week">
-      <option value="">Move…</option>
-      ${order.map(({ week, index }) => `
-        <option value="${week.id}">Week ${index + 1} · ${escapeHtml(week.weekRange)}</option>`).join("")}
-    </select>`;
-}
-
-function moveDraftTaskToWeek(taskId, weekId) {
-  const target = weekDraft.updates.find((item) => item.id === weekId);
-  const found = findDraftTask(taskId);
-  if (!target || !found || found.week.id === target.id) return;
-  if (Number(found.task.fixedWeek)) return;
-
-  found.week.tasks = found.week.tasks.filter((item) => item.id !== found.task.id);
-  found.task.startDate = target.weekStart;
-  found.task.dueDate = taskDueDate(target.weekStart, found.task.days || templateDefaultDays());
-  target.tasks.push(found.task);
-  renderWeekModal();
-}
-
-function findDraftTask(taskId) {
-  for (const week of weekDraft.updates) {
-    const task = (week.tasks || []).find((item) => item.id === taskId);
-    if (task) return { week, task };
-  }
-  return null;
-}
-
-function handleWeekModalClick(event) {
-  if (!weekDraft) return;
-
-  const toggle = event.target.closest("[data-week-toggle]");
-  if (toggle) {
-    const found = findDraftTask(toggle.dataset.weekToggle);
-    if (!found) return;
-    found.task.status = toggle.checked ? "completed" : (found.task.status === "completed" ? "not started" : found.task.status);
-    if (toggle.checked) {
-      if (!found.task.date) {
-        found.task.date = toInputDate(new Date());
-        weekDraft.autoDated.add(found.task.id);
-      }
-      weekDraft.tickedHere.add(found.task.id);
-    } else if (weekDraft.autoDated.delete(found.task.id)) {
-      found.task.date = "";
-    }
-    renderWeekModal();
-    return;
-  }
-
-}
-
-/* Marking work "pending" is a decision that it is being carried now, so it moves into the week
-   being triaged rather than staying filed under a week it did not get done in. That is a
-   deliberate action by the person editing, which is why it is allowed to move the task where
-   the automatic carryover is not. */
-function handleWeekModalStatus(select) {
-  const found = findDraftTask(select.dataset.weekStatus);
-  if (!found) return;
-
-  found.task.status = select.value;
-  if (select.value === "completed" && !found.task.date) {
-    found.task.date = toInputDate(new Date());
-    weekDraft.autoDated.add(found.task.id);
-  }
-  if (select.value === "completed") weekDraft.tickedHere.add(found.task.id);
-  if (select.value !== "completed" && weekDraft.autoDated.delete(found.task.id)) found.task.date = "";
-
-  const current = draftWeeks()[draftIndex()];
-  if (select.value === "pending" && current && found.week.id !== current.id && !Number(found.task.fixedWeek)) {
-    /* Record where the work was originally planned before moving it, so the row keeps saying
-       it was carried rather than looking like it was always this week's. */
-    if (!found.task.carriedFrom) found.task.carriedFrom = found.week.weekStart;
-    found.week.tasks = found.week.tasks.filter((item) => item.id !== found.task.id);
-    found.task.startDate = current.weekStart;
-    found.task.dueDate = taskDueDate(current.weekStart, found.task.days || templateDefaultDays());
-    current.tasks.push(found.task);
-  }
-  renderWeekModal();
-}
-
-function addWeekModalTask() {
-  if (!weekDraft) return;
-  const title = nodes.weekModalNewTask.value.trim();
-  if (!title) return;
-
-  const current = draftWeeks()[draftIndex()];
-  current.tasks = current.tasks || [];
-  current.tasks.push({
-    id: newId(), title, phase: "", domain: "", owner: "", status: "not started",
-    date: "", blocker: "", priority: "medium", comments: "",
-    days: templateDefaultDays(), startDate: current.weekStart,
-    dueDate: taskDueDate(current.weekStart, templateDefaultDays()), subtasks: [],
-  });
-  nodes.weekModalNewTask.value = "";
-  renderWeekModal();
 }
 
 function clearResetFlagFromUrl() {
@@ -1074,6 +760,12 @@ function showAppBanner(message, tone = "error") {
   if (tone !== "error") {
     bannerTimer = setTimeout(() => dismissAppBanner(), BANNER_DISMISS_MS);
   }
+}
+
+/* Say what moved. Creating task rows on someone's behalf should not be silent. */
+function announceCarriedForward(count) {
+  if (!count) return;
+  showAppInfo(`${count} ${count === 1 ? "task" : "tasks"} still pending or in progress carried forward into the following week.`);
 }
 
 function dismissAppBanner() {
@@ -1457,6 +1149,13 @@ const ACTIVE_WINDOW_DAYS = 7;
 /* Projects carry no "modified" stamp of their own, so activity is the most recent thing that
    happened to them: an explicit save, the project's own creation, or the newest weekly report
    added to it. Older projects predate the stamp and fall back to the other two. */
+/* Editing a week is activity on its project: the folder list's Active/Idle marker reads
+   `updatedAt`, and a week edited today should not leave a project looking untouched. */
+function stampProjectActivity(projectId) {
+  const project = state.projects.find((item) => item.id === projectId);
+  if (project) project.updatedAt = new Date().toISOString();
+}
+
 function projectLastActivity(project) {
   const stamps = [project.updatedAt, project.createdAt];
   state.updates.forEach((update) => {
@@ -4760,7 +4459,8 @@ function refileTasksIntoWeeks(projectId) {
 
   moves.forEach(({ task, from, to }) => {
     from.tasks = from.tasks.filter((item) => item.id !== task.id);
-    to.tasks.push(task);
+    /* An arrival again: it was re-dated into this week rather than planned in it. */
+    to.tasks.unshift(task);
   });
 
   return moves.length;
@@ -4958,6 +4658,9 @@ function openCreateReport(projectId, focusUpdateId, { editing = Boolean(focusUpd
   nodes.createReportTitle.textContent = "Project Reports";
   populateProjectPicker(nodes.reportsIndexProject, projectId);
 
+  /* Before the list is drawn, not during: renderAll() calls back into the index, and writing
+     state from inside a render would re-enter it. */
+  announceCarriedForward(carryForwardOverdueTasks());
   renderReportsIndex(projectId || "");
   renderAll();
   nodes.createReportScreen.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -5021,12 +4724,11 @@ function renderReportsIndex(projectId) {
         </div>
         <div class="report-row-actions">
           <span class="status-badge ${statusClass(update.statusTag)}">${escapeHtml(update.statusTag)}</span>
-          <button type="button" class="ghost-button small-button" data-requires="report.edit" data-open-week="${update.id}">Open week</button>
           <button type="button" class="ghost-button small-button" data-requires="report.edit" data-edit-report="${update.id}">Edit</button>
           <button type="button" class="row-remove" data-requires="report.delete" data-delete-report="${update.id}">Delete</button>
         </div>
         <div class="report-row-tasks" id="report-tasks-${update.id}"${open ? "" : " hidden"}>
-          ${renderReportRowTasks(update)}
+          ${renderReportRowTasks(update, updates, index)}
         </div>
       </article>
     `;
@@ -5062,8 +4764,12 @@ function applyWeekStructureChange(button) {
   if (!update) return;
   update.tasks = update.tasks || [];
 
+  /* A carried row is displayed here but owned by an earlier week, so removing a task or adding
+     a sub-task has to act on the week that holds it — not on the week being edited. */
+  const owner = rowOwnerWeek(button) || update;
+  owner.tasks = owner.tasks || [];
   const taskId = button.dataset.addSubtask || button.dataset.removeTask || button.dataset.task;
-  const task = update.tasks.find((item) => item.id === taskId);
+  const task = owner.tasks.find((item) => item.id === taskId);
 
   if (button.dataset.addTask) {
     update.tasks.push({
@@ -5073,7 +4779,7 @@ function applyWeekStructureChange(button) {
       dueDate: taskDueDate(update.weekStart, templateDefaultDays()), subtasks: [],
     });
   } else if (button.dataset.removeTask && task) {
-    update.tasks = update.tasks.filter((item) => item.id !== task.id);
+    owner.tasks = owner.tasks.filter((item) => item.id !== task.id);
   } else if (button.dataset.addSubtask && task) {
     task.subtasks = task.subtasks || [];
     task.subtasks.push({ id: newId(), title: "", owner: task.owner || "", status: "not started", date: "", blocker: "", priority: "medium", comments: "" });
@@ -5081,45 +4787,31 @@ function applyWeekStructureChange(button) {
     task.subtasks = (task.subtasks || []).filter((item) => item.id !== button.dataset.removeSubtask);
   }
 
+  stampProjectActivity(update.projectId);
+
   saveState();
   renderReportsIndex(nodes.reportsIndexProject.value);
   setReportRowsOpenState();
 }
 
-function renderReportRowTasks(update) {
+/* The whole week is edited here: its status and start date, the work still open from earlier
+   weeks, and its own tasks. Everything writes as it is typed — there is no draft, which is what
+   lets several weeks be open at once without two of them disagreeing about the same task. */
+function renderReportRowTasks(update, weeks, index) {
   const tasks = update.tasks || [];
+  const carried = carriedTasksFor(weeks || [update], index || 0);
+  const moveTargets = (weeks || []).map((week, position) => ({ week, position }))
+    .filter((entry) => entry.week.id !== update.id);
 
-  const rows = tasks.map((task) => {
-    const subtasks = task.subtasks || [];
-    return `
-      <tr class="week-task-row" data-task="${task.id}">
-        <td><input type="text" data-task-field="phase" value="${escapeHtml(task.phase || "")}" placeholder="Phase" /></td>
-        <td><input type="text" data-task-field="domain" value="${escapeHtml(task.domain || "")}" placeholder="Domain" /></td>
-        <td><input type="text" data-task-field="title" value="${escapeHtml(task.title || "")}" placeholder="Task" /></td>
-        <td><input type="text" list="ownerOptions" data-task-field="owner" value="${escapeHtml(task.owner || "")}" placeholder="Owner" /></td>
-        <td><input type="date" data-task-field="date" value="${escapeHtml(task.date || "")}" title="The date the work actually finished — this is what the generated report prints" /></td>
-        <td>${statusSelect("task-field", task.status)}</td>
-        <td><input type="text" data-task-field="comments" value="${escapeHtml(task.comments || "")}" placeholder="Comments" /></td>
-        <td class="week-task-actions">
-          <button type="button" class="link-button" data-add-subtask="${task.id}" title="Add a sub-task">+ Sub</button>
-          <button type="button" class="row-remove" data-remove-task="${task.id}" title="Remove this task">&times;</button>
-        </td>
-      </tr>
-      ${subtasks.map((sub) => `
-        <tr class="week-subtask-row" data-task="${task.id}" data-subtask="${sub.id}">
-          <td></td>
-          <td></td>
-          <td class="week-subtask-title"><span aria-hidden="true">&#8627;</span><input type="text" data-subtask-field="title" value="${escapeHtml(sub.title || "")}" placeholder="Sub-task" /></td>
-          <td><input type="text" list="ownerOptions" data-subtask-field="owner" value="${escapeHtml(sub.owner || "")}" placeholder="Owner" /></td>
-          <td><input type="date" data-subtask-field="date" value="${escapeHtml(sub.date || "")}" title="The date this sub-task finished" /></td>
-          <td>${statusSelect("subtask-field", sub.status)}</td>
-          <td><input type="text" data-subtask-field="comments" value="${escapeHtml(sub.comments || "")}" placeholder="Comments" /></td>
-          <td class="week-task-actions">
-            <button type="button" class="row-remove" data-remove-subtask="${sub.id}" data-task="${task.id}" title="Remove this sub-task">&times;</button>
-          </td>
-        </tr>`).join("")}
-    `;
-  }).join("");
+  const carriedRows = carried
+    .map(({ task, from, weekId }) => weekTaskRows(task, moveTargets, index, weekId, `⬅ Carried from Week ${from}`))
+    .join("");
+  /* A task that arrived here from an earlier week keeps saying so, rather than looking as though
+     it had always been this week's work — whether it was copied forward by its status or moved
+     here by hand. */
+  const ownRows = tasks.map((task) => weekTaskRows(task, moveTargets, index, update.id,
+    taskSourceLabel(task, weeks))).join("");
+  const anyRows = carried.length || tasks.length;
 
   return `
     <div class="week-editor" data-update="${update.id}">
@@ -5132,19 +4824,109 @@ function renderReportRowTasks(update) {
         <label>Week starting
           <input type="date" data-week-field="weekStart" value="${escapeHtml(update.weekStart || "")}" />
         </label>
+        ${carried.length ? `<span class="carried-indicator" title="Work from earlier weeks that is past its week and still open">${carried.length} carried</span>` : ""}
         <button type="button" class="btn-save" data-week-saved="${update.id}" disabled
           title="This editor saves as you type — there is nothing waiting to be saved.">Saved</button>
         <button type="button" class="secondary-button small-button" data-add-task="${update.id}">+ Add task</button>
       </div>
-      ${tasks.length ? `
+      ${anyRows ? `
         <div class="week-editor-scroll">
           <table class="report-row-task-table">
             <thead><tr><th>Phase</th><th>Domain</th><th>Task</th><th>Owner</th><th>Completed On</th><th>Status</th><th>Comments</th><th></th></tr></thead>
-            <tbody>${rows}</tbody>
+            <tbody>${carriedRows}${ownRows}</tbody>
           </table>
         </div>` : `<p class="muted">No tasks due this week. Use “+ Add task” to add one.</p>`}
+      <div class="week-editor-foot">
+        <button type="button" class="primary-button small-button" data-week-save="${update.id}"
+          title="This week is already saved — every field writes as you type. Use this to confirm.">💾 Save Changes</button>
+      </div>
     </div>
   `;
+}
+
+function taskSourceLabel(task, weeks) {
+  if (task.copiedFromTaskId && task.copiedFrom) {
+    return `⬅ Copied from ${weekLabelForStart(weeks, task.copiedFrom)}`;
+  }
+  if (task.carriedFrom) return `⬅ Carried from ${weekLabelForStart(weeks, task.carriedFrom)}`;
+  return "";
+}
+
+function weekLabelForStart(weeks, weekStart) {
+  const position = (weeks || []).findIndex((week) => week.weekStart === weekStart);
+  return position >= 0 ? `Week ${position + 1}` : formatWeekRange(weekStart);
+}
+
+/* A task and its sub-tasks. `ownerWeekId` is the week the task belongs to, which for a carried
+   row is an earlier week than the one being edited — edits follow the task, not the row. */
+function weekTaskRows(task, moveTargets, here, ownerWeekId, source) {
+  const pinned = Number(task.fixedWeek) > 0;
+  const pending = task.status === "pending";
+  const classes = ["week-task-row"];
+  /* A copied row is a continuation of earlier work, like a carried one, and reads the same way:
+     two badge colours for "this is late" and "this was forwarded" would be a distinction the
+     reader cannot act on. */
+  if (source) classes.push("is-carried");
+  if (pinned) classes.push("is-pinned");
+  if (pending) classes.push("is-pending");
+
+  return `
+    <tr class="${classes.join(" ")}" data-task="${task.id}" data-owner-week="${ownerWeekId}">
+      <td><input type="text" data-task-field="phase" value="${escapeHtml(task.phase || "")}" placeholder="Phase" /></td>
+      <td><input type="text" data-task-field="domain" value="${escapeHtml(task.domain || "")}" placeholder="Domain" /></td>
+      <td>
+        <input type="text" data-task-field="title" value="${escapeHtml(task.title || "")}" placeholder="Task" />
+        ${pinned ? `<span class="week-task-lock" title="Fixed to week ${task.fixedWeek} — foundational work the rest of the plan depends on.">🔒 week ${task.fixedWeek}</span>` : ""}
+        ${source ? `<span class="week-task-source">${escapeHtml(source)}</span>` : ""}
+      </td>
+      <td><input type="text" list="ownerOptions" data-task-field="owner" value="${escapeHtml(task.owner || "")}" placeholder="Owner" /></td>
+      <td><input type="date" data-task-field="date" value="${escapeHtml(task.date || "")}" title="The date the work actually finished — this is what the generated report prints" /></td>
+      <td>${statusSelect("task-field", task.status)}</td>
+      <td><input type="text" data-task-field="comments" value="${escapeHtml(task.comments || "")}" placeholder="Comments" /></td>
+      <td class="week-task-actions">
+        ${weekMoveSelect(task, moveTargets, here, pinned)}
+        <button type="button" class="link-button" data-add-subtask="${task.id}" title="Add a sub-task">+ Sub</button>
+        <button type="button" class="row-remove" data-remove-task="${task.id}" title="Remove this task">&times;</button>
+      </td>
+    </tr>
+    ${(task.subtasks || []).map((sub) => `
+      <tr class="week-subtask-row" data-task="${task.id}" data-owner-week="${ownerWeekId}" data-subtask="${sub.id}">
+        <td></td>
+        <td></td>
+        <td class="week-subtask-title"><span aria-hidden="true">&#8627;</span><input type="text" data-subtask-field="title" value="${escapeHtml(sub.title || "")}" placeholder="Sub-task" /></td>
+        <td><input type="text" list="ownerOptions" data-subtask-field="owner" value="${escapeHtml(sub.owner || "")}" placeholder="Owner" /></td>
+        <td><input type="date" data-subtask-field="date" value="${escapeHtml(sub.date || "")}" title="The date this sub-task finished" /></td>
+        <td>${statusSelect("subtask-field", sub.status)}</td>
+        <td><input type="text" data-subtask-field="comments" value="${escapeHtml(sub.comments || "")}" placeholder="Comments" /></td>
+        <td class="week-task-actions">
+          <button type="button" class="row-remove" data-remove-subtask="${sub.id}" data-task="${task.id}" title="Remove this sub-task">&times;</button>
+        </td>
+      </tr>`).join("")}
+  `;
+}
+
+/* Move a task to any other week, nearest ahead first — a week further on is the usual
+   destination, so it should not be reached past every earlier week. Pinned work cannot move,
+   and pending work has just been deliberately placed where it is. */
+function weekMoveSelect(task, moveTargets, here, pinned) {
+  /* Only pinned work is barred. Pending used to be too, because Pending *moved* the task into
+     the week being triaged and moving it again made no sense; now it copies the work forward
+     instead, so this instance is an ordinary task that may be moved like any other. */
+  const reason = pinned
+    ? `Fixed to week ${task.fixedWeek} — foundational work the rest of the plan depends on.`
+    : "";
+  if (reason || !moveTargets.length) {
+    return `<select class="week-task-move" disabled title="${escapeHtml(reason || "There is no other week to move this to.")}"><option>Move…</option></select>`;
+  }
+
+  const distance = ({ position }) => (position > here ? position - here : 1000 + (here - position));
+  const ordered = [...moveTargets].sort((left, right) => distance(left) - distance(right));
+  return `
+    <select class="week-task-move" data-week-move="${task.id}" title="Move this task to another week">
+      <option value="">Move…</option>
+      ${ordered.map(({ week, position }) => `
+        <option value="${week.id}">Week ${position + 1} · ${escapeHtml(week.weekRange)}</option>`).join("")}
+    </select>`;
 }
 
 /* Editing in place: find what the field belongs to, write it, save. The row summary is
@@ -5168,8 +4950,17 @@ function handleReportsIndexInput(event) {
     return;
   }
 
+  /* Moving a task is a change of which week owns it, so the list is rebuilt afterwards rather
+     than patched — the row has to leave this table and appear under another week. */
+  if (field.dataset.weekMove) {
+    moveTaskToWeek(field.dataset.weekMove, field.value, update);
+    return;
+  }
+
   const row = field.closest("[data-task]");
-  const task = (update.tasks || []).find((item) => item.id === row.dataset.task);
+  if (!row) return;
+  const owner = rowOwnerWeek(field) || update;
+  const task = (owner.tasks || []).find((item) => item.id === row.dataset.task);
   if (!task) return;
 
   if (field.dataset.taskField) {
@@ -5182,6 +4973,24 @@ function handleReportsIndexInput(event) {
       const cell = row.querySelector('[data-task-field="date"]');
       if (cell) cell.value = task.date;
     }
+    if (field.dataset.taskField === "status") {
+      /* A carried task just ticked off stays in the table, struck through, instead of vanishing
+         from under the pointer. It leaves the carried list on the next rebuild. */
+      row.classList.toggle("is-resolved", field.value === "completed" && row.classList.contains("is-carried"));
+      /* Restyle now rather than waiting for a rebuild that a plain status change does not
+         trigger, so the row reads as pending the moment it is set. */
+      row.classList.toggle("is-pending", field.value === "pending");
+      /* Marking work pending or in progress says it runs past this week, so it is copied into
+         the next one. This replaced Pending's earlier behaviour of *moving* a carried task into
+         the week being triaged: one status cannot both move a task and copy it. */
+      if (FORWARDING_STATUSES.includes(field.value) && forwardTaskToNextWeek(task, update)) {
+        saveState();
+        stampProjectActivity(update.projectId);
+        renderReportsIndex(nodes.reportsIndexProject.value);
+        setReportRowsOpenState();
+        return;
+      }
+    }
   } else if (field.dataset.subtaskField) {
     const sub = (task.subtasks || []).find((item) => item.id === row.dataset.subtask);
     if (!sub) return;
@@ -5189,8 +4998,136 @@ function handleReportsIndexInput(event) {
   }
 
   saveState();
+  stampProjectActivity(update.projectId);
   refreshReportRowSummary(update);
+  /* Completing carried work changes the carried count on every later week, not just this one. */
+  if (owner.id !== update.id) refreshReportRowSummary(owner);
   flashInlineSaved(update);
+}
+
+/* Which week owns the row a control sits in. A carried row is rendered under a later week but
+   the task still belongs where it was planned, so every edit has to be written there. */
+function rowOwnerWeek(element) {
+  const row = element.closest("[data-owner-week]");
+  if (!row) return null;
+  return state.updates.find((item) => item.id === row.dataset.ownerWeek) || null;
+}
+
+/* Copy a task into the week after the one being edited, so work that runs past this week is
+   already on next week's list. The copy is its own record with its own id, dates and status, so
+   the two weeks can disagree: in progress in one, completed in the next.
+   
+   It copies rather than moves, so the week it was planned in keeps saying what it held. Nothing
+   is ever removed by this: completing a task stops further copies but leaves the ones already
+   made, because someone may have typed into them. Returns true when a copy was made. */
+function forwardTaskToNextWeek(task, editingWeek, { auto = false } = {}) {
+  const weeks = projectWeeksSorted(editingWeek.projectId);
+  const here = weeks.findIndex((week) => week.id === editingWeek.id);
+  const target = here >= 0 ? weeks[here + 1] : null;
+  /* The last week has nowhere to forward to. Creating a week past the end of the cycle would
+     silently extend the project and move a go-live date that is calculated, not entered. */
+  if (!target) return false;
+
+  target.tasks = target.tasks || [];
+  /* One copy per source task per week, however many times the status is set. */
+  if (target.tasks.some((item) => item.copiedFromTaskId === task.id)) return false;
+  /* The automatic sweep must not undo a decision: once this hop has been made, deleting the
+     copy keeps it deleted rather than having it reappear on the next load. Marking the status
+     by hand again does re-create it, which is the way back. */
+  if (auto && task.forwardedToWeek === target.id) return false;
+  task.forwardedToWeek = target.id;
+
+  /* Arrivals go to the top of the week, not the bottom: work carried over from the week before
+     is what a person opening this week needs to see first. The report reads the same array, so
+     the editor and the document agree on the order. */
+  target.tasks.unshift({
+    ...task,
+    id: newId(),
+    /* The copy is a continuation, not a second foundation: SDK Set Up and User Tracking are
+       pinned so the *plan* places them in weeks 1 and 2, which says nothing about whether the
+       work finishes there. Carrying the pin onto the copy would have it claim to be fixed to
+       week 2 while sitting in week 3, wear a lock in the wrong week, and refuse to be moved. */
+    fixedWeek: null,
+    /* Completed On is per week: each copy records when the work finished in *its* week, so an
+       inherited date would claim the work was done in a week it was not. */
+    date: "",
+    startDate: target.weekStart,
+    dueDate: taskDueDate(target.weekStart, task.days || templateDefaultDays()),
+    copiedFromTaskId: task.id,
+    copiedFrom: editingWeek.weekStart,
+    subtasks: (task.subtasks || []).map((sub) => ({ ...sub, id: newId(), date: "" })),
+  });
+  return true;
+}
+
+/* Work marked pending or in progress does not stop being due when its week runs out. Marking a
+   task copies it forward there and then; this catches everything *already* marked when a week
+   ends, so nothing has to be touched a second time to keep moving.
+   
+   Only weeks that have **ended** forward, which is what keeps this from fanning out: a task
+   advances one week per real week, rather than a single click filling weeks 3 to 12 at once.
+   Weeks are walked in order, so work stranded several weeks back steps forward through each of
+   them and every week it was open in keeps a record of it. */
+function carryForwardOverdueTasks() {
+  const today = toInputDate(new Date());
+  let carried = 0;
+
+  state.projects.forEach((project) => {
+    const weeks = projectWeeksSorted(project.id);
+    weeks.slice(0, -1).forEach((week) => {
+      if (!weekHasEnded(week, today)) return;
+      /* A snapshot per week, because forwarding writes into the *next* week's array — which is
+         then visited in this same pass, so a chain advances as far as the current week. */
+      [...(week.tasks || [])].forEach((task) => {
+        if (!FORWARDING_STATUSES.includes(task.status)) return;
+        if (forwardTaskToNextWeek(task, week, { auto: true })) carried += 1;
+      });
+    });
+  });
+
+  if (carried) saveState();
+  return carried;
+}
+
+/* Has this task already been continued into a later week? Such a task is not listed as carried:
+   its continuation stands for it, and counting both would show one job as two pieces of late
+   work, then three. */
+function taskWasForwarded(task, weeks, fromIndex) {
+  return weeks.slice(fromIndex + 1)
+    .some((week) => (week.tasks || []).some((item) => item.copiedFromTaskId === task.id));
+}
+
+function projectWeeksSorted(projectId) {
+  return state.updates
+    .filter((item) => item.projectId === projectId)
+    .sort((left, right) => left.weekStart.localeCompare(right.weekStart));
+}
+
+/* The explicit Move control: the task is moved, not copied, and re-dated into its new week. */
+function moveTaskToWeek(taskId, weekId, editing) {
+  const target = state.updates.find((item) => item.id === weekId);
+  if (!target) {
+    renderReportsIndex(nodes.reportsIndexProject.value);
+    setReportRowsOpenState();
+    return;
+  }
+
+  const owner = state.updates.find((week) => (week.tasks || []).some((task) => task.id === taskId));
+  const task = owner && owner.tasks.find((item) => item.id === taskId);
+  if (!task || owner.id === target.id || Number(task.fixedWeek)) return;
+
+  if (!task.carriedFrom && owner.id !== editing.id) task.carriedFrom = owner.weekStart;
+  owner.tasks = owner.tasks.filter((item) => item.id !== task.id);
+  task.startDate = target.weekStart;
+  task.dueDate = taskDueDate(target.weekStart, task.days || templateDefaultDays());
+  target.tasks = target.tasks || [];
+  /* Top of the list, for the same reason as a forwarded copy: it arrived from elsewhere. */
+  target.tasks.unshift(task);
+
+  saveState();
+  stampProjectActivity(target.projectId);
+  renderReportsIndex(nodes.reportsIndexProject.value);
+  setReportRowsOpenState();
 }
 
 /* The inline editor writes on every change, so its Save can never sit in a "you have unsaved
@@ -5214,6 +5151,21 @@ function flashInlineSaved(update) {
   inlineSavedTimers.push(setTimeout(() => {
     button.textContent = "Saved";
     button.classList.remove("saved");
+  }, 1800));
+}
+
+let weekSavedTimers = [];
+
+/* Say so on the button itself, so a click is visibly acknowledged rather than appearing to do
+   nothing — which is exactly how it would read, since there was nothing outstanding. */
+function confirmWeekSaved(button) {
+  weekSavedTimers.forEach(clearTimeout);
+  weekSavedTimers = [];
+  button.textContent = "✓ Saved";
+  button.classList.add("is-confirmed");
+  weekSavedTimers.push(setTimeout(() => {
+    button.textContent = "💾 Save Changes";
+    button.classList.remove("is-confirmed");
   }, 1800));
 }
 
@@ -5241,13 +5193,28 @@ function refreshReportRowSummary(update) {
 function handleReportsIndexClick(event) {
   const toggle = event.target.closest("[data-toggle-report]");
   if (toggle) {
-    /* An accordion: opening a week closes the others, so the list stays compact however many
-       weeks a project has. */
+    /* Any number of weeks may be open at once. Nothing is held in a draft, so two open weeks
+       cannot disagree about the same task. */
     const id = toggle.dataset.toggleReport;
-    const open = !uiState.openReportRows.has(id);
-    uiState.openReportRows.clear();
-    if (open) uiState.openReportRows.add(id);
+    if (uiState.openReportRows.has(id)) uiState.openReportRows.delete(id);
+    else uiState.openReportRows.add(id);
     setReportRowsOpenState();
+    return;
+  }
+
+  /* Save Changes on a surface that has already saved everything. It was asked for by name, so
+     it is here and it works — it writes state and confirms — but it can never have anything
+     pending to commit: the editor writes on every keystroke, which is what allows more than one
+     week to be open without two drafts fighting over the same carried task. */
+  const save = event.target.closest("[data-week-save]");
+  if (save) {
+    if (!requirePermission("report.edit", "edit a weekly report")) return;
+    const update = state.updates.find((item) => item.id === save.dataset.weekSave);
+    if (!update) return;
+    saveState();
+    stampProjectActivity(update.projectId);
+    flashInlineSaved(update);
+    confirmWeekSaved(save);
     return;
   }
 
@@ -5255,12 +5222,6 @@ function handleReportsIndexClick(event) {
   if (structural) {
     if (!requirePermission("report.edit", "edit a weekly report")) return;
     applyWeekStructureChange(structural);
-    return;
-  }
-
-  const open = event.target.closest("[data-open-week]");
-  if (open) {
-    openWeekModal(open.dataset.openWeek);
     return;
   }
 
@@ -5277,20 +5238,23 @@ function handleReportsIndexClick(event) {
   }
 }
 
-/* Editing happens inside the week's own card, so "Edit" just opens that week. */
+/* "Edit" and the chevron do the same thing: fold this week's editor open or shut. */
 function openEditUpdate(updateId) {
   const update = state.updates.find((item) => item.id === updateId);
   if (!update) return;
   const project = state.projects.find((item) => item.id === update.projectId);
   if (!project) return;
 
-  uiState.openReportRows.clear();
-  uiState.openReportRows.add(updateId);
+  const opening = !uiState.openReportRows.has(updateId);
+  if (opening) uiState.openReportRows.add(updateId);
+  else uiState.openReportRows.delete(updateId);
+
   openCreateReport(project.id, null, { editing: false });
   setReportRowsOpenState();
+  if (!opening) return;
 
-  const article = nodes.reportsIndexList.querySelector(`.week-editor[data-update="${updateId}"]`);
-  if (article) article.scrollIntoView({ behavior: "smooth", block: "center" });
+  const editor = nodes.reportsIndexList.querySelector(`.week-editor[data-update="${updateId}"]`);
+  if (editor) editor.scrollIntoView({ behavior: "smooth", block: "center" });
 }
 
 /* Any owner typed on a task that is not already a POC for this project is added to that

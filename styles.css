@@ -517,6 +517,10 @@ p {
   gap: 24px;
   padding: 20px 24px 6px;
   align-content: start;
+  /* A grid item defaults to min-width: auto, so it grows to its widest child rather than
+     letting that child scroll. The expanded week's task table is wider than a phone, and
+     without this the whole page scrolls sideways instead of just the table. */
+  min-width: 0;
 }
 
 .card {
@@ -2279,6 +2283,9 @@ button {
 }
 
 .report-row {
+  /* Same reason as `.content`: a grid item that will not shrink hands the overflow to the
+     page instead of to the editor's own scroll box. */
+  min-width: 0;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -2725,8 +2732,10 @@ button {
   min-width: 0;
 }
 
+/* Wide enough for eight columns to read, narrow enough that a full-screen desktop window does
+   not scroll; below that the editor's own box scrolls, never the page. */
 .week-editor-scroll .report-row-task-table {
-  min-width: 940px;
+  min-width: 1010px;
 }
 
 .report-row-task-table input,
@@ -2766,11 +2775,15 @@ button {
   color: var(--muted);
 }
 
+/* A table cell, not a flex box: `display: flex` here took the cell out of the table's column
+   flow, so the row spilled into an anonymous cell to its right. */
 .week-task-actions {
-  display: flex;
-  gap: 6px;
-  align-items: center;
   white-space: nowrap;
+  text-align: right;
+}
+
+.week-task-actions > * {
+  vertical-align: middle;
 }
 
 .week-task-actions .link-button {
@@ -2806,6 +2819,22 @@ button {
 .report-row-task-table tr:last-child td {
   border-bottom: 0;
 }
+
+/* Fixed columns: the task title is what people read, so it gets the room, and the narrow
+   fields stop stealing it as soon as a week holds a long task name. */
+/* The widths must sum to exactly 100%: mixing a pixel column in with percentages made them
+   total more than the table, so the last column overflowed even on a wide screen. 18% of the
+   1010px minimum is ~182px, which is what the actions cell needs — and it needs a width at all
+   because `table-layout: fixed` never grows a column to fit its content. */
+.report-row-task-table { table-layout: fixed; }
+.report-row-task-table th:nth-child(1) { width: 11%; }
+.report-row-task-table th:nth-child(2) { width: 10%; }
+.report-row-task-table th:nth-child(3) { width: 20%; }
+.report-row-task-table th:nth-child(4) { width: 10%; }
+.report-row-task-table th:nth-child(5) { width: 10%; }
+.report-row-task-table th:nth-child(6) { width: 10%; }
+.report-row-task-table th:nth-child(7) { width: 11%; }
+.report-row-task-table th:nth-child(8) { width: 18%; }
 
 .report-row-actions {
   display: flex;
@@ -3414,183 +3443,84 @@ button {
 }
 
 
-/* Week modal: a focused view of one week — what is still outstanding from earlier weeks,
-   what is planned for this one, and the two moves that matter (tick it off, or push it on). */
-.week-modal {
-  max-width: 800px;
-  width: 100%;
-  background: var(--surface-2);
-  border-radius: 8px;
-  border-top: 3px solid var(--card-accent);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
-}
-
-.week-modal-head {
+/* The expanded week's footer. Its Save Changes button was asked for by name; the editor saves
+   on every keystroke, so the button confirms rather than commits. */
+.week-editor-foot {
   display: flex;
-  align-items: center;
-  gap: 14px;
-  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border-soft);
 }
 
-.week-modal-head h2 {
-  flex: 1;
-  min-width: 0;
-  margin: 0;
-  font-size: 18px;
-  font-weight: 700;
-  color: var(--card-value);
+.week-editor-foot .is-confirmed {
+  background: var(--card-done);
+  border-color: var(--card-done);
+  color: #ffffff;
 }
 
-/* Week-level fields sit in their own row under the title, with the Save that keeps the modal
-   open beside them — the same arrangement as the inline editor's header. */
-.week-modal-fields {
-  display: flex;
-  align-items: flex-end;
-  gap: 14px;
-  flex-wrap: wrap;
-  padding: 0 24px 14px;
-  border-bottom: 1px solid var(--card-border);
+/* Inline week editing. A week opened in the reports accordion is the editor: its own status
+   and start date, the work still open from earlier weeks, and its tasks — all in one table, so
+   what is edited and what the report prints read the same way. There is no modal and no draft,
+   which is what lets several weeks be open at once. */
+.week-task-row.is-carried > td {
+  background: var(--card-warning-soft);
+  box-shadow: inset 3px 0 0 var(--card-warning);
 }
 
-.week-modal-field {
-  display: grid;
-  gap: 4px;
-  font-size: 12px;
-  font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
+.week-task-row.is-carried > td ~ td { box-shadow: none; }
+
+/* Pending work is deliberately being carried in the week it now sits in, so it reads
+   differently from work that is merely unfinished. */
+.week-task-row.is-pending > td:first-child {
+  box-shadow: inset 3px 0 0 #eab308;
+}
+
+.week-task-row.is-pinned > td:first-child {
+  box-shadow: inset 3px 0 0 var(--card-label);
+}
+
+/* Carried work ticked off here stays put, struck through, rather than vanishing from under the
+   pointer. It leaves the carried list the next time the list is rebuilt. */
+.week-task-row.is-resolved > td { opacity: 0.6; }
+.week-task-row.is-resolved [data-task-field="title"] { text-decoration: line-through; }
+
+.week-task-source,
+.week-task-lock {
+  display: block;
+  margin-top: 3px;
+  font-size: 11px;
   color: var(--card-label);
 }
-
-.week-modal-field select,
-.week-modal-field input {
-  padding: 7px 10px;
-  border-radius: 6px;
-  border: 1px solid var(--card-border);
-  background: var(--surface-4);
-  color: var(--text);
-  font-family: inherit;
-  font-size: 13px;
-  text-transform: none;
-  letter-spacing: 0;
-}
-
-.week-modal-body { display: grid; gap: 22px; padding: 22px 0; }
-.week-modal-section { display: grid; gap: 10px; }
-
-.week-modal-subtitle {
-  margin: 0;
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--card-value);
-}
-
-.week-task-list { display: grid; gap: 10px; }
-
-.week-task {
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
-  padding: 16px;
-  border-radius: 6px;
-  background: var(--surface-3);
-  border-left: 3px solid var(--card-accent);
-}
-
-.week-task-check input {
-  width: 18px;
-  height: 18px;
-  margin: 0;
-  accent-color: var(--card-accent);
-  cursor: pointer;
-}
-
-.week-task-body { flex: 1; min-width: 0; display: grid; gap: 3px; }
-
-.week-task-title {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--card-value);
-  overflow-wrap: anywhere;
-}
-
-.week-task-desc { font-size: 12px; color: var(--card-label); }
 
 .week-task-source {
-  font-size: 12px;
   font-style: italic;
-  color: var(--card-label);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-/* A completed task stays readable but visibly settled. */
-.week-task.is-done .week-task-title {
-  text-decoration: line-through;
-  color: var(--card-label);
-}
-
-.week-task.is-done { opacity: 0.72; }
-
-.week-task-status {
-  flex: none;
-  padding: 8px 12px;
-  border-radius: 6px;
+.week-task-move {
+  width: auto;
+  max-width: 88px;
+  padding: 4px 6px;
+  border-radius: 4px;
   border: 1px solid var(--card-border);
   background: var(--surface-4);
-  color: var(--text);
-  font-size: 12px;
-  font-weight: 500;
+  color: var(--card-accent);
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 600;
   cursor: pointer;
 }
 
-/* Pending work is deliberately being carried, so it reads differently from merely unfinished. */
-.week-task.is-pending {
-  border-left-color: #eab308;
-  background: color-mix(in srgb, #eab308 8%, var(--surface-3));
-}
-
-.week-task.is-pinned {
-  border-left-color: var(--card-label);
-}
-
-.week-task-lock {
-  font-size: 11px;
-  opacity: 0.75;
-}
+.week-task-move:hover:not(:disabled) { border-color: var(--card-accent); }
 
 .week-task-move:disabled {
   opacity: 0.4;
   cursor: not-allowed;
   color: var(--card-label);
-}
-
-.week-task-move {
-  flex: none;
-  max-width: 190px;
-  padding: 6px 10px;
-  border-radius: 6px;
-  border: 1px solid var(--card-border);
-  background: var(--surface-4);
-  color: var(--card-accent);
-  font-family: inherit;
-  font-size: 12px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.week-task-move:hover:not(:disabled) { background: var(--card-hover); border-color: var(--card-accent); }
-
-.week-modal-add { display: flex; gap: 10px; flex-wrap: wrap; }
-
-.week-modal-add input {
-  flex: 1;
-  min-width: 200px;
-  padding: 10px 14px;
-  font-size: 13px;
-  border-radius: 6px;
-  border: 1px solid var(--card-border);
-  background: var(--surface-4);
-  color: var(--text);
 }
 
 .overview-action.is-add {
@@ -3600,8 +3530,6 @@ button {
 }
 
 .overview-action.is-add:hover { filter: brightness(0.93); background: var(--card-accent); }
-
-.week-modal-foot { display: flex; justify-content: center; gap: 14px; flex-wrap: wrap; }
 
 .overview-action:disabled { opacity: 0.5; cursor: default; }
 

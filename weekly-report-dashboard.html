@@ -529,6 +529,10 @@ p {
   gap: 24px;
   padding: 20px 24px 6px;
   align-content: start;
+  /* A grid item defaults to min-width: auto, so it grows to its widest child rather than
+     letting that child scroll. The expanded week's task table is wider than a phone, and
+     without this the whole page scrolls sideways instead of just the table. */
+  min-width: 0;
 }
 
 .card {
@@ -2291,6 +2295,9 @@ button {
 }
 
 .report-row {
+  /* Same reason as `.content`: a grid item that will not shrink hands the overflow to the
+     page instead of to the editor's own scroll box. */
+  min-width: 0;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -2737,8 +2744,10 @@ button {
   min-width: 0;
 }
 
+/* Wide enough for eight columns to read, narrow enough that a full-screen desktop window does
+   not scroll; below that the editor's own box scrolls, never the page. */
 .week-editor-scroll .report-row-task-table {
-  min-width: 940px;
+  min-width: 1010px;
 }
 
 .report-row-task-table input,
@@ -2778,11 +2787,15 @@ button {
   color: var(--muted);
 }
 
+/* A table cell, not a flex box: `display: flex` here took the cell out of the table's column
+   flow, so the row spilled into an anonymous cell to its right. */
 .week-task-actions {
-  display: flex;
-  gap: 6px;
-  align-items: center;
   white-space: nowrap;
+  text-align: right;
+}
+
+.week-task-actions > * {
+  vertical-align: middle;
 }
 
 .week-task-actions .link-button {
@@ -2818,6 +2831,22 @@ button {
 .report-row-task-table tr:last-child td {
   border-bottom: 0;
 }
+
+/* Fixed columns: the task title is what people read, so it gets the room, and the narrow
+   fields stop stealing it as soon as a week holds a long task name. */
+/* The widths must sum to exactly 100%: mixing a pixel column in with percentages made them
+   total more than the table, so the last column overflowed even on a wide screen. 18% of the
+   1010px minimum is ~182px, which is what the actions cell needs — and it needs a width at all
+   because `table-layout: fixed` never grows a column to fit its content. */
+.report-row-task-table { table-layout: fixed; }
+.report-row-task-table th:nth-child(1) { width: 11%; }
+.report-row-task-table th:nth-child(2) { width: 10%; }
+.report-row-task-table th:nth-child(3) { width: 20%; }
+.report-row-task-table th:nth-child(4) { width: 10%; }
+.report-row-task-table th:nth-child(5) { width: 10%; }
+.report-row-task-table th:nth-child(6) { width: 10%; }
+.report-row-task-table th:nth-child(7) { width: 11%; }
+.report-row-task-table th:nth-child(8) { width: 18%; }
 
 .report-row-actions {
   display: flex;
@@ -3426,183 +3455,84 @@ button {
 }
 
 
-/* Week modal: a focused view of one week — what is still outstanding from earlier weeks,
-   what is planned for this one, and the two moves that matter (tick it off, or push it on). */
-.week-modal {
-  max-width: 800px;
-  width: 100%;
-  background: var(--surface-2);
-  border-radius: 8px;
-  border-top: 3px solid var(--card-accent);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
-}
-
-.week-modal-head {
+/* The expanded week's footer. Its Save Changes button was asked for by name; the editor saves
+   on every keystroke, so the button confirms rather than commits. */
+.week-editor-foot {
   display: flex;
-  align-items: center;
-  gap: 14px;
-  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border-soft);
 }
 
-.week-modal-head h2 {
-  flex: 1;
-  min-width: 0;
-  margin: 0;
-  font-size: 18px;
-  font-weight: 700;
-  color: var(--card-value);
+.week-editor-foot .is-confirmed {
+  background: var(--card-done);
+  border-color: var(--card-done);
+  color: #ffffff;
 }
 
-/* Week-level fields sit in their own row under the title, with the Save that keeps the modal
-   open beside them — the same arrangement as the inline editor's header. */
-.week-modal-fields {
-  display: flex;
-  align-items: flex-end;
-  gap: 14px;
-  flex-wrap: wrap;
-  padding: 0 24px 14px;
-  border-bottom: 1px solid var(--card-border);
+/* Inline week editing. A week opened in the reports accordion is the editor: its own status
+   and start date, the work still open from earlier weeks, and its tasks — all in one table, so
+   what is edited and what the report prints read the same way. There is no modal and no draft,
+   which is what lets several weeks be open at once. */
+.week-task-row.is-carried > td {
+  background: var(--card-warning-soft);
+  box-shadow: inset 3px 0 0 var(--card-warning);
 }
 
-.week-modal-field {
-  display: grid;
-  gap: 4px;
-  font-size: 12px;
-  font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
+.week-task-row.is-carried > td ~ td { box-shadow: none; }
+
+/* Pending work is deliberately being carried in the week it now sits in, so it reads
+   differently from work that is merely unfinished. */
+.week-task-row.is-pending > td:first-child {
+  box-shadow: inset 3px 0 0 #eab308;
+}
+
+.week-task-row.is-pinned > td:first-child {
+  box-shadow: inset 3px 0 0 var(--card-label);
+}
+
+/* Carried work ticked off here stays put, struck through, rather than vanishing from under the
+   pointer. It leaves the carried list the next time the list is rebuilt. */
+.week-task-row.is-resolved > td { opacity: 0.6; }
+.week-task-row.is-resolved [data-task-field="title"] { text-decoration: line-through; }
+
+.week-task-source,
+.week-task-lock {
+  display: block;
+  margin-top: 3px;
+  font-size: 11px;
   color: var(--card-label);
 }
-
-.week-modal-field select,
-.week-modal-field input {
-  padding: 7px 10px;
-  border-radius: 6px;
-  border: 1px solid var(--card-border);
-  background: var(--surface-4);
-  color: var(--text);
-  font-family: inherit;
-  font-size: 13px;
-  text-transform: none;
-  letter-spacing: 0;
-}
-
-.week-modal-body { display: grid; gap: 22px; padding: 22px 0; }
-.week-modal-section { display: grid; gap: 10px; }
-
-.week-modal-subtitle {
-  margin: 0;
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--card-value);
-}
-
-.week-task-list { display: grid; gap: 10px; }
-
-.week-task {
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
-  padding: 16px;
-  border-radius: 6px;
-  background: var(--surface-3);
-  border-left: 3px solid var(--card-accent);
-}
-
-.week-task-check input {
-  width: 18px;
-  height: 18px;
-  margin: 0;
-  accent-color: var(--card-accent);
-  cursor: pointer;
-}
-
-.week-task-body { flex: 1; min-width: 0; display: grid; gap: 3px; }
-
-.week-task-title {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--card-value);
-  overflow-wrap: anywhere;
-}
-
-.week-task-desc { font-size: 12px; color: var(--card-label); }
 
 .week-task-source {
-  font-size: 12px;
   font-style: italic;
-  color: var(--card-label);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-/* A completed task stays readable but visibly settled. */
-.week-task.is-done .week-task-title {
-  text-decoration: line-through;
-  color: var(--card-label);
-}
-
-.week-task.is-done { opacity: 0.72; }
-
-.week-task-status {
-  flex: none;
-  padding: 8px 12px;
-  border-radius: 6px;
+.week-task-move {
+  width: auto;
+  max-width: 88px;
+  padding: 4px 6px;
+  border-radius: 4px;
   border: 1px solid var(--card-border);
   background: var(--surface-4);
-  color: var(--text);
-  font-size: 12px;
-  font-weight: 500;
+  color: var(--card-accent);
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 600;
   cursor: pointer;
 }
 
-/* Pending work is deliberately being carried, so it reads differently from merely unfinished. */
-.week-task.is-pending {
-  border-left-color: #eab308;
-  background: color-mix(in srgb, #eab308 8%, var(--surface-3));
-}
-
-.week-task.is-pinned {
-  border-left-color: var(--card-label);
-}
-
-.week-task-lock {
-  font-size: 11px;
-  opacity: 0.75;
-}
+.week-task-move:hover:not(:disabled) { border-color: var(--card-accent); }
 
 .week-task-move:disabled {
   opacity: 0.4;
   cursor: not-allowed;
   color: var(--card-label);
-}
-
-.week-task-move {
-  flex: none;
-  max-width: 190px;
-  padding: 6px 10px;
-  border-radius: 6px;
-  border: 1px solid var(--card-border);
-  background: var(--surface-4);
-  color: var(--card-accent);
-  font-family: inherit;
-  font-size: 12px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.week-task-move:hover:not(:disabled) { background: var(--card-hover); border-color: var(--card-accent); }
-
-.week-modal-add { display: flex; gap: 10px; flex-wrap: wrap; }
-
-.week-modal-add input {
-  flex: 1;
-  min-width: 200px;
-  padding: 10px 14px;
-  font-size: 13px;
-  border-radius: 6px;
-  border: 1px solid var(--card-border);
-  background: var(--surface-4);
-  color: var(--text);
 }
 
 .overview-action.is-add {
@@ -3612,8 +3542,6 @@ button {
 }
 
 .overview-action.is-add:hover { filter: brightness(0.93); background: var(--card-accent); }
-
-.week-modal-foot { display: flex; justify-content: center; gap: 14px; flex-wrap: wrap; }
 
 .overview-action:disabled { opacity: 0.5; cursor: default; }
 
@@ -4543,48 +4471,6 @@ small,
         </main>
       </div>
     </div>
-
-    <div id="weekModalOverlay" class="modal-overlay" hidden>
-      <div class="modal-card week-modal" role="dialog" aria-modal="true" aria-labelledby="weekModalTitle">
-        <div class="modal-head week-modal-head">
-          <h2 id="weekModalTitle">Week</h2>
-          <button type="button" id="weekModalClose" class="ghost-button small-button" aria-label="Close">&times;</button>
-        </div>
-
-        <!-- Week-level fields. Saving is the footer's job. -->
-        <div class="week-modal-fields">
-          <label class="week-modal-field">Week status
-            <select id="weekModalStatus"></select>
-          </label>
-          <label class="week-modal-field">Week starting
-            <input type="date" id="weekModalStart" />
-          </label>
-        </div>
-
-        <div class="modal-body week-modal-body">
-          <section class="week-modal-section" id="weekModalCarriedSection" hidden>
-            <h3 class="week-modal-subtitle">Pending from earlier weeks</h3>
-            <div id="weekModalCarried" class="week-task-list"></div>
-          </section>
-
-          <section class="week-modal-section">
-            <h3 class="week-modal-subtitle">Tasks for this week</h3>
-            <div id="weekModalTasks" class="week-task-list"></div>
-          </section>
-
-          <div class="week-modal-add">
-            <input type="text" id="weekModalNewTask" placeholder="Add new task…" />
-            <button type="button" id="weekModalAdd" class="overview-action is-add">+ Add task</button>
-          </div>
-        </div>
-
-        <div class="modal-foot week-modal-foot">
-          <button type="button" id="weekModalBack" class="overview-action">&larr; Back</button>
-          <button type="button" id="weekModalSave" class="overview-action is-primary">💾 Save Changes</button>
-        </div>
-      </div>
-    </div>
-
     <script>window.__BUNDLED_DATA__ = {"supabaseConfig": {"$comment": "Paste your Supabase project URL and anon (public) key here, then reload. Leave them empty to keep the app in local-only mode with no login. Find both in Supabase -> Project Settings -> API. The anon key is safe in client code; row-level security is what protects the data. Sign-in is Google only, so also enable Authentication -> Providers -> Google.", "url": "", "anonKey": ""}, "rolesConfig": {"$comment": "Who may sign in, and as what. firstName and lastName are separate fields, each without spaces. Passwords are stored as SHA-256 hashes, never plaintext — generate one with tools/hash-password.py or from Settings -> Users & Roles. This is a demo gate, not real security: the check runs in the browser.", "allowedDomain": "webengage.com", "requireLogin": true, "passwordPolicy": {"minLength": 10, "requireUppercase": true, "requireLowercase": true, "requireNumber": true, "requireSymbol": true}, "users": [{"email": "stuti.khare@webengage.com", "firstName": "Stuti", "lastName": "Khare", "role": "admin", "passwordHash": "e89f0e0f77c934974dcbc69c702dce140298911b57d30bc58045c8c18bbacef1"}, {"email": "ajwanda.shrivastav@webengage.com", "firstName": "Ajwanda", "lastName": "Shrivastav", "role": "admin", "passwordHash": "c39bb579dfe5734135aae305d2c0d7b88e5e7d0420083180e3828cd4f5c9dbaa"}]}, "weekTemplates": {"source": "https://docs.google.com/spreadsheets/d/1szgspVwOpiUgsS3DKoybF_UKB8t6LXRNXBAnr_pmO7E/edit", "sourceTabs": {"4": "Week 4", "6": "Week 6", "12": "Week 12"}, "version": "2026-09-07-fixed-weeks", "baseCycleWeeks": 4, "cycleWeeksWithData": [4, 6, 12], "weeks": [{"week": 1, "label": "Kickoff", "tasks": [{"scope": "Kickoff", "title": "Kick-off Meeting", "owner": "Webengage OBM", "priority": "medium", "platforms": [], "channels": [], "offsetByCycle": {"4": 0, "6": 0, "12": 0}, "elastic": false}, {"scope": "Kickoff", "title": "Discovery", "owner": "Webengage OBM", "priority": "medium", "platforms": [], "channels": [], "offsetByCycle": {"4": 0, "6": 0, "12": 0}, "elastic": false}, {"scope": "Kickoff", "title": "Data Modelling", "owner": "Webengage OBM", "priority": "medium", "platforms": [], "channels": [], "offsetByCycle": {"4": 3, "6": 5, "12": 10}, "elastic": true}, {"scope": "Kickoff", "title": "Scope of Work", "owner": "Webengage OBM", "priority": "medium", "platforms": [], "channels": [], "offsetByCycle": {"4": 0, "6": 3, "12": 3}, "elastic": true}, {"scope": "Kickoff", "title": "Create Staging Dashboard", "owner": "Webengage OBM", "priority": "medium", "platforms": [], "channels": [], "offsetByCycle": {"4": 0, "6": 0, "12": 3}, "elastic": true}, {"scope": "Kickoff", "title": "Data Model Finalised", "owner": "Client team", "priority": "medium", "platforms": [], "channels": [], "offsetByCycle": {"4": 5, "6": 7, "12": 14}, "elastic": true}], "elastic": true}, {"week": 2, "label": "Staging Deployment", "tasks": [{"scope": "Website", "title": "SDK Set Up", "owner": "Client tech team", "priority": "medium", "platforms": ["Website"], "channels": [], "offsetByCycle": {"4": 5, "6": 5, "12": 5}, "elastic": false, "fixedWeek": 1}, {"scope": "Web App", "title": "SDK Set Up", "owner": "Client tech team", "priority": "medium", "platforms": ["Web App"], "channels": [], "offsetByCycle": {"4": 5, "6": 5, "12": 5}, "elastic": false, "fixedWeek": 1}, {"scope": "Website", "title": "User Tracking", "owner": "Client tech team", "priority": "medium", "platforms": ["Website"], "channels": [], "offsetByCycle": {"4": 10, "6": 10, "12": 10}, "elastic": false, "fixedWeek": 2}, {"scope": "Web App", "title": "User Tracking", "owner": "Client tech team", "priority": "medium", "platforms": ["Web App"], "channels": [], "offsetByCycle": {"4": 10, "6": 10, "12": 10}, "elastic": false, "fixedWeek": 2}, {"scope": "Website", "title": "Event Tracking", "owner": "Client tech team", "priority": "medium", "platforms": ["Website"], "channels": [], "offsetByCycle": {"4": 10, "6": 15, "12": 21}, "elastic": true}, {"scope": "Web App", "title": "Event Tracking", "owner": "Client tech team", "priority": "medium", "platforms": ["Web App"], "channels": [], "offsetByCycle": {"4": 10, "6": 15, "12": 35}, "elastic": true}, {"scope": "Website", "title": "Web Push Setup", "owner": "Client tech team", "priority": "medium", "platforms": ["Website"], "channels": ["Web Push", "Push"], "offsetByCycle": {"4": 5, "6": 5, "12": 14}, "elastic": true}, {"scope": "Web App", "title": "Web Push Setup", "owner": "Client tech team", "priority": "medium", "platforms": ["Web App"], "channels": ["Web Push", "Push"], "offsetByCycle": {"4": 10, "6": 15, "12": 28}, "elastic": true}, {"scope": "Android", "title": "SDK Set Up", "owner": "Client tech team", "priority": "medium", "platforms": ["Android"], "channels": [], "offsetByCycle": {"4": 5, "6": 5, "12": 5}, "elastic": false, "fixedWeek": 1}, {"scope": "Android", "title": "User Tracking", "owner": "Client tech team", "priority": "medium", "platforms": ["Android"], "channels": [], "offsetByCycle": {"4": 10, "6": 10, "12": 10}, "elastic": false, "fixedWeek": 2}, {"scope": "Android", "title": "Event Tracking", "owner": "Client tech team", "priority": "medium", "platforms": ["Android"], "channels": [], "offsetByCycle": {"4": 10, "6": 15, "12": 35}, "elastic": true}, {"scope": "Android", "title": "Push Setup", "owner": "Client tech team", "priority": "medium", "platforms": ["Android"], "channels": ["Push"], "offsetByCycle": {"4": 10, "6": 15, "12": 28}, "elastic": true}, {"scope": "Android", "title": "Screen Tracking", "owner": "Client tech team", "priority": "medium", "platforms": ["Android"], "channels": [], "offsetByCycle": {"4": 10, "6": 15, "12": 35}, "elastic": true}, {"scope": "Android", "title": "Deeplinks", "owner": "Client tech team", "priority": "medium", "platforms": ["Android"], "channels": [], "offsetByCycle": {"4": 10, "6": 15, "12": 28}, "elastic": true}, {"scope": "Android", "title": "Silent / Force Login", "owner": "Client tech team", "priority": "medium", "platforms": ["Android"], "channels": [], "offsetByCycle": {"4": 10, "6": 15, "12": 28}, "elastic": true}, {"scope": "iOS", "title": "SDK Set Up", "owner": "Client tech team", "priority": "medium", "platforms": ["iOS"], "channels": [], "offsetByCycle": {"4": 5, "6": 5, "12": 5}, "elastic": false, "fixedWeek": 1}, {"scope": "iOS", "title": "User Tracking", "owner": "Client tech team", "priority": "medium", "platforms": ["iOS"], "channels": [], "offsetByCycle": {"4": 10, "6": 10, "12": 10}, "elastic": false, "fixedWeek": 2}, {"scope": "iOS", "title": "Event Tracking", "owner": "Client tech team", "priority": "medium", "platforms": ["iOS"], "channels": [], "offsetByCycle": {"4": 10, "6": 15, "12": 35}, "elastic": true}, {"scope": "iOS", "title": "Push Setup", "owner": "Client tech team", "priority": "medium", "platforms": ["iOS"], "channels": ["Push"], "offsetByCycle": {"4": 10, "6": 15, "12": 28}, "elastic": true}, {"scope": "iOS", "title": "Rich Push Setup", "owner": "Client tech team", "priority": "medium", "platforms": ["iOS"], "channels": ["Push"], "offsetByCycle": {"4": 10, "6": 15, "12": 28}, "elastic": true}, {"scope": "iOS", "title": "Screen Tracking", "owner": "Client tech team", "priority": "medium", "platforms": ["iOS"], "channels": [], "offsetByCycle": {"4": 10, "6": 15, "12": 35}, "elastic": true}, {"scope": "iOS", "title": "Silent / Force Login", "owner": "Client tech team", "priority": "medium", "platforms": ["iOS"], "channels": [], "offsetByCycle": {"4": 10, "6": 15, "12": 28}, "elastic": true}, {"scope": "iOS", "title": "Deeplinks", "owner": "Client tech team", "priority": "medium", "platforms": ["iOS"], "channels": [], "offsetByCycle": {"4": 10, "6": 15, "12": 28}, "elastic": true}, {"scope": "Communication Channels", "title": "Email setup", "owner": "Cpaas / Client team", "priority": "medium", "platforms": [], "channels": ["Email"], "offsetByCycle": {"4": 10, "6": 10, "12": 21}, "elastic": true}, {"scope": "Communication Channels", "title": "SMS setup", "owner": "Cpaas / Client team", "priority": "medium", "platforms": [], "channels": ["SMS"], "offsetByCycle": {"4": 10, "6": 10, "12": 21}, "elastic": true}, {"scope": "Communication Channels", "title": "Whatsapp setup", "owner": "Cpaas / Client team", "priority": "medium", "platforms": [], "channels": ["WhatsApp"], "offsetByCycle": {"4": 10, "6": 10, "12": 21}, "elastic": true}, {"scope": "Communication Channels", "title": "RCS setup", "owner": "Cpaas / Client team", "priority": "medium", "platforms": [], "channels": ["RCS"], "offsetByCycle": {"4": 10, "6": 10, "12": 21}, "elastic": true}, {"scope": "Communication Channels", "title": "IVR setup", "owner": "Cpaas / Client team", "priority": "medium", "platforms": [], "channels": ["IVR"], "offsetByCycle": {"4": 10, "6": 10, "12": 21}, "elastic": true}, {"scope": "Rest API", "title": "User Tracking", "owner": "Client tech team", "priority": "medium", "platforms": ["REST API"], "channels": [], "offsetByCycle": {"4": 10, "6": 10, "12": 10}, "elastic": false, "fixedWeek": 2}, {"scope": "Rest API", "title": "Event Tracking", "owner": "Client tech team", "priority": "medium", "platforms": ["REST API"], "channels": [], "offsetByCycle": {"4": 10, "6": 15, "12": 35}, "elastic": true}, {"scope": "Website", "title": "Users and Events Audit", "owner": "Webengage OBM", "priority": "medium", "platforms": ["Website"], "channels": [], "offsetByCycle": {"4": 15, "6": 17, "12": 42}, "elastic": true}, {"scope": "Web App", "title": "Users and Events Audit", "owner": "Webengage OBM", "priority": "medium", "platforms": ["Web App"], "channels": [], "offsetByCycle": {"4": 17, "6": 21, "12": 49}, "elastic": true}, {"scope": "Website", "title": "WebPush Audit", "owner": "Webengage OBM", "priority": "medium", "platforms": ["Website"], "channels": ["Web Push", "Push"], "offsetByCycle": {"4": 15, "6": 17, "12": 42}, "elastic": true}, {"scope": "Web App", "title": "WebPush Audit", "owner": "Webengage OBM", "priority": "medium", "platforms": ["Web App"], "channels": ["Web Push", "Push"], "offsetByCycle": {"4": 17, "6": 21, "12": 49}, "elastic": true}, {"scope": "Website", "title": "Onsite Notification Audit", "owner": "Webengage OBM", "priority": "medium", "platforms": ["Website"], "channels": ["On-site Notification"], "offsetByCycle": {"4": 15, "6": 17, "12": 42}, "elastic": true}, {"scope": "Web App", "title": "Onsite Notification Audit", "owner": "Webengage OBM", "priority": "medium", "platforms": ["Web App"], "channels": ["On-site Notification"], "offsetByCycle": {"4": 17, "6": 21, "12": 49}, "elastic": true}, {"scope": "Website", "title": "Staging Fixes as per Audit Report", "owner": "Client tech team", "priority": "medium", "platforms": ["Website"], "channels": [], "offsetByCycle": {"4": 17, "6": 21, "12": 42}, "elastic": true}, {"scope": "Web App", "title": "Staging Fixes as per Audit Report", "owner": "Client tech team", "priority": "medium", "platforms": ["Web App"], "channels": [], "offsetByCycle": {"4": 21, "6": 25, "12": 49}, "elastic": true}, {"scope": "Android", "title": "Users and Events Audit", "owner": "Webengage OBM", "priority": "medium", "platforms": ["Android"], "channels": [], "offsetByCycle": {"4": 17, "6": 21, "12": 49}, "elastic": true}, {"scope": "Android", "title": "Push Android", "owner": "Webengage OBM", "priority": "medium", "platforms": ["Android"], "channels": ["Push"], "offsetByCycle": {"4": 17, "6": 21, "12": 49}, "elastic": true}, {"scope": "Android", "title": "In-App Android", "owner": "Webengage OBM", "priority": "medium", "platforms": ["Android"], "channels": ["In-App"], "offsetByCycle": {"4": 17, "6": 21, "12": 49}, "elastic": true}, {"scope": "Android", "title": "Deeplinks", "owner": "Webengage OBM", "priority": "medium", "platforms": ["Android"], "channels": [], "offsetByCycle": {"4": 17, "6": 21, "12": 49}, "elastic": true}, {"scope": "Android", "title": "Staging Fixes as per Audit Report", "owner": "Client tech team", "priority": "medium", "platforms": ["Android"], "channels": [], "offsetByCycle": {"4": 21, "6": 25, "12": 49}, "elastic": true}, {"scope": "iOS", "title": "Users and Events Audit", "owner": "Webengage OBM", "priority": "medium", "platforms": ["iOS"], "channels": [], "offsetByCycle": {"4": 17, "6": 21, "12": 49}, "elastic": true}, {"scope": "iOS", "title": "Push, Rich Push iOS", "owner": "Webengage OBM", "priority": "medium", "platforms": ["iOS"], "channels": ["Push"], "offsetByCycle": {"4": 17, "6": 21, "12": 49}, "elastic": true}, {"scope": "iOS", "title": "In-App iOS", "owner": "Webengage OBM", "priority": "medium", "platforms": ["iOS"], "channels": ["In-App"], "offsetByCycle": {"4": 17, "6": 21, "12": 49}, "elastic": true}, {"scope": "iOS", "title": "Deeplinks", "owner": "Webengage OBM", "priority": "medium", "platforms": ["iOS"], "channels": [], "offsetByCycle": {"4": 17, "6": 21, "12": 49}, "elastic": true}, {"scope": "iOS", "title": "Staging Fixes as per Audit Report", "owner": "Client tech team", "priority": "medium", "platforms": ["iOS"], "channels": [], "offsetByCycle": {"4": 21, "6": 25, "12": 49}, "elastic": true}, {"scope": "Rest API", "title": "Data Validation", "owner": "Webengage OBM", "priority": "medium", "platforms": ["REST API"], "channels": [], "offsetByCycle": {"4": 17, "6": 25, "12": 49}, "elastic": true}, {"scope": "Rest API", "title": "Count Matching", "owner": "Webengage team + Client team", "priority": "medium", "platforms": ["REST API"], "channels": [], "offsetByCycle": {"4": 17, "6": 25, "12": 49}, "elastic": true}], "elastic": true}, {"week": 3, "label": "Production Deployment", "tasks": [{"scope": "Production Deployment", "title": "Create Production Dashboard", "owner": "Webengage OBM", "priority": "medium", "platforms": [], "channels": [], "offsetByCycle": {"4": 21, "6": 21, "12": 42}, "elastic": true}, {"scope": "Website", "title": "Production Migration", "owner": "Client tech team", "priority": "medium", "platforms": ["Website"], "channels": [], "offsetByCycle": {"4": 22, "6": 27, "12": 56}, "elastic": true}, {"scope": "Web App", "title": "Production Migration", "owner": "Client tech team", "priority": "medium", "platforms": ["Web App"], "channels": [], "offsetByCycle": {"4": 22, "6": 27, "12": 56}, "elastic": true}, {"scope": "Website", "title": "Web Push Setup on dashboard", "owner": "Client tech team", "priority": "medium", "platforms": ["Website"], "channels": ["Web Push", "Push"], "offsetByCycle": {"4": 22, "6": 27, "12": 56}, "elastic": true}, {"scope": "Web App", "title": "Web Push Setup on dashboard", "owner": "Client tech team", "priority": "medium", "platforms": ["Web App"], "channels": ["Web Push", "Push"], "offsetByCycle": {"4": 22, "6": 27, "12": 56}, "elastic": true}, {"scope": "Android", "title": "Production Migration", "owner": "Client tech team", "priority": "medium", "platforms": ["Android"], "channels": [], "offsetByCycle": {"4": 22, "6": 27, "12": 56}, "elastic": true}, {"scope": "Android", "title": "Push credentials", "owner": "Client tech team", "priority": "medium", "platforms": ["Android"], "channels": ["Push"], "offsetByCycle": {"4": 22, "6": 27, "12": 56}, "elastic": true}, {"scope": "iOS", "title": "Production Migration", "owner": "Client tech team", "priority": "medium", "platforms": ["iOS"], "channels": [], "offsetByCycle": {"4": 22, "6": 27, "12": 56}, "elastic": true}, {"scope": "iOS", "title": "Push credentials", "owner": "Client tech team", "priority": "medium", "platforms": ["iOS"], "channels": ["Push"], "offsetByCycle": {"4": 22, "6": 27, "12": 56}, "elastic": true}, {"scope": "Rest API", "title": "Production Migration", "owner": "Client tech team", "priority": "medium", "platforms": ["REST API"], "channels": [], "offsetByCycle": {"4": 22, "6": 27, "12": 56}, "elastic": true}, {"scope": "Communication Channels", "title": "Email setup", "owner": "Cpaas / Client team", "priority": "medium", "platforms": [], "channels": ["Email"], "offsetByCycle": {"4": 22, "6": 10, "12": 21}, "elastic": true}, {"scope": "Communication Channels", "title": "SMS setup", "owner": "Cpaas / Client team", "priority": "medium", "platforms": [], "channels": ["SMS"], "offsetByCycle": {"4": 22, "6": 10, "12": 21}, "elastic": true}, {"scope": "Communication Channels", "title": "Whatsapp setup", "owner": "Cpaas / Client team", "priority": "medium", "platforms": [], "channels": ["WhatsApp"], "offsetByCycle": {"4": 22, "6": 10, "12": 21}, "elastic": true}, {"scope": "Communication Channels", "title": "RCS setup", "owner": "Cpaas / Client team", "priority": "medium", "platforms": [], "channels": ["RCS"], "offsetByCycle": {"4": 22, "6": 10, "12": 21}, "elastic": true}, {"scope": "Communication Channels", "title": "IVR setup", "owner": "Cpaas / Client team", "priority": "medium", "platforms": [], "channels": ["IVR"], "offsetByCycle": {"4": 23, "6": 10, "12": 21}, "elastic": true}, {"scope": "Website", "title": "Users and Events Audit", "owner": "Webengage OBM", "priority": "medium", "platforms": ["Website"], "channels": [], "offsetByCycle": {"4": 23, "6": 28, "12": 63}, "elastic": true}, {"scope": "Web App", "title": "Users and Events Audit", "owner": "Webengage OBM", "priority": "medium", "platforms": ["Web App"], "channels": [], "offsetByCycle": {"4": 24, "6": 31, "12": 63}, "elastic": true}, {"scope": "Website", "title": "WebPush Audit", "owner": "Webengage OBM", "priority": "medium", "platforms": ["Website"], "channels": ["Web Push", "Push"], "offsetByCycle": {"4": 23, "6": 28, "12": 63}, "elastic": true}, {"scope": "Web App", "title": "WebPush Audit", "owner": "Webengage OBM", "priority": "medium", "platforms": ["Web App"], "channels": ["Web Push", "Push"], "offsetByCycle": {"4": 24, "6": 31, "12": 63}, "elastic": true}, {"scope": "Website", "title": "Onsite Notification Audit", "owner": "Webengage OBM", "priority": "medium", "platforms": ["Website"], "channels": ["On-site Notification"], "offsetByCycle": {"4": 23, "6": 28, "12": 63}, "elastic": true}, {"scope": "Web App", "title": "Onsite Notification Audit", "owner": "Webengage OBM", "priority": "medium", "platforms": ["Web App"], "channels": ["On-site Notification"], "offsetByCycle": {"4": 24, "6": 31, "12": 63}, "elastic": true}, {"scope": "Website", "title": "Prod Fixes as per Audit Report", "owner": "Client tech team", "priority": "medium", "platforms": ["Website"], "channels": [], "offsetByCycle": {"4": 24, "6": 31, "12": 63}, "elastic": true}, {"scope": "Web App", "title": "Prod Fixes as per Audit Report", "owner": "Client tech team", "priority": "medium", "platforms": ["Web App"], "channels": [], "offsetByCycle": {"4": 25, "6": 36, "12": 70}, "elastic": true}, {"scope": "Android", "title": "Users and Events Audit", "owner": "Webengage OBM", "priority": "medium", "platforms": ["Android"], "channels": [], "offsetByCycle": {"4": 24, "6": 31, "12": 63}, "elastic": true}, {"scope": "Android", "title": "Push Android", "owner": "Webengage OBM", "priority": "medium", "platforms": ["Android"], "channels": ["Push"], "offsetByCycle": {"4": 24, "6": 31, "12": 63}, "elastic": true}, {"scope": "Android", "title": "In-App Android", "owner": "Webengage OBM", "priority": "medium", "platforms": ["Android"], "channels": ["In-App"], "offsetByCycle": {"4": 24, "6": 31, "12": 63}, "elastic": true}, {"scope": "Android", "title": "Deeplinks", "owner": "Webengage OBM", "priority": "medium", "platforms": ["Android"], "channels": [], "offsetByCycle": {"4": 24, "6": 31, "12": 63}, "elastic": true}, {"scope": "Android", "title": "Prod Fixes as per Audit Report", "owner": "Client tech team", "priority": "medium", "platforms": ["Android"], "channels": [], "offsetByCycle": {"4": 25, "6": 36, "12": 70}, "elastic": true}, {"scope": "iOS", "title": "Users and Events Audit", "owner": "Webengage OBM", "priority": "medium", "platforms": ["iOS"], "channels": [], "offsetByCycle": {"4": 24, "6": 31, "12": 63}, "elastic": true}, {"scope": "iOS", "title": "Push, Rich Push iOS", "owner": "Webengage OBM", "priority": "medium", "platforms": ["iOS"], "channels": ["Push"], "offsetByCycle": {"4": 24, "6": 31, "12": 63}, "elastic": true}, {"scope": "iOS", "title": "In-App iOS", "owner": "Webengage OBM", "priority": "medium", "platforms": ["iOS"], "channels": ["In-App"], "offsetByCycle": {"4": 24, "6": 31, "12": 63}, "elastic": true}, {"scope": "iOS", "title": "Deeplinks", "owner": "Webengage OBM", "priority": "medium", "platforms": ["iOS"], "channels": [], "offsetByCycle": {"4": 24, "6": 31, "12": 63}, "elastic": true}, {"scope": "iOS", "title": "Prod Fixes as per Audit Report", "owner": "Client tech team", "priority": "medium", "platforms": ["iOS"], "channels": [], "offsetByCycle": {"4": 24, "6": 36, "12": 70}, "elastic": true}, {"scope": "Rest API", "title": "Data Validation", "owner": "Webengage OBM", "priority": "medium", "platforms": ["REST API"], "channels": [], "offsetByCycle": {"4": 25, "6": 37, "12": 70}, "elastic": true}, {"scope": "Rest API", "title": "Count Matching", "owner": "Webengage team + Client team", "priority": "medium", "platforms": ["REST API"], "channels": [], "offsetByCycle": {"4": 25, "6": 37, "12": 70}, "elastic": true}, {"scope": "Rest API", "title": "Historical User Data Upload", "owner": "Client team", "priority": "medium", "platforms": ["REST API"], "channels": [], "offsetByCycle": {"4": 23, "6": 31, "12": 63}, "elastic": true}, {"scope": "Rest API", "title": "Historical Events Data Upload", "owner": "Client team", "priority": "medium", "platforms": ["REST API"], "channels": [], "offsetByCycle": {"4": 23, "6": 31, "12": 63}, "elastic": true}], "elastic": true}, {"week": 4, "label": "Training and Use-Cases", "tasks": [{"scope": "Training and Use-Cases", "title": "Training Session I", "owner": "Webengage OBM", "priority": "medium", "platforms": [], "channels": [], "offsetByCycle": {"4": 23, "6": 36, "12": 77}, "elastic": true}, {"scope": "Training and Use-Cases", "title": "Training Session II", "owner": "Webengage OBM", "priority": "medium", "platforms": [], "channels": [], "offsetByCycle": {"4": 23, "6": 36, "12": 77}, "elastic": true}, {"scope": "Training and Use-Cases", "title": "Training Session III", "owner": "Webengage OBM", "priority": "medium", "platforms": [], "channels": [], "offsetByCycle": {"4": 23, "6": 36, "12": 77}, "elastic": true}, {"scope": "Communication Channels", "title": "Email Warmup Journey Live", "owner": "Webengage OBM", "priority": "medium", "platforms": [], "channels": ["Email"], "offsetByCycle": {"4": 23, "6": 36, "12": 77}, "elastic": true}, {"scope": "Communication Channels", "title": "Whatsapp Warmup Journey Live", "owner": "Webengage OBM", "priority": "medium", "platforms": [], "channels": ["WhatsApp"], "offsetByCycle": {"4": 23, "6": 36, "12": 77}, "elastic": true}, {"scope": "Communication Channels", "title": "Send Dashboard Recording", "owner": "Webengage OBM", "priority": "medium", "platforms": [], "channels": [], "offsetByCycle": {"4": 23, "6": 36, "12": 77}, "elastic": true}], "elastic": true}, {"week": 5, "label": "Go Live", "tasks": [{"scope": "All Integrated Domains", "title": "Integration / Domains check", "owner": "Webengage OBM", "priority": "medium", "platforms": [], "channels": [], "offsetByCycle": {"4": 27, "6": 40, "12": 82}, "elastic": true}], "elastic": true}]}, "demoIndex": {"$comment": "Lists the demo datasets offered in Settings -> Demo data. Add a file here and drop the JSON alongside it to offer another demo.", "demos": [{"file": "salad-days.json", "name": "Salad Days", "description": "Real 6-week website integration: kickoff through production movement, with live blockers on SMS/WhatsApp templates and the payment gateway."}]}, "demos": {"salad-days.json": {"$comment": "Demo project generated from 'Weekly status - Salad Days.xlsx'. Loaded on demand from Settings -> Demo data. Safe to delete this file; also remove its entry from demo-data/index.json.", "name": "Salad Days", "description": "Real 6-week website integration: kickoff through production movement, with live blockers on SMS/WhatsApp templates and the payment gateway.", "source": "Weekly status - Salad Days.xlsx", "project": {"name": "Salad Days", "clientName": "Salad Days Pvt. Ltd.", "status": "current", "csm": "Stuti", "implementationOwner": "Alisha", "salesOwner": "Vikram Kapoor", "kickoffDate": "2026-04-27", "goLiveDate": "2026-06-05", "cycleWeeks": 6, "techTeam": "outsourced", "vendorName": "Devx Team", "clientPocs": [{"name": "Ajwanda", "email": "", "addedFrom": "project"}, {"name": "Alisha", "email": "", "addedFrom": "project"}, {"name": "Channel Team", "email": "", "addedFrom": "project"}, {"name": "Devx Team", "email": "", "addedFrom": "project"}, {"name": "Keshav", "email": "", "addedFrom": "project"}, {"name": "Stuti", "email": "", "addedFrom": "project"}], "platforms": ["Website"], "platformLink": "https://www.saladdays.in", "channels": ["Email", "SMS", "WhatsApp", "Web Push"], "dataRequirements": {"historicalMigration": "yes", "userIdentifier": "Phone"}, "knownBlockers": "Gupshup SMS credentials failing; Razorpay checkout migration stalled.", "dependencies": "Devx Team for SDK/backend changes; Gupshup for SMS/WhatsApp; Razorpay for checkout events.", "notes": "Website-only WebEngage integration. Phone number is the unique identifier."}, "weeks": [{"weekStart": "2026-04-27", "templateWeek": 1, "templateLabel": "Kickoff & Discovery", "statusTag": "in progress", "tasks": [{"title": "Onboarding mail thread initiated", "phase": "Kickoff call", "owner": "Stuti", "status": "completed", "date": "2026-04-27", "blocker": "", "priority": "medium", "comments": "", "subtasks": []}, {"title": "Channel form Shared", "phase": "Kickoff call", "owner": "", "status": "not started", "date": "", "blocker": "", "priority": "medium", "comments": "", "subtasks": []}, {"title": "Tech doc shared", "phase": "Kickoff call", "owner": "", "status": "not started", "date": "", "blocker": "", "priority": "medium", "comments": "", "subtasks": []}, {"title": "Website", "phase": "Tech Team connect", "owner": "Alisha", "status": "completed", "date": "2026-04-27", "blocker": "", "priority": "medium", "comments": "", "subtasks": []}, {"title": "Phone number will be the finalized unique identifier", "phase": "User Id", "owner": "Keshav", "status": "completed", "date": "2026-04-27", "blocker": "", "priority": "high", "comments": "", "subtasks": []}, {"title": "Creation of data model", "phase": "Data Model", "owner": "Ajwanda", "status": "completed", "date": "2026-04-27", "blocker": "", "priority": "high", "comments": "", "subtasks": []}, {"title": "Data model Finalisation - Website", "phase": "Data Model", "owner": "Alisha", "status": "completed", "date": "2026-04-27", "blocker": "", "priority": "high", "comments": "", "subtasks": []}]}, {"weekStart": "2026-05-04", "templateWeek": 2, "templateLabel": "Staging Setup", "statusTag": "in progress", "tasks": [{"title": "SDK setup", "phase": "Website - Staging", "owner": "Devx Team", "status": "completed", "date": "2026-05-04", "blocker": "", "priority": "high", "comments": "", "subtasks": []}, {"title": "User setup", "phase": "Website - Staging", "owner": "", "status": "not started", "date": "", "blocker": "", "priority": "high", "comments": "", "subtasks": []}, {"title": "Event setup", "phase": "Website - Staging", "owner": "", "status": "not started", "date": "", "blocker": "", "priority": "high", "comments": "", "subtasks": []}, {"title": "Email Channel form", "phase": "Channels Set Up - Staging", "owner": "Alisha", "status": "completed", "date": "2026-05-04", "blocker": "", "priority": "high", "comments": "", "subtasks": []}]}, {"weekStart": "2026-05-11", "templateWeek": 3, "templateLabel": "Channels & Integrations", "statusTag": "completed", "tasks": [{"title": "Preparation of CSV file containing historical user and transactional event data", "phase": "Historic Data", "owner": "Alisha", "status": "completed", "date": "2026-05-11", "blocker": "", "priority": "high", "comments": "", "subtasks": []}, {"title": "setup finalised on the dashboard", "phase": "Events", "owner": "Devx Team", "status": "completed", "date": "2026-05-11", "blocker": "", "priority": "high", "comments": "", "subtasks": []}, {"title": "Website Audit", "phase": "Staging Audit", "owner": "Ajwanda", "status": "completed", "date": "2026-05-11", "blocker": "", "priority": "high", "comments": "", "subtasks": []}, {"title": "Email Channel - WE", "phase": "Channels Set Up - Staging", "owner": "Channel Team", "status": "completed", "date": "2026-05-11", "blocker": "", "priority": "medium", "comments": "", "subtasks": []}, {"title": "SMS channel - Gupshup", "phase": "Channels Set Up - Staging", "owner": "Alisha", "status": "completed", "date": "2026-05-11", "blocker": "", "priority": "high", "comments": "", "subtasks": []}, {"title": "Whatsapp Channel - Gupshup", "phase": "Channels Set Up - Staging", "owner": "Alisha", "status": "completed", "date": "2026-05-11", "blocker": "", "priority": "high", "comments": "", "subtasks": []}, {"title": "WebPush Channel", "phase": "Channels Set Up - Staging", "owner": "Devx Team", "status": "completed", "date": "2026-05-11", "blocker": "", "priority": "medium", "comments": "", "subtasks": []}, {"title": "Setup a call with team, and initiased the mail thread", "phase": "Razorpay", "owner": "Alisha", "status": "completed", "date": "2026-05-11", "blocker": "", "priority": "high", "comments": "", "subtasks": []}]}, {"weekStart": "2026-05-18", "templateWeek": 4, "templateLabel": "Audit & Templates", "statusTag": "blocked", "tasks": [{"title": "Preparation of CSV file containing historical transactional event data", "phase": "Historic Data", "owner": "Alisha", "status": "blocked", "date": "", "blocker": "Cluttered data", "priority": "high", "comments": "", "subtasks": []}, {"title": "Changes shared by webengage team, devx team to work on it.", "phase": "Staging audit", "owner": "Devx Team", "status": "completed", "date": "2026-05-18", "blocker": "", "priority": "high", "comments": "", "subtasks": []}, {"title": "Content ready", "phase": "Email Warmup", "owner": "Alisha", "status": "delayed", "date": "", "blocker": "", "priority": "high", "comments": "", "subtasks": []}, {"title": "share template to test Gupshup", "phase": "SMS template", "owner": "Alisha", "status": "completed", "date": "2026-05-18", "blocker": "", "priority": "high", "comments": "", "subtasks": []}, {"title": "Add template on the dashboard to test Gupshup", "phase": "Whatsapp Template", "owner": "Alisha", "status": "completed", "date": "2026-05-18", "blocker": "", "priority": "high", "comments": "", "subtasks": []}, {"title": "Moving from standard checkout to Razorpay Magic checkout", "phase": "Razorpay", "owner": "Alisha", "status": "blocked", "date": "", "blocker": "Razorpay team is not responding", "priority": "high", "comments": "", "subtasks": []}]}, {"weekStart": "2026-05-25", "templateWeek": 5, "templateLabel": "Carry-overs & Fixes", "statusTag": "in progress", "tasks": [{"title": "Preparation of CSV file containing historical transactional event data", "phase": "Historic Data", "owner": "Alisha", "status": "delayed", "date": "", "blocker": "", "priority": "high", "comments": "", "subtasks": []}, {"title": "Devx team shared confirmation on the open pointers; WebEngage team will perform the audit", "phase": "Staging audit", "owner": "Ajwanda", "status": "completed", "date": "2026-05-25", "blocker": "27th May", "priority": "high", "comments": "", "subtasks": []}, {"title": "Content ready", "phase": "Email Warmup", "owner": "Alisha", "status": "delayed", "date": "", "blocker": "", "priority": "high", "comments": "", "subtasks": []}, {"title": "Gupshup updated the Credentials", "phase": "SMS template", "owner": "Alisha", "status": "delayed", "date": "", "blocker": "", "priority": "high", "comments": "", "subtasks": []}, {"title": "Gupshup updated the Credentials", "phase": "Whatsapp Template", "owner": "", "status": "delayed", "date": "", "blocker": "", "priority": "high", "comments": "", "subtasks": []}, {"title": "Will continue with the Standard Checkout, for which we will connect with the Devx Team for the setup", "phase": "Razorpay", "owner": "Ajwanda", "status": "completed", "date": "2026-05-25", "blocker": "27th May", "priority": "high", "comments": "", "subtasks": []}]}, {"weekStart": "2026-06-01", "templateWeek": 6, "templateLabel": "Production Movement", "statusTag": "not started", "tasks": [{"title": "Preparation of CSV file containing historical transactional event data", "phase": "Historic Data", "owner": "Alisha", "status": "not started", "date": "", "blocker": "", "priority": "high", "comments": "Alisha will work on cleaning the cluttered data and then upload it to the dashboard. We need to complete this by Wednesday.", "subtasks": []}, {"title": "Will move the integration on production by 2nd june", "phase": "Production Movement", "owner": "Devx Team", "status": "not started", "date": "", "blocker": "", "priority": "high", "comments": "Dependence on the code base.", "subtasks": []}, {"title": "Content ready", "phase": "Email Warmup", "owner": "Alisha", "status": "not started", "date": "", "blocker": "", "priority": "high", "comments": "Will make it Live by 2nd June.", "subtasks": []}, {"title": "Connect with gupshup support team", "phase": "SMS template", "owner": "Alisha", "status": "not started", "date": "", "blocker": "", "priority": "high", "comments": "Gupshup support ticket has been raised. Please take this on priority.", "subtasks": []}, {"title": "Connect with gupshup support team", "phase": "Whatsapp Template", "owner": "", "status": "not started", "date": "", "blocker": "", "priority": "high", "comments": "", "subtasks": []}, {"title": "DevX Team will implement the events from backend.", "phase": "Razorpay", "owner": "Devx Team", "status": "not started", "date": "", "blocker": "", "priority": "high", "comments": "", "subtasks": []}]}]}}};</script>
     <script>
 /* Shared planning engine.
@@ -4700,6 +4586,9 @@ const STATE_KEY = "multi-project-dashboard-state";
    than merely unfinished. It is a first-class status so the report and the accordion editor
    show it too, not just the week modal. */
 const SUBTASK_STATUSES = ["not started", "in progress", "delayed", "blocked", "completed", "pending"];
+/* Marking a task one of these says the work runs past this week, so it is copied into the next
+   one. Completed, delayed and blocked all stop that: the work is done, or it is not moving. */
+const FORWARDING_STATUSES = ["pending", "in progress"];
 const WEEK_STATUSES = ["not started", "on track", "needs attention", "blocked", "completed"];
 
 /* Master plan seed, generated from the team's Google Sheet by tools/import-sheet.py. A task's
@@ -4976,18 +4865,6 @@ const nodes = {
   projectScope: document.getElementById("projectScope"),
   projectTimelineFields: document.getElementById("projectTimelineFields"),
   projectPhases: document.getElementById("projectPhases"),
-  weekModalOverlay: document.getElementById("weekModalOverlay"),
-  weekModalTitle: document.getElementById("weekModalTitle"),
-  weekModalStatus: document.getElementById("weekModalStatus"),
-  weekModalStart: document.getElementById("weekModalStart"),
-  weekModalClose: document.getElementById("weekModalClose"),
-  weekModalCarriedSection: document.getElementById("weekModalCarriedSection"),
-  weekModalCarried: document.getElementById("weekModalCarried"),
-  weekModalTasks: document.getElementById("weekModalTasks"),
-  weekModalNewTask: document.getElementById("weekModalNewTask"),
-  weekModalAdd: document.getElementById("weekModalAdd"),
-  weekModalBack: document.getElementById("weekModalBack"),
-  weekModalSave: document.getElementById("weekModalSave"),
   projScopeEdit: document.getElementById("projScopeEdit"),
   projScopeForm: document.getElementById("projScopeForm"),
   projScopeCancel: document.getElementById("projScopeCancel"),
@@ -5210,53 +5087,6 @@ function boot() {
     renderCategoryScreen();
   });
   nodes.projScopeEdit.addEventListener("click", () => toggleProjectScope(true));
-  nodes.weekModalClose.addEventListener("click", () => closeWeekModal());
-  nodes.weekModalBack.addEventListener("click", () => closeWeekModal());
-  nodes.weekModalSave.addEventListener("click", () => commitWeekDraft());
-  nodes.weekModalStart.addEventListener("change", () => {
-    const current = weekDraft && draftWeeks()[draftIndex()];
-    if (!current) return;
-    if (!nodes.weekModalStart.value) {
-      nodes.weekModalStart.value = current.weekStart;
-      return;
-    }
-    current.weekStart = nodes.weekModalStart.value;
-    current.weekRange = formatWeekRange(current.weekStart);
-    renderWeekModal();
-  });
-  /* Closing the tab or reloading with an unsaved week open asks first, like the modal's own
-     close does; Escape closes the modal through the same prompt. */
-  window.addEventListener("beforeunload", (e) => {
-    if (!weekDraftDirty()) return;
-    e.preventDefault();
-    e.returnValue = "";
-  });
-  document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape" && weekDraft && !nodes.weekModalOverlay.hidden) closeWeekModal();
-  });
-  nodes.weekModalAdd.addEventListener("click", () => addWeekModalTask());
-  nodes.weekModalNewTask.addEventListener("keydown", (e) => {
-    if (e.key === "Enter") { e.preventDefault(); addWeekModalTask(); }
-  });
-  nodes.weekModalStatus.addEventListener("change", () => {
-    const current = draftWeeks()[draftIndex()];
-    if (!current) return;
-    current.statusTag = nodes.weekModalStatus.value;
-    renderWeekModal();
-  });
-  nodes.weekModalOverlay.addEventListener("click", (e) => {
-    if (e.target === nodes.weekModalOverlay) closeWeekModal();
-  });
-  nodes.weekModalCarried.addEventListener("click", (e) => handleWeekModalClick(e));
-  nodes.weekModalTasks.addEventListener("click", (e) => handleWeekModalClick(e));
-  [nodes.weekModalCarried, nodes.weekModalTasks].forEach((list) => {
-    list.addEventListener("change", (e) => {
-      if (e.target.dataset.weekStatus) handleWeekModalStatus(e.target);
-      else if (e.target.dataset.weekMove && e.target.value) {
-        moveDraftTaskToWeek(e.target.dataset.weekMove, e.target.value);
-      }
-    });
-  });
   nodes.projScopeCancel.addEventListener("click", () => toggleProjectScope(false));
   nodes.projScopeForm.addEventListener("submit", (e) => saveProjectScope(e));
   nodes.projScopeTechTeam.addEventListener("change", () => {
@@ -5398,6 +5228,14 @@ renderDemoDataOptions();
     });
   }
 
+  /* On load as well as on opening the reports screen: a week can run out while nobody is
+     looking, and the work that outlived it should be on the next week's list by the time
+     anyone reads the dashboard. */
+  const carried = carryForwardOverdueTasks();
+  if (carried) {
+    renderAll();
+    announceCarriedForward(carried);
+  }
 }
 
 /* Stale either because the version moved on, or because the stored plan predates a field the
@@ -5424,87 +5262,6 @@ function setProjectView(view) {
 }
 
 
-/* ---------- Week modal ---------- */
-
-/* Edits a working copy of the project's weeks, so Back can walk away and Save is a real
-   commit rather than a decoration over changes already written. */
-let weekDraft = null;
-
-function draftWeeks() {
-  return [...weekDraft.updates].sort((left, right) => left.weekStart.localeCompare(right.weekStart));
-}
-
-function draftIndex() {
-  return draftWeeks().findIndex((update) => update.id === weekDraft.weekId);
-}
-
-function openWeekModal(updateId) {
-  const update = state.updates.find((item) => item.id === updateId);
-  if (!update) return;
-  if (!requirePermission("report.edit", "edit a weekly report")) return;
-
-  weekDraft = {
-    projectId: update.projectId,
-    weekId: updateId,
-    /* The draft as last saved. "Dirty" is a comparison against this rather than a flag that
-       only ever turns on, so changing something and changing it back leaves nothing to save. */
-    baseline: "",
-    /* Completion dates this session filled in by itself, so unticking can take them back out
-       and a tick-then-untick really does return the week to where it was. */
-    autoDated: new Set(),
-    /* Carried rows are the ones still outstanding, so ticking one would drop it out of the
-       list mid-click. Anything ticked here stays put until the modal closes. */
-    tickedHere: new Set(),
-    updates: state.updates
-      .filter((item) => item.projectId === update.projectId)
-      .map((item) => JSON.parse(JSON.stringify(item))),
-  };
-  weekDraft.baseline = JSON.stringify(weekDraft.updates);
-
-  nodes.weekModalStatus.innerHTML = WEEK_STATUSES
-    .map((status) => `<option value="${status}">${capitalize(status)}</option>`).join("");
-  nodes.weekModalOverlay.hidden = false;
-  renderWeekModal();
-  nodes.weekModalNewTask.value = "";
-}
-
-function weekDraftDirty() {
-  return Boolean(weekDraft) && JSON.stringify(weekDraft.updates) !== weekDraft.baseline;
-}
-
-function closeWeekModal() {
-  if (weekDraftDirty() && !confirm("Discard the changes made in this week?")) return;
-  weekDraft = null;
-  nodes.weekModalOverlay.hidden = true;
-}
-
-/* Commits the draft and closes. It writes a *copy* of the draft into state rather than the
-   draft objects themselves, so nothing the modal holds is ever live state. */
-function commitWeekDraft() {
-  if (!weekDraft) return;
-  if (!requirePermission("report.edit", "edit a weekly report")) return;
-
-  if (weekDraftDirty()) {
-    const byId = new Map(weekDraft.updates.map((item) => [item.id, JSON.parse(JSON.stringify(item))]));
-    state.updates = state.updates.map((item) => byId.get(item.id) || item);
-
-    const project = state.projects.find((item) => item.id === weekDraft.projectId);
-    if (project) project.updatedAt = new Date().toISOString();
-
-    refreshProjectGoLive(weekDraft.projectId);
-    saveState();
-  }
-
-  weekDraft = null;
-  nodes.weekModalOverlay.hidden = true;
-  renderAll();
-  showAppSuccess("Week saved.");
-}
-
-function weekTaskDescription(task) {
-  return [task.phase, task.domain].filter(Boolean).join(" · ") || task.owner || "";
-}
-
 /* A task stays owned by the week it was planned in. Earlier weeks' unfinished work is shown
    here, labelled with where it came from, so the history of what a week actually contained is
    not rewritten every time someone opens a later week. Moving a task between weeks is the
@@ -5524,9 +5281,11 @@ function carriedTasksFor(weeks, index, keepIds) {
   weeks.slice(0, index).forEach((week, position) => {
     if (!weekHasEnded(week, today)) return;
     (week.tasks || []).forEach((task) => {
-      if (task.status !== "completed" || (keepIds && keepIds.has(task.id))) {
-        carried.push({ task, from: position + 1, weekId: week.id });
-      }
+      if (task.status === "completed" && !(keepIds && keepIds.has(task.id))) return;
+      /* A task already continued into a later week is represented by that copy, so listing it
+         here as well would show one job as two pieces of late work, then three. */
+      if (taskWasForwarded(task, weeks, position)) return;
+      carried.push({ task, from: position + 1, weekId: week.id });
     });
   });
   return carried;
@@ -5546,193 +5305,6 @@ function reportRowSummary(update, tasks, carried) {
   const own = `${tasks.length} task${tasks.length === 1 ? "" : "s"}`;
   const slip = carried ? ` <span class="carried-count">+ ${carried} carried</span>` : "";
   return `${escapeHtml(label)} · ${own}${slip} · ${done} completed`;
-}
-
-function renderWeekModal() {
-  if (!weekDraft) return;
-  const weeks = draftWeeks();
-  const index = draftIndex();
-  const current = weeks[index];
-  if (!current) return closeWeekModal();
-
-  const carriedHere = carriedCountFor(weeks, index);
-  nodes.weekModalTitle.innerHTML = `📅 Week ${index + 1} (${escapeHtml(current.weekRange)})`
-    + (carriedHere ? ` <span class="carried-indicator">${carriedHere} carried</span>` : "");
-  nodes.weekModalStatus.value = current.statusTag;
-
-  const carried = carriedTasksFor(weeks, index, weekDraft.tickedHere);
-
-  nodes.weekModalCarriedSection.hidden = !carried.length;
-  nodes.weekModalCarried.innerHTML = carried
-    .map(({ task, from }) => weekTaskRow(task, `⬅ Carried from Week ${from}`)).join("");
-  const weekNumberOf = (weekStart) => {
-    const position = weeks.findIndex((week) => week.weekStart === weekStart);
-    return position >= 0 ? position + 1 : null;
-  };
-
-  nodes.weekModalTasks.innerHTML = (current.tasks || []).length
-    ? current.tasks.map((task) => {
-        const from = task.carriedFrom && task.carriedFrom !== current.weekStart
-          ? weekNumberOf(task.carriedFrom) : null;
-        return weekTaskRow(task, from ? `⬅ Carried from Week ${from}` : "");
-      }).join("")
-    : `<p class="muted">No tasks in this week yet.</p>`;
-
-  if (document.activeElement !== nodes.weekModalStart) nodes.weekModalStart.value = current.weekStart;
-
-  /* An asterisk while there is something to save, so the footer says whether the work in front
-     of you has been committed. */
-  const dirty = weekDraftDirty();
-  nodes.weekModalSave.disabled = !dirty;
-  nodes.weekModalSave.textContent = dirty ? "💾 Save Changes *" : "💾 Save Changes";
-  nodes.weekModalSave.title = dirty ? "You have unsaved changes" : "Nothing to save";
-}
-
-function weekTaskRow(task, source) {
-  const done = task.status === "completed";
-  const pending = task.status === "pending";
-  /* Foundational work is pinned to its week, so it cannot be shifted out of it. Status stays
-     editable — the point is that the work happens first, not that nobody may record it. */
-  const pinned = Number(task.fixedWeek) > 0;
-  return `
-    <div class="week-task${done ? " is-done" : ""}${pending ? " is-pending" : ""}${pinned ? " is-pinned" : ""}" data-week-task="${task.id}">
-      <label class="week-task-check">
-        <input type="checkbox"${done ? " checked" : ""} data-week-toggle="${task.id}" />
-      </label>
-      <div class="week-task-body">
-        <div class="week-task-title">${pinned ? `<span class="week-task-lock" title="Fixed to week ${task.fixedWeek}">🔒</span> ` : ""}${escapeHtml(task.title || "Untitled task")}</div>
-        <div class="week-task-desc">${escapeHtml(weekTaskDescription(task))}</div>
-        ${source ? `<div class="week-task-source">${escapeHtml(source)}</div>` : ""}
-      </div>
-      <select class="week-task-status" data-week-status="${task.id}">
-        ${SUBTASK_STATUSES.map((status) => `<option value="${status}"${status === task.status ? " selected" : ""}>${capitalize(status)}</option>`).join("")}
-      </select>
-      ${weekMoveControl(task, pinned, pending)}
-    </div>`;
-}
-
-/* Moving a task anywhere in the project, not just one week on. A native select rather than a
-   floating menu: the modal body scrolls, so an absolutely positioned dropdown would be clipped
-   by it, and this needs no outside-click handling or keyboard work of its own. The next week is
-   listed first, so the common case is still one open and one click. */
-function weekMoveControl(task, pinned, pending) {
-  const weeks = draftWeeks();
-  const here = draftIndex();
-  const reason = pinned
-    ? `Fixed to week ${task.fixedWeek} — foundational work the rest of the plan depends on.`
-    : (pending ? "Pending work stays in this week — change the status to move it on." : "");
-
-  if (reason) {
-    return `<select class="week-task-move" disabled title="${escapeHtml(reason)}"><option>Move…</option></select>`;
-  }
-
-  /* Nearest weeks first in each direction, so "next week" is the top entry. */
-  const order = weeks
-    .map((week, index) => ({ week, index }))
-    .filter((entry) => entry.index !== here)
-    .sort((left, right) => (left.index > here ? 0 : 1) - (right.index > here ? 0 : 1)
-      || Math.abs(left.index - here) - Math.abs(right.index - here));
-
-  if (!order.length) {
-    return `<select class="week-task-move" disabled title="This project has only one week."><option>Move…</option></select>`;
-  }
-
-  return `
-    <select class="week-task-move" data-week-move="${task.id}" title="Move this task to another week">
-      <option value="">Move…</option>
-      ${order.map(({ week, index }) => `
-        <option value="${week.id}">Week ${index + 1} · ${escapeHtml(week.weekRange)}</option>`).join("")}
-    </select>`;
-}
-
-function moveDraftTaskToWeek(taskId, weekId) {
-  const target = weekDraft.updates.find((item) => item.id === weekId);
-  const found = findDraftTask(taskId);
-  if (!target || !found || found.week.id === target.id) return;
-  if (Number(found.task.fixedWeek)) return;
-
-  found.week.tasks = found.week.tasks.filter((item) => item.id !== found.task.id);
-  found.task.startDate = target.weekStart;
-  found.task.dueDate = taskDueDate(target.weekStart, found.task.days || templateDefaultDays());
-  target.tasks.push(found.task);
-  renderWeekModal();
-}
-
-function findDraftTask(taskId) {
-  for (const week of weekDraft.updates) {
-    const task = (week.tasks || []).find((item) => item.id === taskId);
-    if (task) return { week, task };
-  }
-  return null;
-}
-
-function handleWeekModalClick(event) {
-  if (!weekDraft) return;
-
-  const toggle = event.target.closest("[data-week-toggle]");
-  if (toggle) {
-    const found = findDraftTask(toggle.dataset.weekToggle);
-    if (!found) return;
-    found.task.status = toggle.checked ? "completed" : (found.task.status === "completed" ? "not started" : found.task.status);
-    if (toggle.checked) {
-      if (!found.task.date) {
-        found.task.date = toInputDate(new Date());
-        weekDraft.autoDated.add(found.task.id);
-      }
-      weekDraft.tickedHere.add(found.task.id);
-    } else if (weekDraft.autoDated.delete(found.task.id)) {
-      found.task.date = "";
-    }
-    renderWeekModal();
-    return;
-  }
-
-}
-
-/* Marking work "pending" is a decision that it is being carried now, so it moves into the week
-   being triaged rather than staying filed under a week it did not get done in. That is a
-   deliberate action by the person editing, which is why it is allowed to move the task where
-   the automatic carryover is not. */
-function handleWeekModalStatus(select) {
-  const found = findDraftTask(select.dataset.weekStatus);
-  if (!found) return;
-
-  found.task.status = select.value;
-  if (select.value === "completed" && !found.task.date) {
-    found.task.date = toInputDate(new Date());
-    weekDraft.autoDated.add(found.task.id);
-  }
-  if (select.value === "completed") weekDraft.tickedHere.add(found.task.id);
-  if (select.value !== "completed" && weekDraft.autoDated.delete(found.task.id)) found.task.date = "";
-
-  const current = draftWeeks()[draftIndex()];
-  if (select.value === "pending" && current && found.week.id !== current.id && !Number(found.task.fixedWeek)) {
-    /* Record where the work was originally planned before moving it, so the row keeps saying
-       it was carried rather than looking like it was always this week's. */
-    if (!found.task.carriedFrom) found.task.carriedFrom = found.week.weekStart;
-    found.week.tasks = found.week.tasks.filter((item) => item.id !== found.task.id);
-    found.task.startDate = current.weekStart;
-    found.task.dueDate = taskDueDate(current.weekStart, found.task.days || templateDefaultDays());
-    current.tasks.push(found.task);
-  }
-  renderWeekModal();
-}
-
-function addWeekModalTask() {
-  if (!weekDraft) return;
-  const title = nodes.weekModalNewTask.value.trim();
-  if (!title) return;
-
-  const current = draftWeeks()[draftIndex()];
-  current.tasks = current.tasks || [];
-  current.tasks.push({
-    id: newId(), title, phase: "", domain: "", owner: "", status: "not started",
-    date: "", blocker: "", priority: "medium", comments: "",
-    days: templateDefaultDays(), startDate: current.weekStart,
-    dueDate: taskDueDate(current.weekStart, templateDefaultDays()), subtasks: [],
-  });
-  nodes.weekModalNewTask.value = "";
-  renderWeekModal();
 }
 
 function clearResetFlagFromUrl() {
@@ -5769,6 +5341,12 @@ function showAppBanner(message, tone = "error") {
   if (tone !== "error") {
     bannerTimer = setTimeout(() => dismissAppBanner(), BANNER_DISMISS_MS);
   }
+}
+
+/* Say what moved. Creating task rows on someone's behalf should not be silent. */
+function announceCarriedForward(count) {
+  if (!count) return;
+  showAppInfo(`${count} ${count === 1 ? "task" : "tasks"} still pending or in progress carried forward into the following week.`);
 }
 
 function dismissAppBanner() {
@@ -6152,6 +5730,13 @@ const ACTIVE_WINDOW_DAYS = 7;
 /* Projects carry no "modified" stamp of their own, so activity is the most recent thing that
    happened to them: an explicit save, the project's own creation, or the newest weekly report
    added to it. Older projects predate the stamp and fall back to the other two. */
+/* Editing a week is activity on its project: the folder list's Active/Idle marker reads
+   `updatedAt`, and a week edited today should not leave a project looking untouched. */
+function stampProjectActivity(projectId) {
+  const project = state.projects.find((item) => item.id === projectId);
+  if (project) project.updatedAt = new Date().toISOString();
+}
+
 function projectLastActivity(project) {
   const stamps = [project.updatedAt, project.createdAt];
   state.updates.forEach((update) => {
@@ -9455,7 +9040,8 @@ function refileTasksIntoWeeks(projectId) {
 
   moves.forEach(({ task, from, to }) => {
     from.tasks = from.tasks.filter((item) => item.id !== task.id);
-    to.tasks.push(task);
+    /* An arrival again: it was re-dated into this week rather than planned in it. */
+    to.tasks.unshift(task);
   });
 
   return moves.length;
@@ -9653,6 +9239,9 @@ function openCreateReport(projectId, focusUpdateId, { editing = Boolean(focusUpd
   nodes.createReportTitle.textContent = "Project Reports";
   populateProjectPicker(nodes.reportsIndexProject, projectId);
 
+  /* Before the list is drawn, not during: renderAll() calls back into the index, and writing
+     state from inside a render would re-enter it. */
+  announceCarriedForward(carryForwardOverdueTasks());
   renderReportsIndex(projectId || "");
   renderAll();
   nodes.createReportScreen.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -9716,12 +9305,11 @@ function renderReportsIndex(projectId) {
         </div>
         <div class="report-row-actions">
           <span class="status-badge ${statusClass(update.statusTag)}">${escapeHtml(update.statusTag)}</span>
-          <button type="button" class="ghost-button small-button" data-requires="report.edit" data-open-week="${update.id}">Open week</button>
           <button type="button" class="ghost-button small-button" data-requires="report.edit" data-edit-report="${update.id}">Edit</button>
           <button type="button" class="row-remove" data-requires="report.delete" data-delete-report="${update.id}">Delete</button>
         </div>
         <div class="report-row-tasks" id="report-tasks-${update.id}"${open ? "" : " hidden"}>
-          ${renderReportRowTasks(update)}
+          ${renderReportRowTasks(update, updates, index)}
         </div>
       </article>
     `;
@@ -9757,8 +9345,12 @@ function applyWeekStructureChange(button) {
   if (!update) return;
   update.tasks = update.tasks || [];
 
+  /* A carried row is displayed here but owned by an earlier week, so removing a task or adding
+     a sub-task has to act on the week that holds it — not on the week being edited. */
+  const owner = rowOwnerWeek(button) || update;
+  owner.tasks = owner.tasks || [];
   const taskId = button.dataset.addSubtask || button.dataset.removeTask || button.dataset.task;
-  const task = update.tasks.find((item) => item.id === taskId);
+  const task = owner.tasks.find((item) => item.id === taskId);
 
   if (button.dataset.addTask) {
     update.tasks.push({
@@ -9768,7 +9360,7 @@ function applyWeekStructureChange(button) {
       dueDate: taskDueDate(update.weekStart, templateDefaultDays()), subtasks: [],
     });
   } else if (button.dataset.removeTask && task) {
-    update.tasks = update.tasks.filter((item) => item.id !== task.id);
+    owner.tasks = owner.tasks.filter((item) => item.id !== task.id);
   } else if (button.dataset.addSubtask && task) {
     task.subtasks = task.subtasks || [];
     task.subtasks.push({ id: newId(), title: "", owner: task.owner || "", status: "not started", date: "", blocker: "", priority: "medium", comments: "" });
@@ -9776,45 +9368,31 @@ function applyWeekStructureChange(button) {
     task.subtasks = (task.subtasks || []).filter((item) => item.id !== button.dataset.removeSubtask);
   }
 
+  stampProjectActivity(update.projectId);
+
   saveState();
   renderReportsIndex(nodes.reportsIndexProject.value);
   setReportRowsOpenState();
 }
 
-function renderReportRowTasks(update) {
+/* The whole week is edited here: its status and start date, the work still open from earlier
+   weeks, and its own tasks. Everything writes as it is typed — there is no draft, which is what
+   lets several weeks be open at once without two of them disagreeing about the same task. */
+function renderReportRowTasks(update, weeks, index) {
   const tasks = update.tasks || [];
+  const carried = carriedTasksFor(weeks || [update], index || 0);
+  const moveTargets = (weeks || []).map((week, position) => ({ week, position }))
+    .filter((entry) => entry.week.id !== update.id);
 
-  const rows = tasks.map((task) => {
-    const subtasks = task.subtasks || [];
-    return `
-      <tr class="week-task-row" data-task="${task.id}">
-        <td><input type="text" data-task-field="phase" value="${escapeHtml(task.phase || "")}" placeholder="Phase" /></td>
-        <td><input type="text" data-task-field="domain" value="${escapeHtml(task.domain || "")}" placeholder="Domain" /></td>
-        <td><input type="text" data-task-field="title" value="${escapeHtml(task.title || "")}" placeholder="Task" /></td>
-        <td><input type="text" list="ownerOptions" data-task-field="owner" value="${escapeHtml(task.owner || "")}" placeholder="Owner" /></td>
-        <td><input type="date" data-task-field="date" value="${escapeHtml(task.date || "")}" title="The date the work actually finished — this is what the generated report prints" /></td>
-        <td>${statusSelect("task-field", task.status)}</td>
-        <td><input type="text" data-task-field="comments" value="${escapeHtml(task.comments || "")}" placeholder="Comments" /></td>
-        <td class="week-task-actions">
-          <button type="button" class="link-button" data-add-subtask="${task.id}" title="Add a sub-task">+ Sub</button>
-          <button type="button" class="row-remove" data-remove-task="${task.id}" title="Remove this task">&times;</button>
-        </td>
-      </tr>
-      ${subtasks.map((sub) => `
-        <tr class="week-subtask-row" data-task="${task.id}" data-subtask="${sub.id}">
-          <td></td>
-          <td></td>
-          <td class="week-subtask-title"><span aria-hidden="true">&#8627;</span><input type="text" data-subtask-field="title" value="${escapeHtml(sub.title || "")}" placeholder="Sub-task" /></td>
-          <td><input type="text" list="ownerOptions" data-subtask-field="owner" value="${escapeHtml(sub.owner || "")}" placeholder="Owner" /></td>
-          <td><input type="date" data-subtask-field="date" value="${escapeHtml(sub.date || "")}" title="The date this sub-task finished" /></td>
-          <td>${statusSelect("subtask-field", sub.status)}</td>
-          <td><input type="text" data-subtask-field="comments" value="${escapeHtml(sub.comments || "")}" placeholder="Comments" /></td>
-          <td class="week-task-actions">
-            <button type="button" class="row-remove" data-remove-subtask="${sub.id}" data-task="${task.id}" title="Remove this sub-task">&times;</button>
-          </td>
-        </tr>`).join("")}
-    `;
-  }).join("");
+  const carriedRows = carried
+    .map(({ task, from, weekId }) => weekTaskRows(task, moveTargets, index, weekId, `⬅ Carried from Week ${from}`))
+    .join("");
+  /* A task that arrived here from an earlier week keeps saying so, rather than looking as though
+     it had always been this week's work — whether it was copied forward by its status or moved
+     here by hand. */
+  const ownRows = tasks.map((task) => weekTaskRows(task, moveTargets, index, update.id,
+    taskSourceLabel(task, weeks))).join("");
+  const anyRows = carried.length || tasks.length;
 
   return `
     <div class="week-editor" data-update="${update.id}">
@@ -9827,19 +9405,109 @@ function renderReportRowTasks(update) {
         <label>Week starting
           <input type="date" data-week-field="weekStart" value="${escapeHtml(update.weekStart || "")}" />
         </label>
+        ${carried.length ? `<span class="carried-indicator" title="Work from earlier weeks that is past its week and still open">${carried.length} carried</span>` : ""}
         <button type="button" class="btn-save" data-week-saved="${update.id}" disabled
           title="This editor saves as you type — there is nothing waiting to be saved.">Saved</button>
         <button type="button" class="secondary-button small-button" data-add-task="${update.id}">+ Add task</button>
       </div>
-      ${tasks.length ? `
+      ${anyRows ? `
         <div class="week-editor-scroll">
           <table class="report-row-task-table">
             <thead><tr><th>Phase</th><th>Domain</th><th>Task</th><th>Owner</th><th>Completed On</th><th>Status</th><th>Comments</th><th></th></tr></thead>
-            <tbody>${rows}</tbody>
+            <tbody>${carriedRows}${ownRows}</tbody>
           </table>
         </div>` : `<p class="muted">No tasks due this week. Use “+ Add task” to add one.</p>`}
+      <div class="week-editor-foot">
+        <button type="button" class="primary-button small-button" data-week-save="${update.id}"
+          title="This week is already saved — every field writes as you type. Use this to confirm.">💾 Save Changes</button>
+      </div>
     </div>
   `;
+}
+
+function taskSourceLabel(task, weeks) {
+  if (task.copiedFromTaskId && task.copiedFrom) {
+    return `⬅ Copied from ${weekLabelForStart(weeks, task.copiedFrom)}`;
+  }
+  if (task.carriedFrom) return `⬅ Carried from ${weekLabelForStart(weeks, task.carriedFrom)}`;
+  return "";
+}
+
+function weekLabelForStart(weeks, weekStart) {
+  const position = (weeks || []).findIndex((week) => week.weekStart === weekStart);
+  return position >= 0 ? `Week ${position + 1}` : formatWeekRange(weekStart);
+}
+
+/* A task and its sub-tasks. `ownerWeekId` is the week the task belongs to, which for a carried
+   row is an earlier week than the one being edited — edits follow the task, not the row. */
+function weekTaskRows(task, moveTargets, here, ownerWeekId, source) {
+  const pinned = Number(task.fixedWeek) > 0;
+  const pending = task.status === "pending";
+  const classes = ["week-task-row"];
+  /* A copied row is a continuation of earlier work, like a carried one, and reads the same way:
+     two badge colours for "this is late" and "this was forwarded" would be a distinction the
+     reader cannot act on. */
+  if (source) classes.push("is-carried");
+  if (pinned) classes.push("is-pinned");
+  if (pending) classes.push("is-pending");
+
+  return `
+    <tr class="${classes.join(" ")}" data-task="${task.id}" data-owner-week="${ownerWeekId}">
+      <td><input type="text" data-task-field="phase" value="${escapeHtml(task.phase || "")}" placeholder="Phase" /></td>
+      <td><input type="text" data-task-field="domain" value="${escapeHtml(task.domain || "")}" placeholder="Domain" /></td>
+      <td>
+        <input type="text" data-task-field="title" value="${escapeHtml(task.title || "")}" placeholder="Task" />
+        ${pinned ? `<span class="week-task-lock" title="Fixed to week ${task.fixedWeek} — foundational work the rest of the plan depends on.">🔒 week ${task.fixedWeek}</span>` : ""}
+        ${source ? `<span class="week-task-source">${escapeHtml(source)}</span>` : ""}
+      </td>
+      <td><input type="text" list="ownerOptions" data-task-field="owner" value="${escapeHtml(task.owner || "")}" placeholder="Owner" /></td>
+      <td><input type="date" data-task-field="date" value="${escapeHtml(task.date || "")}" title="The date the work actually finished — this is what the generated report prints" /></td>
+      <td>${statusSelect("task-field", task.status)}</td>
+      <td><input type="text" data-task-field="comments" value="${escapeHtml(task.comments || "")}" placeholder="Comments" /></td>
+      <td class="week-task-actions">
+        ${weekMoveSelect(task, moveTargets, here, pinned)}
+        <button type="button" class="link-button" data-add-subtask="${task.id}" title="Add a sub-task">+ Sub</button>
+        <button type="button" class="row-remove" data-remove-task="${task.id}" title="Remove this task">&times;</button>
+      </td>
+    </tr>
+    ${(task.subtasks || []).map((sub) => `
+      <tr class="week-subtask-row" data-task="${task.id}" data-owner-week="${ownerWeekId}" data-subtask="${sub.id}">
+        <td></td>
+        <td></td>
+        <td class="week-subtask-title"><span aria-hidden="true">&#8627;</span><input type="text" data-subtask-field="title" value="${escapeHtml(sub.title || "")}" placeholder="Sub-task" /></td>
+        <td><input type="text" list="ownerOptions" data-subtask-field="owner" value="${escapeHtml(sub.owner || "")}" placeholder="Owner" /></td>
+        <td><input type="date" data-subtask-field="date" value="${escapeHtml(sub.date || "")}" title="The date this sub-task finished" /></td>
+        <td>${statusSelect("subtask-field", sub.status)}</td>
+        <td><input type="text" data-subtask-field="comments" value="${escapeHtml(sub.comments || "")}" placeholder="Comments" /></td>
+        <td class="week-task-actions">
+          <button type="button" class="row-remove" data-remove-subtask="${sub.id}" data-task="${task.id}" title="Remove this sub-task">&times;</button>
+        </td>
+      </tr>`).join("")}
+  `;
+}
+
+/* Move a task to any other week, nearest ahead first — a week further on is the usual
+   destination, so it should not be reached past every earlier week. Pinned work cannot move,
+   and pending work has just been deliberately placed where it is. */
+function weekMoveSelect(task, moveTargets, here, pinned) {
+  /* Only pinned work is barred. Pending used to be too, because Pending *moved* the task into
+     the week being triaged and moving it again made no sense; now it copies the work forward
+     instead, so this instance is an ordinary task that may be moved like any other. */
+  const reason = pinned
+    ? `Fixed to week ${task.fixedWeek} — foundational work the rest of the plan depends on.`
+    : "";
+  if (reason || !moveTargets.length) {
+    return `<select class="week-task-move" disabled title="${escapeHtml(reason || "There is no other week to move this to.")}"><option>Move…</option></select>`;
+  }
+
+  const distance = ({ position }) => (position > here ? position - here : 1000 + (here - position));
+  const ordered = [...moveTargets].sort((left, right) => distance(left) - distance(right));
+  return `
+    <select class="week-task-move" data-week-move="${task.id}" title="Move this task to another week">
+      <option value="">Move…</option>
+      ${ordered.map(({ week, position }) => `
+        <option value="${week.id}">Week ${position + 1} · ${escapeHtml(week.weekRange)}</option>`).join("")}
+    </select>`;
 }
 
 /* Editing in place: find what the field belongs to, write it, save. The row summary is
@@ -9863,8 +9531,17 @@ function handleReportsIndexInput(event) {
     return;
   }
 
+  /* Moving a task is a change of which week owns it, so the list is rebuilt afterwards rather
+     than patched — the row has to leave this table and appear under another week. */
+  if (field.dataset.weekMove) {
+    moveTaskToWeek(field.dataset.weekMove, field.value, update);
+    return;
+  }
+
   const row = field.closest("[data-task]");
-  const task = (update.tasks || []).find((item) => item.id === row.dataset.task);
+  if (!row) return;
+  const owner = rowOwnerWeek(field) || update;
+  const task = (owner.tasks || []).find((item) => item.id === row.dataset.task);
   if (!task) return;
 
   if (field.dataset.taskField) {
@@ -9877,6 +9554,24 @@ function handleReportsIndexInput(event) {
       const cell = row.querySelector('[data-task-field="date"]');
       if (cell) cell.value = task.date;
     }
+    if (field.dataset.taskField === "status") {
+      /* A carried task just ticked off stays in the table, struck through, instead of vanishing
+         from under the pointer. It leaves the carried list on the next rebuild. */
+      row.classList.toggle("is-resolved", field.value === "completed" && row.classList.contains("is-carried"));
+      /* Restyle now rather than waiting for a rebuild that a plain status change does not
+         trigger, so the row reads as pending the moment it is set. */
+      row.classList.toggle("is-pending", field.value === "pending");
+      /* Marking work pending or in progress says it runs past this week, so it is copied into
+         the next one. This replaced Pending's earlier behaviour of *moving* a carried task into
+         the week being triaged: one status cannot both move a task and copy it. */
+      if (FORWARDING_STATUSES.includes(field.value) && forwardTaskToNextWeek(task, update)) {
+        saveState();
+        stampProjectActivity(update.projectId);
+        renderReportsIndex(nodes.reportsIndexProject.value);
+        setReportRowsOpenState();
+        return;
+      }
+    }
   } else if (field.dataset.subtaskField) {
     const sub = (task.subtasks || []).find((item) => item.id === row.dataset.subtask);
     if (!sub) return;
@@ -9884,8 +9579,136 @@ function handleReportsIndexInput(event) {
   }
 
   saveState();
+  stampProjectActivity(update.projectId);
   refreshReportRowSummary(update);
+  /* Completing carried work changes the carried count on every later week, not just this one. */
+  if (owner.id !== update.id) refreshReportRowSummary(owner);
   flashInlineSaved(update);
+}
+
+/* Which week owns the row a control sits in. A carried row is rendered under a later week but
+   the task still belongs where it was planned, so every edit has to be written there. */
+function rowOwnerWeek(element) {
+  const row = element.closest("[data-owner-week]");
+  if (!row) return null;
+  return state.updates.find((item) => item.id === row.dataset.ownerWeek) || null;
+}
+
+/* Copy a task into the week after the one being edited, so work that runs past this week is
+   already on next week's list. The copy is its own record with its own id, dates and status, so
+   the two weeks can disagree: in progress in one, completed in the next.
+   
+   It copies rather than moves, so the week it was planned in keeps saying what it held. Nothing
+   is ever removed by this: completing a task stops further copies but leaves the ones already
+   made, because someone may have typed into them. Returns true when a copy was made. */
+function forwardTaskToNextWeek(task, editingWeek, { auto = false } = {}) {
+  const weeks = projectWeeksSorted(editingWeek.projectId);
+  const here = weeks.findIndex((week) => week.id === editingWeek.id);
+  const target = here >= 0 ? weeks[here + 1] : null;
+  /* The last week has nowhere to forward to. Creating a week past the end of the cycle would
+     silently extend the project and move a go-live date that is calculated, not entered. */
+  if (!target) return false;
+
+  target.tasks = target.tasks || [];
+  /* One copy per source task per week, however many times the status is set. */
+  if (target.tasks.some((item) => item.copiedFromTaskId === task.id)) return false;
+  /* The automatic sweep must not undo a decision: once this hop has been made, deleting the
+     copy keeps it deleted rather than having it reappear on the next load. Marking the status
+     by hand again does re-create it, which is the way back. */
+  if (auto && task.forwardedToWeek === target.id) return false;
+  task.forwardedToWeek = target.id;
+
+  /* Arrivals go to the top of the week, not the bottom: work carried over from the week before
+     is what a person opening this week needs to see first. The report reads the same array, so
+     the editor and the document agree on the order. */
+  target.tasks.unshift({
+    ...task,
+    id: newId(),
+    /* The copy is a continuation, not a second foundation: SDK Set Up and User Tracking are
+       pinned so the *plan* places them in weeks 1 and 2, which says nothing about whether the
+       work finishes there. Carrying the pin onto the copy would have it claim to be fixed to
+       week 2 while sitting in week 3, wear a lock in the wrong week, and refuse to be moved. */
+    fixedWeek: null,
+    /* Completed On is per week: each copy records when the work finished in *its* week, so an
+       inherited date would claim the work was done in a week it was not. */
+    date: "",
+    startDate: target.weekStart,
+    dueDate: taskDueDate(target.weekStart, task.days || templateDefaultDays()),
+    copiedFromTaskId: task.id,
+    copiedFrom: editingWeek.weekStart,
+    subtasks: (task.subtasks || []).map((sub) => ({ ...sub, id: newId(), date: "" })),
+  });
+  return true;
+}
+
+/* Work marked pending or in progress does not stop being due when its week runs out. Marking a
+   task copies it forward there and then; this catches everything *already* marked when a week
+   ends, so nothing has to be touched a second time to keep moving.
+   
+   Only weeks that have **ended** forward, which is what keeps this from fanning out: a task
+   advances one week per real week, rather than a single click filling weeks 3 to 12 at once.
+   Weeks are walked in order, so work stranded several weeks back steps forward through each of
+   them and every week it was open in keeps a record of it. */
+function carryForwardOverdueTasks() {
+  const today = toInputDate(new Date());
+  let carried = 0;
+
+  state.projects.forEach((project) => {
+    const weeks = projectWeeksSorted(project.id);
+    weeks.slice(0, -1).forEach((week) => {
+      if (!weekHasEnded(week, today)) return;
+      /* A snapshot per week, because forwarding writes into the *next* week's array — which is
+         then visited in this same pass, so a chain advances as far as the current week. */
+      [...(week.tasks || [])].forEach((task) => {
+        if (!FORWARDING_STATUSES.includes(task.status)) return;
+        if (forwardTaskToNextWeek(task, week, { auto: true })) carried += 1;
+      });
+    });
+  });
+
+  if (carried) saveState();
+  return carried;
+}
+
+/* Has this task already been continued into a later week? Such a task is not listed as carried:
+   its continuation stands for it, and counting both would show one job as two pieces of late
+   work, then three. */
+function taskWasForwarded(task, weeks, fromIndex) {
+  return weeks.slice(fromIndex + 1)
+    .some((week) => (week.tasks || []).some((item) => item.copiedFromTaskId === task.id));
+}
+
+function projectWeeksSorted(projectId) {
+  return state.updates
+    .filter((item) => item.projectId === projectId)
+    .sort((left, right) => left.weekStart.localeCompare(right.weekStart));
+}
+
+/* The explicit Move control: the task is moved, not copied, and re-dated into its new week. */
+function moveTaskToWeek(taskId, weekId, editing) {
+  const target = state.updates.find((item) => item.id === weekId);
+  if (!target) {
+    renderReportsIndex(nodes.reportsIndexProject.value);
+    setReportRowsOpenState();
+    return;
+  }
+
+  const owner = state.updates.find((week) => (week.tasks || []).some((task) => task.id === taskId));
+  const task = owner && owner.tasks.find((item) => item.id === taskId);
+  if (!task || owner.id === target.id || Number(task.fixedWeek)) return;
+
+  if (!task.carriedFrom && owner.id !== editing.id) task.carriedFrom = owner.weekStart;
+  owner.tasks = owner.tasks.filter((item) => item.id !== task.id);
+  task.startDate = target.weekStart;
+  task.dueDate = taskDueDate(target.weekStart, task.days || templateDefaultDays());
+  target.tasks = target.tasks || [];
+  /* Top of the list, for the same reason as a forwarded copy: it arrived from elsewhere. */
+  target.tasks.unshift(task);
+
+  saveState();
+  stampProjectActivity(target.projectId);
+  renderReportsIndex(nodes.reportsIndexProject.value);
+  setReportRowsOpenState();
 }
 
 /* The inline editor writes on every change, so its Save can never sit in a "you have unsaved
@@ -9909,6 +9732,21 @@ function flashInlineSaved(update) {
   inlineSavedTimers.push(setTimeout(() => {
     button.textContent = "Saved";
     button.classList.remove("saved");
+  }, 1800));
+}
+
+let weekSavedTimers = [];
+
+/* Say so on the button itself, so a click is visibly acknowledged rather than appearing to do
+   nothing — which is exactly how it would read, since there was nothing outstanding. */
+function confirmWeekSaved(button) {
+  weekSavedTimers.forEach(clearTimeout);
+  weekSavedTimers = [];
+  button.textContent = "✓ Saved";
+  button.classList.add("is-confirmed");
+  weekSavedTimers.push(setTimeout(() => {
+    button.textContent = "💾 Save Changes";
+    button.classList.remove("is-confirmed");
   }, 1800));
 }
 
@@ -9936,13 +9774,28 @@ function refreshReportRowSummary(update) {
 function handleReportsIndexClick(event) {
   const toggle = event.target.closest("[data-toggle-report]");
   if (toggle) {
-    /* An accordion: opening a week closes the others, so the list stays compact however many
-       weeks a project has. */
+    /* Any number of weeks may be open at once. Nothing is held in a draft, so two open weeks
+       cannot disagree about the same task. */
     const id = toggle.dataset.toggleReport;
-    const open = !uiState.openReportRows.has(id);
-    uiState.openReportRows.clear();
-    if (open) uiState.openReportRows.add(id);
+    if (uiState.openReportRows.has(id)) uiState.openReportRows.delete(id);
+    else uiState.openReportRows.add(id);
     setReportRowsOpenState();
+    return;
+  }
+
+  /* Save Changes on a surface that has already saved everything. It was asked for by name, so
+     it is here and it works — it writes state and confirms — but it can never have anything
+     pending to commit: the editor writes on every keystroke, which is what allows more than one
+     week to be open without two drafts fighting over the same carried task. */
+  const save = event.target.closest("[data-week-save]");
+  if (save) {
+    if (!requirePermission("report.edit", "edit a weekly report")) return;
+    const update = state.updates.find((item) => item.id === save.dataset.weekSave);
+    if (!update) return;
+    saveState();
+    stampProjectActivity(update.projectId);
+    flashInlineSaved(update);
+    confirmWeekSaved(save);
     return;
   }
 
@@ -9950,12 +9803,6 @@ function handleReportsIndexClick(event) {
   if (structural) {
     if (!requirePermission("report.edit", "edit a weekly report")) return;
     applyWeekStructureChange(structural);
-    return;
-  }
-
-  const open = event.target.closest("[data-open-week]");
-  if (open) {
-    openWeekModal(open.dataset.openWeek);
     return;
   }
 
@@ -9972,20 +9819,23 @@ function handleReportsIndexClick(event) {
   }
 }
 
-/* Editing happens inside the week's own card, so "Edit" just opens that week. */
+/* "Edit" and the chevron do the same thing: fold this week's editor open or shut. */
 function openEditUpdate(updateId) {
   const update = state.updates.find((item) => item.id === updateId);
   if (!update) return;
   const project = state.projects.find((item) => item.id === update.projectId);
   if (!project) return;
 
-  uiState.openReportRows.clear();
-  uiState.openReportRows.add(updateId);
+  const opening = !uiState.openReportRows.has(updateId);
+  if (opening) uiState.openReportRows.add(updateId);
+  else uiState.openReportRows.delete(updateId);
+
   openCreateReport(project.id, null, { editing: false });
   setReportRowsOpenState();
+  if (!opening) return;
 
-  const article = nodes.reportsIndexList.querySelector(`.week-editor[data-update="${updateId}"]`);
-  if (article) article.scrollIntoView({ behavior: "smooth", block: "center" });
+  const editor = nodes.reportsIndexList.querySelector(`.week-editor[data-update="${updateId}"]`);
+  if (editor) editor.scrollIntoView({ behavior: "smooth", block: "center" });
 }
 
 /* Any owner typed on a task that is not already a POC for this project is added to that

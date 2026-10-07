@@ -109,8 +109,8 @@ cannot hand these tasks back their elastic offsets. It is carried through `toTem
 `ensureDefaults` and the seed writer; that whitelist rebuilds each task field by field, so a new
 field not named in all three is silently dropped.
 
-In the week modal a pinned task shows a lock, cannot be shifted, and is not moved by the pending
-rule. Its status stays editable — the point is that the work happens first, not that nobody may
+In the week editor a pinned task shows a lock and cannot be moved. Marking it pending or in
+progress does copy it into the next week, as an unpinned continuation. Its status stays editable — the point is that the work happens first, not that nobody may
 record it.
 
 ## Create-project wizard
@@ -163,63 +163,55 @@ Opening a project always lands on details. They are two views of one screen rath
 screens, so the project stays loaded and Back is instant.
 
 The old "Weekly updates" list on the project page is gone — it was a third rendering of the
-same weeks, after the report itself and the reports accordion. Adding and editing weeks now
+same weeks, after the report itself and the reports accordion. Adding and editing weeks all
 happens on the Project Reports screen, reachable from the details view.
 
-## Week modal
-
-"Open week" on a row in the reports list opens a focused view of that week: what is still
-outstanding from earlier weeks, what is planned for this one, tick-to-complete, shift-to-next-
-week, and add-a-task.
-
-**Carried means late**, not merely unfinished: `carriedTasksFor()` counts tasks from earlier
-weeks that have **ended** and are still not completed. Counting everything incomplete instead
-put "+14 carried" on week 6 of a project where nothing had started — work that is not due yet,
-not slippage. The accordion summary shows it as "4 tasks + 2 carried", the week modal's title
-as a badge, and both use the same function as the modal's carried list, so a count never
-disagrees with the rows it stands for. The generated report shows none of it.
-
-Carryover is **display only**. A task stays owned by the week it was planned in; earlier weeks'
-unfinished work is shown here labelled with its source, so opening a later week never rewrites
-what an earlier one contained. Everything not completed carries, not a chosen set of statuses.
-
-Moving a task between weeks is the explicit **Move** control on its row — a native select rather
-than a floating menu, because `.modal-body` scrolls and would clip an absolutely positioned one.
-It lists every other week with the nearest ahead first, moves the task rather than copying it,
-and re-dates it into the target. It is disabled for pinned and pending tasks.
-
-Each row carries a status dropdown over the six statuses. **Pending** means the work is
-deliberately being carried in the week it now sits in, rather than merely unfinished: choosing
-it moves the task into the week being triaged and disables Shift, since the task has just been
-pinned there. It is a first-class status, so the report and the accordion show it too. The move records
-`carriedFrom` on the task, so the row keeps saying where the work was originally planned
-instead of looking like it had always been this week's — and keeps saying it after a save.
-
-The modal edits a deep copy of the project's weeks. Its only save is the footer's **Save
-Changes** (`commitWeekDraft()`), which commits and closes, writing a *copy* of the draft into
-state. A header Save beside Week status and Week starting was added and then removed on request.
-"Back", ×, Escape, the backdrop and a tab reload all ask first while work is unsaved.
-
-Unsaved means `weekDraftDirty()`: the draft compared with a snapshot taken on open and on each
-save, not a flag that only turns on — so changing something and changing it back leaves nothing
-to save. Completion dates the modal fills in itself are tracked in `autoDated` and removed on
-untick, so tick-then-untick really does return to clean.
-
-(Headless Chrome's virtual clock does not advance CSS transitions, so a test that reads the
-button's `background` straight after a change sees the start colour. Disable the transition in
-tests; `cursor`, which does not animate, flips immediately.) A carried task ticked here stays visible and struck through until the
-modal closes, rather than vanishing out of the list mid-click.
-
-## Weekly reports screen
+## Weekly reports screen: weeks edited in place
 
 Weeks are an accordion: collapsed to a summary line (week number, dates, phase, task count,
-completed count, status), one open at a time. The open week **is** the editor — task, domain,
-owner, due date, status and comments, with sub-tasks nested underneath, all writing straight to
-state on change. There is no separate form below the list, so a week's tasks are never rendered
-twice. "Edit" opens a week in place; "+ New report" appends a week and opens it.
+carried count, completed count, status). **The open week is the editor**, and **any number of
+weeks may be open at once** — "Edit" and the chevron both fold a week open or shut, and
+`uiState.openReportRows` is a Set, not a single id. "+ New report" appends a week and opens it
+alone, since that is the week the person just asked for.
 
-Columns run **Phase | Domain | Task | Owner | Completed On | Status | Comments** in the editor
-and in every report output, so what is edited and what is sent read the same way.
+There was also a **week modal** ("Open week"), a second editor over a deep copy of the project's
+weeks with its own Save Changes and unsaved-work prompts. It is gone: `#weekModalOverlay`, the
+15 `weekDraft`/`weekModal*` functions, `let weekDraft` and the beforeunload/Escape draft guards
+were all removed, and everything they did now happens in the accordion. Two editors over the
+same weeks meant two places a count could disagree.
+
+**Nothing is held in a draft.** Every field writes straight to state on change, which is what
+lets several weeks be open together: two drafts over the same task would silently clobber each
+other, and the one saved last would win.
+
+The footer's **💾 Save Changes** button therefore confirms rather than commits — it calls
+`saveState()`, flashes the header indicator and turns green reading "✓ Saved" for 1.8s. It can
+never have anything outstanding to save. It exists because it was asked for by name, twice,
+after the conflict was explained; the alternative offered was a permanently disabled button,
+which reads as broken, so it is enabled and reports success. **There is no unsaved-changes
+prompt and no dirty state anywhere** — with several weeks open there is nothing coherent for one
+to describe. The header's **Save state** reports likewise: grey "Saved", flashing green
+"Saved ✓" as each write lands. A blue "click to save" would be a lie.
+
+If a real draft is ever wanted here, it costs multi-open: one week at a time, a snapshot taken
+on open, `weekDraftDirty()`-style comparison, and leave prompts on Back/Escape/reload. That is a
+behaviour change, not a button.
+
+Columns run **Phase | Domain | Task | Owner | Completed On | Status | Comments**, plus an actions
+cell (Move… / + Sub / ×), in the editor and in every report output, so what is edited and what is
+sent read the same way. `table-layout: fixed` sizes them, so the actions cell needs a pixel width
+— a percentage clips its three controls, since fixed layout never grows a column to fit content.
+`.week-task-actions` is a plain cell: `display: flex` on a `<td>` takes it out of the table's
+column flow and the row spills into an anonymous cell beside it. The eight widths must sum to
+exactly 100% — mixing a pixel column in among percentages made them total more than the table,
+so the last column overflowed even on a wide screen.
+
+The table is wider than a phone, so it scrolls inside `.week-editor-scroll`. That only works
+because **`.content` and `.report-row` carry `min-width: 0`**: a grid item defaults to
+`min-width: auto` and grows to its widest child, which handed the overflow to the page — the
+whole app scrolled sideways at every width, `.shell`'s `minmax(0, 1fr)` notwithstanding, since
+that sizes the track and not the item in it. Anything wide added to a screen needs the same
+check: the page must not scroll horizontally, only the wide thing's own box.
 
 **Completed On** is `task.date` — what actually happened, and what the report prints. Setting a
 task's status to completed fills it with today if it is still blank. `task.dueDate` is still the
@@ -231,15 +223,114 @@ Membership comes from `isDateInUpdateWeek`, which compares ISO date strings — 
 `YYYY-MM-DD` with `new Date` reads it as UTC while `new Date()` is local, which would put the
 boundary a day out for anyone behind UTC. Nothing is marked when today falls outside the cycle.
 
-The editor's header carries a **Save state** next to Week Status and Week Starting. It reports
-rather than acts: the editor writes on every change, so there is never unsaved work for a button
-to commit. It rests grey reading "Saved" and flashes green "Saved ✓" as each write lands. A blue
-"click to save" state would be a lie; if the editor should instead hold a draft like the week
-modal does, that is a behaviour change, not a button.
+Structural changes (add/remove a task or sub-task, Move, a pending move) re-render the list and
+restore every open row; field edits patch the summary line by hand instead, since re-rendering
+would blur the input mid-edit. Editing any week stamps `updatedAt` on its project
+(`stampProjectActivity`), so a week worked on today does not leave the project reading Idle.
 
-Structural changes (add/remove a task or sub-task) re-render the list and restore the open row;
-field edits patch the summary line by hand instead, since re-rendering would blur the input
-mid-edit.
+### Carried work
+
+**Carried means late**, not merely unfinished: `carriedTasksFor()` collects tasks from earlier
+weeks that have **ended** and are still not completed. Counting everything incomplete instead
+put "+14 carried" on week 6 of a project where nothing had started — work that is not due yet,
+not slippage. The accordion summary shows it as "4 tasks + 2 carried" and the open editor as a
+badge in its header, both from the same function as the rows themselves, so a count never
+disagrees with what it stands for. The generated report shows none of it.
+
+Carryover is **display only**. A task stays owned by the week it was planned in; earlier weeks'
+unfinished work appears in later editors as amber rows labelled "⬅ Carried from Week N", so
+opening a later week never rewrites what an earlier one contained.
+
+That makes the row's owner and the panel it appears in two different weeks, which every handler
+has to respect: `rowOwnerWeek()` reads `data-owner-week` off the row and edits are written to
+*that* week. Writing to the panel's week instead would fork the task into a copy under the later
+week — the original still late, the copy holding the edit. `applyWeekStructureChange` uses it
+too, so × and + Sub on a carried row act on the task rather than on a lookalike.
+
+Carried work ticked off here keeps its row, struck through (`.is-resolved`), instead of vanishing
+from under the pointer; it leaves the carried list the next time the list is rebuilt.
+
+### Move
+
+Moving a task between weeks is the explicit **Move…** control on its row — a native select rather
+than a floating menu, because the editor scrolls and would clip an absolutely positioned one. It
+lists every other week, nearest ahead first, **moves** the task rather than copying it, and
+re-dates it into the target. Only **pinned** tasks are barred: a forwarded copy is an ordinary
+task and moving one instance out of its week is a stated part of auto-forwarding.
+
+A pinned task (see "Fixed foundational weeks") shows a lock and cannot be moved, though it *is*
+copied forward when marked pending or in progress. Its status stays editable — the point is that the work happens first, not that nobody
+may record it.
+
+### Auto-forwarding: Pending and In Progress copy into the next week
+
+Marking a task **pending** or **in progress** (`FORWARDING_STATUSES`) copies it into the week
+after the one being edited, so work that runs past this week is already on next week's list.
+`forwardTaskToNextWeek()` does it; **completed, delayed and blocked do not forward** — the work
+is either done or not moving.
+
+The copy is **its own record**: a new `id`, `startDate`/`dueDate` re-dated into the target week,
+sub-tasks re-idded, and a **blank Completed On** — that date is per week, so inheriting it would
+claim the work finished in a week it did not. It carries `copiedFromTaskId` (lineage) and
+`copiedFrom` (the source week's start), and its row reads "⬅ Copied from Week N" in the same
+amber as a carried row: two badge colours for "this is late" and "this was forwarded" would be a
+distinction the reader cannot act on.
+
+Rules that keep it from running away:
+
+- **One copy per source task per week.** Re-marking the same status does nothing, because the
+  target week is checked for an existing task whose `copiedFromTaskId` matches.
+- **Two triggers.** Marking the status copies the task forward immediately. A sweep,
+  `carryForwardOverdueTasks()`, then catches work *already* marked when its week runs out, so a
+  task set to pending weeks ago does not sit stranded in a week nobody is looking at any more.
+  It runs at app start and when the reports screen opens — before the render, not during it,
+  since `renderAll()` calls back into the index and writing state from inside a render would
+  re-enter it.
+- **Only weeks that have ENDED forward.** That is the whole safeguard against fanning out: a
+  task advances one week per real week, instead of one click filling weeks 3–12 at once. Weeks
+  are walked in order, so work stranded several weeks back steps through each of them in a
+  single pass and arrives in the current week, with every week it was open in keeping a record.
+  The chain stops at the current week, which has not ended.
+- **The sweep never undoes a decision.** `forwardedToWeek` is stamped on the source when a hop
+  is made, and the sweep skips a stamped hop — so a copy someone deleted stays deleted instead
+  of reappearing on the next load. Marking the status by hand again re-creates it, which is the
+  way back.
+- **It says what it did.** `announceCarriedForward()` shows a self-clearing notice; creating task
+  rows on someone's behalf should not be silent.
+- **The last week does not forward.** Creating a week past the end of the cycle would silently
+  extend the project and move a go-live date that is calculated, not entered.
+- **Pinned work does forward, and the copy is not pinned.** `fixedWeek` decides where the
+  *master plan places* a task when a project is generated; it says nothing about whether the
+  work finishes there. Refusing to forward it was wrong — Android User Tracking marked in
+  progress in week 2 simply vanished from week 3 — and it contradicted the app's own carryover,
+  which has always shown incomplete pinned tasks in later weeks. The copy clears `fixedWeek`:
+  keeping it would have the copy claim to be fixed to week 2 while sitting in week 3, wear a
+  lock in the wrong week, and refuse to be moved. The original keeps its pin and its lock.
+- **Arrivals go to the top of the week.** A forwarded copy, a task moved in by hand and a task
+  re-dated into the week by `refileTasksIntoWeeks` are all `unshift`ed rather than pushed: work
+  arriving from the week before is what someone opening this week needs to see first. The report
+  reads the same array, so the editor and the document agree on the order. `+ Add task` still
+  appends, since a row a person just created belongs where they clicked.
+- **Nothing is ever auto-deleted.** Completing a task stops *further* copies but leaves the ones
+  already made, because someone may have typed into them. The brief asked for completion to
+  "remove it from future weeks"; that cannot hold alongside copies being independently editable
+  records, and it would throw away entered work without warning.
+
+`taskWasForwarded()` keeps the carried count honest: a task already continued into a later week
+is **not** also listed as carried, because its copy stands for it. Without that, one job would
+show as two pieces of late work, then three, and "+5 carried" would stop meaning anything.
+
+**Pending no longer moves a task.** It used to move a carried task into the week being triaged,
+recording `carriedFrom`; one status cannot both move a task and copy it. `carriedFrom` is still
+written by Move and still rendered, so weeks moved by hand before this change still read right.
+
+**Known consequence:** each week's report table prints that week's own tasks, so a task forwarded
+across six weeks prints six times in the client report — once per week, each with that week's own
+status. That is the cost of copies over one record with a status per week.
+
+(Headless Chrome's virtual clock does not advance CSS transitions, so a test that reads a
+button's `background` straight after a change sees the start colour. Disable the transition in
+tests; `cursor`, which does not animate, flips immediately.)
 
 ## Phase and domain on a task
 
