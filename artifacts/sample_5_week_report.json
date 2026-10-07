@@ -76,7 +76,7 @@
           "owner": "Client tech team",
           "offset_days": 5,
           "planned_date": "2026-09-12",
-          "is_elastic": true,
+          "is_elastic": false,
           "status": "not started"
         },
         {
@@ -87,33 +87,11 @@
           "owner": "Client tech team",
           "offset_days": 5,
           "planned_date": "2026-09-12",
-          "is_elastic": true,
+          "is_elastic": false,
           "status": "not started"
         },
         {
           "task_id": "w1_t8",
-          "domain": "Website",
-          "task_name": "User Tracking",
-          "phase": "Staging Deployment",
-          "owner": "Client tech team",
-          "offset_days": 5,
-          "planned_date": "2026-09-12",
-          "is_elastic": true,
-          "status": "not started"
-        },
-        {
-          "task_id": "w1_t9",
-          "domain": "Web App",
-          "task_name": "User Tracking",
-          "phase": "Staging Deployment",
-          "owner": "Client tech team",
-          "offset_days": 5,
-          "planned_date": "2026-09-12",
-          "is_elastic": true,
-          "status": "not started"
-        },
-        {
-          "task_id": "w1_t10",
           "domain": "Website",
           "task_name": "Web Push Setup",
           "phase": "Staging Deployment",
@@ -124,51 +102,29 @@
           "status": "not started"
         },
         {
+          "task_id": "w1_t9",
+          "domain": "Android",
+          "task_name": "SDK Set Up",
+          "phase": "Staging Deployment",
+          "owner": "Client tech team",
+          "offset_days": 5,
+          "planned_date": "2026-09-12",
+          "is_elastic": false,
+          "status": "not started"
+        },
+        {
+          "task_id": "w1_t10",
+          "domain": "iOS",
+          "task_name": "SDK Set Up",
+          "phase": "Staging Deployment",
+          "owner": "Client tech team",
+          "offset_days": 5,
+          "planned_date": "2026-09-12",
+          "is_elastic": false,
+          "status": "not started"
+        },
+        {
           "task_id": "w1_t11",
-          "domain": "Android",
-          "task_name": "SDK Set Up",
-          "phase": "Staging Deployment",
-          "owner": "Client tech team",
-          "offset_days": 5,
-          "planned_date": "2026-09-12",
-          "is_elastic": true,
-          "status": "not started"
-        },
-        {
-          "task_id": "w1_t12",
-          "domain": "Android",
-          "task_name": "User Tracking",
-          "phase": "Staging Deployment",
-          "owner": "Client tech team",
-          "offset_days": 5,
-          "planned_date": "2026-09-12",
-          "is_elastic": true,
-          "status": "not started"
-        },
-        {
-          "task_id": "w1_t13",
-          "domain": "iOS",
-          "task_name": "SDK Set Up",
-          "phase": "Staging Deployment",
-          "owner": "Client tech team",
-          "offset_days": 5,
-          "planned_date": "2026-09-12",
-          "is_elastic": true,
-          "status": "not started"
-        },
-        {
-          "task_id": "w1_t14",
-          "domain": "iOS",
-          "task_name": "User Tracking",
-          "phase": "Staging Deployment",
-          "owner": "Client tech team",
-          "offset_days": 5,
-          "planned_date": "2026-09-12",
-          "is_elastic": true,
-          "status": "not started"
-        },
-        {
-          "task_id": "w1_t15",
           "domain": "Kickoff",
           "task_name": "Data Model Finalised",
           "phase": "Kickoff",
@@ -179,7 +135,7 @@
           "status": "not started"
         }
       ],
-      "task_count": 15,
+      "task_count": 11,
       "completed_count": 0,
       "progress_percent": 0
     },
@@ -191,6 +147,50 @@
       "tasks": [
         {
           "task_id": "w2_t1",
+          "domain": "Website",
+          "task_name": "User Tracking",
+          "phase": "Staging Deployment",
+          "owner": "Client tech team",
+          "offset_days": 10,
+          "planned_date": "2026-09-17",
+          "is_elastic": false,
+          "status": "not started"
+        },
+        {
+          "task_id": "w2_t2",
+          "domain": "Web App",
+          "task_name": "User Tracking",
+          "phase": "Staging Deployment",
+          "owner": "Client tech team",
+          "offset_days": 10,
+          "planned_date": "2026-09-17",
+          "is_elastic": false,
+          "status": "not started"
+        },
+        {
+          "task_id": "w2_t3",
+          "domain": "Android",
+          "task_name": "User Tracking",
+          "phase": "Staging Deployment",
+          "owner": "Client tech team",
+          "offset_days": 10,
+          "planned_date": "2026-09-17",
+          "is_elastic": false,
+          "status": "not started"
+        },
+        {
+          "task_id": "w2_t4",
+          "domain": "iOS",
+          "task_name": "User Tracking",
+          "phase": "Staging Deployment",
+          "owner": "Client tech team",
+          "offset_days": 10,
+          "planned_date": "2026-09-17",
+          "is_elastic": false,
+          "status": "not started"
+        },
+        {
+          "task_id": "w2_t5",
           "domain": "Communication Channels",
           "task_name": "Email setup",
           "phase": "Staging Deployment",
@@ -201,7 +201,7 @@
           "status": "not started"
         },
         {
-          "task_id": "w2_t2",
+          "task_id": "w2_t6",
           "domain": "Communication Channels",
           "task_name": "SMS setup",
           "phase": "Staging Deployment",
@@ -212,7 +212,7 @@
           "status": "not started"
         },
         {
-          "task_id": "w2_t3",
+          "task_id": "w2_t7",
           "domain": "Communication Channels",
           "task_name": "Whatsapp setup",
           "phase": "Staging Deployment",
@@ -223,7 +223,7 @@
           "status": "not started"
         },
         {
-          "task_id": "w2_t4",
+          "task_id": "w2_t8",
           "domain": "Communication Channels",
           "task_name": "RCS setup",
           "phase": "Staging Deployment",
@@ -234,7 +234,7 @@
           "status": "not started"
         },
         {
-          "task_id": "w2_t5",
+          "task_id": "w2_t9",
           "domain": "Communication Channels",
           "task_name": "IVR setup",
           "phase": "Staging Deployment",
@@ -245,7 +245,18 @@
           "status": "not started"
         },
         {
-          "task_id": "w2_t6",
+          "task_id": "w2_t10",
+          "domain": "Rest API",
+          "task_name": "User Tracking",
+          "phase": "Staging Deployment",
+          "owner": "Client tech team",
+          "offset_days": 10,
+          "planned_date": "2026-09-17",
+          "is_elastic": false,
+          "status": "not started"
+        },
+        {
+          "task_id": "w2_t11",
           "domain": "Website",
           "task_name": "Event Tracking",
           "phase": "Staging Deployment",
@@ -256,7 +267,7 @@
           "status": "not started"
         },
         {
-          "task_id": "w2_t7",
+          "task_id": "w2_t12",
           "domain": "Web App",
           "task_name": "Event Tracking",
           "phase": "Staging Deployment",
@@ -267,7 +278,7 @@
           "status": "not started"
         },
         {
-          "task_id": "w2_t8",
+          "task_id": "w2_t13",
           "domain": "Web App",
           "task_name": "Web Push Setup",
           "phase": "Staging Deployment",
@@ -278,63 +289,8 @@
           "status": "not started"
         },
         {
-          "task_id": "w2_t9",
-          "domain": "Android",
-          "task_name": "Event Tracking",
-          "phase": "Staging Deployment",
-          "owner": "Client tech team",
-          "offset_days": 12,
-          "planned_date": "2026-09-19",
-          "is_elastic": true,
-          "status": "not started"
-        },
-        {
-          "task_id": "w2_t10",
-          "domain": "Android",
-          "task_name": "Push Setup",
-          "phase": "Staging Deployment",
-          "owner": "Client tech team",
-          "offset_days": 12,
-          "planned_date": "2026-09-19",
-          "is_elastic": true,
-          "status": "not started"
-        },
-        {
-          "task_id": "w2_t11",
-          "domain": "Android",
-          "task_name": "Screen Tracking",
-          "phase": "Staging Deployment",
-          "owner": "Client tech team",
-          "offset_days": 12,
-          "planned_date": "2026-09-19",
-          "is_elastic": true,
-          "status": "not started"
-        },
-        {
-          "task_id": "w2_t12",
-          "domain": "Android",
-          "task_name": "Deeplinks",
-          "phase": "Staging Deployment",
-          "owner": "Client tech team",
-          "offset_days": 12,
-          "planned_date": "2026-09-19",
-          "is_elastic": true,
-          "status": "not started"
-        },
-        {
-          "task_id": "w2_t13",
-          "domain": "Android",
-          "task_name": "Silent / Force Login",
-          "phase": "Staging Deployment",
-          "owner": "Client tech team",
-          "offset_days": 12,
-          "planned_date": "2026-09-19",
-          "is_elastic": true,
-          "status": "not started"
-        },
-        {
           "task_id": "w2_t14",
-          "domain": "iOS",
+          "domain": "Android",
           "task_name": "Event Tracking",
           "phase": "Staging Deployment",
           "owner": "Client tech team",
@@ -345,7 +301,7 @@
         },
         {
           "task_id": "w2_t15",
-          "domain": "iOS",
+          "domain": "Android",
           "task_name": "Push Setup",
           "phase": "Staging Deployment",
           "owner": "Client tech team",
@@ -356,18 +312,7 @@
         },
         {
           "task_id": "w2_t16",
-          "domain": "iOS",
-          "task_name": "Rich Push Setup",
-          "phase": "Staging Deployment",
-          "owner": "Client tech team",
-          "offset_days": 12,
-          "planned_date": "2026-09-19",
-          "is_elastic": true,
-          "status": "not started"
-        },
-        {
-          "task_id": "w2_t17",
-          "domain": "iOS",
+          "domain": "Android",
           "task_name": "Screen Tracking",
           "phase": "Staging Deployment",
           "owner": "Client tech team",
@@ -377,8 +322,19 @@
           "status": "not started"
         },
         {
+          "task_id": "w2_t17",
+          "domain": "Android",
+          "task_name": "Deeplinks",
+          "phase": "Staging Deployment",
+          "owner": "Client tech team",
+          "offset_days": 12,
+          "planned_date": "2026-09-19",
+          "is_elastic": true,
+          "status": "not started"
+        },
+        {
           "task_id": "w2_t18",
-          "domain": "iOS",
+          "domain": "Android",
           "task_name": "Silent / Force Login",
           "phase": "Staging Deployment",
           "owner": "Client tech team",
@@ -390,7 +346,7 @@
         {
           "task_id": "w2_t19",
           "domain": "iOS",
-          "task_name": "Deeplinks",
+          "task_name": "Event Tracking",
           "phase": "Staging Deployment",
           "owner": "Client tech team",
           "offset_days": 12,
@@ -400,8 +356,8 @@
         },
         {
           "task_id": "w2_t20",
-          "domain": "Rest API",
-          "task_name": "User Tracking",
+          "domain": "iOS",
+          "task_name": "Push Setup",
           "phase": "Staging Deployment",
           "owner": "Client tech team",
           "offset_days": 12,
@@ -411,6 +367,50 @@
         },
         {
           "task_id": "w2_t21",
+          "domain": "iOS",
+          "task_name": "Rich Push Setup",
+          "phase": "Staging Deployment",
+          "owner": "Client tech team",
+          "offset_days": 12,
+          "planned_date": "2026-09-19",
+          "is_elastic": true,
+          "status": "not started"
+        },
+        {
+          "task_id": "w2_t22",
+          "domain": "iOS",
+          "task_name": "Screen Tracking",
+          "phase": "Staging Deployment",
+          "owner": "Client tech team",
+          "offset_days": 12,
+          "planned_date": "2026-09-19",
+          "is_elastic": true,
+          "status": "not started"
+        },
+        {
+          "task_id": "w2_t23",
+          "domain": "iOS",
+          "task_name": "Silent / Force Login",
+          "phase": "Staging Deployment",
+          "owner": "Client tech team",
+          "offset_days": 12,
+          "planned_date": "2026-09-19",
+          "is_elastic": true,
+          "status": "not started"
+        },
+        {
+          "task_id": "w2_t24",
+          "domain": "iOS",
+          "task_name": "Deeplinks",
+          "phase": "Staging Deployment",
+          "owner": "Client tech team",
+          "offset_days": 12,
+          "planned_date": "2026-09-19",
+          "is_elastic": true,
+          "status": "not started"
+        },
+        {
+          "task_id": "w2_t25",
           "domain": "Rest API",
           "task_name": "Event Tracking",
           "phase": "Staging Deployment",
@@ -421,7 +421,7 @@
           "status": "not started"
         }
       ],
-      "task_count": 21,
+      "task_count": 25,
       "completed_count": 0,
       "progress_percent": 0
     },

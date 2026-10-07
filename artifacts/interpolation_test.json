@@ -1,5 +1,5 @@
 {
-  "generated_from": "2026-09-06-google-sheet",
+  "generated_from": "2026-09-07-fixed-weeks",
   "cases": [
     {
       "cycle_length": 2,
@@ -9,8 +9,8 @@
       "weeks_with_tasks": 2,
       "empty_weeks": [],
       "tasks_per_week": [
-        36,
-        64
+        31,
+        69
       ],
       "go_live_offset": 13,
       "passes": true,
@@ -31,8 +31,8 @@
       "weeks_with_tasks": 3,
       "empty_weeks": [],
       "tasks_per_week": [
-        15,
-        38,
+        11,
+        42,
         47
       ],
       "go_live_offset": 20,
@@ -54,8 +54,8 @@
       "weeks_with_tasks": 4,
       "empty_weeks": [],
       "tasks_per_week": [
-        15,
-        21,
+        11,
+        25,
         17,
         47
       ],
@@ -78,8 +78,8 @@
       "weeks_with_tasks": 5,
       "empty_weeks": [],
       "tasks_per_week": [
-        15,
-        21,
+        11,
+        25,
         20,
         32,
         12
@@ -103,9 +103,9 @@
       "weeks_with_tasks": 6,
       "empty_weeks": [],
       "tasks_per_week": [
-        14,
-        11,
-        19,
+        10,
+        16,
+        18,
         27,
         17,
         12
@@ -129,9 +129,9 @@
       "weeks_with_tasks": 7,
       "empty_weeks": [],
       "tasks_per_week": [
-        8,
-        17,
+        10,
         16,
+        15,
         16,
         17,
         14,
@@ -156,10 +156,10 @@
       "weeks_with_tasks": 8,
       "empty_weeks": [],
       "tasks_per_week": [
-        4,
-        11,
+        8,
+        8,
         19,
-        10,
+        9,
         18,
         12,
         19,
@@ -184,10 +184,10 @@
       "weeks_with_tasks": 9,
       "empty_weeks": [],
       "tasks_per_week": [
-        4,
-        5,
-        17,
-        15,
+        8,
+        8,
+        11,
+        14,
         5,
         25,
         17,
@@ -213,11 +213,11 @@
       "weeks_with_tasks": 10,
       "empty_weeks": [],
       "tasks_per_week": [
-        4,
-        5,
-        17,
         8,
-        10,
+        8,
+        11,
+        8,
+        9,
         18,
         9,
         17,
@@ -243,11 +243,11 @@
       "weeks_with_tasks": 11,
       "empty_weeks": [],
       "tasks_per_week": [
-        4,
-        5,
+        8,
+        8,
         11,
-        14,
-        7,
+        8,
+        6,
         5,
         16,
         9,
@@ -274,12 +274,12 @@
       "weeks_with_tasks": 12,
       "empty_weeks": [],
       "tasks_per_week": [
-        4,
-        1,
-        4,
+        8,
+        6,
+        2,
         11,
-        14,
-        7,
+        8,
+        6,
         5,
         16,
         9,

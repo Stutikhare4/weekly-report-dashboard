@@ -221,8 +221,10 @@ At creation the tool:
    to their week);
 4. creates one weekly report per week.
 
-**Week 1 is the week the kickoff falls in**, so a day-0 task lands in week 1 whatever weekday the
-project starts on.
+**Week 1 starts on the kickoff date itself** — not the Monday of that calendar week. A project
+starting Wednesday 30 September runs 30 Sep–6 Oct, 7–13 Oct, 14–20 Oct, 21–27 Oct, 28 Oct–3 Nov,
+with go-live on 3 November. This holds for every starting weekday, and projects created under the
+old Monday-aligned rule are re-dated once, with a banner saying so.
 
 **A cycle length the sheet doesn't cover is interpolated** between the two nearest tabs — 8 weeks
 sits between the 6- and 12-week plans — so new cycle lengths need no edits. **Every task appears
@@ -623,6 +625,15 @@ earlier commits used.
 - A Save button added to the week modal's header, then removed on request; change detection and
   the leave prompts were kept.
 
+**7 October**
+- **Weeks now start on the project's kickoff date** rather than the Monday of that week, for new
+  projects, re-dates and (once, on load) existing ones.
+- **The report now covers last week then this week**, in that order — what was delivered before
+  what is still in hand. It used to show the current week and the one after it.
+- **Report week numbers fixed.** They came from `templateWeek`, which holds the master-plan
+  phase a week's first task came from, so a report could print "Week 2" twice. They are now
+  numbered by position in the project, as the accordion already did.
+
 **5 October**
 - **Automatic carry-forward:** pending and in-progress work is no longer only forwarded at the
   moment someone changes the status — a sweep moves anything still open when its week ends into
@@ -727,29 +738,27 @@ These came up in requests and were declined or changed, with reasons.
 ## 17. Open questions and known issues
 
 **Need a decision**
-1. **What the report covers.** Only the current and next week, today. Options: keep it; show all
-   weeks; or all weeks on screen with only current + next in the PDF and email.
-2. **The week editor's "Saved" indicator:** keep it or remove it? It cannot ever report unsaved
+1. **The week editor's "Saved" indicator:** keep it or remove it? It cannot ever report unsaved
    work, since the editor writes on every change.
-3. **Page heading size:** page headings are 14px, smaller than the 18px top-bar title. A
+2. **Page heading size:** page headings are 14px, smaller than the 18px top-bar title. A
    one-line change would make them 20px.
-4. **Serif headings in the PDF and email:** match the app's sans-serif, or keep them?
-5. **Recent updates** show each project's *final* week, which can be months ahead. Showing the
+3. **Serif headings in the PDF and email:** match the app's sans-serif, or keep them?
+4. **Recent updates** show each project's *final* week, which can be months ahead. Showing the
    week containing today may be more useful.
-6. **Changing "Week starting"** renames the week but doesn't re-date its tasks.
+5. **Changing "Week starting"** renames the week but doesn't re-date its tasks.
 
 **In the sheet, not the tool**
 
-7. **Production channel setup is scheduled too early.** Email, SMS, WhatsApp, RCS and IVR setup
+6. **Production channel setup is scheduled too early.** Email, SMS, WhatsApp, RCS and IVR setup
     in the *Production* phase are due at N+10 in the Week 6 tab and N+21 in Week 12. Create
     Production Dashboard is at N+21 and N+42, so the setup work lands before the dashboard it
     configures. The Week 4 tab has it right (N+22/23, after N+21).
-8. **Five phases, not six:** designs have asked for a "Discovery" phase, but it is a task inside
+7. **Five phases, not six:** designs have asked for a "Discovery" phase, but it is a task inside
     Kickoff.
 
 **Security and exposure**
 
-9. **The live site serves the docs and `roles-config.json` publicly**, including both email
+8. **The live site serves the docs and `roles-config.json` publicly**, including both email
     addresses and password hashes. A small `vercel.json` could block the `.md` files. The roles
     file must stay readable for sign-in to work.
 

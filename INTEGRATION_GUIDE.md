@@ -65,8 +65,8 @@ node tools/generate-weekly-report.js --artifacts           # regenerate artifact
    distribution, not in the UI afterwards — the week counts have to reflect the project's real
    scope.
 2. **Resolve each task's offset** for this cycle via `PlanEngine.resolveTaskOffset`.
-3. **Bucket into weeks** via `PlanEngine.weekIndexFor`. Week 1 is the week the kickoff falls in,
-   so an N+0 task lands in it whatever weekday the project starts on.
+3. **Bucket into weeks** via `PlanEngine.weekIndexFor`. Week 1 starts on the kickoff date
+   itself, so a Wednesday project runs Wed–Tue and `lead` is 0.
 4. **Create one `update` per week**, each holding its tasks with `dueDate` = kickoff + offset.
 
 Task-to-project filtering is by **`platforms`** and **`channels`**, both already tagged on every

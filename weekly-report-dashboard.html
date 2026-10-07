@@ -4544,17 +4544,20 @@ small,
     return new Set(values.map(Number)).size > 1;
   }
 
-  /* Which week of the project a task belongs to. `lead` is how many days the kickoff sits
-     after the start of its own week, so an N+0 task lands in week 1 whatever weekday the
-     project starts on. Week 1 covers days 0-6, week 2 days 7-13, and so on. */
+  /* Which week of the project a task belongs to. Week 1 covers days 0-6 from the start of
+     week 1, week 2 days 7-13, and so on. `lead` is how many days the kickoff sits after the
+     start of its own week; callers anchor week 1 on the kickoff date itself, so it is 0 in
+     practice and kept only so a caller that anchors differently still gets right answers. */
   function weekIndexFor(offset, cycleWeeks, lead) {
     const index = Math.floor(((Number(lead) || 0) + offset) / 7);
     return Math.min(Math.max(index, 0), Math.max(0, cycleWeeks - 1));
   }
 
-  /* Foundational work sits in a named week rather than wherever its offset lands. Placing it by
-     offset alone would only hold for a Monday or Tuesday kickoff: with `lead` counted in, an
-     N+5 task slides into week 2 for a project starting on a Wednesday or later. */
+  /* Foundational work sits in a named week rather than wherever its offset lands. This used to
+     be load-bearing: when week 1 began on the Monday before the kickoff, `lead` pushed an N+5
+     task into week 2 for any project starting Wednesday or later. Now that week 1 starts on the
+     kickoff, N+5 and N+10 land in weeks 1 and 2 on their own, and the pin states the intent
+     rather than correcting for the calendar. */
   function placementFor(task, cycleWeeks, lead, meta) {
     const pinned = Number(task && task.fixedWeek);
     if (Number.isFinite(pinned) && pinned > 0) {
@@ -5228,14 +5231,18 @@ renderDemoDataOptions();
     });
   }
 
+  /* Before the sweep, because week boundaries decide which weeks have ended. */
+  const realigned = alignWeeksToKickoff();
+  if (realigned) {
+    showAppInfo(`${realigned} project${realigned === 1 ? "" : "s"} re-dated: weeks now start on the project's own kickoff date rather than the Monday of that week.`);
+  }
+
   /* On load as well as on opening the reports screen: a week can run out while nobody is
      looking, and the work that outlived it should be on the next week's list by the time
      anyone reads the dashboard. */
   const carried = carryForwardOverdueTasks();
-  if (carried) {
-    renderAll();
-    announceCarriedForward(carried);
-  }
+  if (realigned || carried) renderAll();
+  if (carried) announceCarriedForward(carried);
 }
 
 /* Stale either because the version moved on, or because the stored plan predates a field the
@@ -5921,8 +5928,8 @@ function buildReport(projectId) {
     return latestReportText;
   }
 
-  /* The report covers only the current week and the one after it — the status a reader
-     needs now, not the whole history. Every week is still on the project page. */
+  /* The report covers last week and this one — what was delivered, then what is in hand — not
+     the whole history. Every week is still on the Project Reports screen. */
   const allWeeks = state.updates
     .filter((update) => update.projectId === project.id)
     .sort((left, right) => left.weekStart.localeCompare(right.weekStart));
@@ -5957,8 +5964,9 @@ function weekHeading(week) {
   return `${prefix} (${week.range})${week.label ? ` — ${week.label}` : ""}${tag}`;
 }
 
-/* Current week = the one whose 7-day range contains today; before kickoff there is none,
-   and after go-live it falls back to the last week that ended. Upcoming = the next one after. */
+/* Last week first, then this one: a reader wants what was delivered before what is still in
+   hand. Current week = the one whose 7-day range contains today; after go-live it falls back to
+   the last week that ended, so the report then shows the final two weeks of the project. */
 function selectReportWeeks(weeksAsc) {
   if (!weeksAsc.length) return [];
 
@@ -5969,22 +5977,30 @@ function selectReportWeeks(weeksAsc) {
     || [...weeksAsc].reverse().find((update) => endOf(update) < today)
     || null;
 
-  const upcoming = current
-    ? weeksAsc.find((update) => update.weekStart > current.weekStart)
-    : weeksAsc.find((update) => update.weekStart > today);
+  /* Numbered by position in the project, the way the accordion numbers them. `templateWeek`
+     holds the master-plan phase a week's first task came from, and several weeks can draw on
+     the same phase — which printed "Week 2" twice in one report. */
+  const numberOf = (update) => weeksAsc.indexOf(update) + 1;
+
+  /* Before kickoff there is no current week and no last one, so the first week stands alone
+     rather than the report coming out empty. */
+  if (!current) return [toReportWeek(weeksAsc[0], "upcoming", 1)];
+
+  /* Week 1 has no week before it. */
+  const previous = [...weeksAsc].reverse().find((update) => update.weekStart < current.weekStart);
 
   return [
-    current ? toReportWeek(current, "current") : null,
-    upcoming ? toReportWeek(upcoming, "upcoming") : null,
+    previous ? toReportWeek(previous, "last", numberOf(previous)) : null,
+    toReportWeek(current, "current", numberOf(current)),
   ].filter(Boolean);
 }
 
-function toReportWeek(update, tag) {
+function toReportWeek(update, tag, weekNumber) {
   return {
     id: update.id,
     range: update.weekRange,
     weekStart: update.weekStart,
-    weekNumber: update.templateWeek || null,
+    weekNumber: weekNumber || update.templateWeek || null,
     label: update.templateLabel || "",
     statusTag: update.statusTag || "not started",
     tag,
@@ -8770,7 +8786,7 @@ function addWeekToProject(projectId) {
   const weekNumber = existing.length + 1;
   const weekStart = existing.length
     ? toInputDate(shiftDays(new Date(`${existing[existing.length - 1].weekStart}T00:00:00`), 7))
-    : mondayOnOrAfter(project.kickoffDate);
+    : project.kickoffDate;
 
   const template = state.weekTemplates.find((entry) => entry.week === weekNumber);
 
@@ -8942,9 +8958,9 @@ function saveProjectDetails(event) {
     .sort((left, right) => left.weekStart.localeCompare(right.weekStart));
 
   if (datesChanged && kickoff && updates.length) {
-    const firstMonday = mondayOnOrAfter(kickoff);
+    /* Weeks run from the kickoff date, so re-dating starts there rather than at a Monday. */
     updates.forEach((update, index) => {
-      update.weekStart = toInputDate(shiftDays(new Date(`${firstMonday}T00:00:00`), index * 7));
+      update.weekStart = toInputDate(shiftDays(new Date(`${kickoff}T00:00:00`), index * 7));
       update.weekRange = formatWeekRange(update.weekStart);
     });
   }
@@ -8970,7 +8986,7 @@ function saveProjectDetails(event) {
   toggleProjectDetails(false);
   renderAll();
   showAppSuccess(datesChanged && updates.length
-    ? `Details saved. ${updates.length} week(s) re-dated from ${formatSummaryDate(mondayOnOrAfter(kickoff))}.`
+    ? `Details saved. ${updates.length} week(s) re-dated from ${formatSummaryDate(kickoff)}.`
     : "Project details saved.");
 }
 
@@ -9119,12 +9135,12 @@ function resolveTaskOffset(task, cycleWeeks) {
 
 function generateWeeklyPlan(project) {
   const weeks = Math.min(Math.max(Number(project.cycleWeeks) || DEFAULT_CYCLE_WEEKS, MIN_CYCLE_WEEKS), MAX_CYCLE_WEEKS);
-  /* Week 1 is the week the kickoff falls in, so an N+0 task lands in it whatever weekday
-     the project starts on. */
-  const firstStart = mondayOnOrBefore(project.kickoffDate);
+  /* Week 1 starts on the kickoff date itself, not on the Monday of the calendar week it falls
+     in: a project beginning on a Wednesday runs Wed-Tue, and every later week follows from
+     there. `lead` — how far into week 1 the kickoff sits — is therefore always 0. */
+  const firstStart = project.kickoffDate || toInputDate(new Date());
   const base = new Date(`${firstStart}T00:00:00`);
-  const kickoff = new Date(`${project.kickoffDate || firstStart}T00:00:00`);
-  const lead = Math.round((kickoff - base) / 86400000);
+  const lead = 0;
   const plan = Array.from({ length: weeks }, () => ({ labels: [], stageWeeks: [], tasks: [] }));
 
   [...state.weekTemplates].sort((left, right) => left.week - right.week).forEach((stage) => {
@@ -9133,7 +9149,9 @@ function generateWeeklyPlan(project) {
       const slot = plan[PlanEngine.placementFor(task, weeks, lead, templateMeta)];
       if (!slot.labels.includes(stage.label)) slot.labels.push(stage.label);
       if (!slot.stageWeeks.includes(stage.week)) slot.stageWeeks.push(stage.week);
-      slot.tasks.push({ task, phase: stage.label, dueDate: toInputDate(shiftDays(kickoff, offset)) });
+      /* `base` is the kickoff, now that week 1 starts there, so a task's planned date is still
+         kickoff + its offset from the master plan. */
+      slot.tasks.push({ task, phase: stage.label, dueDate: toInputDate(shiftDays(base, offset)) });
     });
   });
 
@@ -9155,23 +9173,6 @@ function generateWeeklyPlan(project) {
   });
 
   return plan.length;
-}
-
-function mondayOnOrBefore(dateValue) {
-  const base = dateValue ? new Date(`${dateValue}T00:00:00`) : new Date();
-  if (Number.isNaN(base.getTime())) return toInputDate(new Date());
-  return toInputDate(shiftDays(base, -((base.getDay() + 6) % 7)));
-}
-
-function mondayOnOrAfter(dateValue) {
-  const base = dateValue ? new Date(`${dateValue}T00:00:00`) : new Date();
-  if (Number.isNaN(base.getTime())) {
-    return mondayOfThisWeek();
-  }
-
-  const day = base.getDay();
-  const offset = day === 0 ? 1 : (day === 1 ? 0 : 8 - day);
-  return toInputDate(shiftDays(base, offset));
 }
 
 /* ---------- Create Report (task editor) ---------- */
@@ -9213,7 +9214,7 @@ function addWeeklyReport(projectId) {
   const last = existing[existing.length - 1];
   const weekStart = last
     ? toInputDate(shiftDays(new Date(`${last.weekStart}T00:00:00`), 7))
-    : mondayOnOrBefore(project.kickoffDate);
+    : project.kickoffDate;
 
   const update = {
     id: newId(), projectId: project.id, projectName: project.name, weekStart,
@@ -9639,6 +9640,34 @@ function forwardTaskToNextWeek(task, editingWeek, { auto = false } = {}) {
     subtasks: (task.subtasks || []).map((sub) => ({ ...sub, id: newId(), date: "" })),
   });
   return true;
+}
+
+/* Weeks used to begin on the Monday of the calendar week the kickoff fell in. They now begin on
+   the kickoff date itself, so a project that started mid-week is re-dated once to match: a
+   Wednesday kickoff runs Wed-Tue. A Monday kickoff is already aligned and is left untouched.
+   Tasks move with their week, and go-live follows. */
+function alignWeeksToKickoff() {
+  let realigned = 0;
+
+  state.projects.forEach((project) => {
+    if (!project.kickoffDate) return;
+    const weeks = projectWeeksSorted(project.id);
+    if (!weeks.length || weeks[0].weekStart === project.kickoffDate) return;
+
+    weeks.forEach((week, index) => {
+      week.weekStart = toInputDate(shiftDays(new Date(`${project.kickoffDate}T00:00:00`), index * 7));
+      week.weekRange = formatWeekRange(week.weekStart);
+      (week.tasks || []).forEach((task) => {
+        task.startDate = week.weekStart;
+        task.dueDate = taskDueDate(week.weekStart, task.days || templateDefaultDays());
+      });
+    });
+    refreshProjectGoLive(project.id);
+    realigned += 1;
+  });
+
+  if (realigned) saveState();
+  return realigned;
 }
 
 /* Work marked pending or in progress does not stop being due when its week runs out. Marking a

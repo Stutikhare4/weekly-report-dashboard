@@ -1,14 +1,14 @@
 {
   "source": "https://docs.google.com/spreadsheets/d/1szgspVwOpiUgsS3DKoybF_UKB8t6LXRNXBAnr_pmO7E/edit",
-  "version": "2026-09-06-google-sheet",
+  "version": "2026-09-07-fixed-weeks",
   "cycles_with_data": [
     4,
     6,
     12
   ],
   "total_tasks": 100,
-  "elastic_tasks": 98,
-  "fixed_tasks": 2,
+  "elastic_tasks": 89,
+  "fixed_tasks": 11,
   "tasks": [
     {
       "task_id": "task_001",
@@ -110,11 +110,11 @@
         "Website"
       ],
       "channels": [],
-      "is_elastic": true,
+      "is_elastic": false,
       "offsets": {
         "4": 5,
         "6": 5,
-        "12": 14
+        "12": 5
       }
     },
     {
@@ -127,11 +127,11 @@
         "Web App"
       ],
       "channels": [],
-      "is_elastic": true,
+      "is_elastic": false,
       "offsets": {
         "4": 5,
         "6": 5,
-        "12": 28
+        "12": 5
       }
     },
     {
@@ -144,11 +144,11 @@
         "Website"
       ],
       "channels": [],
-      "is_elastic": true,
+      "is_elastic": false,
       "offsets": {
-        "4": 5,
-        "6": 5,
-        "12": 14
+        "4": 10,
+        "6": 10,
+        "12": 10
       }
     },
     {
@@ -161,11 +161,11 @@
         "Web App"
       ],
       "channels": [],
-      "is_elastic": true,
+      "is_elastic": false,
       "offsets": {
-        "4": 5,
-        "6": 5,
-        "12": 28
+        "4": 10,
+        "6": 10,
+        "12": 10
       }
     },
     {
@@ -252,11 +252,11 @@
         "Android"
       ],
       "channels": [],
-      "is_elastic": true,
+      "is_elastic": false,
       "offsets": {
         "4": 5,
         "6": 5,
-        "12": 28
+        "12": 5
       }
     },
     {
@@ -269,11 +269,11 @@
         "Android"
       ],
       "channels": [],
-      "is_elastic": true,
+      "is_elastic": false,
       "offsets": {
-        "4": 5,
-        "6": 5,
-        "12": 28
+        "4": 10,
+        "6": 10,
+        "12": 10
       }
     },
     {
@@ -373,11 +373,11 @@
         "iOS"
       ],
       "channels": [],
-      "is_elastic": true,
+      "is_elastic": false,
       "offsets": {
         "4": 5,
         "6": 5,
-        "12": 28
+        "12": 5
       }
     },
     {
@@ -390,11 +390,11 @@
         "iOS"
       ],
       "channels": [],
-      "is_elastic": true,
+      "is_elastic": false,
       "offsets": {
-        "4": 5,
-        "6": 5,
-        "12": 28
+        "4": 10,
+        "6": 10,
+        "12": 10
       }
     },
     {
@@ -598,11 +598,11 @@
         "REST API"
       ],
       "channels": [],
-      "is_elastic": true,
+      "is_elastic": false,
       "offsets": {
         "4": 10,
-        "6": 15,
-        "12": 35
+        "6": 10,
+        "12": 10
       }
     },
     {

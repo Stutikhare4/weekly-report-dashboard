@@ -25,16 +25,13 @@ const shift = (iso, days) => {
   date.setUTCDate(date.getUTCDate() + days);
   return date.toISOString().slice(0, 10);
 };
-/* Week 1 is the week the kickoff falls in, so an N+0 task lands in it whatever weekday the
-   project starts on. */
-const mondayOnOrBefore = (iso) => {
-  const date = new Date(`${iso}T00:00:00Z`);
-  return shift(iso, -((date.getUTCDay() + 6) % 7));
-};
-
+/* Week 1 starts on the kickoff date itself, so a project beginning on a Wednesday runs Wed-Tue
+   and every later week follows from there. The kickoff sits at the start of its own week, so
+   `lead` is always 0. Kept in step with generateWeeklyPlan() in app.js, which anchors the same
+   way — the engine is shared precisely so the app and these artifacts cannot disagree. */
 function generateWeeklyReport(kickoffDate, cycleLength, { tasks = allTasks } = {}) {
-  const weekOne = mondayOnOrBefore(kickoffDate);
-  const lead = Math.round((Date.parse(`${kickoffDate}T00:00:00Z`) - Date.parse(`${weekOne}T00:00:00Z`)) / 86400000);
+  const weekOne = kickoffDate;
+  const lead = 0;
   const buckets = PlanEngine.distribute(tasks, cycleLength, meta, lead);
 
   const weeks = buckets.map((bucket, index) => {

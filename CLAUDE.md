@@ -75,10 +75,34 @@ linearly interpolated between the two nearest when not (8 weeks sits between the
 12-week plans), scaled from the nearest outside the range. A new cycle length needs no edit.
 
 `generateWeeklyPlan()` files each task into the week containing kickoff + offset, so **every
-task appears at every cycle length** and the dates are the sheet's own. Week 1 is the week the
-kickoff falls in (`mondayOnOrBefore`), so an N+0 task lands in it whatever weekday the project
-starts. A week with nothing due would show as empty, which would reflect a real gap in the plan
-rather than a bug; with the current sheet no cycle from 2 to 12 weeks has an empty week.
+task appears at every cycle length** and the dates are the sheet's own. A week with nothing due
+would show as empty, which would reflect a real gap in the plan rather than a bug; with the
+current sheet no cycle from 2 to 12 weeks has an empty week.
+
+### Weeks start on the kickoff date
+
+**Week 1 begins on the project's kickoff date, not on the Monday of the calendar week it falls
+in.** A project starting Wednesday 30 September runs Wed–Tue: 30 Sep–6 Oct, 7–13 Oct, 14–20 Oct,
+21–27 Oct, 28 Oct–3 Nov, go-live 3 November. Every project is anchored this way whatever weekday
+it starts on, and `computeGoLiveDate()` is kickoff + weeks×7 − 1, which already agreed.
+
+Five places anchored weeks and all five now use the kickoff: `generateWeeklyPlan`, the first week
+of "+ Add week from template" and of "+ New report", and the re-dating done when the kickoff or
+cycle length changes. `mondayOnOrBefore` and `mondayOnOrAfter` were deleted with the last of
+their callers; `tools/generate-weekly-report.js` anchors identically, since the whole point of
+the shared engine is that the app and the generated artifacts cannot disagree.
+
+Because week 1 now starts at the kickoff, **`lead` is structurally 0** and is passed as a
+literal. It stays in the engine's signature so a caller that anchors differently still gets right
+answers. That also retires the reason `fixedWeek` pinning was load-bearing: with the old Monday
+anchor, `lead` pushed an N+5 task into week 2 for any project starting Wednesday or later. N+5
+and N+10 now land in weeks 1 and 2 on their own, so the pin states intent rather than correcting
+for the calendar — verified, SDK Set Up → week 1 and User Tracking → week 2 on a Wednesday start.
+
+`alignWeeksToKickoff()` re-dates projects created under the old rule, once, on load, and says so
+through a banner. It moves each week to kickoff + index×7, drags each task's `startDate` and
+`dueDate` along, and refreshes go-live. A Monday kickoff is already aligned and is skipped, which
+is why it is safe to run on every load — it is idempotent by construction.
 
 Tasks are filtered to the project twice: by `platforms` (domain) and by `channels`. Channel
 filtering only applies once the project has chosen channels, so an early draft still gets the
@@ -331,6 +355,21 @@ status. That is the cost of copies over one record with a status per week.
 (Headless Chrome's virtual clock does not advance CSS transitions, so a test that reads a
 button's `background` straight after a change sees the start colour. Disable the transition in
 tests; `cursor`, which does not animate, flips immediately.)
+
+## What the report covers
+
+`selectReportWeeks()` returns **last week then the current week**, in that order: a reader wants
+what was delivered before what is still in hand. The current week is the one whose 7-day range
+contains today; week 1 has no week before it and stands alone; before kickoff there is neither,
+so the first week is shown rather than an empty report; after go-live "current" falls back to the
+last week that ended, so the report shows the project's final two weeks. Every week is still on
+the Project Reports screen — this only scopes the generated document.
+
+Weeks are numbered **by position in the project**, passed into `toReportWeek()`. They used to
+come from `update.templateWeek`, which holds the master-plan phase a week's first task came from
+(`slot.stageWeeks[0]`); several weeks can draw on one phase, so a report printed "Week 2" twice
+and a 6-week project's last two weeks read as "Week 3" and "Week 4". `templateWeek` is still the
+right field for finding which template a week came from — it is just not a position.
 
 ## Phase and domain on a task
 

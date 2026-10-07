@@ -69,17 +69,20 @@
     return new Set(values.map(Number)).size > 1;
   }
 
-  /* Which week of the project a task belongs to. `lead` is how many days the kickoff sits
-     after the start of its own week, so an N+0 task lands in week 1 whatever weekday the
-     project starts on. Week 1 covers days 0-6, week 2 days 7-13, and so on. */
+  /* Which week of the project a task belongs to. Week 1 covers days 0-6 from the start of
+     week 1, week 2 days 7-13, and so on. `lead` is how many days the kickoff sits after the
+     start of its own week; callers anchor week 1 on the kickoff date itself, so it is 0 in
+     practice and kept only so a caller that anchors differently still gets right answers. */
   function weekIndexFor(offset, cycleWeeks, lead) {
     const index = Math.floor(((Number(lead) || 0) + offset) / 7);
     return Math.min(Math.max(index, 0), Math.max(0, cycleWeeks - 1));
   }
 
-  /* Foundational work sits in a named week rather than wherever its offset lands. Placing it by
-     offset alone would only hold for a Monday or Tuesday kickoff: with `lead` counted in, an
-     N+5 task slides into week 2 for a project starting on a Wednesday or later. */
+  /* Foundational work sits in a named week rather than wherever its offset lands. This used to
+     be load-bearing: when week 1 began on the Monday before the kickoff, `lead` pushed an N+5
+     task into week 2 for any project starting Wednesday or later. Now that week 1 starts on the
+     kickoff, N+5 and N+10 land in weeks 1 and 2 on their own, and the pin states the intent
+     rather than correcting for the calendar. */
   function placementFor(task, cycleWeeks, lead, meta) {
     const pinned = Number(task && task.fixedWeek);
     if (Number.isFinite(pinned) && pinned > 0) {
