@@ -18,6 +18,31 @@ const WEEK_STATUSES = ["not started", "on track", "needs attention", "blocked", 
    and it protected nothing, since each person's data lives in their own browser and someone
    signing in with an unknown address just gets an empty dashboard. */
 const ALLOWED_EMAIL_DOMAIN = "webengage.com";
+
+/* How a project is going, set by hand on its page. Separate from `status`, which is only the
+   Ongoing/Completed folder a project sits in — but the two are kept in step: marking a project
+   completed or cancelled files it under Completed, anything else under Ongoing. Until now
+   nothing in the app ever wrote `status` anything but "current", so the Completed folder could
+   not be reached at all. */
+const PROJECT_STAGES = [
+  { value: "on track",     label: "On Track",     closes: false },
+  { value: "slow moving",  label: "Slow Moving",  closes: false },
+  { value: "at risk",      label: "At Risk",      closes: false },
+  { value: "parked",       label: "Parked",       closes: false },
+  { value: "completed",    label: "Completed",    closes: true },
+  { value: "cancelled",    label: "Cancelled",    closes: true },
+];
+
+function projectStage(project) {
+  const stored = String((project && project.stage) || "").toLowerCase();
+  if (PROJECT_STAGES.some((stage) => stage.value === stored)) return stored;
+  /* Projects created before this existed: derive from the folder they are in. */
+  return project && project.status === "closed" ? "completed" : "on track";
+}
+
+function stageClass(value) {
+  return `stage-${String(value || "on track").replace(/[^a-z]+/g, "-")}`;
+}
 let currentSession = null;
 
 /* Read by debugLog() from anywhere, so it must be module-level, not inside boot(). */
@@ -232,6 +257,8 @@ const nodes = {
   categoryLoadMore: document.getElementById("categoryLoadMore"),
   projectTitle: document.getElementById("projectTitle"),
   projectStatusBadge: document.getElementById("projectStatusBadge"),
+  projStage: document.getElementById("projStage"),
+  projStageNote: document.getElementById("projStageNote"),
   deleteProjectBtn: document.getElementById("deleteProjectBtn"),
   projKickoff: document.getElementById("projKickoff"),
   projGoLive: document.getElementById("projGoLive"),
@@ -473,6 +500,7 @@ function boot() {
   });
   nodes.projCancelEdit.addEventListener("click", () => toggleProjectDetails(false));
   nodes.projDetailsForm.addEventListener("submit", (e) => saveProjectDetails(e));
+  nodes.projStage.addEventListener("change", () => setProjectStage(nodes.projStage.value));
   nodes.projTechTeam.addEventListener("change", () => {
     nodes.projVendorField.hidden = nodes.projTechTeam.value !== "outsourced";
   });
@@ -1300,6 +1328,7 @@ function renderProjectScreen() {
       : "No tasks yet"],
   ]);
 
+  renderProjectStage(project);
   nodes.projectDetailsFields.innerHTML = buildProjectDetailsHtml(project);
   nodes.projectScope.innerHTML = buildIntegrationScopeHtml(project);
   nodes.projectTimelineFields.innerHTML = overviewFields([
@@ -2149,6 +2178,10 @@ function ensureDefaults(targetState) {
     });
   });
 
+  targetState.projects.forEach((project) => {
+    if (!project.stage) project.stage = project.status === "closed" ? "completed" : "on track";
+  });
+
   targetState.updates.forEach((update) => {
     (update.tasks || []).forEach((task) => {
       if (task.domain === undefined) {
@@ -2390,6 +2423,40 @@ function projectPeople(project) {
    
    These live in the Basic Details card itself rather than a card of their own, because that is
    the section the brief names and the one whose Edit form owns these fields. */
+/* The status control on the project page. Changing it also moves the project between the
+   Ongoing and Completed folders, so there is one place to say how a project is going rather
+   than two that can disagree. */
+function renderProjectStage(project) {
+  if (!nodes.projStage) return;
+
+  const current = projectStage(project);
+  nodes.projStage.innerHTML = PROJECT_STAGES
+    .map((stage) => `<option value="${stage.value}"${stage.value === current ? " selected" : ""}>${escapeHtml(stage.label)}</option>`)
+    .join("");
+  nodes.projStage.className = `stage-select ${stageClass(current)}`;
+
+  const closes = PROJECT_STAGES.find((stage) => stage.value === current);
+  nodes.projStageNote.textContent = closes && closes.closes
+    ? "Filed under Completed projects."
+    : "Filed under Ongoing projects.";
+}
+
+function setProjectStage(value) {
+  const project = state.projects.find((item) => item.id === uiState.projectId);
+  const stage = PROJECT_STAGES.find((item) => item.value === value);
+  if (!project || !stage) return;
+
+  project.stage = stage.value;
+  /* Completed and Cancelled both leave the Ongoing folder. "Completed" is the only other
+     folder there is, so a cancelled project lands there too — it is not ongoing, and inventing
+     a third folder for it would change every count and list on the dashboard. */
+  project.status = stage.closes ? "closed" : "current";
+  project.updatedAt = new Date().toISOString();
+  saveState();
+  renderAll();
+  showAppSuccess(`${project.name || "Project"} marked ${stage.label}.`);
+}
+
 function buildProjectDetailsHtml(project) {
   const { webengage, client } = projectPeople(project);
   const group = (title, rows, empty) => `

@@ -2557,6 +2557,39 @@ button {
   border-left: 3px solid var(--card-accent);
 }
 
+/* Basic Details is the tall card, so without this the Timeline leaves a hole beneath it and
+   the status card drops under Basic Details instead of filling that gap. */
+#projDetailsBlock { grid-row: span 2; }
+
+@media (max-width: 900px) {
+  #projDetailsBlock { grid-row: auto; }
+}
+
+.stage-field {
+  display: grid;
+  gap: 6px;
+}
+
+/* The colours are the ones the team already uses for these words in their sheet, so the
+   dropdown reads the same way here as it does there. */
+.stage-select {
+  padding: 9px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--card-border);
+  font-family: inherit;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  color: #1f2937;
+}
+
+.stage-on-track    { background: #c6e8a2; }
+.stage-slow-moving { background: #f5e07a; }
+.stage-at-risk     { background: #ef9a9a; }
+.stage-parked      { background: #f3b0a3; }
+.stage-completed   { background: #8fd97a; }
+.stage-cancelled   { background: #b8c2c9; }
+
 .overview-card-wide { margin-bottom: 32px; }
 
 .overview-card-head {
