@@ -15,7 +15,6 @@ A client-side PWA for tracking weekly status updates across multiple projects (C
   and Use-Cases, Go Live). Each task carries `offsetByCycle` — its completion day offset from
   kickoff per cycle length. See "Master plan and cycle length" below.
 - `demo-data/` — optional demo datasets; `index.json` lists what Settings offers
-- `allowed-users.json` — who may sign in: email, first name, last name. See `README-auth.md`
 - `supabase-config.json` — Supabase URL + anon key; unused while sign-in is the local demo gate
 - `supabase/schema.sql` — run once in the Supabase SQL editor to create tables, RLS and stats
 - `tools/import-sheet.py` — re-import the master plan from the Google Sheet, with an alignment guard
@@ -24,26 +23,38 @@ A client-side PWA for tracking weekly status updates across multiple projects (C
 - `build-standalone.py` — bundles everything into `weekly-report-dashboard.html`
 - `weekly-report-dashboard.html` — generated single-file build (do not edit by hand)
 
-## Sign-in: email only, no roles
+## Sign-in: email only, no list
 
-Someone types their work email; if it is listed in `allowed-users.json` they are in. **No
-password, no role, no server.** `@webengage.com` only (`allowedDomain`), and an unlisted
-address gets "This email doesn't have access. Ask Stuti to add you." Everyone who signs in has
-**full access**. Adding or removing someone is a commit — the browser cannot write the file.
-Full procedure in `README-auth.md`.
+Any `@webengage.com` address is let in (`ALLOWED_EMAIL_DOMAIN`). **No password, no role and no
+list of people.** The greeting comes from the address itself — `userDisplayName()` turns
+`name.surname@webengage.com` into "Name Surname" — which is why no stored names are needed. A
+new joiner needs no commit and no deploy: they sign in on their first day.
 
-A stored session is re-checked against the list on every load, so removing an entry takes that
-person's access away on their next page load rather than never.
+`allowed-users.json` was removed on 21 October 2026, two weeks after it replaced
+`roles-config.json` and its password hashes. With no server the check runs in the browser, so
+**any list it compares against must be downloaded first**: the file was fetched before the
+sign-in screen appeared and anyone could read it at its URL. It also protected nothing — each
+person's data lives in their own browser under `USER_DATA_PREFIX` + their email, so an
+unexpected address starts an empty dashboard rather than reading someone else's. It published
+the team's addresses in exchange for nothing. Hashing the addresses would only have raised
+reading them from "open the URL" to "run a script", since company addresses are
+firstname.lastname.
 
-This is a **gate, not security**: the file is public on the deployed site, anyone can type any
-address, and DevTools walks past it. It exists so the app knows who you are.
+A stored session is re-checked against the domain on every load, so a session saved under
+another domain stops working rather than living for ever.
 
-Removed on 7 October 2026, with their config file and `tools/hash-password.py`: password fields
-and SHA-256 checks, `ROLES` / `ROLE_LABELS` / `PERMISSIONS` and the `can()` / `requirePermission()`
-/ `applyRolePermissions()` trio, every `data-requires` attribute (18 in markup, 3 in renderers),
-21 permission guards, `state.settings.role`, the role label under the name in the header, and
-Settings → Change password / Users & Roles. Hashes in a publicly readable file protect nothing,
-and a role split is overhead for a team where everyone needs to edit.
+This is a **gate, not security**: anyone can type any company address, including one that is not
+theirs, and DevTools steps straight past it. Any employee can open the tool, which costs nothing
+while nothing is shared. **The day projects are shared between people** (in `BACKLOG.md`, and
+blocked on a database) access control starts mattering, and only a server can both hide the list
+and enforce it — `README-supabase.md` sketches it, `supabase/schema.sql` is written, and roles
+would return with it.
+
+Removed with the lists, 7 and 21 October 2026: password fields and SHA-256 checks, `ROLES` /
+`ROLE_LABELS` / `PERMISSIONS`, `can()` / `requirePermission()` / `applyRolePermissions()`, every
+`data-requires` attribute, 21 permission guards, `state.settings.role`, the role label under the
+name in the header, Settings → Change password / Users & Roles, `tools/hash-password.py`, and
+`findConfiguredUser()`.
 
 **`TEAM_ROLES` is unrelated** — OBM, TSS, CSM and so on are job titles on a project's team, not
 access levels, and they stay.

@@ -1,9 +1,0 @@
-{
-  "$comment": "Who may sign in. Email-only: an address listed here is let in, with no password. Publicly readable on the deployed site, so it holds names and addresses and nothing else. Adding someone means editing this file and pushing - the browser cannot write to it.",
-  "allowedDomain": "webengage.com",
-  "requireLogin": true,
-  "users": [
-    { "email": "stuti.khare@webengage.com", "firstName": "Stuti", "lastName": "Khare" },
-    { "email": "ajwanda.shrivastav@webengage.com", "firstName": "Ajwanda", "lastName": "Shrivastav" }
-  ]
-}

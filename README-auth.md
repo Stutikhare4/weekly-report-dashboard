@@ -1,43 +1,45 @@
 # Who can sign in
 
-Sign-in is **email only**. Someone types their work email; if that address is listed in
-`allowed-users.json`, they are in. There is no password, no role and no server.
-
-Every signed-in person has **full access** — there is no Admin/Viewer split. Data stays in
-each person's own browser (`localStorage`), so two people signed in on two machines do not
-see each other's projects.
+Any **@webengage.com** email address. That is the whole check: the person types their work
+email, and if the domain matches they are in. No password, no role, **no list of people**.
 
 ## Adding someone
 
-1. Edit `allowed-users.json` and add an entry:
+Nothing to do. A new joiner signs in with their work email on their first day.
 
-   ```json
-   { "email": "name.surname@webengage.com", "firstName": "Name", "lastName": "Surname" }
-   ```
+There is no file to edit, no commit and no deploy. The greeting is derived from the address —
+`name.surname@webengage.com` is shown as "Name Surname".
 
-2. Commit and push. Vercel redeploys and they can sign in.
+## Why there is no list
 
-The browser cannot write this file, so there is no in-app "add a user" screen — adding or
-removing someone is a commit. Removing an entry takes effect on that person's **next page
-load**: a stored session is re-checked against the list every time, so it stops working.
+There used to be one (`allowed-users.json`, and before that `roles-config.json` with password
+hashes). Both were removed, on 21 October 2026 and 7 October 2026.
 
-Only `@webengage.com` addresses are accepted; the domain is `allowedDomain` in the same file.
-An unlisted address sees: *"This email doesn't have access. Ask Stuti to add you."*
+With no server, the check runs in the visitor's browser, so **any list it compares against has
+to be downloaded first**. The file was fetched before the sign-in screen even appeared and was
+readable by anyone who opened its URL. Hashing or renaming it would only have changed how much
+effort reading it took.
+
+And it was guarding nothing. Each person's projects live in their own browser, under their own
+`localStorage` key, so someone signing in with an unexpected address starts an **empty
+dashboard** rather than reading anyone else's. The list published the team's addresses in
+exchange for no protection at all.
 
 ## What this is and is not
 
-It is a **gate on an internal tool, not security**. The file is publicly readable on the
-deployed site, anyone can type any address, and anyone who opens DevTools can set the session
-key by hand and walk straight past it. It exists so the app knows who you are and can put your
-name on what you enter.
+A **gate on an internal tool, not security**. Anyone can type any @webengage.com address,
+including one that is not theirs, and anyone who opens DevTools can set the session key by hand
+and skip the screen. It exists so the app knows who you are and can keep your data under your
+own key.
 
-That is a deliberate trade for a demo used by one internal team. If real access control is ever
-needed, it needs a server — `README-supabase.md` sketches the accounts route, and the schema is
-already written.
+Any WebEngage employee can therefore open the tool. Today that costs nothing, because there is
+nothing shared to see.
 
-## What used to be here
+## When this has to change
 
-Passwords (SHA-256 hashes in `roles-config.json`), two roles with a ten-capability permission
-matrix, Settings → Change password, and Settings → Users & Roles. All removed on 7 October
-2026: hashes in a publicly readable file protect nothing, and a role split is overhead for a
-team where everyone needs to edit. `tools/hash-password.py` went with them.
+**The day projects are shared between people.** That is in `BACKLOG.md` and needs a database
+rather than one saved blob per person — and at that point access control starts mattering for
+real, because one person's data would be reachable by another.
+
+Only a server can both keep the list private and enforce it. `README-supabase.md` sketches that
+route and `supabase/schema.sql` is already written; roles would come back with it.

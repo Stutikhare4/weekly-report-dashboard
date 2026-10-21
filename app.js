@@ -13,14 +13,11 @@ const WEEK_STATUSES = ["not started", "on track", "needs attention", "blocked", 
 /* Master plan seed, generated from the team's Google Sheet by tools/import-sheet.py. A task's
    `scope` is the domain it is done against; the phase it belongs to comes from its stage.
    This is only the SEED — the editable copy lives in state.weekTemplates (Templates screen). */
-/* Loaded from allowed-users.json at boot. These fallbacks keep the app honest if the file
-   cannot be read: the domain rule still applies and the list is empty, so nobody is let in
-   rather than everybody. */
-let allowedUsers = {
-  allowedDomain: "webengage.com",
-  requireLogin: true,
-  users: [],
-};
+/* The whole sign-in rule. There is no list of people: with no server, any list the browser
+   checks has to be downloaded first, so publishing one was the only thing it reliably did —
+   and it protected nothing, since each person's data lives in their own browser and someone
+   signing in with an unknown address just gets an empty dashboard. */
+const ALLOWED_EMAIL_DOMAIN = "webengage.com";
 let currentSession = null;
 
 /* Read by debugLog() from anywhere, so it must be module-level, not inside boot(). */
@@ -582,7 +579,7 @@ function boot() {
   }
 
 
-  loadAllowedUsers().then(() => startSession());
+  startSession();
 renderDemoDataOptions();
 
   /* Prefer the editable JSON file over the copy compiled into app.js — on first run, and
@@ -3380,50 +3377,30 @@ function ensureDemoProjectShape(project) {
 
 
 
-async function loadAllowedUsers() {
-  const inlined = bundled("allowedUsers");
-  if (inlined) {
-    allowedUsers = { ...allowedUsers, ...inlined };
-    return;
-  }
-
-  try {
-    const response = await fetch("./allowed-users.json", { cache: "no-store" });
-    if (response.ok) allowedUsers = { ...allowedUsers, ...(await response.json()) };
-  } catch (error) {
-    debugLog(`allowed-users.json not readable: ${error.message}`);
-  }
-}
-
 function isAllowedEmail(email) {
-  const domain = String(allowedUsers.allowedDomain || "").toLowerCase().trim();
+  const domain = ALLOWED_EMAIL_DOMAIN.toLowerCase().trim();
   if (!domain) return true;
   return String(email || "").toLowerCase().trim().endsWith(`@${domain}`);
 }
 
-/* Config stores firstName and lastName separately; `name` is still read so older config
-   files keep working. */
-function userDisplayName(user, email) {
-  const joined = [user && user.firstName, user && user.lastName].filter(Boolean).join(" ").trim();
-  if (joined) return joined;
-  if (user && user.name) return user.name;
-
+/* The greeting comes from the address itself — stuti.khare@webengage.com reads as
+   "Stuti Khare" — which is why no stored names are needed. */
+function userDisplayName(email) {
   const local = String(email || "").split("@")[0];
   return local.split(/[._-]+/).filter(Boolean)
     .map((part) => part.charAt(0).toUpperCase() + part.slice(1)).join(" ") || local;
 }
 
-function findConfiguredUser(email) {
-  const wanted = String(email || "").toLowerCase().trim();
-  return (allowedUsers.users || []).find((user) => String(user.email).toLowerCase().trim() === wanted) || null;
-}
 
 /* ---------- Sign-in ---------- */
 
-/* Email only: an address listed in allowed-users.json is let in, and that is the whole check.
-   No password, no role, no server. It identifies the person so the app can greet them by name;
-   it is a gate on an internal tool, not a security control — anyone who can open the page can
-   type any address, and anyone who opens DevTools can step straight past it. */
+/* Email only: any @webengage.com address is let in, and that is the whole check. No password,
+   no role, no list, no server. It identifies the person so the app can greet them by name and
+   keep their data under their own key; it is a gate on an internal tool, not a security
+   control — anyone can type any address, and DevTools steps straight past it.
+
+   There is nothing behind it to take: each person's projects live in their own browser, so an
+   unexpected colleague signing in starts an empty dashboard rather than reading yours. */
 const SESSION_KEY = "multi-project-dashboard-session";
 
 function loadSession() {
@@ -3443,22 +3420,18 @@ function saveSession(session) {
   }
 }
 
-/* A stored session is honoured only while its address is still listed. Take someone out of
-   allowed-users.json and their session stops working on their next load — otherwise removing
-   them would not actually remove their access. */
+/* A stored session is re-checked on every load, so a session saved under some other domain
+   stops working rather than living for ever. */
 function startSession() {
-  if (allowedUsers.requireLogin === false) return;
-
   const session = loadSession();
-  const user = session ? findConfiguredUser(session.email) : null;
 
-  if (session && user && isAllowedEmail(session.email)) {
-    applySession({ ...session, name: userDisplayName(user, session.email) });
+  if (session && isAllowedEmail(session.email)) {
+    applySession({ ...session, name: userDisplayName(session.email) });
     return;
   }
 
   if (session) {
-    debugLog("stored session is no longer in allowed-users.json - signing out");
+    debugLog("stored session is not a @" + ALLOWED_EMAIL_DOMAIN + " address - signing out");
     try { localStorage.removeItem(SESSION_KEY); } catch (error) { /* ignore */ }
   }
 
@@ -3481,18 +3454,13 @@ function handleEmailSignIn(event) {
   const email = nodes.authEmail.value.trim().toLowerCase();
 
   if (!isAllowedEmail(email)) {
-    showAuthError(`Use a @${allowedUsers.allowedDomain} address. Access is limited to the internal team.`);
+    showAuthError(`Use a @${ALLOWED_EMAIL_DOMAIN} address. Access is limited to the internal team.`);
     return;
   }
 
-  const user = findConfiguredUser(email);
-  if (!user) {
-    showAuthError("This email doesn't have access. Ask Stuti to add you.");
-    return;
-  }
-
-  saveSession({ email, name: userDisplayName(user, email), signedInAt: new Date().toISOString() });
-  applySession(loadSession() || { email, name: userDisplayName(user, email) });
+  const name = userDisplayName(email);
+  saveSession({ email, name, signedInAt: new Date().toISOString() });
+  applySession({ email, name });
 }
 
 function signOutSession() {
@@ -3579,7 +3547,7 @@ async function onSignedIn(user) {
     await cloud.client.auth.signOut();
     cloud.user = null;
     showAuthOverlay();
-    showAuthError(`${user.email} is not a @${allowedUsers.allowedDomain} account. Access is restricted to company accounts.`);
+    showAuthError(`${user.email} is not a @${ALLOWED_EMAIL_DOMAIN} account. Access is restricted to company accounts.`);
     return;
   }
 
@@ -3654,14 +3622,12 @@ function renderAccountPanel() {
   if (!nodes.settingsAccount) return;
 
   if (!currentSession) {
-    nodes.settingsAccount.innerHTML = `<p class="muted">Not signed in. Sign-in is off in
-      <code>allowed-users.json</code> (<code>requireLogin: false</code>).</p>`;
+    nodes.settingsAccount.innerHTML = `<p class="muted">Not signed in.</p>`;
     return;
   }
 
   nodes.settingsAccount.innerHTML = `
-    <p class="muted">Signed in as <strong>${escapeHtml(currentSession.email)}</strong> —
-    from <code>allowed-users.json</code>.</p>
+    <p class="muted">Signed in as <strong>${escapeHtml(currentSession.email)}</strong>.</p>
     <p class="muted" style="margin-top:6px;font-size:0.8rem;">Sign-in is your email alone — no
     password and no server, so this identifies you rather than protecting anything. Data stays in
     this browser.</p>

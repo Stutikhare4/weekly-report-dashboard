@@ -44,7 +44,6 @@ def main():
 
     bundle = {
         "supabaseConfig": supabase_config,
-        "allowedUsers": json.loads(read("allowed-users.json")),
         "weekTemplates": json.loads(read("week-templates.json")),
         "demoIndex": demo_index,
         "demos": demos,

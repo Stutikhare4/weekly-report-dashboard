@@ -84,7 +84,6 @@ is **written but not switched on**.
 | `sw.js` | Service worker; `CACHE_NAME` must be bumped on every release |
 | `manifest.webmanifest`, `icon.svg` | PWA install metadata and icon |
 | `week-templates.json` | The master plan, generated from the Google Sheet |
-| `allowed-users.json` | Who may sign in: email, first name, last name |
 | `demo-data/` | An optional demo project (Salad Days) loadable from Settings |
 | `build-standalone.py` | Builds the single-file version |
 | `weekly-report-dashboard.html` | The generated single-file version (never edited by hand) |
@@ -243,9 +242,9 @@ and any generated artifact cannot disagree.
 
 ### Sign-in
 A theme-aware sign-in card, light by default, with **one field: work email**. It accepts
-`@webengage.com` addresses only, and only people listed in `allowed-users.json`; anyone else
-sees "This email doesn't have access. Ask Stuti to add you." There is no password. The card says
-plainly that this identifies you rather than protecting anything.
+any `@webengage.com` address, with no password and no list of people. Anything else sees "Use a
+@webengage.com address." The card says plainly that this identifies you rather than protecting
+anything.
 
 ### Top bar and sidebar
 The top bar shows the "Weekly Report" wordmark (the old "S" logo square is hidden), a project
@@ -462,20 +461,19 @@ document, while the app itself uses one sans-serif font.
 
 ## 10. Access control
 
-- **Who can sign in:** email only, `@webengage.com` only, and only the addresses listed in
-  `allowed-users.json` — currently stuti.khare@webengage.com and
-  ajwanda.shrivastav@webengage.com. No password.
+- **Who can sign in:** any `@webengage.com` address. No password and no list — a new joiner
+  signs in on their first day with nothing to edit or deploy.
 - **No roles.** Everyone who signs in has full access. The two-role split and its ten-capability
   permission matrix were removed on 7 October 2026: a role split is overhead for a team where
   everyone needs to edit.
-- **Adding or removing someone** means editing `allowed-users.json` and pushing —
-  `README-auth.md` has the steps. Removal takes effect on that person's next page load, since a
-  stored session is re-checked against the list every time.
+- **Nothing to maintain.** The list was deleted on 21 October 2026: with no server, a list the
+  browser checks has to be published to the browser, and it guarded nothing — each person's data
+  is in their own browser, so an unknown address starts an empty dashboard. A stored session is
+  re-checked against the domain on every load.
 
 **This is a gate, not security.**
-- `allowed-users.json` is publicly downloadable from the live site, so the email addresses can
-  be read by anyone with the URL. There are no password hashes in it any more.
-- Anyone can type any listed address, since nothing is verified.
+- Any employee can open the tool, and anyone can type any company address, including one that
+  is not theirs. Nothing is verified. There is no longer any file publishing who the team is.
 - The check runs in the browser, so it can be bypassed with developer tools.
 
 This is fine for an internal demo, but not for real client data on a public URL. The
@@ -626,6 +624,12 @@ earlier commits used.
 - A Save button added to the week modal's header, then removed on request; change detection and
   the leave prompts were kept.
 
+**21 October**
+- **The user list is gone.** `allowed-users.json` was deleted: any @webengage.com address signs
+  in, and a new joiner needs no commit or deploy. With no server, a list the browser checks has
+  to be published to the browser — and it guarded nothing, since each person's data is in their
+  own browser and an unknown address starts an empty dashboard.
+
 **19 October**
 - **Layout fix:** `.wizard-section` had `height: 100%`, so each section stretched to its whole
   screen — the Team page was 6194px tall for 1200px of content, scrolled into blank space, and
@@ -638,8 +642,8 @@ earlier commits used.
   project owner and sales owner.
 
 **7 October**
-- **Sign-in is email-only.** `allowed-users.json` became `allowed-users.json` (email, first name,
-  last name). Passwords, the two roles and the whole permission matrix are gone, along with
+- **Sign-in is email-only.** `roles-config.json` became `allowed-users.json` (email, first name,
+  last name; itself deleted on 21 October). Passwords, the two roles and the whole permission matrix are gone, along with
   Settings → Change password and Users & Roles, and the "admin" label in the header. Everyone
   signed in has full access.
 - **Owner became a project-scoped dropdown** in the week editor, grouped Team / Client POCs,
@@ -776,9 +780,10 @@ These came up in requests and were declined or changed, with reasons.
 
 **Security and exposure**
 
-8. **The live site serves the docs and `allowed-users.json` publicly.** The file now holds only
-    names and email addresses — the password hashes are gone — and it must stay readable for
-    sign-in to work. A small `vercel.json` could still block the `.md` files.
+8. **The live site serves the docs publicly** — `PRODUCT-CONTEXT.md` and `CLAUDE.md` are
+    fetchable by anyone with the URL. A small `vercel.json` would block them. No file publishes
+    who the team is any more: the password hashes went on 7 October and the address list on
+    21 October.
 
 ---
 
