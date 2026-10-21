@@ -675,6 +675,35 @@ p {
   gap: 12px;
 }
 
+/* The result cards under the month. Everything here is scoped to the calendar: `.project-name`
+   and `.project-meta` are shared with the dashboard's recent-updates cards, so a general rule
+   would quietly shrink those too. */
+#calendarSelectedList .project-name-card {
+  padding: 10px 12px;
+  gap: 3px;
+  border-radius: 12px;
+}
+
+#calendarSelectedList .project-name {
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+#calendarSelectedList .project-meta {
+  font-size: 0.78rem;
+}
+
+#calendarSelectedList .calendar-golive {
+  font-size: 0.74rem;
+  color: var(--muted);
+}
+
+/* The card is a grid, so without this the badge stretches the full width and reads as a bar
+   rather than a status chip. */
+#calendarSelectedList .status-badge {
+  justify-self: start;
+}
+
 .project-name-card {
   padding: 18px 20px;
   border-radius: 18px;
@@ -1088,6 +1117,131 @@ button {
   align-content: start;
 }
 
+/* Tinted tiles with a watermark icon, one hue per metric, so the row reads at a glance instead
+   of as five identical boxes. The tints are derived from the app's own accent tokens rather
+   than new hex values, so dark mode and the WebEngage palette still hold. */
+.stat-tile {
+  position: relative;
+  overflow: hidden;
+}
+
+.stat-tile-icon {
+  position: absolute;
+  right: 12px;
+  bottom: 10px;
+  width: 26px;
+  height: 26px;
+  opacity: 0.32;
+  pointer-events: none;
+}
+
+.tile-total     { background: color-mix(in srgb, var(--card-accent) 10%, var(--surface-2)); }
+.tile-ongoing   { background: color-mix(in srgb, #8b5cf6 12%, var(--surface-2)); }
+.tile-completed { background: color-mix(in srgb, var(--card-done) 12%, var(--surface-2)); }
+.tile-updates   { background: color-mix(in srgb, var(--card-accent) 16%, var(--surface-2)); }
+.tile-blocked   { background: color-mix(in srgb, #ef4444 10%, var(--surface-2)); }
+
+.tile-total .stat-tile-icon     { color: var(--card-accent); }
+.tile-ongoing .stat-tile-icon   { color: #8b5cf6; }
+.tile-completed .stat-tile-icon { color: var(--card-done); }
+.tile-updates .stat-tile-icon   { color: var(--card-accent); }
+.tile-blocked .stat-tile-icon   { color: #ef4444; }
+
+/* A folder card is no longer one big button: it holds a heading button plus a row per project,
+   and a button cannot be nested inside a button. */
+.folder-card {
+  padding: 16px 18px;
+  border-radius: 22px;
+  border: 1px solid var(--border-soft);
+  display: grid;
+  gap: 10px;
+  align-content: start;
+}
+
+.folder-card-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.folder-card-list {
+  display: grid;
+  gap: 6px;
+}
+
+.folder-card-row {
+  display: grid;
+  grid-template-columns: 1fr 86px;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 10px;
+  border-radius: 10px;
+  border: 1px solid transparent;
+  background: color-mix(in srgb, var(--surface-1) 72%, transparent);
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.folder-card-row:hover { border-color: var(--border-soft); }
+
+.folder-card-row-main { display: grid; gap: 1px; min-width: 0; }
+
+.folder-card-row-name {
+  font-size: 0.82rem;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.folder-card-row-meta { font-size: 0.72rem; color: var(--muted); }
+
+/* One progress treatment, used by the folder rows and the recent-updates rows. */
+.progress-track {
+  display: block;
+  height: 6px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--card-label) 22%, transparent);
+  overflow: hidden;
+}
+
+.progress-fill {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: var(--card-accent);
+}
+
+/* Recent updates: the text column, then the bar, then the initials circle. */
+.dash-update-row {
+  display: grid;
+  grid-template-columns: 1fr 110px 34px;
+  align-items: center;
+  gap: 14px;
+}
+
+.dash-update-main { display: grid; gap: 3px; min-width: 0; }
+.dash-update-row .status-badge { justify-self: start; }
+
+.dash-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--card-value);
+  background: color-mix(in srgb, var(--card-primary) 26%, var(--surface-2));
+}
+
 .stat-tile-label {
   color: var(--muted);
   font-size: 0.8rem;
@@ -1205,10 +1359,10 @@ button {
 .calendar-head {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: 8px;
-  margin-bottom: 8px;
+  gap: 6px;
+  margin-bottom: 6px;
   color: var(--muted);
-  font-size: 0.78rem;
+  font-size: 0.68rem;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   text-align: center;
@@ -1217,24 +1371,30 @@ button {
 .calendar-grid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: 8px;
+  gap: 6px;
 }
 
+/* No `aspect-ratio: 1`. A square cell is as tall as the column is wide, so on a desktop the
+   seven columns made 143px squares and the month grid alone ran to 748px — the screen came to
+   1236px against an 813px viewport, and the updates list below it could only be reached by
+   scrolling. A month needs to be readable, not a grid of large empty boxes; `min-height` keeps
+   each cell a comfortable row that can still grow if anything is added to it. */
 .calendar-day {
   position: relative;
-  aspect-ratio: 1;
-  border-radius: 12px;
+  min-height: 38px;
+  border-radius: 10px;
   background: var(--surface-1);
   border: 1px solid var(--border-soft);
   color: var(--text);
-  font-size: 0.85rem;
+  font-size: 0.75rem;
   display: flex;
   align-items: flex-start;
   justify-content: flex-start;
-  padding: 8px;
+  padding: 5px 7px;
 }
 
 .calendar-day-empty {
+  min-height: 0;
   background: transparent;
   border-color: transparent;
 }
@@ -1676,8 +1836,13 @@ button {
   gap: 14px;
 }
 
+/* No `height: 100%` here. As a grid item its containing block is a definite height handed down
+   from the shell, so each section stretched to the full height of the screen it sits in — and
+   because that made the screen taller, the next section stretched further still. The Team page
+   went from two sections to four and ended up 6194px tall for 1200px of content, with a blank
+   gap under every heading. Grid already stretches side-by-side sections to equal heights, which
+   is all this was wanted for. */
 .wizard-section {
-  height: 100%;
   padding: 11px 15px;
   border-radius: 18px;
   background: var(--surface-5);
@@ -2829,11 +2994,12 @@ button {
 .report-row-task-table { table-layout: fixed; }
 .report-row-task-table th:nth-child(1) { width: 11%; }
 .report-row-task-table th:nth-child(2) { width: 10%; }
-.report-row-task-table th:nth-child(3) { width: 20%; }
-.report-row-task-table th:nth-child(4) { width: 10%; }
+.report-row-task-table th:nth-child(3) { width: 19%; }
+/* Owner is a select now, and a name has to be readable without opening it. */
+.report-row-task-table th:nth-child(4) { width: 13%; }
 .report-row-task-table th:nth-child(5) { width: 10%; }
 .report-row-task-table th:nth-child(6) { width: 10%; }
-.report-row-task-table th:nth-child(7) { width: 11%; }
+.report-row-task-table th:nth-child(7) { width: 9%; }
 .report-row-task-table th:nth-child(8) { width: 18%; }
 
 .report-row-actions {
@@ -3459,6 +3625,54 @@ button {
   border-color: var(--card-done);
   color: #ffffff;
 }
+
+/* People: the two groups on a project's Basic Details card, and the per-project client
+   sections on the Team screen. */
+.people-group + .people-group {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border-soft);
+}
+
+.people-group-title {
+  margin: 0 0 8px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+}
+
+/* The go-live note follows the read-only fields, so it needs a rule above it or it reads as
+   another line of the client list. */
+#projectDetailsFields + #projDetailsNote {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border-soft);
+}
+
+.team-project-group + .team-project-group {
+  margin-top: 18px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border-soft);
+}
+
+/* On the Team screen the group labels carry the structure of the page — which role, which
+   project — so they read as accent chips rather than quiet captions. Scoped to this screen:
+   the same class labels "WEBENGAGE TEAM" / "CLIENT TEAM" on a project's Basic Details card,
+   where a chip would compete with the card heading. */
+#teamScreen .people-group-title {
+  display: inline-block;
+  margin-bottom: 10px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: var(--card-warning-soft);
+  color: var(--card-warning);
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+}
+
 
 /* Inline week editing. A week opened in the reports accordion is the editor: its own status
    and start date, the work still open from earlier weeks, and its tasks — all in one table, so

@@ -13,39 +13,12 @@ const WEEK_STATUSES = ["not started", "on track", "needs attention", "blocked", 
 /* Master plan seed, generated from the team's Google Sheet by tools/import-sheet.py. A task's
    `scope` is the domain it is done against; the phase it belongs to comes from its stage.
    This is only the SEED — the editable copy lives in state.weekTemplates (Templates screen). */
-const ROLES = ["admin", "viewer"];
-
-const ROLE_LABELS = {
-  admin: "Admin",
-  viewer: "Viewer",
-};
-
-const ROLE_DESCRIPTIONS = {
-  admin: "Full access — projects, reports, templates, teams, data and user roles.",
-  viewer: "Read-only. Can browse projects and generate or export reports, but change nothing.",
-};
-
-/* Two roles: Admin does everything, Viewer changes nothing. Every mutating capability is
-   admin-only. Viewing, generating and exporting reports need no permission and so are not
-   listed here. */
-const PERMISSIONS = {
-  "project.create": ["admin"],
-  "project.delete": ["admin"],
-  "project.edit": ["admin"],
-  "report.create": ["admin"],
-  "report.edit": ["admin"],
-  "report.delete": ["admin"],
-  "template.edit": ["admin"],
-  "team.manage": ["admin"],
-  "data.manage": ["admin"],
-  "users.manage": ["admin"],
-};
-
-/* Loaded from roles-config.json at boot; these are the fallbacks if the file is missing. */
-let rolesConfig = {
+/* Loaded from allowed-users.json at boot. These fallbacks keep the app honest if the file
+   cannot be read: the domain rule still applies and the list is empty, so nobody is let in
+   rather than everybody. */
+let allowedUsers = {
   allowedDomain: "webengage.com",
   requireLogin: true,
-  passwordPolicy: { minLength: 10, requireUppercase: true, requireLowercase: true, requireNumber: true, requireSymbol: true },
   users: [],
 };
 let currentSession = null;
@@ -214,7 +187,6 @@ const STATUS_FILL = {
 
 const nodes = {
   headerDisplayName: document.getElementById("headerDisplayName"),
-  headerRole: document.getElementById("headerRole"),
   headerAvatar: document.getElementById("headerAvatar"),
   themeToggle: document.getElementById("themeToggle"),
   searchInput: document.getElementById("searchInput"),
@@ -283,6 +255,11 @@ const nodes = {
   projectOverview: document.getElementById("projectOverview"),
   projectScope: document.getElementById("projectScope"),
   projectTimelineFields: document.getElementById("projectTimelineFields"),
+  projectDetailsFields: document.getElementById("projectDetailsFields"),
+  dashOngoingList: document.getElementById("dashOngoingList"),
+  dashClosedList: document.getElementById("dashClosedList"),
+  teamWebengage: document.getElementById("teamWebengage"),
+  teamByProject: document.getElementById("teamByProject"),
   projectPhases: document.getElementById("projectPhases"),
   projScopeEdit: document.getElementById("projScopeEdit"),
   projScopeForm: document.getElementById("projScopeForm"),
@@ -323,7 +300,6 @@ const nodes = {
   authIntro: document.getElementById("authIntro"),
   authError: document.getElementById("authError"),
   authEmail: document.getElementById("authEmail"),
-  authPassword: document.getElementById("authPassword"),
   authHint: document.getElementById("authHint"),
   authForm: document.getElementById("authForm"),
   authLocalNote: document.getElementById("authLocalNote"),
@@ -354,10 +330,6 @@ const nodes = {
   calendarPrev: document.getElementById("calendarPrev"),
   calendarNext: document.getElementById("calendarNext"),
 
-  teamList: document.getElementById("teamList"),
-  teamProjectSelect: document.getElementById("teamProjectSelect"),
-  teamMemberList: document.getElementById("teamMemberList"),
-  teamAddMember: document.getElementById("teamAddMember"),
 
   templatesScreen: document.getElementById("templatesScreen"),
   templatesList: document.getElementById("templatesList"),
@@ -367,7 +339,6 @@ const nodes = {
 
   settingsForm: document.getElementById("settingsForm"),
   settingsDisplayName: document.getElementById("settingsDisplayName"),
-  settingsRole: document.getElementById("settingsRole"),
   settingsSavedNote: document.getElementById("settingsSavedNote"),
   settingsOrigin: document.getElementById("settingsOrigin"),
   settingsExport: document.getElementById("settingsExport"),
@@ -384,16 +355,6 @@ const nodes = {
   syncList: document.getElementById("syncList"),
   syncNote: document.getElementById("syncNote"),
   settingsAccount: document.getElementById("settingsAccount"),
-  settingsRoles: document.getElementById("settingsRoles"),
-  settingsPasswordBlock: document.getElementById("settingsPasswordBlock"),
-  passwordForm: document.getElementById("passwordForm"),
-  pwCurrent: document.getElementById("pwCurrent"),
-  pwNew: document.getElementById("pwNew"),
-  pwConfirm: document.getElementById("pwConfirm"),
-  pwError: document.getElementById("pwError"),
-  pwResult: document.getElementById("pwResult"),
-  pwResultEmail: document.getElementById("pwResultEmail"),
-  pwHash: document.getElementById("pwHash"),
 };
 
 const SCREEN_NODES = {
@@ -427,6 +388,9 @@ let uiState = {
   projectView: "details",
   categoryShown: 12,
   openReportRows: new Set(),
+  /* Carried rows ticked off in a later week's editor. They stay listed, struck through, until
+     the next time the screen is opened, so a row does not vanish from under the pointer. */
+  keepCarried: new Set(),
 };
 let latestReportText = "";
 let taskCounter = 0;
@@ -434,7 +398,6 @@ let subtaskCounter = 0;
 
 const NAV_HANDLERS = {
   "dashboard": openDashboard,
-  "create-report": () => openCreateReport(uiState.projectId || null),
   "calendar": openCalendar,
   "team": openTeam,
   "settings": openSettings,
@@ -543,7 +506,6 @@ function boot() {
   nodes.settingsForm.addEventListener("submit", (e) => saveSettings(e));
 
   nodes.authForm.addEventListener("submit", (e) => handleEmailSignIn(e));
-nodes.passwordForm.addEventListener("submit", (e) => handlePasswordChange(e));
 
   nodes.syncPreview.addEventListener("click", () => previewTemplateSync());
   nodes.syncApply.addEventListener("click", () => applyTemplateSync());
@@ -557,15 +519,6 @@ nodes.passwordForm.addEventListener("submit", (e) => handlePasswordChange(e));
     if (e.target.files && e.target.files[0]) importBackup(e.target.files[0]);
     e.target.value = "";
   });
-
-  nodes.teamProjectSelect.addEventListener("change", () => {
-    uiState.teamProjectId = nodes.teamProjectSelect.value;
-    renderTeamScreen();
-  });
-  nodes.teamAddMember.addEventListener("click", () => addTeamMember());
-  nodes.teamMemberList.addEventListener("input", (e) => handleTeamMemberInput(e));
-  nodes.teamMemberList.addEventListener("change", (e) => handleTeamMemberInput(e));
-  nodes.teamMemberList.addEventListener("click", (e) => handleTeamMemberClick(e));
 
   nodes.templatesList.addEventListener("input", (e) => handleTemplatesInput(e));
   nodes.templatesList.addEventListener("change", (e) => handleTemplatesInput(e));
@@ -629,7 +582,7 @@ nodes.passwordForm.addEventListener("submit", (e) => handlePasswordChange(e));
   }
 
 
-  loadRolesConfig().then(() => startSession());
+  loadAllowedUsers().then(() => startSession());
 renderDemoDataOptions();
 
   /* Prefer the editable JSON file over the copy compiled into app.js — on first run, and
@@ -714,8 +667,8 @@ function carriedTasksFor(weeks, index, keepIds) {
   return carried;
 }
 
-function carriedCountFor(weeks, index) {
-  return carriedTasksFor(weeks, index).length;
+function carriedCountFor(weeks, index, keepIds) {
+  return carriedTasksFor(weeks, index, keepIds).length;
 }
 
 /* Built in one place because two renderers need it: the list, and the live refresh that
@@ -884,8 +837,7 @@ function renderAll() {
   safeRender(renderSettingsScreen);
   safeRender(renderTemplatesScreen);
   safeRender(refreshReportsIndex);
-  safeRender(applyRolePermissions);
-}
+  }
 
 function safeRender(render) {
   try {
@@ -952,9 +904,81 @@ function computeAlertItems() {
   return items;
 }
 
+/* How far a project has actually got: completed tasks over all its tasks, across every week.
+   Sub-tasks are not counted — a task is the unit the report prints and the accordion counts. */
+function projectProgress(projectId) {
+  let total = 0;
+  let done = 0;
+  state.updates
+    .filter((update) => update.projectId === projectId)
+    .forEach((update) => (update.tasks || []).forEach((task) => {
+      total += 1;
+      if (task.status === "completed") done += 1;
+    }));
+  return total ? Math.round((done / total) * 100) : 0;
+}
+
+function progressBarHtml(percent) {
+  return `<span class="progress-track" role="img" aria-label="${percent}% of tasks completed" title="${percent}% of tasks completed">
+    <span class="progress-fill" style="width: ${Math.max(2, percent)}%"></span>
+  </span>`;
+}
+
+/* The person a project is fronted by. No avatar images exist anywhere in the app, so the
+   circle carries initials from the project owner, falling back to the CSM. */
+function projectLeadName(projectId) {
+  const project = state.projects.find((item) => item.id === projectId);
+  if (!project) return "";
+  return (project.implementationOwner || project.csm || "").trim();
+}
+
+function initialsFor(name) {
+  const parts = String(name || "").trim().split(/\s+/).filter(Boolean);
+  if (!parts.length) return "—";
+  return parts.slice(0, 2).map((part) => part.charAt(0).toUpperCase()).join("");
+}
+
+/* The two folder cards list the projects they stand for, each with how far it has got, so the
+   dashboard answers "where is everything?" without opening the folder. The card heading is
+   still the button into the full list. */
+function renderDashFolderLists() {
+  const render = (node, status, emptyText) => {
+    if (!node) return;
+    const projects = state.projects
+      .filter((project) => project.status === status)
+      .sort((left, right) => (projectLastActivity(right) || 0) - (projectLastActivity(left) || 0))
+      .slice(0, 4);
+
+    node.innerHTML = projects.length
+      ? projects.map((project) => {
+          const weeks = projectWeeksSorted(project.id);
+          const today = toInputDate(new Date());
+          const position = weeks.findIndex((week) => isDateInUpdateWeek(today, week)) + 1;
+          const where = position
+            ? `Week ${position} of ${weeks.length}`
+            : (weeks.length ? `${weeks.length} week${weeks.length === 1 ? "" : "s"}` : "No weeks yet");
+          return `
+            <button type="button" class="folder-card-row" data-project-id="${project.id}">
+              <span class="folder-card-row-main">
+                <span class="folder-card-row-name">${escapeHtml(project.name || "Untitled project")}</span>
+                <span class="folder-card-row-meta">${escapeHtml(where)}</span>
+              </span>
+              ${progressBarHtml(projectProgress(project.id))}
+            </button>`;
+        }).join("")
+      : `<p class="muted small-note">${escapeHtml(emptyText)}</p>`;
+
+    node.querySelectorAll(".folder-card-row").forEach((button) => {
+      button.addEventListener("click", () => openProject(button.dataset.projectId));
+    });
+  };
+
+  render(nodes.dashOngoingList, "current", "No ongoing projects yet.");
+  render(nodes.dashClosedList, "closed", "Nothing completed yet.");
+}
+
 function renderHeader() {
   nodes.headerDisplayName.textContent = state.settings.displayName;
-  nodes.headerRole.textContent = state.settings.role;
   nodes.headerAvatar.textContent = state.settings.displayName.trim().charAt(0).toUpperCase() || "?";
 
   const alerts = computeAlertItems();
@@ -1089,6 +1113,8 @@ function renderDashboardScreen() {
      the list on its own and pushed the others out. "Latest" is the greatest weekStart rather
      than the last element: weeks are added by hand and moved between each other, so array
      order is not chronological. */
+  renderDashFolderLists();
+
   const latestByProject = new Map();
   state.updates.forEach((update) => {
     const seen = latestByProject.get(update.projectId);
@@ -1102,13 +1128,20 @@ function renderDashboardScreen() {
   nodes.dashRecentList.innerHTML = recent.length
     ? recent
         .map(
-          (update) => `
-            <button type="button" class="project-name-card btn-dash-update" data-project-id="${update.projectId}">
-              <span class="project-name">${escapeHtml(update.projectName)}</span>
-              <span class="project-meta">${escapeHtml(update.weekRange)}</span>
-              <span class="status-badge ${statusClass(update.statusTag)}">${escapeHtml(update.statusTag)}</span>
+          (update) => {
+            const done = projectProgress(update.projectId);
+            return `
+            <button type="button" class="project-name-card dash-update-row btn-dash-update" data-project-id="${update.projectId}">
+              <span class="dash-update-main">
+                <span class="project-name">${escapeHtml(update.projectName)}</span>
+                <span class="project-meta">${escapeHtml(update.weekRange)}</span>
+                <span class="status-badge ${statusClass(update.statusTag)}">${escapeHtml(update.statusTag)}</span>
+              </span>
+              ${progressBarHtml(done)}
+              <span class="dash-avatar" title="${escapeHtml(projectLeadName(update.projectId) || "Unassigned")}">${escapeHtml(initialsFor(projectLeadName(update.projectId)))}</span>
             </button>
-          `
+          `;
+          }
         )
         .join("")
     : `<div class="empty-state">No weekly updates yet.</div>`;
@@ -1270,6 +1303,7 @@ function renderProjectScreen() {
       : "No tasks yet"],
   ]);
 
+  nodes.projectDetailsFields.innerHTML = buildProjectDetailsHtml(project);
   nodes.projectScope.innerHTML = buildIntegrationScopeHtml(project);
   nodes.projectTimelineFields.innerHTML = overviewFields([
     ["Kickoff Date", project.kickoffDate ? formatSummaryDate(project.kickoffDate) : "Not set"],
@@ -1862,13 +1896,26 @@ function renderCalendarSelectedList() {
   nodes.calendarSelectedList.innerHTML = matches.length
     ? matches
         .map(
-          (update) => `
+          (update) => {
+            /* Which week of its own project this is, by position — the same way the reports
+               accordion numbers them. `templateWeek` holds the master-plan phase a week's first
+               task came from, and several weeks can draw on one phase, so it is not a position. */
+            const weeks = projectWeeksSorted(update.projectId);
+            const position = weeks.findIndex((item) => item.id === update.id) + 1;
+            const project = state.projects.find((item) => item.id === update.projectId);
+            const goLive = project && project.goLiveDate
+              ? `Go-live ${formatSummaryDate(project.goLiveDate)}`
+              : "Go-live not set";
+
+            return `
             <button type="button" class="project-name-card btn-calendar-update" data-project-id="${update.projectId}">
               <span class="project-name">${escapeHtml(update.projectName)}</span>
-              <span class="project-meta">${escapeHtml(update.weekRange)}</span>
+              <span class="project-meta">${position ? `Week ${position} of ${weeks.length} · ` : ""}${escapeHtml(update.weekRange)}</span>
+              <span class="project-meta calendar-golive">${escapeHtml(goLive)}</span>
               <span class="status-badge ${statusClass(update.statusTag)}">${escapeHtml(update.statusTag)}</span>
             </button>
-          `
+          `;
+          }
         )
         .join("")
     : `<div class="empty-state">No weekly update covers ${escapeHtml(uiState.calendarSelectedDate)}.</div>`;
@@ -1880,33 +1927,6 @@ function renderCalendarSelectedList() {
 
 /* ---------- Team ---------- */
 
-function computeTeamRoster(projectId) {
-  const map = new Map();
-  const add = (owner, status) => {
-    const name = (owner || "").trim() || "Unassigned";
-    if (!map.has(name)) {
-      const rec = { name, total: 0 };
-      SUBTASK_STATUSES.forEach((s) => { rec[s] = 0; });
-      map.set(name, rec);
-    }
-    const rec = map.get(name);
-    rec.total += 1;
-    if (rec[status] !== undefined) {
-      rec[status] += 1;
-    }
-  };
-
-  state.updates
-    .filter((update) => !projectId || update.projectId === projectId)
-    .forEach((update) => {
-    (update.tasks || []).forEach((task) => {
-      add(task.owner, task.status);
-      (task.subtasks || []).forEach((sub) => add(sub.owner, sub.status));
-    });
-  });
-
-  return [...map.values()].sort((a, b) => b.total - a.total);
-}
 
 function openTeam() {
   uiState.returnScreen = uiState.screen;
@@ -1916,111 +1936,99 @@ function openTeam() {
   nodes.teamScreen.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
-const TEAM_ROLES = ["OBM", "TSS", "GC", "Ops", "Dev Team", "CSM", "Client", "Other"];
 
-function currentTeamProject() {
-  const project = state.projects.find((item) => item.id === uiState.teamProjectId) || state.projects[0] || null;
-  /* ensureDefaults() only runs on load, so a project created this session may not have
-     the array yet. */
-  if (project && !Array.isArray(project.team)) project.team = [];
-  return project;
-}
 
-function renderProjectTeam() {
-  if (!nodes.teamMemberList) return;
 
-  const project = currentTeamProject();
-  populateProjectPicker(nodes.teamProjectSelect, project ? project.id : "");
-  uiState.teamProjectId = project ? project.id : null;
 
-  if (!project) {
-    nodes.teamMemberList.innerHTML = `<p class="muted">Create a project first — teams are defined per project.</p>`;
-    return;
-  }
 
-  if (!project.team.length) {
-    nodes.teamMemberList.innerHTML = `<p class="muted">No team members yet. Use “+ Add member”.</p>`;
-    return;
-  }
-
-  nodes.teamMemberList.innerHTML = project.team.map((member) => `
-    <div class="detail-row poc-row" data-member="${member.id}">
-      <input type="text" data-field="name" value="${escapeHtml(member.name)}" placeholder="Name" />
-      <select data-field="role">
-        ${TEAM_ROLES.map((role) => `<option value="${role}"${member.role === role ? " selected" : ""}>${role}</option>`).join("")}
-      </select>
-      <button type="button" class="row-remove" data-requires="team.manage" data-action="remove-member">Remove</button>
-    </div>
-  `).join("");
-}
-
-function addTeamMember() {
-  if (!requirePermission("team.manage", "manage the project team")) return;
-  const project = currentTeamProject();
-  if (!project) return;
-
-  project.team.push({ id: newId(), name: "", role: "OBM" });
-  saveState();
-  renderTeamScreen();
-}
-
-function handleTeamMemberInput(event) {
-  const field = event.target.dataset.field;
-  if (!field) return;
-
-  const project = currentTeamProject();
-  if (!project) return;
-
-  const rowEl = event.target.closest("[data-member]");
-  const member = project.team.find((item) => item.id === rowEl.dataset.member);
-  if (!member) return;
-
-  member[field] = event.target.value;
-  saveState();
-  refreshOwnerOptions(project.id);
-}
-
-function handleTeamMemberClick(event) {
-  if (!event.target.closest('[data-action="remove-member"]')) return;
-  if (!requirePermission("team.manage", "manage the project team")) return;
-
-  const project = currentTeamProject();
-  if (!project) return;
-
-  const rowEl = event.target.closest("[data-member]");
-  const member = project.team.find((item) => item.id === rowEl.dataset.member);
-  if (member && member.name && !confirm(`Remove ${member.name} from ${project.name}'s team?`)) return;
-
-  project.team = project.team.filter((item) => item.id !== rowEl.dataset.member);
-  saveState();
-  renderTeamScreen();
-}
 
 function renderTeamScreen() {
-  renderProjectTeam();
-  renderTeamWorkload();
+  renderWebengageTeam();
+  renderClientTeamsByProject();
 }
 
-function renderTeamWorkload() {
-  const roster = computeTeamRoster(uiState.teamProjectId);
-  nodes.teamList.innerHTML = roster.length
-    ? roster
-        .map(
-          (member) => `
-            <article class="team-roster-row">
-              <div class="team-roster-name">${escapeHtml(member.name)}</div>
-              <div class="team-roster-badges">
-                <span class="pill pill-dark">${member.total} item${member.total === 1 ? "" : "s"}</span>
-                ${SUBTASK_STATUSES.filter((s) => member[s]).map((s) => `
-                  <span class="status-badge ${statusClass(s)}">${member[s]} ${escapeHtml(formatStatus(s))}</span>
-                `).join("")}
-              </div>
-            </article>
-          `
-        )
-        .join("")
-    : `<div class="empty-state">No task owners on this project yet.</div>`;
+/* The WebEngage side, grouped by role rather than by person. These people are permanent — the
+   same CSM runs several projects — so each is listed once per role, as a plain list of names.
+   Someone who is CSM on one project and sales owner on another appears under both. The projects
+   each person covers are still counted for the badge but no longer named underneath: the lines
+   repeated the project names on every row and crowded the list. Nothing is stored here: the
+   names are read from every project's Basic Details, the one place to edit them. */
+const WEBENGAGE_ROLES = ["Project Owner", "Sales Owner", "CSM"];
+
+function renderWebengageTeam() {
+  if (!nodes.teamWebengage) return;
+
+  /* role -> person -> the projects where they hold that role */
+  const byRole = new Map(WEBENGAGE_ROLES.map((role) => [role, new Map()]));
+  state.projects.forEach((project) => {
+    [["Project Owner", project.implementationOwner], ["Sales Owner", project.salesOwner], ["CSM", project.csm]]
+      .forEach(([role, raw]) => {
+        const name = (raw || "").trim();
+        if (!name) return;
+        const people = byRole.get(role);
+        const key = name.toLowerCase();
+        if (!people.has(key)) people.set(key, { name, projects: new Set() });
+        people.get(key).projects.add(project.name || "Untitled project");
+      });
+  });
+
+  const groups = WEBENGAGE_ROLES
+    .filter((role) => byRole.get(role).size)   /* a role nobody holds is not shown at all */
+    .map((role) => `
+      <div class="team-project-group">
+        <p class="people-group-title">${escapeHtml(role)}</p>
+        <div class="row-list">
+          ${[...byRole.get(role).values()]
+            .sort((left, right) => left.name.localeCompare(right.name))
+            .map((person) => `
+              <article class="team-roster-row">
+                <div class="team-roster-name">${escapeHtml(person.name)}</div>
+                <div class="team-roster-badges">
+                  <span class="pill">${person.projects.size} project${person.projects.size === 1 ? "" : "s"}</span>
+                </div>
+              </article>`)
+            .join("")}
+        </div>
+      </div>`)
+    .join("");
+
+  nodes.teamWebengage.innerHTML = groups
+    || `<p class="muted">No CSM, project owner or sales owner set on any project yet. They are captured when a project is created, and editable under a project's Basic Details.</p>`;
 }
+
+/* One section per project, headed by its name, listing that project's client points of contact.
+   Clients are the part that changes from project to project, which is why they are grouped this
+   way round rather than pooled like the WebEngage team. */
+function renderClientTeamsByProject() {
+  if (!nodes.teamByProject) return;
+
+  if (!state.projects.length) {
+    nodes.teamByProject.innerHTML = `<p class="muted">Create a project first — client contacts belong to a project.</p>`;
+    return;
+  }
+
+  nodes.teamByProject.innerHTML = state.projects
+    .slice()
+    .sort((a, b) => (a.name || "").localeCompare(b.name || ""))
+    .map((project) => {
+      const pocs = projectPeople(project).client;
+      return `
+        <div class="team-project-group">
+          <p class="people-group-title">${escapeHtml(project.name || "Untitled project")}</p>
+          ${pocs.length
+            ? `<div class="row-list">${pocs.map((poc) => `
+                <article class="team-roster-row">
+                  <div class="team-roster-name">${escapeHtml(poc.name)}</div>
+                  <div class="team-roster-badges">
+                    ${poc.email ? `<span class="pill">${escapeHtml(poc.email)}</span>` : `<span class="pill">Client POC</span>`}
+                  </div>
+                </article>`).join("")}</div>`
+            : `<p class="muted small-note">No client points of contact captured for this project.</p>`}
+        </div>`;
+    })
+    .join("");
+}
+
 
 /* ---------- Settings ---------- */
 
@@ -2034,18 +2042,14 @@ function openSettings() {
 
 function renderSettingsScreen() {
   nodes.settingsDisplayName.value = state.settings.displayName;
-  nodes.settingsRole.value = state.settings.role;
   renderStorageStats();
   renderAccountPanel();
-  renderRolesPanel();
-  nodes.settingsPasswordBlock.hidden = !currentSession;
 }
 
 function saveSettings(event) {
   event.preventDefault();
   const displayName = nodes.settingsDisplayName.value.trim() || "Stuti";
-  const role = nodes.settingsRole.value.trim() || "Admin";
-  state.settings = { displayName, role };
+  state.settings = { ...state.settings, displayName };
   saveState();
   renderHeader();
 
@@ -2098,12 +2102,9 @@ function loadState() {
 
 function ensureDefaults(targetState) {
   if (!targetState.settings || typeof targetState.settings !== "object") {
-    targetState.settings = { displayName: "Stuti", role: "viewer", theme: "light" };
+    targetState.settings = { displayName: "Stuti", theme: "light" };
   } else {
     targetState.settings.displayName = targetState.settings.displayName || "Stuti";
-    targetState.settings.role = ROLES.includes(String(targetState.settings.role || "").toLowerCase())
-      ? String(targetState.settings.role).toLowerCase()
-      : "viewer";
     targetState.settings.theme = targetState.settings.theme === "dark" ? "dark" : "light";
   }
 
@@ -2364,6 +2365,62 @@ function overviewFields(rows) {
     </div>`).join("");
 }
 
+/* Who is on a project, in the two groups the team thinks in: WebEngage staff and the client's
+   people. The WebEngage side comes from the three fields the creation wizard already captures,
+   plus anyone added for this project alone on the Team page — nothing here is entered twice. */
+function projectPeople(project) {
+  const webengage = [
+    { name: (project.csm || "").trim(), role: "CSM" },
+    { name: (project.implementationOwner || "").trim(), role: "Project Owner" },
+    { name: (project.salesOwner || "").trim(), role: "Sales Owner" },
+    /* The Team page's "+ Add member" roster is gone, but anyone added through it before that
+       is still read here, so existing data keeps working and those names stay assignable. */
+    ...(project.team || []).map((member) => ({ name: (member.name || "").trim(), role: member.role || "Team" })),
+  ].filter((person) => person.name);
+
+  const client = (project.clientPocs || [])
+    .map((poc) => ({ name: (poc.name || "").trim(), email: (poc.email || "").trim() }))
+    .filter((poc) => poc.name);
+
+  return { webengage, client };
+}
+
+/* The body of the Basic Details card. That card used to render nothing but two notes: the
+   project name, CSM, project owner, sales owner and client POCs were all captured by the
+   wizard and stored, but visible only after clicking Edit — so the details a person had just
+   typed in looked lost. The client POCs were shown, but under Integration Scope, a card about
+   platforms and channels rather than people.
+   
+   These live in the Basic Details card itself rather than a card of their own, because that is
+   the section the brief names and the one whose Edit form owns these fields. */
+function buildProjectDetailsHtml(project) {
+  const { webengage, client } = projectPeople(project);
+  const group = (title, rows, empty) => `
+    <div class="people-group">
+      <p class="people-group-title">${escapeHtml(title)}</p>
+      ${rows.length
+        ? rows.map((row) => `<div class="overview-field">
+            <span class="overview-label">${escapeHtml(row.role)}</span>
+            <span class="overview-value">${escapeHtml(row.name)}</span>
+          </div>`).join("")
+        : `<p class="muted small-note">${escapeHtml(empty)}</p>`}
+    </div>`;
+
+  const name = `<div class="overview-field">
+      <span class="overview-label">Project name</span>
+      <span class="overview-value">${escapeHtml(project.name || "Untitled project")}</span>
+    </div>`;
+
+  return `<div class="people-group">${name}</div>`
+    + group("WebEngage team", webengage, "No CSM, project owner or sales owner set yet.")
+    + group("Client team", client.map((poc) => ({
+        role: "Client POC",
+        /* The address belongs beside the name, not in the label column, where it read as
+           though the email were the person's job title. */
+        name: poc.email ? `${poc.name} · ${poc.email}` : poc.name,
+      })), "No client points of contact captured yet.");
+}
+
 function buildIntegrationScopeHtml(project) {
   const data = project.dataRequirements || {};
   return overviewFields([
@@ -2374,7 +2431,6 @@ function buildIntegrationScopeHtml(project) {
     ["Technical Team", project.techTeam === "outsourced"
       ? `Outsourced${project.vendorName ? ` (${project.vendorName})` : ""}`
       : (project.techTeam ? (TECH_TEAM_LABELS[project.techTeam] || project.techTeam) : "")],
-    ["Client POCs", (project.clientPocs || []).map(formatPoc).join(", ")],
     ["Channels", (project.channels || []).join(", ")],
     ["Historical Data Migration", data.historicalMigration === "yes" ? "Yes" : (data.historicalMigration === "no" ? "No" : "")],
     ["User Identifier", data.userIdentifier],
@@ -2391,7 +2447,6 @@ function buildIntegrationScopeHtml(project) {
 function toggleProjectScope(editing) {
   const project = state.projects.find((item) => item.id === uiState.projectId);
   if (!project) return;
-  if (editing && !requirePermission("project.edit", "edit this project")) return;
 
   nodes.projScopeForm.hidden = !editing;
   nodes.projectScope.hidden = editing;
@@ -2421,7 +2476,6 @@ function saveProjectScope(event) {
   event.preventDefault();
   const project = state.projects.find((item) => item.id === uiState.projectId);
   if (!project) return;
-  if (!requirePermission("project.edit", "edit this project")) return;
 
   const picked = (container) => [...container.querySelectorAll("input:checked")].map((box) => box.value);
   project.platforms = picked(nodes.projPlatforms);
@@ -2559,7 +2613,6 @@ function getRadioValue(name) {
 
 function openAddProject() {
   debugLog("openAddProject() called");
-  if (!requirePermission("project.create", "create projects")) return;
   uiState.returnScreen = uiState.screen === "add-project" ? uiState.returnScreen : uiState.screen;
   uiState.screen = "add-project";
   uiState.wizardStep = 1;
@@ -2758,23 +2811,62 @@ function formatPoc(poc) {
   return poc.name;
 }
 
-/* Feeds the <datalist> behind every task/subtask owner field: the selected project's client
-   POCs first, then any owner already used elsewhere, so past entries stay one keystroke away.
-   It is a suggestion list, not a dropdown — free text is still allowed. */
-/* Strictly project-scoped: only the selected project's POCs are offered, never names from
-   other projects. Typing a name not on the list is allowed and adds them to this project
-   on save (see syncOwnersIntoProjectPocs). */
-function refreshOwnerOptions(projectId) {
-  const list = document.getElementById("ownerOptions");
-  if (!list) return;
+/* Who may own a task on this project: its delivery team, its client POCs, and whatever names
+   are already recorded on its tasks. Strictly project-scoped — a name from another project is
+   never offered, which is the point of keeping team and POCs on the project itself.
 
+   The third group matters: the owner was a free-text field until now, so existing reports hold
+   names like "Webengage OBM" and "Client tech team" that belong to no roster. A dropdown that
+   omitted them would silently reassign work the first time someone opened the row. */
+function projectOwnerOptions(projectId) {
   const project = state.projects.find((item) => item.id === projectId);
-  const team = project ? (project.team || []).map((member) => member.name).filter(Boolean) : [];
-  const pocs = project ? (project.clientPocs || []).map(formatPoc).filter(Boolean) : [];
+  if (!project) return { team: [], pocs: [], legacy: [] };
 
-  list.innerHTML = [...new Set([...team, ...pocs])]
-    .map((value) => `<option value="${escapeHtml(value)}"></option>`)
-    .join("");
+  const clean = (list) => [...new Set(list.map((name) => (name || "").trim()).filter(Boolean))];
+  /* The CSM, project owner and sales owner are on the project as much as anyone added by hand,
+     so they are offered as task owners too — otherwise the people named in Basic Details could
+     not be assigned any of the work. */
+  const team = clean(projectPeople(project).webengage.map((person) => person.name));
+  const pocs = clean((project.clientPocs || []).map(formatPoc)).filter((name) => !team.includes(name));
+
+  const known = new Set([...team, ...pocs]);
+  const used = [];
+  state.updates
+    .filter((update) => update.projectId === projectId)
+    .forEach((update) => (update.tasks || []).forEach((task) => {
+      used.push(task.owner);
+      (task.subtasks || []).forEach((sub) => used.push(sub.owner));
+    }));
+
+  const legacy = clean(used).filter((name) => !known.has(name)).sort((a, b) => a.localeCompare(b));
+  return { team, pocs, legacy };
+}
+
+/* The owner cell. A select rather than free text, so the same person is spelled one way across
+   a project and the Workload grouping stays meaningful. The stored value is still the plain
+   name, which is what the report prints. */
+function ownerSelect(attr, value, owners) {
+  const current = (value || "").trim();
+  const option = (name) => `<option value="${escapeHtml(name)}"${name === current ? " selected" : ""}>${escapeHtml(name)}</option>`;
+  const group = (label, names) => (names.length
+    ? `<optgroup label="${escapeHtml(label)}">${names.map(option).join("")}</optgroup>`
+    : "");
+
+  const listed = [...owners.team, ...owners.pocs, ...owners.legacy];
+  /* A value that somehow belongs to no group still gets an entry, so opening a row can never
+     quietly blank out who owns the work. */
+  const orphan = current && !listed.includes(current) ? option(current) : "";
+  const empty = `<option value=""${current ? "" : " selected"}>Unassigned</option>`;
+  const hint = (!owners.team.length && !owners.pocs.length)
+    ? `<option value="" disabled>— add people on the Team page —</option>`
+    : "";
+
+  return `<select data-${attr}="owner" title="Only this project's team and client POCs are listed">`
+    + empty + hint + orphan
+    + group("Team", owners.team)
+    + group("Client POCs", owners.pocs)
+    + group("Already assigned", owners.legacy)
+    + `</select>`;
 }
 
 function summaryRow(label, value) {
@@ -2965,7 +3057,7 @@ function renderTemplateWeek(entry) {
       </select>
       <input type="text" data-field="offsetByCycle" value="${escapeHtml(formatOffsets(task.offsetByCycle))}" placeholder="4:5, 6:5, 12:5" title="Completion day offset from the kickoff date, per cycle length — cycle:day, comma separated. A cycle not listed is interpolated between the nearest two." />
       <span class="template-elastic${task.elastic ? " is-elastic" : ""}" title="${task.elastic ? "Elastic — this task's completion date moves with the project length." : "Fixed — this task completes the same number of days after kickoff whatever the project length."}">${task.elastic ? "Elastic" : "Fixed"}</span>
-      <button type="button" class="row-remove" data-requires="template.edit" data-action="remove-task">Remove</button>
+      <button type="button" class="row-remove" data-action="remove-task">Remove</button>
     </div>
   `).join("");
 
@@ -2975,8 +3067,8 @@ function renderTemplateWeek(entry) {
         <span class="template-week-badge">Phase ${entry.week}</span>
         <input type="text" class="template-week-label" data-field="label" value="${escapeHtml(entry.label)}" placeholder="Week label" />
         <span class="muted">${entry.tasks.length} task${entry.tasks.length === 1 ? "" : "s"}</span>
-        <button type="button" class="ghost-button small-button" data-requires="template.edit" data-action="add-task">+ Task</button>
-        <button type="button" class="row-remove" data-requires="template.edit" data-action="remove-week">Delete week</button>
+        <button type="button" class="ghost-button small-button" data-action="add-task">+ Task</button>
+        <button type="button" class="row-remove" data-action="remove-week">Delete week</button>
       </header>
       <div class="template-rows">${rows || `<p class="muted">No tasks yet.</p>`}</div>
     </section>
@@ -3057,7 +3149,6 @@ function handleTemplatePlatformToggle(input) {
 function handleTemplatesClick(event) {
   const button = event.target.closest("[data-action]");
   if (!button) return;
-  if (!requirePermission("template.edit", "edit the master template")) return;
 
   const weekEl = button.closest(".template-week");
   const entry = findTemplateWeek(weekEl.dataset.week);
@@ -3083,7 +3174,6 @@ function handleTemplatesClick(event) {
 }
 
 function addTemplateWeek() {
-  if (!requirePermission("template.edit", "edit the master template")) return;
   const nextWeek = state.weekTemplates.length + 1;
   state.weekTemplates.push({ week: nextWeek, label: `Week ${nextWeek}`, tasks: [] });
   saveState();
@@ -3163,13 +3253,11 @@ async function seedTemplatesFromFile({ silent } = {}) {
 }
 
 function reloadTemplatesFromFile() {
-  if (!requirePermission("template.edit", "edit the master template")) return;
   if (!confirm("Replace the master plan with the contents of week-templates.json? Your edits on this screen will be lost.")) return;
   seedTemplatesFromFile({ silent: false });
 }
 
 function resetTemplatesToDefault() {
-  if (!requirePermission("template.edit", "edit the master template")) return;
   if (!confirm("Replace the master plan with the default week-wise template built into the app? Your edits here will be lost.")) return;
 
   state.weekTemplates = toTemplateWeeks(WEEK_TEMPLATE_SEED);
@@ -3292,69 +3380,23 @@ function ensureDemoProjectShape(project) {
 
 
 
-/* ---------- RBAC ---------- */
-
-/* Four roles, each a superset of the one below it. The matrix is the single source of
-   truth: UI gating and the action guards both read from it, so a capability can never be
-   hidden in one place and left open in another.
-
-   Client-side checks are convenience, not security — anything that must be enforced is
-   also enforced by row-level security and the SECURITY DEFINER functions in
-   supabase/schema.sql. */
-function currentRole() {
-  const role = String(state.settings.role || "").toLowerCase();
-  return ROLES.includes(role) ? role : "admin";
-}
-
-function can(permission) {
-  const allowed = PERMISSIONS[permission];
-  if (!allowed) return true;
-  return allowed.includes(currentRole());
-}
-
-/* Guard for the action itself, so a hidden button is not the only thing stopping it. */
-function requirePermission(permission, what) {
-  if (can(permission)) return true;
-  showAppInfo(`Your role (${ROLE_LABELS[currentRole()]}) cannot ${what}.`);
-  return false;
-}
-
-/* Hides or disables anything tagged with data-requires="<permission>". */
-function applyRolePermissions() {
-  document.querySelectorAll("[data-requires]").forEach((element) => {
-    const allowed = can(element.dataset.requires);
-    if (element.dataset.requiresMode === "disable") {
-      element.disabled = !allowed;
-      element.title = allowed ? "" : `Not available for the ${ROLE_LABELS[currentRole()]} role`;
-    } else {
-      element.hidden = !allowed;
-    }
-  });
-
-  /* The Templates screen is fully editable or fully read-only. */
-  const editable = can("template.edit");
-  document.querySelectorAll("#templatesList input, #templatesList select").forEach((field) => {
-    field.disabled = !editable;
-  });
-}
-
-async function loadRolesConfig() {
-  const inlined = bundled("rolesConfig");
+async function loadAllowedUsers() {
+  const inlined = bundled("allowedUsers");
   if (inlined) {
-    rolesConfig = { ...rolesConfig, ...inlined };
+    allowedUsers = { ...allowedUsers, ...inlined };
     return;
   }
 
   try {
-    const response = await fetch("./roles-config.json", { cache: "no-store" });
-    if (response.ok) rolesConfig = { ...rolesConfig, ...(await response.json()) };
+    const response = await fetch("./allowed-users.json", { cache: "no-store" });
+    if (response.ok) allowedUsers = { ...allowedUsers, ...(await response.json()) };
   } catch (error) {
-    debugLog(`roles-config.json not readable: ${error.message}`);
+    debugLog(`allowed-users.json not readable: ${error.message}`);
   }
 }
 
 function isAllowedEmail(email) {
-  const domain = String(rolesConfig.allowedDomain || "").toLowerCase().trim();
+  const domain = String(allowedUsers.allowedDomain || "").toLowerCase().trim();
   if (!domain) return true;
   return String(email || "").toLowerCase().trim().endsWith(`@${domain}`);
 }
@@ -3373,43 +3415,15 @@ function userDisplayName(user, email) {
 
 function findConfiguredUser(email) {
   const wanted = String(email || "").toLowerCase().trim();
-  return (rolesConfig.users || []).find((user) => String(user.email).toLowerCase().trim() === wanted) || null;
+  return (allowedUsers.users || []).find((user) => String(user.email).toLowerCase().trim() === wanted) || null;
 }
 
-/* SHA-256 of the typed password, compared against the hash in roles-config.json so no
-   plaintext password is ever stored in the repo. */
-async function hashPassword(password) {
-  const bytes = new TextEncoder().encode(password);
-  const digest = await crypto.subtle.digest("SHA-256", bytes);
-  return [...new Uint8Array(digest)].map((b) => b.toString(16).padStart(2, "0")).join("");
-}
+/* ---------- Sign-in ---------- */
 
-function passwordProblems(password) {
-  const policy = rolesConfig.passwordPolicy || {};
-  const problems = [];
-  if (password.length < (policy.minLength || 10)) problems.push(`at least ${policy.minLength || 10} characters`);
-  if (policy.requireUppercase && !/[A-Z]/.test(password)) problems.push("an uppercase letter");
-  if (policy.requireLowercase && !/[a-z]/.test(password)) problems.push("a lowercase letter");
-  if (policy.requireNumber && !/[0-9]/.test(password)) problems.push("a number");
-  if (policy.requireSymbol && !/[^A-Za-z0-9]/.test(password)) problems.push("a symbol");
-  return problems;
-}
-
-function describePasswordPolicy() {
-  const policy = rolesConfig.passwordPolicy || {};
-  const parts = [`${policy.minLength || 10}+ characters`];
-  if (policy.requireUppercase) parts.push("uppercase");
-  if (policy.requireLowercase) parts.push("lowercase");
-  if (policy.requireNumber) parts.push("number");
-  if (policy.requireSymbol) parts.push("symbol");
-  return `Password must have ${parts.join(", ")}.`;
-}
-
-/* ---------- Demo sign-in ---------- */
-
-/* Identifies the person so the app can pick their role. Deliberately not a security
-   control: there is no password and no server, so anyone who can open the page can type
-   any address. It exists so an internal demo shows the right view per person. */
+/* Email only: an address listed in allowed-users.json is let in, and that is the whole check.
+   No password, no role, no server. It identifies the person so the app can greet them by name;
+   it is a gate on an internal tool, not a security control — anyone who can open the page can
+   type any address, and anyone who opens DevTools can step straight past it. */
 const SESSION_KEY = "multi-project-dashboard-session";
 
 function loadSession() {
@@ -3429,88 +3443,56 @@ function saveSession(session) {
   }
 }
 
-/* A stored session is only honoured while it still matches roles-config.json. Reset
-   someone's password, change their role or remove them, and their session stops working
-   on their next load — otherwise a reset would not actually lock anyone out. */
+/* A stored session is honoured only while its address is still listed. Take someone out of
+   allowed-users.json and their session stops working on their next load — otherwise removing
+   them would not actually remove their access. */
 function startSession() {
-  if (rolesConfig.requireLogin === false) return;
+  if (allowedUsers.requireLogin === false) return;
 
   const session = loadSession();
   const user = session ? findConfiguredUser(session.email) : null;
 
-  if (session && user && isAllowedEmail(session.email) && session.fingerprint === passwordFingerprint(user)) {
-    applySession({ ...session, role: ROLES.includes(user.role) ? user.role : "viewer", name: userDisplayName(user, session.email) });
+  if (session && user && isAllowedEmail(session.email)) {
+    applySession({ ...session, name: userDisplayName(user, session.email) });
     return;
   }
 
   if (session) {
-    debugLog("stored session no longer matches roles-config.json - signing out");
+    debugLog("stored session is no longer in allowed-users.json - signing out");
     try { localStorage.removeItem(SESSION_KEY); } catch (error) { /* ignore */ }
   }
 
   showAuthOverlay();
 }
 
-function passwordFingerprint(user) {
-  return String(user && user.passwordHash ? user.passwordHash : "").slice(0, 12);
-}
-
 function applySession(session) {
   currentSession = session;
-  state.settings.role = session.role;
   state.settings.displayName = session.name;
   saveState();
   nodes.authOverlay.hidden = true;
   renderAll();
-  debugLog(`session: ${session.email} (${session.role})`);
+  debugLog(`session: ${session.email}`);
 }
 
-async function handleEmailSignIn(event) {
+function handleEmailSignIn(event) {
   event.preventDefault();
   showAuthError("");
 
   const email = nodes.authEmail.value.trim().toLowerCase();
-  const password = nodes.authPassword.value;
 
   if (!isAllowedEmail(email)) {
-    showAuthError(`Use a @${rolesConfig.allowedDomain} address. Access is limited to the internal team.`);
-    return;
-  }
-
-  const problems = passwordProblems(password);
-  if (problems.length) {
-    showAuthError(`Password needs ${problems.join(", ")}.`);
+    showAuthError(`Use a @${allowedUsers.allowedDomain} address. Access is limited to the internal team.`);
     return;
   }
 
   const user = findConfiguredUser(email);
-
-  let digest;
-  try {
-    digest = await hashPassword(password);
-  } catch (error) {
-    showAuthError("This browser cannot hash passwords here — open the app over http://localhost or https.");
+  if (!user) {
+    showAuthError("This email doesn't have access. Ask Stuti to add you.");
     return;
   }
 
-  /* Same message either way, so the form does not reveal which addresses exist. */
-  if (!user || user.passwordHash !== digest) {
-    showAuthError("That email and password do not match.");
-    nodes.authPassword.value = "";
-    return;
-  }
-
-  const session = {
-    email,
-    fingerprint: passwordFingerprint(user),
-    role: ROLES.includes(user.role) ? user.role : "viewer",
-    name: userDisplayName(user, email),
-    signedInAt: new Date().toISOString(),
-  };
-
-  nodes.authPassword.value = "";
-  saveSession(session);
-  applySession(session);
+  saveSession({ email, name: userDisplayName(user, email), signedInAt: new Date().toISOString() });
+  applySession(loadSession() || { email, name: userDisplayName(user, email) });
 }
 
 function signOutSession() {
@@ -3525,238 +3507,6 @@ function signOutSession() {
   currentSession = null;
   nodes.authEmail.value = "";
   showAuthOverlay();
-}
-
-/* No server means no reset email and no way to write roles-config.json from the browser.
-   The next best thing: verify the current password, enforce the policy on the new one, and
-   hand over the hash to paste in. */
-async function handlePasswordChange(event) {
-  event.preventDefault();
-  nodes.pwError.hidden = true;
-  nodes.pwResult.hidden = true;
-
-  if (!currentSession) {
-    showPasswordError("Sign in first.");
-    return;
-  }
-
-  const user = findConfiguredUser(currentSession.email);
-  if (!user) {
-    showPasswordError("Your account is not in roles-config.json.");
-    return;
-  }
-
-  const current = await hashPassword(nodes.pwCurrent.value);
-  if (current !== user.passwordHash) {
-    showPasswordError("Current password is wrong.");
-    return;
-  }
-
-  const next = nodes.pwNew.value;
-  const problems = passwordProblems(next);
-  if (problems.length) {
-    showPasswordError(`New password needs ${problems.join(", ")}.`);
-    return;
-  }
-
-  if (next !== nodes.pwConfirm.value) {
-    showPasswordError("The two new passwords do not match.");
-    return;
-  }
-
-  if (next === nodes.pwCurrent.value) {
-    showPasswordError("The new password is the same as the current one.");
-    return;
-  }
-
-  nodes.pwHash.value = await hashPassword(next);
-  nodes.pwResultEmail.textContent = currentSession.email;
-  nodes.pwResult.hidden = false;
-  nodes.passwordForm.reset();
-  nodes.pwHash.select();
-}
-
-function showPasswordError(message) {
-  nodes.pwError.textContent = message;
-  nodes.pwError.hidden = false;
-}
-
-/* ---------- Users & Roles (admin) ---------- */
-
-function renderRolesPanel() {
-  if (!nodes.settingsRoles) return;
-
-  if (!can("users.manage")) {
-    nodes.settingsRoles.innerHTML = "";
-    return;
-  }
-
-  const users = rolesConfig.users || [];
-
-  const myEmail = currentSession ? String(currentSession.email).toLowerCase() : "";
-
-  nodes.settingsRoles.innerHTML = `
-    <p class="muted" style="margin-bottom:10px;">
-      ${users.length} account(s), from <code>roles-config.json</code>. Change a role below and the
-      updated <code>users</code> block appears underneath — paste it back into the file, commit and
-      push. There is no server, so the browser cannot save it for you.
-    </p>
-    <div class="row-list" style="margin-bottom:12px;">
-      ${users.map((user, index) => {
-        const isSelf = String(user.email).toLowerCase() === myEmail;
-        return `
-        <div class="detail-row poc-row">
-          <div>
-            <div style="font-weight:700;">${escapeHtml(userDisplayName(user, user.email))}${isSelf ? ` <span class="meta">(you)</span>` : ""}</div>
-            <div class="meta">${escapeHtml(user.email)}</div>
-          </div>
-          <select data-role-index="${index}"${isSelf ? " disabled title='You cannot change your own role'" : ""}>
-            ${ROLES.map((role) => `<option value="${role}"${user.role === role ? " selected" : ""}>${ROLE_LABELS[role]}</option>`).join("")}
-          </select>
-        </div>`;
-      }).join("") || `<p class="muted">No users configured.</p>`}
-    </div>
-    <div id="rolesDiff" hidden>
-      <p class="storage-warning" style="margin-bottom:8px;">
-        <strong>Not saved yet.</strong> Paste this over the <code>users</code> array in
-        <code>roles-config.json</code>, then commit and push. Anyone whose role changed picks it up
-        on their next load.
-      </p>
-      <textarea class="report-html-source" id="rolesJson" readonly style="min-height:150px;"></textarea>
-    </div>
-
-    <h4 class="settings-subhead">Add a user, or reset a password</h4>
-    <p class="muted" style="font-size:0.82rem;margin-bottom:10px;">
-      Produces the entry to paste into <code>roles-config.json</code>. For an existing user, replace
-      just their <code>passwordHash</code>; for a new one, paste the whole block into
-      <code>users</code>. Commit and push to make it live.
-    </p>
-    <form class="password-form" id="resetForm">
-      <label>User email<input type="email" id="resetEmail" required placeholder="name@${escapeHtml(rolesConfig.allowedDomain)}" /></label>
-      <label>First name<input type="text" id="resetFirst" placeholder="e.g. Neha" /></label>
-      <label>Last name<input type="text" id="resetLast" placeholder="e.g. Sharma" /></label>
-      <label>Role
-        <select id="resetRole">
-          ${ROLES.map((role) => `<option value="${role}"${role === "viewer" ? " selected" : ""}>${ROLE_LABELS[role]}</option>`).join("")}
-        </select>
-      </label>
-      <label>Password
-        <input type="text" id="resetPassword" required placeholder="Type one, or generate" />
-      </label>
-      <div class="actions">
-        <button type="button" id="resetSuggest" class="ghost-button small-button">Suggest strong password</button>
-        <button type="submit" class="secondary-button">Add entry</button>
-      </div>
-    </form>
-    <p class="auth-error" id="resetError" hidden></p>
-    <div id="resetResult" hidden>
-      <p class="muted" style="font-size:0.82rem;margin:10px 0 6px;">
-        Entry for <strong id="resetResultEmail"></strong> — paste into <code>roles-config.json</code>:
-      </p>
-      <textarea class="report-html-source" id="resetHash" readonly style="min-height:110px;"></textarea>
-      <p class="storage-warning" style="margin-top:10px;">
-        Share this password with them directly (Slack DM or a password manager) — it is not
-        recoverable from the hash, and this is the only time it is shown.
-        <strong id="resetPlain" style="display:block;margin-top:6px;font-family:ui-monospace,Menlo,monospace;"></strong>
-      </p>
-    </div>`;
-
-  nodes.settingsRoles.querySelectorAll("[data-role-index]").forEach((select) => {
-    select.addEventListener("change", () => {
-      const index = Number(select.dataset.roleIndex);
-      if (rolesConfig.users[index]) rolesConfig.users[index].role = select.value;
-      showRolesJson();
-    });
-  });
-
-  const form = document.getElementById("resetForm");
-  if (form) form.addEventListener("submit", (event) => handleAdminReset(event));
-
-  const suggest = document.getElementById("resetSuggest");
-  if (suggest) suggest.addEventListener("click", () => {
-    document.getElementById("resetPassword").value = suggestPassword();
-  });
-}
-
-/* A password that satisfies the policy by construction, so an admin never has to invent
-   one. crypto.getRandomValues, not Math.random. */
-function suggestPassword() {
-  const groups = [
-    "ABCDEFGHJKLMNPQRSTUVWXYZ",
-    "abcdefghijkmnopqrstuvwxyz",
-    "23456789",
-    "!@#$%^&*?",
-  ];
-  const all = groups.join("");
-  /* Exactly the policy minimum — two characters from each required group, the rest random. */
-  const target = Math.max(rolesConfig.passwordPolicy?.minLength || 10, groups.length * 2);
-  const pick = (set, count) => {
-    const values = crypto.getRandomValues(new Uint32Array(count));
-    return [...values].map((value) => set[value % set.length]);
-  };
-
-  const chars = groups.flatMap((group) => pick(group, 2)).concat(pick(all, target - groups.length * 2));
-
-  /* Fisher-Yates so the guaranteed characters are not always in the same positions. */
-  const shuffle = crypto.getRandomValues(new Uint32Array(chars.length));
-  for (let i = chars.length - 1; i > 0; i -= 1) {
-    const j = shuffle[i] % (i + 1);
-    [chars[i], chars[j]] = [chars[j], chars[i]];
-  }
-  return chars.join("");
-}
-
-/* The browser cannot write roles-config.json, so a role change produces the block to paste
-   rather than pretending to save. */
-function showRolesJson() {
-  const block = document.getElementById("rolesDiff");
-  const output = document.getElementById("rolesJson");
-  if (!block || !output) return;
-
-  output.value = JSON.stringify(rolesConfig.users, null, 2);
-  block.hidden = false;
-  output.select();
-}
-
-async function handleAdminReset(event) {
-  event.preventDefault();
-  const error = document.getElementById("resetError");
-  const result = document.getElementById("resetResult");
-  error.hidden = true;
-  result.hidden = true;
-
-  const email = document.getElementById("resetEmail").value.trim().toLowerCase();
-  const password = document.getElementById("resetPassword").value;
-
-  const fail = (message) => { error.textContent = message; error.hidden = false; };
-
-  if (!isAllowedEmail(email)) {
-    fail(`Use a @${rolesConfig.allowedDomain} address.`);
-    return;
-  }
-
-  const problems = passwordProblems(password);
-  if (problems.length) {
-    fail(`Password needs ${problems.join(", ")}.`);
-    return;
-  }
-
-  const local = email.split("@")[0];
-  const guess = local.split(/[._-]+/).filter(Boolean)
-    .map((part) => part.charAt(0).toUpperCase() + part.slice(1));
-  const entry = {
-    email,
-    firstName: document.getElementById("resetFirst").value.trim().replace(/\s+/g, "") || guess[0] || "",
-    lastName: document.getElementById("resetLast").value.trim().replace(/\s+/g, "") || guess.slice(1).join("") || "",
-    role: document.getElementById("resetRole").value,
-    passwordHash: await hashPassword(password),
-  };
-
-  document.getElementById("resetHash").value = JSON.stringify(entry, null, 2);
-  document.getElementById("resetResultEmail").textContent = email;
-  document.getElementById("resetPlain").textContent = password;
-  result.hidden = false;
-  document.getElementById("resetHash").select();
 }
 
 /* ---------- Accounts & cloud sync (Supabase) ---------- */
@@ -3815,7 +3565,7 @@ async function initCloud() {
 function showAuthOverlay() {
   nodes.authOverlay.hidden = false;
   showAuthError("");
-  if (nodes.authHint) nodes.authHint.textContent = describePasswordPolicy();
+  if (nodes.authHint) nodes.authHint.textContent = "No password needed — your email is the sign-in.";
 }
 
 function showAuthError(message) {
@@ -3829,7 +3579,7 @@ async function onSignedIn(user) {
     await cloud.client.auth.signOut();
     cloud.user = null;
     showAuthOverlay();
-    showAuthError(`${user.email} is not a @${rolesConfig.allowedDomain} account. Access is restricted to company accounts.`);
+    showAuthError(`${user.email} is not a @${allowedUsers.allowedDomain} account. Access is restricted to company accounts.`);
     return;
   }
 
@@ -3838,11 +3588,6 @@ async function onSignedIn(user) {
 
   const meta = user.user_metadata || {};
   state.settings.displayName = meta.full_name || meta.name || String(user.email || "").split("@")[0] || state.settings.displayName;
-
-  const { data: profile } = await cloud.client
-    .from("profiles").select("role, display_name").eq("id", user.id).maybeSingle();
-  cloud.role = (profile && ROLES.includes(profile.role)) ? profile.role : configuredRoleFor(user.email);
-  state.settings.role = cloud.role;
 
   await pullCloudState();
   await cloud.client.rpc("touch_last_seen").catch(() => {});
@@ -3865,7 +3610,6 @@ async function pullCloudState() {
 
   if (data && data.state && Object.keys(data.state).length) {
     state = ensureDefaults(data.state);
-    if (cloud.role) state.settings.role = cloud.role;
     saveState();
     applyTheme(state.settings.theme);
   } else {
@@ -3911,16 +3655,16 @@ function renderAccountPanel() {
 
   if (!currentSession) {
     nodes.settingsAccount.innerHTML = `<p class="muted">Not signed in. Sign-in is off in
-      <code>roles-config.json</code> (<code>requireLogin: false</code>).</p>`;
+      <code>allowed-users.json</code> (<code>requireLogin: false</code>).</p>`;
     return;
   }
 
   nodes.settingsAccount.innerHTML = `
     <p class="muted">Signed in as <strong>${escapeHtml(currentSession.email)}</strong> —
-    role <strong>${escapeHtml(ROLE_LABELS[currentSession.role])}</strong>, from
-    <code>roles-config.json</code>.</p>
-    <p class="muted" style="margin-top:6px;font-size:0.8rem;">Demo sign-in only: no password and no
-    server, so this identifies you rather than protecting anything. Data stays in this browser.</p>
+    from <code>allowed-users.json</code>.</p>
+    <p class="muted" style="margin-top:6px;font-size:0.8rem;">Sign-in is your email alone — no
+    password and no server, so this identifies you rather than protecting anything. Data stays in
+    this browser.</p>
     <div class="actions" style="margin-top: 12px;">
       <button type="button" id="settingsSignOut" class="ghost-button">Sign out</button>
     </div>`;
@@ -4023,7 +3767,6 @@ function planTemplateSync() {
 }
 
 function previewTemplateSync() {
-  if (!requirePermission("project.edit", "update project tasks")) return;
 
   pendingTemplateSync = planTemplateSync();
   nodes.syncApply.disabled = !pendingTemplateSync.length;
@@ -4043,7 +3786,6 @@ function previewTemplateSync() {
 
 function applyTemplateSync() {
   if (!pendingTemplateSync || !pendingTemplateSync.length) return;
-  if (!requirePermission("project.edit", "update project tasks")) return;
   if (!confirm(`Update ${pendingTemplateSync.length} task(s) across your projects? Only untouched tasks change.`)) return;
 
   let applied = 0;
@@ -4083,7 +3825,6 @@ function renderStorageStats() {
    settings, which is what you almost always want after testing. Exposed as
    window.clearAllData() so it can be run from the browser console. */
 function clearAllData({ keepTemplates = true, confirmFirst = true } = {}) {
-  if (!requirePermission("data.manage", "clear all data")) return false;
   const summary = `${state.projects.length} project(s) and ${state.updates.length} weekly report(s)`;
   if (confirmFirst && !confirm(`Delete ${summary}? This cannot be undone — export a backup first if you need one.`)) {
     return false;
@@ -4124,7 +3865,6 @@ function exportBackup() {
 }
 
 function importBackup(file) {
-  if (!requirePermission("data.manage", "import a backup")) return;
   const reader = new FileReader();
 
   reader.onload = () => {
@@ -4156,7 +3896,6 @@ function importBackup(file) {
 /* Removes a project and every weekly report belonging to it. There is no undo, so the
    confirmation spells out exactly what goes. */
 function deleteProject(projectId) {
-  if (!requirePermission("project.delete", "delete projects")) return;
   const project = state.projects.find((item) => item.id === projectId);
   if (!project) return;
 
@@ -4176,7 +3915,6 @@ function deleteProject(projectId) {
 }
 
 function deleteUpdate(updateId) {
-  if (!requirePermission("report.delete", "delete weekly reports")) return;
   const update = state.updates.find((item) => item.id === updateId);
   if (!update) return;
 
@@ -4191,7 +3929,6 @@ function deleteUpdate(updateId) {
 /* Appends the next week after the project's latest one, pre-filled from the master plan
    when a template exists for that week number. */
 function addWeekToProject(projectId) {
-  if (!requirePermission("report.create", "add weeks")) return;
   const project = state.projects.find((item) => item.id === projectId);
   if (!project) return;
 
@@ -4336,6 +4073,8 @@ function syncCycleWeeksToDates() {
 
 function toggleProjectDetails(editing) {
   nodes.projDetailsForm.hidden = !editing;
+  /* One or the other, never the same fields twice in one card. */
+  nodes.projectDetailsFields.hidden = editing;
   nodes.projEditToggle.textContent = editing ? "Editing…" : "Edit";
   nodes.projEditToggle.disabled = editing;
   if (!editing) renderProjectTimeline(state.projects.find((item) => item.id === uiState.projectId));
@@ -4345,7 +4084,6 @@ function toggleProjectDetails(editing) {
    report for the project, so the plan stays consistent with the timeline. */
 function saveProjectDetails(event) {
   event.preventDefault();
-  if (!requirePermission("project.edit", "edit project details")) return;
 
   const project = state.projects.find((item) => item.id === uiState.projectId);
   if (!project) return;
@@ -4617,7 +4355,6 @@ function mondayOfThisWeek() {
    once you pick one to edit or start a new one. */
 /* Add the week after the project's last one, then open it for editing. */
 function addWeeklyReport(projectId) {
-  if (!requirePermission("report.create", "add a weekly report")) return;
   const project = state.projects.find((item) => item.id === projectId);
   if (!project) {
     showAppInfo("Pick a project first, then add a report to it.");
@@ -4650,11 +4387,16 @@ function addWeeklyReport(projectId) {
 function openCreateReport(projectId, focusUpdateId, { editing = Boolean(focusUpdateId) } = {}) {
   uiState.returnScreen = uiState.screen === "create-report" ? uiState.returnScreen : uiState.screen;
   uiState.screen = "create-report";
-  uiState.activeNav = "create-report";
+  /* Reached from a project rather than the sidebar, so the sidebar reads the same as it does
+     on the project page itself instead of highlighting nothing. */
+  uiState.activeNav = "dashboard";
   uiState.projectId = projectId || null;
 
   nodes.createReportTitle.textContent = "Project Reports";
   populateProjectPicker(nodes.reportsIndexProject, projectId);
+
+  /* Rows kept visible after being ticked off are a within-visit courtesy, not stored state. */
+  uiState.keepCarried.clear();
 
   /* Before the list is drawn, not during: renderAll() calls back into the index, and writing
      state from inside a render would re-enter it. */
@@ -4684,7 +4426,9 @@ function renderReportsIndex(projectId) {
     return;
   }
 
-  refreshOwnerOptions(projectId);
+  /* Built once for the whole list: every row's owner dropdown offers the same project-scoped
+     people, so switching projects rebuilds the list and with it the options. */
+  const owners = projectOwnerOptions(projectId);
 
   /* Which week contains today, so the list says where the project actually is. Compared as
      ISO strings: parsing "YYYY-MM-DD" with `new Date` reads it as UTC while `new Date()` is
@@ -4705,7 +4449,7 @@ function renderReportsIndex(projectId) {
     const done = tasks.filter((task) => task.status === "completed").length;
     const open = uiState.openReportRows.has(update.id);
     const isCurrentWeek = isDateInUpdateWeek(today, update);
-    const carried = carriedCountFor(updates, index);
+    const carried = carriedCountFor(updates, index, uiState.keepCarried);
 
     return `
       <article class="report-row${isCurrentWeek ? " is-current-week" : ""}"${isCurrentWeek ? ' aria-current="date"' : ""}>
@@ -4722,17 +4466,16 @@ function renderReportsIndex(projectId) {
         </div>
         <div class="report-row-actions">
           <span class="status-badge ${statusClass(update.statusTag)}">${escapeHtml(update.statusTag)}</span>
-          <button type="button" class="ghost-button small-button" data-requires="report.edit" data-edit-report="${update.id}">Edit</button>
-          <button type="button" class="row-remove" data-requires="report.delete" data-delete-report="${update.id}">Delete</button>
+          <button type="button" class="ghost-button small-button" data-edit-report="${update.id}">Edit</button>
+          <button type="button" class="row-remove" data-delete-report="${update.id}">Delete</button>
         </div>
         <div class="report-row-tasks" id="report-tasks-${update.id}"${open ? "" : " hidden"}>
-          ${renderReportRowTasks(update, updates, index)}
+          ${renderReportRowTasks(update, updates, index, owners)}
         </div>
       </article>
     `;
   }).join("");
 
-  applyRolePermissions();
 }
 
 /* A read-only peek at the week's work, so the list can be scanned without opening each
@@ -4795,20 +4538,21 @@ function applyWeekStructureChange(button) {
 /* The whole week is edited here: its status and start date, the work still open from earlier
    weeks, and its own tasks. Everything writes as it is typed — there is no draft, which is what
    lets several weeks be open at once without two of them disagreeing about the same task. */
-function renderReportRowTasks(update, weeks, index) {
+function renderReportRowTasks(update, weeks, index, owners) {
   const tasks = update.tasks || [];
-  const carried = carriedTasksFor(weeks || [update], index || 0);
+  const carried = carriedTasksFor(weeks || [update], index || 0, uiState.keepCarried);
   const moveTargets = (weeks || []).map((week, position) => ({ week, position }))
     .filter((entry) => entry.week.id !== update.id);
 
+  const ownerChoices = owners || projectOwnerOptions(update.projectId);
   const carriedRows = carried
-    .map(({ task, from, weekId }) => weekTaskRows(task, moveTargets, index, weekId, `⬅ Carried from Week ${from}`))
+    .map(({ task, from, weekId }) => weekTaskRows(task, moveTargets, index, weekId, `⬅ Carried from Week ${from}`, ownerChoices))
     .join("");
   /* A task that arrived here from an earlier week keeps saying so, rather than looking as though
      it had always been this week's work — whether it was copied forward by its status or moved
      here by hand. */
   const ownRows = tasks.map((task) => weekTaskRows(task, moveTargets, index, update.id,
-    taskSourceLabel(task, weeks))).join("");
+    taskSourceLabel(task, weeks), ownerChoices)).join("");
   const anyRows = carried.length || tasks.length;
 
   return `
@@ -4857,7 +4601,7 @@ function weekLabelForStart(weeks, weekStart) {
 
 /* A task and its sub-tasks. `ownerWeekId` is the week the task belongs to, which for a carried
    row is an earlier week than the one being edited — edits follow the task, not the row. */
-function weekTaskRows(task, moveTargets, here, ownerWeekId, source) {
+function weekTaskRows(task, moveTargets, here, ownerWeekId, source, owners) {
   const pinned = Number(task.fixedWeek) > 0;
   const pending = task.status === "pending";
   const classes = ["week-task-row"];
@@ -4865,6 +4609,9 @@ function weekTaskRows(task, moveTargets, here, ownerWeekId, source) {
      two badge colours for "this is late" and "this was forwarded" would be a distinction the
      reader cannot act on. */
   if (source) classes.push("is-carried");
+  /* Struck through from the renderer too, not only from the click that completed it, so it
+     survives the rebuild that a status change now triggers. */
+  if (source && task.status === "completed") classes.push("is-resolved");
   if (pinned) classes.push("is-pinned");
   if (pending) classes.push("is-pending");
 
@@ -4877,7 +4624,7 @@ function weekTaskRows(task, moveTargets, here, ownerWeekId, source) {
         ${pinned ? `<span class="week-task-lock" title="Fixed to week ${task.fixedWeek} — foundational work the rest of the plan depends on.">🔒 week ${task.fixedWeek}</span>` : ""}
         ${source ? `<span class="week-task-source">${escapeHtml(source)}</span>` : ""}
       </td>
-      <td><input type="text" list="ownerOptions" data-task-field="owner" value="${escapeHtml(task.owner || "")}" placeholder="Owner" /></td>
+      <td>${ownerSelect("task-field", task.owner, owners)}</td>
       <td><input type="date" data-task-field="date" value="${escapeHtml(task.date || "")}" title="The date the work actually finished — this is what the generated report prints" /></td>
       <td>${statusSelect("task-field", task.status)}</td>
       <td><input type="text" data-task-field="comments" value="${escapeHtml(task.comments || "")}" placeholder="Comments" /></td>
@@ -4892,7 +4639,7 @@ function weekTaskRows(task, moveTargets, here, ownerWeekId, source) {
         <td></td>
         <td></td>
         <td class="week-subtask-title"><span aria-hidden="true">&#8627;</span><input type="text" data-subtask-field="title" value="${escapeHtml(sub.title || "")}" placeholder="Sub-task" /></td>
-        <td><input type="text" list="ownerOptions" data-subtask-field="owner" value="${escapeHtml(sub.owner || "")}" placeholder="Owner" /></td>
+        <td>${ownerSelect("subtask-field", sub.owner, owners)}</td>
         <td><input type="date" data-subtask-field="date" value="${escapeHtml(sub.date || "")}" title="The date this sub-task finished" /></td>
         <td>${statusSelect("subtask-field", sub.status)}</td>
         <td><input type="text" data-subtask-field="comments" value="${escapeHtml(sub.comments || "")}" placeholder="Comments" /></td>
@@ -4933,7 +4680,6 @@ function handleReportsIndexInput(event) {
   const field = event.target;
   const editor = field.closest(".week-editor");
   if (!editor) return;
-  if (!requirePermission("report.edit", "edit a weekly report")) return;
 
   const update = state.updates.find((item) => item.id === editor.dataset.update);
   if (!update) return;
@@ -4972,22 +4718,29 @@ function handleReportsIndexInput(event) {
       if (cell) cell.value = task.date;
     }
     if (field.dataset.taskField === "status") {
-      /* A carried task just ticked off stays in the table, struck through, instead of vanishing
-         from under the pointer. It leaves the carried list on the next rebuild. */
-      row.classList.toggle("is-resolved", field.value === "completed" && row.classList.contains("is-carried"));
-      /* Restyle now rather than waiting for a rebuild that a plain status change does not
-         trigger, so the row reads as pending the moment it is set. */
-      row.classList.toggle("is-pending", field.value === "pending");
+      /* A carried task ticked off here stays listed, struck through, instead of vanishing from
+         under the pointer — remembered across the rebuild below. */
+      if (field.value === "completed" && row.classList.contains("is-carried")) {
+        uiState.keepCarried.add(task.id);
+      } else {
+        uiState.keepCarried.delete(task.id);
+      }
+
       /* Marking work pending or in progress says it runs past this week, so it is copied into
          the next one. This replaced Pending's earlier behaviour of *moving* a carried task into
          the week being triaged: one status cannot both move a task and copy it. */
-      if (FORWARDING_STATUSES.includes(field.value) && forwardTaskToNextWeek(task, update)) {
-        saveState();
-        stampProjectActivity(update.projectId);
-        renderReportsIndex(nodes.reportsIndexProject.value);
-        setReportRowsOpenState();
-        return;
-      }
+      if (FORWARDING_STATUSES.includes(field.value)) forwardTaskToNextWeek(task, update);
+
+      /* Then rebuild the whole list. Whether a task counts as carried is read off its status,
+         and every *later* week shows it — so patching only this week's summary left finished
+         work still listed as outstanding in each week after it, with the stale rows even
+         showing the status it had before. A status change is a select, not typing, so a
+         rebuild cannot interrupt anyone mid-keystroke. */
+      saveState();
+      stampProjectActivity(update.projectId);
+      renderReportsIndex(nodes.reportsIndexProject.value);
+      setReportRowsOpenState();
+      return;
     }
   } else if (field.dataset.subtaskField) {
     const sub = (task.subtasks || []).find((item) => item.id === row.dataset.subtask);
@@ -5205,7 +4958,7 @@ function refreshReportRowSummary(update) {
   const weeks = state.updates
     .filter((item) => item.projectId === update.projectId)
     .sort((left, right) => left.weekStart.localeCompare(right.weekStart));
-  const carried = carriedCountFor(weeks, weeks.findIndex((item) => item.id === update.id));
+  const carried = carriedCountFor(weeks, weeks.findIndex((item) => item.id === update.id), uiState.keepCarried);
 
   article.querySelector(".report-row-range").textContent = update.weekRange;
   /* innerHTML, not textContent: the carried count carries a span of its own, and this line is
@@ -5234,7 +4987,6 @@ function handleReportsIndexClick(event) {
      week to be open without two drafts fighting over the same carried task. */
   const save = event.target.closest("[data-week-save]");
   if (save) {
-    if (!requirePermission("report.edit", "edit a weekly report")) return;
     const update = state.updates.find((item) => item.id === save.dataset.weekSave);
     if (!update) return;
     saveState();
@@ -5246,7 +4998,6 @@ function handleReportsIndexClick(event) {
 
   const structural = event.target.closest("[data-add-task], [data-remove-task], [data-add-subtask], [data-remove-subtask]");
   if (structural) {
-    if (!requirePermission("report.edit", "edit a weekly report")) return;
     applyWeekStructureChange(structural);
     return;
   }
@@ -5283,31 +5034,6 @@ function openEditUpdate(updateId) {
   if (editor) editor.scrollIntoView({ behavior: "smooth", block: "center" });
 }
 
-/* Any owner typed on a task that is not already a POC for this project is added to that
-   project's POC list, so the name is offered from the dropdown next time. POCs stay scoped
-   to their project — nothing here is global. */
-function syncOwnersIntoProjectPocs(project, tasks) {
-  if (!Array.isArray(project.clientPocs)) project.clientPocs = [];
-
-  const known = new Set(project.clientPocs.map((poc) => poc.name.trim().toLowerCase()));
-  const seen = [];
-
-  tasks.forEach((task) => {
-    seen.push(task.owner);
-    (task.subtasks || []).forEach((sub) => seen.push(sub.owner));
-  });
-
-  seen
-    .map((name) => (name || "").trim())
-    .filter(Boolean)
-    .forEach((name) => {
-      const key = name.toLowerCase();
-      if (known.has(key)) return;
-      known.add(key);
-      project.clientPocs.push({ name, email: "", addedFrom: "task" });
-      debugLog(`POC "${name}" added to project ${project.name} from a task owner`);
-    });
-}
 
 
 /* Everything above is declarations; start the app. */

@@ -33,18 +33,14 @@
             <input type="email" id="authEmail" autocomplete="email" required placeholder="you@webengage.com" />
           </label>
 
-          <label>Password
-            <input type="password" id="authPassword" autocomplete="current-password" required placeholder="Your password" />
-          </label>
-
           <p class="auth-hint" id="authHint"></p>
 
           <p class="auth-error" id="authError" hidden></p>
 
           <button type="submit" class="primary-button full-width">Continue</button>
 
-          <p class="auth-fineprint">Demo sign-in for the internal team. It identifies you so the app
-            knows your role — it is not a security control.</p>
+          <p class="auth-fineprint">Sign-in for the internal team. Your email identifies you so the
+            app can greet you by name — it is not a security control.</p>
         </form>
 
         <p class="auth-footer">Weekly Report v1.0 · Internal Tool</p>
@@ -95,7 +91,6 @@
             <span id="headerAvatar" class="avatar">S</span>
             <span class="user-widget-text">
               <span id="headerDisplayName" class="user-widget-name">Stuti</span>
-              <span id="headerRole" class="user-widget-role">Admin</span>
             </span>
             <svg class="icon icon-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
           </button>
@@ -112,10 +107,6 @@
             <button class="nav-item" type="button" data-nav-key="dashboard">
               <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
               <span>Dashboard</span>
-            </button>
-            <button class="nav-item" type="button" data-nav-key="create-report">
-              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg>
-              <span>Project Reports</span>
             </button>
             <button class="nav-item" type="button" data-nav-key="templates">
               <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M9 9v11"/></svg>
@@ -135,7 +126,7 @@
             </button>
           </nav>
           <div class="sidebar-actions">
-            <button id="sidebarAddProject" class="primary-button sidebar-button" type="button" data-requires="project.create">+ New Project</button>
+            <button id="sidebarAddProject" class="primary-button sidebar-button" type="button">+ New Project</button>
           </div>
         </aside>
 
@@ -143,34 +134,58 @@
           <section class="card screen" id="dashboardScreen">
             <div class="card-head">
               <div>
-                <p class="eyebrow">Home</p>
-                <h2>Dashboard</h2>
+                <p class="eyebrow">Dashboard</p>
+                <h2>All Projects</h2>
               </div>
               <div class="actions" style="align-items: center;">
-                <button id="homeAddProject" data-requires="project.create" class="primary-button" type="button" style="padding: 8px 14px; font-size: 0.85rem; border-radius: 10px;">+ New Project</button>
+                <button id="homeAddProject" class="primary-button" type="button" style="padding: 8px 14px; font-size: 0.85rem; border-radius: 10px;">+ New Project</button>
               </div>
             </div>
             <div class="stat-tile-row">
-              <article class="stat-tile"><span class="stat-tile-label">Total Projects</span><span class="stat-tile-value" id="dashProjectCount">0</span></article>
-              <article class="stat-tile"><span class="stat-tile-label">Ongoing</span><span class="stat-tile-value" id="dashCurrentCount">0</span></article>
-              <article class="stat-tile"><span class="stat-tile-label">Completed</span><span class="stat-tile-value" id="dashClosedCount">0</span></article>
-              <article class="stat-tile"><span class="stat-tile-label">Weekly Updates</span><span class="stat-tile-value" id="dashUpdateCount">0</span></article>
-              <article class="stat-tile"><span class="stat-tile-label">Blocked/Delayed</span><span class="stat-tile-value tone-blocked" id="dashAlertCount">0</span></article>
+              <article class="stat-tile tile-total">
+                <span class="stat-tile-label">Total Projects</span>
+                <span class="stat-tile-value" id="dashProjectCount">0</span>
+                <svg class="stat-tile-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+              </article>
+              <article class="stat-tile tile-ongoing">
+                <span class="stat-tile-label">Ongoing</span>
+                <span class="stat-tile-value" id="dashCurrentCount">0</span>
+                <svg class="stat-tile-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+              </article>
+              <article class="stat-tile tile-completed">
+                <span class="stat-tile-label">Completed</span>
+                <span class="stat-tile-value" id="dashClosedCount">0</span>
+                <svg class="stat-tile-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m8.5 12.5 2.5 2.5 4.5-5"/></svg>
+              </article>
+              <article class="stat-tile tile-updates">
+                <span class="stat-tile-label">Weekly Updates</span>
+                <span class="stat-tile-value" id="dashUpdateCount">0</span>
+                <svg class="stat-tile-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 18 9 11l4 4 7-8"/><path d="M15 7h5v5"/></svg>
+              </article>
+              <article class="stat-tile tile-blocked">
+                <span class="stat-tile-label">Blocked/Delayed</span>
+                <span class="stat-tile-value tone-blocked" id="dashAlertCount">0</span>
+                <svg class="stat-tile-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M10 9v6M14 9v6"/></svg>
+              </article>
             </div>
 
             <h3 style="margin-top: 24px; margin-bottom: 14px;">Weekly Reports</h3>
             <div class="home-grid">
-              <button class="folder-button folder-button-warm" id="openCurrent" type="button">
-                <span class="folder-label">Ongoing projects</span>
-                <span id="currentProjectCount" class="folder-count">0</span>
-                <small>Open active work</small>
-              </button>
+              <section class="folder-card folder-button-warm">
+                <button class="folder-card-head" id="openCurrent" type="button">
+                  <span class="folder-label">Ongoing projects</span>
+                  <span id="currentProjectCount" class="folder-count">0</span>
+                </button>
+                <div id="dashOngoingList" class="folder-card-list"></div>
+              </section>
 
-              <button class="folder-button folder-button-cool" id="openClosed" type="button">
-                <span class="folder-label">Completed projects</span>
-                <span id="closedProjectCount" class="folder-count">0</span>
-                <small>Review completed work</small>
-              </button>
+              <section class="folder-card folder-button-cool">
+                <button class="folder-card-head" id="openClosed" type="button">
+                  <span class="folder-label">Completed projects</span>
+                  <span id="closedProjectCount" class="folder-count">0</span>
+                </button>
+                <div id="dashClosedList" class="folder-card-list"></div>
+              </section>
             </div>
 
             <div class="detail-panel" style="margin-top: 24px;">
@@ -207,7 +222,7 @@
               </div>
               <div class="project-head-actions">
                 <span id="projectStatusBadge" class="pill pill-dark">Ongoing</span>
-                <button id="deleteProjectBtn" class="row-remove" type="button" data-requires="project.delete">Delete project</button>
+                <button id="deleteProjectBtn" class="row-remove" type="button">Delete project</button>
               </div>
             </div>
 
@@ -221,7 +236,7 @@
                 <section class="overview-card">
                   <div class="overview-card-head">
                     <h3>Integration Scope</h3>
-                    <button type="button" id="projScopeEdit" class="overview-edit" data-requires="project.edit">Edit</button>
+                    <button type="button" id="projScopeEdit" class="overview-edit">Edit</button>
                   </div>
                   <div id="projectScope" class="overview-fields"></div>
                   <form id="projScopeForm" class="overview-form" hidden>
@@ -259,9 +274,10 @@
               <div class="overview-grid">
                 <section class="overview-card overview-card-side" id="projDetailsBlock">
                   <div class="overview-card-head">
-                    <h3>Project Details</h3>
-                    <button type="button" id="projEditToggle" class="overview-edit" data-requires="project.edit">Edit</button>
+                    <h3>Basic Details</h3>
+                    <button type="button" id="projEditToggle" class="overview-edit">Edit</button>
                   </div>
+                  <div id="projectDetailsFields" class="overview-fields"></div>
                   <p class="muted" id="projDetailsNote">Go-live is calculated from kickoff and cycle length. Changing either re-dates every weekly report.</p>
                   <p class="overview-highlight" id="projTimelineNote"></p>
 
@@ -293,7 +309,7 @@
                 <section class="overview-card">
                   <div class="overview-card-head">
                     <h3>📅 Timeline</h3>
-                    <button type="button" id="projTimelineEdit" class="overview-edit" data-requires="project.edit">Edit</button>
+                    <button type="button" id="projTimelineEdit" class="overview-edit">Edit</button>
                   </div>
                   <div id="projectTimelineFields" class="overview-fields"></div>
                 </section>
@@ -302,15 +318,15 @@
               <section class="overview-card overview-card-wide">
                 <div class="overview-card-head">
                   <h3>🗓️ Project Phases</h3>
-                  <button type="button" id="projPhasesEdit" class="overview-edit" data-requires="template.edit">Edit</button>
+                  <button type="button" id="projPhasesEdit" class="overview-edit">Edit</button>
                 </div>
                 <div id="projectPhases" class="phase-track"></div>
               </section>
 
               <div class="project-view-actions">
-                <button id="addWeekFromTemplate" data-requires="report.create" class="overview-action" type="button">+ Add week from template</button>
+                <button id="addWeekFromTemplate" class="overview-action" type="button">+ Add week from template</button>
                 <button id="openWeeklyReport" class="overview-action is-primary" type="button">📊 View Report</button>
-                <button id="editWeeklyReports" data-requires="report.edit" class="overview-action" type="button">Edit weekly reports</button>
+                <button id="editWeeklyReports" class="overview-action" type="button">Edit weekly reports</button>
               </div>
             </div>
 
@@ -532,11 +548,10 @@
                   Project
                   <select id="reportsIndexProject"></select>
                 </label>
-                <button id="reportsNewBtn" class="primary-button" type="button" data-requires="report.create">+ New report</button>
+                <button id="reportsNewBtn" class="primary-button" type="button">+ New report</button>
               </div>
               <div id="reportsIndexList" class="reports-index-list"></div>
               <!-- Owner suggestions for the inline week editors: the project's team and client POCs. -->
-              <datalist id="ownerOptions"></datalist>
             </section>
 
           </section>
@@ -567,29 +582,27 @@
             <div class="card-head">
               <div>
                 <p class="eyebrow">Team</p>
-                <h2>Project Team</h2>
+                <h2>Teams</h2>
               </div>
             </div>
 
             <section class="wizard-section">
-              <div class="reports-index-head">
-                <label class="reports-index-picker">
-                  Project
-                  <select id="teamProjectSelect"></select>
-                </label>
-                <button id="teamAddMember" class="secondary-button" type="button" data-requires="team.manage">+ Add member</button>
-              </div>
-              <div id="teamMemberList" class="row-list"></div>
-              <p class="muted small-note">
-                The delivery team for this project. These names are offered when assigning tasks in
-                this project&rsquo;s weekly reports, alongside the client POCs. Scoped to this project only.
+              <h3 class="wizard-section-title">WebEngage Team</h3>
+              <p class="muted small-note" style="margin-top:0;margin-bottom:10px;">
+                The CSM, project owner and sales owner across every project. These come from each
+                project&rsquo;s Basic Details &mdash; edit them there.
               </p>
+              <div id="teamWebengage" class="row-list"></div>
             </section>
 
             <section class="wizard-section">
-              <h3 class="wizard-section-title">Workload</h3>
-              <div id="teamList" style="display: grid; gap: 10px;"></div>
+              <h3 class="wizard-section-title">Client teams</h3>
+              <p class="muted small-note" style="margin-top:0;margin-bottom:10px;">
+                Each project&rsquo;s client points of contact, captured when the project was created.
+              </p>
+              <div id="teamByProject"></div>
             </section>
+
           </section>
 
           <section class="card screen" id="templatesScreen" hidden>
@@ -599,9 +612,9 @@
                 <h2>Week-wise Task Templates</h2>
               </div>
               <div class="actions">
-                <button id="templatesAddWeek" class="secondary-button" type="button" data-requires="template.edit">+ Add week</button>
-                <button id="templatesReloadFile" class="ghost-button" type="button" data-requires="template.edit">Reload from file</button>
-                <button id="templatesReset" class="ghost-button" type="button" data-requires="template.edit">Reset to built-in</button>
+                <button id="templatesAddWeek" class="secondary-button" type="button">+ Add week</button>
+                <button id="templatesReloadFile" class="ghost-button" type="button">Reload from file</button>
+                <button id="templatesReset" class="ghost-button" type="button">Reset to built-in</button>
               </div>
             </div>
             <p class="muted" style="margin-bottom: 12px;">
@@ -631,10 +644,6 @@
                 Display Name *
                 <input type="text" id="settingsDisplayName" required placeholder="e.g. Stuti" />
               </label>
-              <label class="span-2">
-                Role
-                <input type="text" id="settingsRole" placeholder="e.g. Admin" />
-              </label>
               <div class="actions span-2" style="align-items: center;">
                 <button type="submit" class="primary-button">Save</button>
                 <span id="settingsSavedNote" class="pill" hidden>Saved!</span>
@@ -645,35 +654,7 @@
               <h3 class="settings-head" style="margin-top:0;">Account</h3>
               <div id="settingsAccount"></div>
 
-              <div id="settingsPasswordBlock" style="margin-top: 18px;">
-                <h4 style="margin-bottom: 6px;">Change password</h4>
-                <p class="muted" style="font-size: 0.82rem; margin-bottom: 10px;">
-                  There is no server, so this cannot email a reset link or save the change by itself.
-                  It checks your current password, then gives you the hash to paste into
-                  <code>roles-config.json</code>.
-                </p>
-                <form id="passwordForm" class="password-form">
-                  <label>Current password<input type="password" id="pwCurrent" autocomplete="current-password" required /></label>
-                  <label>New password<input type="password" id="pwNew" autocomplete="new-password" required /></label>
-                  <label>Confirm new password<input type="password" id="pwConfirm" autocomplete="new-password" required /></label>
-                  <button type="submit" class="secondary-button">Generate new hash</button>
-                </form>
-                <p class="auth-error" id="pwError" hidden></p>
-                <div id="pwResult" hidden>
-                  <p class="muted" style="font-size: 0.82rem; margin: 10px 0 6px;">
-                    Paste this as <code>passwordHash</code> for <span id="pwResultEmail"></span> in
-                    <code>roles-config.json</code>, then redeploy. Until you do, your old password still works.
-                  </p>
-                  <textarea class="report-html-source" id="pwHash" readonly style="min-height: 60px;"></textarea>
-                </div>
-              </div>
-
-              <div id="settingsRolesBlock" data-requires="users.manage">
-                <h3 class="settings-head">Users &amp; Roles</h3>
-                <div id="settingsRoles"></div>
-              </div>
-
-              <div id="settingsSyncBlock" data-requires="project.edit">
+              <div id="settingsSyncBlock">
                 <h3 class="settings-head">Update existing projects from the template</h3>
                 <p class="muted" style="font-size: 0.82rem; margin-bottom: 10px;">
                   Projects keep the task wording they were created with. This re-applies the current
@@ -705,14 +686,14 @@
                   Demo data
                   <select id="settingsDemoSelect"></select>
                 </label>
-                <button id="settingsDemoLoad" class="secondary-button" type="button" data-requires="project.create">Load demo project</button>
+                <button id="settingsDemoLoad" class="secondary-button" type="button">Load demo project</button>
               </div>
               <p class="muted" id="settingsDemoNote" style="margin-top: 8px; font-size: 0.82rem;"></p>
 
               <div class="actions" style="margin-top: 14px;">
                 <button id="settingsExport" class="secondary-button" type="button">Export backup (.json)</button>
-                <button id="settingsImport" data-requires="data.manage" class="ghost-button" type="button">Import backup</button>
-                <button id="settingsClear" data-requires="data.manage" class="row-remove" type="button" style="padding: 13px 18px; border-radius: 14px;">Clear all test data</button>
+                <button id="settingsImport" class="ghost-button" type="button">Import backup</button>
+                <button id="settingsClear" class="row-remove" type="button" style="padding: 13px 18px; border-radius: 14px;">Clear all test data</button>
                 <input type="file" id="settingsImportFile" accept="application/json,.json" hidden />
               </div>
               <p class="muted" id="settingsDataStats" style="margin-top: 10px; font-size: 0.82rem;"></p>

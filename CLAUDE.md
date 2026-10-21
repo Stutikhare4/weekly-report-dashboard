@@ -15,8 +15,7 @@ A client-side PWA for tracking weekly status updates across multiple projects (C
   and Use-Cases, Go Live). Each task carries `offsetByCycle` — its completion day offset from
   kickoff per cycle length. See "Master plan and cycle length" below.
 - `demo-data/` — optional demo datasets; `index.json` lists what Settings offers
-- `roles-config.json` — who may sign in, their role and password hash; see `README-auth.md`
-- `tools/hash-password.py` — prints the SHA-256 hash to put in `roles-config.json`
+- `allowed-users.json` — who may sign in: email, first name, last name. See `README-auth.md`
 - `supabase-config.json` — Supabase URL + anon key; unused while sign-in is the local demo gate
 - `supabase/schema.sql` — run once in the Supabase SQL editor to create tables, RLS and stats
 - `tools/import-sheet.py` — re-import the master plan from the Google Sheet, with an alignment guard
@@ -25,12 +24,29 @@ A client-side PWA for tracking weekly status updates across multiple projects (C
 - `build-standalone.py` — bundles everything into `weekly-report-dashboard.html`
 - `weekly-report-dashboard.html` — generated single-file build (do not edit by hand)
 
-## Sign-in and roles
+## Sign-in: email only, no roles
 
-Demo sign-in checked in the browser against `roles-config.json`: `@webengage.com` addresses
-only, listed users only, passwords stored as SHA-256 hashes, two roles (Admin / Viewer).
-Adding a user or resetting a password means editing that file and pushing — the browser
-cannot write to it. Full procedure in `README-auth.md`. This is a gate, not security.
+Someone types their work email; if it is listed in `allowed-users.json` they are in. **No
+password, no role, no server.** `@webengage.com` only (`allowedDomain`), and an unlisted
+address gets "This email doesn't have access. Ask Stuti to add you." Everyone who signs in has
+**full access**. Adding or removing someone is a commit — the browser cannot write the file.
+Full procedure in `README-auth.md`.
+
+A stored session is re-checked against the list on every load, so removing an entry takes that
+person's access away on their next page load rather than never.
+
+This is a **gate, not security**: the file is public on the deployed site, anyone can type any
+address, and DevTools walks past it. It exists so the app knows who you are.
+
+Removed on 7 October 2026, with their config file and `tools/hash-password.py`: password fields
+and SHA-256 checks, `ROLES` / `ROLE_LABELS` / `PERMISSIONS` and the `can()` / `requirePermission()`
+/ `applyRolePermissions()` trio, every `data-requires` attribute (18 in markup, 3 in renderers),
+21 permission guards, `state.settings.role`, the role label under the name in the header, and
+Settings → Change password / Users & Roles. Hashes in a publicly readable file protect nothing,
+and a role split is overhead for a team where everyone needs to edit.
+
+**`TEAM_ROLES` is unrelated** — OBM, TSS, CSM and so on are job titles on a project's team, not
+access levels, and they stay.
 
 ## Accounts via Supabase (not currently wired up)
 
@@ -371,6 +387,69 @@ come from `update.templateWeek`, which holds the master-plan phase a week's firs
 and a 6-week project's last two weeks read as "Week 3" and "Week 4". `templateWeek` is still the
 right field for finding which template a week came from — it is just not a position.
 
+## People: WebEngage team vs client team
+
+`projectPeople(project)` is the one source of truth, returning two groups:
+
+- **WebEngage team** — the project's `csm`, `implementationOwner` and `salesOwner`, plus anyone
+  added for that project alone on the Team page (`project.team`)
+- **Client team** — `project.clientPocs`
+
+All four were captured by the creation wizard and stored all along, but the **Basic Details**
+card rendered nothing but two notes: name, CSM, project owner and sales owner were visible only
+after clicking Edit, so details someone had just typed in looked lost. The POCs were shown, but
+under **Integration Scope** — a card about platforms and channels, not people.
+
+`buildProjectDetailsHtml()` now fills that card with the values read-only, grouped **WebEngage
+team** / **Client team**, and the POC row moved out of Integration Scope into it. They belong in
+Basic Details rather than a card of their own: that is the section whose Edit form owns these
+fields, and a separate "People" card (built first, and wrong) left Basic Details still empty.
+`toggleProjectDetails()` hides the read-only block while the form is open, so the card never
+shows the same fields twice.
+
+The Team screen is built from the same function, grouped the way the team thinks:
+
+- **Permanent WebEngage Team** — one common section, since the same CSM runs several projects.
+  Each person is listed once with their role(s) and the projects they are on, derived from every
+  project's three fields. Nothing is stored here: Basic Details stays the only place to edit
+  them, so the two screens cannot disagree.
+- **Client teams, by project** — one section per project, headed by its name, listing that
+  project's POCs. Clients are the part that changes per project, which is why this grouping is
+  the other way round from the WebEngage one.
+- **Extra members for one project** — the former "+ Add member" roster, kept because it feeds the
+  owner dropdown and holds anyone who is neither staff nor a client contact.
+
+`projectOwnerOptions()` now draws its **Team** group from `projectPeople().webengage` rather than
+`project.team` alone, so the CSM, project owner and sales owner can actually be assigned work —
+until now the people named in Basic Details were the only ones who could not own a task.
+
+## Owner is a project-scoped dropdown
+
+The Owner cell in the week editor is a `<select>`, built by `ownerSelect()` from
+`projectOwnerOptions(projectId)`, which returns three groups:
+
+- **Team** — `project.team` names, added on the Team page
+- **Client POCs** — `project.clientPocs`, via `formatPoc`
+- **Already assigned** — owner values already recorded on this project's tasks that belong to
+  neither roster
+
+That third group is the point. Owner was free text until now, so existing reports hold names
+like "Webengage OBM" and "Client tech team" that come from the master plan's role names rather
+than from any roster. A dropdown without them would silently reassign work the first time
+someone opened a row. A value belonging to no group at all still gets its own option, so opening
+a row can never blank out who owns the work.
+
+Options are **scoped to the project** and built once per `renderReportsIndex()`, so switching
+projects rebuilds the list with them — no name from another project is ever offered. The stored
+value stays a plain name, which is what the report prints and what `computeTeamRoster()` groups
+the Team page's Workload by, so that grouping is unaffected. A project with no team and no POCs
+gets a disabled "— add people on the Team page —" option alongside Unassigned.
+
+This replaced a `<datalist id="ownerOptions">` fed by `refreshOwnerOptions()`, which was already
+project-scoped but allowed free text and could not group. Both are gone, as is
+`syncOwnersIntoProjectPocs()` — dead since the modal save path was removed, and premised on
+owners being typed.
+
 ## Phase and domain on a task
 
 A task carries both: `phase` is the stage it belongs to (Kickoff, Staging Deployment, ...) and
@@ -413,6 +492,22 @@ back to fetching the files when served normally.
 Note `app.js` contains `</head>` and `</body>` inside `buildReportPrintHtml`'s template
 literal — anything rewriting the bundled HTML must target the first/last occurrence, not
 replace all.
+
+## Section heights
+
+**`.wizard-section` must not carry `height: 100%`.** It did, and as a grid item whose containing
+block is a definite height handed down from `.shell`, every section stretched to the full height
+of the screen it sat in — which made the screen taller, so the next section stretched further.
+The Team page grew from two sections to four and came out **6194px tall for ~1200px of content**,
+with a blank gap under every heading, a page that scrolled into emptiness, and the sticky
+sidebar and header scrolling away because the page dwarfed them. Removing that one line put
+every screen within 6px of its content and fixed all three symptoms at once.
+
+Grid already stretches side-by-side sections to equal heights (`align-items: stretch` is the
+default), which is the only thing the rule was wanted for, so the wizard is unaffected.
+
+A screen whose content is shorter than the viewport still reports "trailing blank space" — that
+is `.app-shell`'s `min-height`, filling the window rather than extra scroll, and is correct.
 
 ## Typography
 

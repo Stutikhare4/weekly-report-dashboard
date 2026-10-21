@@ -84,13 +84,12 @@ is **written but not switched on**.
 | `sw.js` | Service worker; `CACHE_NAME` must be bumped on every release |
 | `manifest.webmanifest`, `icon.svg` | PWA install metadata and icon |
 | `week-templates.json` | The master plan, generated from the Google Sheet |
-| `roles-config.json` | Who may sign in, their role, their password hash |
+| `allowed-users.json` | Who may sign in: email, first name, last name |
 | `demo-data/` | An optional demo project (Salad Days) loadable from Settings |
 | `build-standalone.py` | Builds the single-file version |
 | `weekly-report-dashboard.html` | The generated single-file version (never edited by hand) |
 | `tools/import-sheet.py` | Re-imports the master plan from the Google Sheet, with safety checks |
 | `tools/generate-weekly-report.js` | Generates and validates a plan for any cycle; writes `artifacts/` |
-| `tools/hash-password.py` | Prints the hash to put in `roles-config.json` |
 | `artifacts/` | Task registry, the cycle 2–12 test matrix, a sample 5-week plan |
 | `supabase/schema.sql`, `supabase-config.json` | The unused cloud backend |
 | `README.md`, `README-auth.md`, `README-supabase.md` | Running locally, adding users, the backend |
@@ -243,10 +242,10 @@ and any generated artifact cannot disagree.
 ## 7. Screens, one by one
 
 ### Sign-in
-A theme-aware sign-in card, light by default. It accepts `@webengage.com` addresses only, and
-only people listed in `roles-config.json`. The password rule is at least 10 characters with
-upper case, lower case, a number and a symbol. The card says plainly that this is a demo gate,
-not a security control.
+A theme-aware sign-in card, light by default, with **one field: work email**. It accepts
+`@webengage.com` addresses only, and only people listed in `allowed-users.json`; anyone else
+sees "This email doesn't have access. Ask Stuti to add you." There is no password. The card says
+plainly that this identifies you rather than protecting anything.
 
 ### Top bar and sidebar
 The top bar shows the "Weekly Report" wordmark (the old "S" logo square is hidden), a project
@@ -347,7 +346,10 @@ need one.
   weeks forward, so the work advances one week per real week rather than filling the whole
   remaining plan at once, and a notice says how many tasks moved. The copy is a separate record and its row reads
   "⬅ Copied from Week N". Completed, delayed and blocked do not forward.
-- **Everything saves as you type.** Owner fields suggest the project's team and client contacts.
+- **Everything saves as you type.** Owner is a dropdown listing only this project's people,
+  grouped **Team** / **Client POCs**, plus an **Already assigned** group holding names already
+  used on the project (e.g. "Webengage OBM") so nothing is reassigned behind your back. A
+  project with nobody added yet points you at the Team page.
 - A **💾 Save Changes** button sits in the expanded week's footer. It confirms rather than
   commits — the week is already saved, so clicking it writes state again and turns green reading
   "✓ Saved". There is no unsaved-changes prompt: with several weeks open at once there is no
@@ -382,11 +384,8 @@ A month grid with previous/next buttons, and the weekly reports covering whichev
 selected.
 
 ### Settings
-- **Profile:** display name and a role label.
-- **Account.**
-- **Change password:** checks the current password and gives you the new hash to paste into
-  `roles-config.json` — there is no server to save it.
-- **Users & Roles** (admins only).
+- **Profile:** display name.
+- **Account:** the signed-in name and email, and Sign out.
 - **Update existing projects from the template:** preview, then apply, for untouched tasks only.
 - **Data & Backup:** load the demo project, export or import a JSON backup, clear all test data,
   and data statistics. A clear warning explains that everything lives in this browser.
@@ -463,17 +462,20 @@ document, while the app itself uses one sans-serif font.
 
 ## 10. Access control
 
-- **Who can sign in:** email and password, `@webengage.com` only. There are currently two users:
-  stuti.khare@webengage.com (**Admin**) and ajwanda.shrivastav@webengage.com (**Viewer**).
-- **Roles:** Admin can do everything. Viewer is read-only across all ten capabilities: create,
-  edit and delete projects; create, edit and delete reports; edit the template; manage the team;
-  manage data; manage users.
-- **Passwords** are SHA-256 hashes in `roles-config.json`. Adding a user or resetting a password
-  means editing that file and pushing — `README-auth.md` has the steps.
+- **Who can sign in:** email only, `@webengage.com` only, and only the addresses listed in
+  `allowed-users.json` — currently stuti.khare@webengage.com and
+  ajwanda.shrivastav@webengage.com. No password.
+- **No roles.** Everyone who signs in has full access. The two-role split and its ten-capability
+  permission matrix were removed on 7 October 2026: a role split is overhead for a team where
+  everyone needs to edit.
+- **Adding or removing someone** means editing `allowed-users.json` and pushing —
+  `README-auth.md` has the steps. Removal takes effect on that person's next page load, since a
+  stored session is re-checked against the list every time.
 
 **This is a gate, not security.**
-- `roles-config.json` is publicly downloadable from the live site, so both email addresses and
-  both password hashes can be read by anyone with the URL.
+- `allowed-users.json` is publicly downloadable from the live site, so the email addresses can
+  be read by anyone with the URL. There are no password hashes in it any more.
+- Anyone can type any listed address, since nothing is verified.
 - The check runs in the browser, so it can be bypassed with developer tools.
 
 This is fine for an internal demo, but not for real client data on a public URL. The
@@ -547,7 +549,6 @@ Web App tasks.
 **Other tools:**
 - `node tools/generate-weekly-report.js <kickoff> <cycle>` prints a plan.
 - `--artifacts` rewrites the registry, the test matrix and the sample plan.
-- `python3 tools/hash-password.py` prints a password hash.
 
 **Git identity:** set for this repository only, to "Stuti Khare" and the hostname address the
 earlier commits used.
@@ -565,7 +566,7 @@ earlier commits used.
 - Editable week-wise templates seeded from the old Salad Days workbook.
 - Reports: tabular, oldest week first, HTML, with a project summary card.
 - Project-level teams and client contacts.
-- Sign-in with Admin/Viewer roles and the `@webengage.com` rule.
+- Email-only sign-in with the `@webengage.com` rule and no roles.
 - Light theme by default.
 - Info banners that are no longer red and dismiss themselves after 10 seconds.
 - Fixes for the table overflowing sideways and a start-up error.
@@ -625,7 +626,24 @@ earlier commits used.
 - A Save button added to the week modal's header, then removed on request; change detection and
   the leave prompts were kept.
 
+**19 October**
+- **Layout fix:** `.wizard-section` had `height: 100%`, so each section stretched to its whole
+  screen — the Team page was 6194px tall for 1200px of content, scrolled into blank space, and
+  pushed the sidebar and header off-screen. One line removed; every screen now ends with its
+  content.
+- **People split into WebEngage team and client team.** A People card on Basic Details shows the
+  CSM, project owner, sales owner and client POCs — all captured at creation but previously
+  invisible unless you clicked Edit. The Team screen became one permanent WebEngage section plus
+  one section per project for its client contacts. The owner dropdown now offers the CSM,
+  project owner and sales owner.
+
 **7 October**
+- **Sign-in is email-only.** `allowed-users.json` became `allowed-users.json` (email, first name,
+  last name). Passwords, the two roles and the whole permission matrix are gone, along with
+  Settings → Change password and Users & Roles, and the "admin" label in the header. Everyone
+  signed in has full access.
+- **Owner became a project-scoped dropdown** in the week editor, grouped Team / Client POCs,
+  with existing free-text owners preserved as selectable values.
 - **Weeks now start on the project's kickoff date** rather than the Monday of that week, for new
   projects, re-dates and (once, on load) existing ones.
 - **The report now covers last week then this week**, in that order — what was delivered before
@@ -655,8 +673,8 @@ earlier commits used.
 
 ## 14. Decisions already taken
 
-- **No Google sign-in.** Demo and internal use only: basic login with a strong password rule.
-- **Two roles only,** Admin and Viewer.
+- **No Google sign-in.** Demo and internal use only.
+- **No passwords and no roles.** Email-only sign-in; everyone signed in has full access.
 - **Go-live is calculated,** never entered. The cycle length is a plan, not a ceiling.
 - **The Google Sheet is the source of truth** for timings; the tool never invents dates. Sheet
   mistakes are imported as written and reported, not silently fixed.
@@ -758,9 +776,9 @@ These came up in requests and were declined or changed, with reasons.
 
 **Security and exposure**
 
-8. **The live site serves the docs and `roles-config.json` publicly**, including both email
-    addresses and password hashes. A small `vercel.json` could block the `.md` files. The roles
-    file must stay readable for sign-in to work.
+8. **The live site serves the docs and `allowed-users.json` publicly.** The file now holds only
+    names and email addresses — the password hashes are gone — and it must stay readable for
+    sign-in to work. A small `vercel.json` could still block the `.md` files.
 
 ---
 
@@ -769,8 +787,8 @@ These came up in requests and were declined or changed, with reasons.
 1. **Raise a GitHub pull request for access changes** using a fine-grained access token. It was
    built once and removed: a token in the browser is a real credential somewhere it can't be
    protected. Decide who holds it and how first.
-2. **Real accounts with roles enforced by a server,** via Supabase. The schema is written; this
-   would also give password resets by email.
+2. **Real accounts enforced by a server,** via Supabase, if access ever has to be more than a
+   gate. The schema is written. Roles would have to come back with it.
 3. **Sharing projects between users.** This needs proper database tables rather than one saved
    blob per person.
 
