@@ -4846,13 +4846,29 @@ const ALLOWED_EMAIL_DOMAIN = "webengage.com";
    nothing in the app ever wrote `status` anything but "current", so the Completed folder could
    not be reached at all. */
 const PROJECT_STAGES = [
-  { value: "on track",     label: "On Track",     closes: false },
-  { value: "slow moving",  label: "Slow Moving",  closes: false },
-  { value: "at risk",      label: "At Risk",      closes: false },
-  { value: "parked",       label: "Parked",       closes: false },
-  { value: "completed",    label: "Completed",    closes: true },
-  { value: "cancelled",    label: "Cancelled",    closes: true },
+  { value: "on track",     label: "On Track",     closes: false, alerts: false },
+  { value: "slow moving",  label: "Slow Moving",  closes: false, alerts: false },
+  { value: "at risk",      label: "At Risk",      closes: false, alerts: true },
+  { value: "parked",       label: "Parked",       closes: false, alerts: true },
+  { value: "completed",    label: "Completed",    closes: true,  alerts: false },
+  { value: "cancelled",    label: "Cancelled",    closes: true,  alerts: true },
 ];
+
+/* The states the dashboard's Blocked/Delayed tile counts. Kept on the stage table so the tile
+   and the dropdown that sets it cannot drift apart. */
+function alertingStages() {
+  return PROJECT_STAGES.filter((stage) => stage.alerts).map((stage) => stage.value);
+}
+
+function stageLabel(value) {
+  const stage = PROJECT_STAGES.find((item) => item.value === value);
+  return stage ? stage.label : String(value || "");
+}
+
+function blockedProjects() {
+  const flagged = alertingStages();
+  return state.projects.filter((project) => flagged.includes(projectStage(project)));
+}
 
 function projectStage(project) {
   const stored = String((project && project.stage) || "").toLowerCase();
@@ -5947,13 +5963,23 @@ function openDashboard() {
 function renderDashboardScreen() {
   const currentProjects = state.projects.filter((p) => p.status === "current").length;
   const closedProjects = state.projects.filter((p) => p.status === "closed").length;
-  const alerts = computeAlertItems();
 
   nodes.dashProjectCount.textContent = `${state.projects.length}`;
   nodes.dashCurrentCount.textContent = `${currentProjects}`;
   nodes.dashClosedCount.textContent = `${closedProjects}`;
   nodes.dashUpdateCount.textContent = `${state.updates.length}`;
-  nodes.dashAlertCount.textContent = `${alerts.length}`;
+  /* Projects marked At Risk, Parked or Cancelled — a project count, like the four tiles beside
+     it. It used to count blocked/delayed *sub-tasks*, which is a different unit entirely and
+     read as though five numbers in a row were comparable when they were not. The sub-task list
+     still has a home: it is what the notification bell shows. */
+  const blocked = blockedProjects();
+  nodes.dashAlertCount.textContent = `${blocked.length}`;
+  const tile = nodes.dashAlertCount.closest(".stat-tile");
+  if (tile) {
+    tile.title = blocked.length
+      ? blocked.map((project) => `${project.name || "Untitled"} — ${stageLabel(projectStage(project))}`).join("\n")
+      : "No project is At Risk, Parked or Cancelled.";
+  }
 
   /* One row per project. Listing every weekly report meant a project with eight weeks filled
      the list on its own and pushed the others out. "Latest" is the greatest weekStart rather
