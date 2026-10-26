@@ -440,7 +440,6 @@ const NAV_HANDLERS = {
   "dashboard": openDashboard,
   "calendar": openCalendar,
   "team": openTeam,
-  "settings": openSettings,
   "templates": openTemplates,
 };
 
@@ -4744,9 +4743,34 @@ function handleReportsIndexInput(event) {
   if (!update) return;
 
   const weekField = field.dataset.weekField;
+  if (weekField === "weekStart") {
+    /* Only on `change`. A date input fires `input` as each segment is typed, and rebuilding the
+       list on a half-entered date would both blur the field and shift the weeks twice. */
+    if (event.type !== "change") return;
+
+    const next = field.value;
+    if (!next) {
+      /* Cleared or mid-edit: put the stored date back rather than writing an empty week. */
+      field.value = update.weekStart;
+      return;
+    }
+
+    const delta = Math.round(
+      (Date.parse(`${next}T00:00:00`) - Date.parse(`${update.weekStart}T00:00:00`)) / 86400000,
+    );
+    if (!Number.isFinite(delta) || delta === 0) return;
+
+    const moved = shiftWeeksFrom(update, delta);
+    saveState();
+    stampProjectActivity(update.projectId);
+    renderReportsIndex(nodes.reportsIndexProject.value);
+    setReportRowsOpenState();
+    showAppSuccess(`All weeks updated (${delta > 0 ? "+" : "−"}${Math.abs(delta)} day${Math.abs(delta) === 1 ? "" : "s"}) — ${moved} week${moved === 1 ? "" : "s"} moved.`);
+    return;
+  }
+
   if (weekField) {
     update[weekField] = field.value;
-    if (weekField === "weekStart") update.weekRange = formatWeekRange(field.value);
     saveState();
     refreshReportRowSummary(update);
     flashInlineSaved(update);
@@ -4813,6 +4837,37 @@ function handleReportsIndexInput(event) {
   /* Completing carried work changes the carried count on every later week, not just this one. */
   if (owner.id !== update.id) refreshReportRowSummary(owner);
   flashInlineSaved(update);
+}
+
+/* Moving a week's start date moves every week after it by the same number of days, so the cycle
+   stays a run of consecutive weeks instead of developing a gap or an overlap. Each task travels
+   with its week — `startDate` and `dueDate` shift by the same delta, which is what keeps a task
+   inside the week it belongs to.
+
+   Status, owner, comments and Completed On are deliberately left alone: those record what
+   happened, and re-dating a plan should not rewrite the history of the work. */
+function shiftWeeksFrom(startWeek, delta) {
+  const weeks = projectWeeksSorted(startWeek.projectId);
+  const from = weeks.findIndex((week) => week.id === startWeek.id);
+  if (from < 0) return 0;
+
+  const shift = (value) => (value
+    ? toInputDate(shiftDays(new Date(`${value}T00:00:00`), delta))
+    : value);
+
+  const moved = weeks.slice(from);
+  moved.forEach((week) => {
+    week.weekStart = shift(week.weekStart);
+    week.weekRange = formatWeekRange(week.weekStart);
+    (week.tasks || []).forEach((task) => {
+      task.startDate = shift(task.startDate);
+      task.dueDate = shift(task.dueDate);
+    });
+  });
+
+  /* Go-live follows the last task to finish, so it has to be recomputed after a shift. */
+  refreshProjectGoLive(startWeek.projectId);
+  return moved.length;
 }
 
 /* Which week owns the row a control sits in. A carried row is rendered under a later week but

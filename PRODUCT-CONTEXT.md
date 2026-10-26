@@ -624,6 +624,12 @@ earlier commits used.
 - A Save button added to the week modal's header, then removed on request; change detection and
   the leave prompts were kept.
 
+**26 October**
+- **Theme matched to the WebEngage/Atlas studio:** indigo accent instead of orange, a dark navy
+  sidebar with a solid indigo active pill in both themes, near-white page, flat white cards with
+  1px rules and 10px corners, and no background washes. Done by retuning tokens, so dark mode
+  keeps the same roles at higher contrast.
+
 **21 October**
 - **The user list is gone.** `allowed-users.json` was deleted: any @webengage.com address signs
   in, and a new joiner needs no commit or deploy. With no server, a list the browser checks has

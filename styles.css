@@ -22,6 +22,14 @@
   --sidebar-grad-1: rgba(10, 18, 33, 0.95);
   --sidebar-grad-2: rgba(5, 11, 21, 0.82);
 
+  /* The rail has its own text colours because it is dark in both themes, so it cannot read
+     --text / --muted, which flip with the theme. */
+  --sidebar-text: #e6e9f5;
+  --sidebar-text-muted: #9aa2c4;
+  --sidebar-active-bg: #5b4fe3;
+  --sidebar-active-text: #ffffff;
+  --sidebar-hover-bg: rgba(255, 255, 255, 0.06);
+
   --border: rgba(148, 163, 184, 0.16);
   --border-soft: rgba(148, 163, 184, 0.12);
   --border-strong: rgba(148, 163, 184, 0.18);
@@ -50,13 +58,16 @@
 }
 
 :root[data-theme="light"] {
-  --bg: #eef2f8;
-  --bg-grad-1: #f7f9fc;
-  --bg-grad-2: #eef2f8;
-  --bg-grad-3: #e4eaf3;
-  --bg-wash-1: rgba(249, 115, 22, 0.1);
-  --bg-wash-2: rgba(56, 189, 248, 0.12);
-  --grid-line: rgba(15, 23, 42, 0.035);
+  /* WebEngage/Atlas: a near-white page, flat white cards, thin grey rules and an indigo
+     accent. The orange and sky washes that used to tint the background are gone — the studio
+     has no colour behind its content. */
+  --bg: #f7f8fa;
+  --bg-grad-1: #fafbfc;
+  --bg-grad-2: #f7f8fa;
+  --bg-grad-3: #f2f4f7;
+  --bg-wash-1: transparent;
+  --bg-wash-2: transparent;
+  --grid-line: rgba(16, 24, 40, 0.025);
 
   --panel: rgba(255, 255, 255, 0.82);
   --panel-strong: rgba(255, 255, 255, 0.97);
@@ -69,24 +80,37 @@
   --surface-6: rgba(255, 255, 255, 0.7);
   --surface-7: rgba(255, 255, 255, 0.9);
 
-  --topbar-bg: rgba(255, 255, 255, 0.88);
-  --sidebar-grad-1: rgba(255, 255, 255, 0.92);
-  --sidebar-grad-2: rgba(241, 245, 249, 0.85);
+  --topbar-bg: #ffffff;
+  /* The rail stays dark navy in the light theme — it is the most recognisable part of the
+     studio's chrome. */
+  --sidebar-grad-1: #1c1c35;
+  --sidebar-grad-2: #16162d;
+  --sidebar-text: #e6e9f5;
+  --sidebar-text-muted: #9aa2c4;
+  --sidebar-active-bg: #5b4fe3;
+  --sidebar-active-text: #ffffff;
+  --sidebar-hover-bg: rgba(255, 255, 255, 0.08);
 
-  --border: rgba(15, 23, 42, 0.14);
-  --border-soft: rgba(15, 23, 42, 0.1);
-  --border-strong: rgba(15, 23, 42, 0.16);
+  --border: #e4e7ec;
+  --border-soft: #eaecf0;
+  --border-strong: #d0d5dd;
 
   --text: #101828;
-  --text-soft: #1e293b;
-  --text-strong-cool: #1e293b;
-  --muted: #64748b;
-  --range-color: #0369a1;
-  --folder-count-text: #1f2937;
-  --stat-tile-value-text: #0f172a;
-  --active-nav-text: #0369a1;
+  --text-soft: #344054;
+  --text-strong-cool: #344054;
+  --muted: #667085;
+  --range-color: #4c41d1;
+  --folder-count-text: #101828;
+  --stat-tile-value-text: #101828;
+  --active-nav-text: #ffffff;
 
-  --shadow: 0 24px 60px rgba(15, 23, 42, 0.12);
+  --accent: #5b4fe3;
+  --accent-2: #5b4fe3;
+  --accent-3: #12b76a;
+
+  /* Flat, not floating: the studio's cards are defined by a 1px rule, not a drop shadow. */
+  --shadow: 0 1px 2px rgba(16, 24, 40, 0.05);
+  --radius: 10px;
 }
 
 * {
@@ -476,9 +500,9 @@ p {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 12px 14px;
-  border-radius: 14px;
-  color: var(--muted);
+  padding: 10px 12px;
+  border-radius: 8px;
+  color: var(--sidebar-text-muted);
   background: transparent;
   text-align: left;
   width: 100%;
@@ -490,10 +514,11 @@ p {
   color: var(--text);
 }
 
+/* A solid indigo pill, as in the studio, rather than a translucent wash. */
 .nav-item.active {
-  background: linear-gradient(135deg, rgba(56, 189, 248, 0.22), rgba(56, 189, 248, 0.08));
-  color: var(--active-nav-text);
-  box-shadow: inset 0 0 0 1px rgba(56, 189, 248, 0.35);
+  background: var(--sidebar-active-bg);
+  color: var(--sidebar-active-text);
+  box-shadow: none;
 }
 
 .sidebar-button {
@@ -610,17 +635,21 @@ p {
   min-height: 170px;
 }
 
+/* Plain surfaces with a coloured top rule, not orange and sky gradients. The studio's cards
+   are white; colour is carried by a thin accent, not by a wash behind the content. */
 .folder-button-warm {
-  background: linear-gradient(180deg, rgba(249, 115, 22, 0.18), var(--surface-1));
+  background: var(--surface-2);
+  border-top: 3px solid var(--card-accent);
 }
 
 .folder-button-cool {
-  background: linear-gradient(180deg, rgba(56, 189, 248, 0.18), var(--surface-1));
+  background: var(--surface-2);
+  border-top: 3px solid var(--card-done);
 }
 
 .folder-label {
   font-family: inherit;
-  font-size: 1.35rem;
+  font-size: 1.05rem;
   font-weight: 700;
 }
 
@@ -706,7 +735,7 @@ p {
 
 .project-name-card {
   padding: 18px 20px;
-  border-radius: 18px;
+  border-radius: 10px;
   border: 1px solid var(--border-soft);
   background: var(--surface-2);
   color: var(--text);
@@ -831,14 +860,19 @@ button {
 }
 
 .primary-button {
-  color: #08101c;
-  background: linear-gradient(135deg, #fdba74, #f97316);
+  color: #ffffff;
+  background: var(--card-primary);
 }
 
+.primary-button:hover { background: var(--card-primary-hover); }
+
 .secondary-button {
-  color: #05253f;
-  background: linear-gradient(135deg, #7dd3fc, #38bdf8);
+  color: var(--card-primary);
+  background: color-mix(in srgb, var(--card-primary) 10%, transparent);
+  border: 1px solid color-mix(in srgb, var(--card-primary) 32%, transparent);
 }
+
+.secondary-button:hover { background: color-mix(in srgb, var(--card-primary) 16%, transparent); }
 
 .ghost-button {
   color: var(--text-strong-cool);
@@ -1109,7 +1143,7 @@ button {
 .stat-tile {
   min-height: 92px;
   padding: 16px 16px 14px;
-  border-radius: 18px;
+  border-radius: 10px;
   background: linear-gradient(180deg, var(--surface-3), var(--surface-2));
   border: 1px solid var(--border);
   display: grid;
@@ -1151,7 +1185,7 @@ button {
    and a button cannot be nested inside a button. */
 .folder-card {
   padding: 16px 18px;
-  border-radius: 22px;
+  border-radius: 10px;
   border: 1px solid var(--border-soft);
   display: grid;
   gap: 10px;
@@ -1844,7 +1878,7 @@ button {
    is all this was wanted for. */
 .wizard-section {
   padding: 11px 15px;
-  border-radius: 18px;
+  border-radius: 10px;
   background: var(--surface-5);
   border: 1px solid var(--border);
 }
@@ -2407,7 +2441,7 @@ button {
 .reports-index {
   margin-bottom: 20px;
   padding: 16px 18px;
-  border-radius: 18px;
+  border-radius: 10px;
   background: var(--surface-5);
   border: 1px solid var(--border);
 }
@@ -2492,9 +2526,9 @@ button {
    The WebEngage palette is the light theme; dark keeps the same roles at usable contrast, so
    the page reads in both rather than only the one the design was drawn in. */
 :root {
-  --card-accent: #4d9fff;
-  --card-primary: #ff8c3d;
-  --card-primary-hover: #ff7a1f;
+  --card-accent: #8b80ff;
+  --card-primary: #6d61ea;
+  --card-primary-hover: #5b4fe3;
   --card-done: #62d62a;
   --card-border: rgba(148, 163, 184, 0.28);
   --card-hover: rgba(77, 159, 255, 0.14);
@@ -2506,17 +2540,17 @@ button {
 }
 
 :root[data-theme="light"] {
-  --card-accent: #0066cc;
-  --card-primary: #ff8c3d;
-  --card-primary-hover: #ff7a1f;
-  --card-done: #52c41a;
-  --card-border: #dce5f0;
-  --card-hover: #f0f6ff;
-  --card-warning: #b45309;
-  --card-warning-soft: #fffbe6;
-  --card-body: #4a5f7f;
-  --card-label: #7b8fa3;
-  --card-value: #1a202c;
+  --card-accent: #5b4fe3;
+  --card-primary: #5b4fe3;
+  --card-primary-hover: #4c41d1;
+  --card-done: #12b76a;
+  --card-border: #e4e7ec;
+  --card-hover: #f4f3ff;
+  --card-warning: #b54708;
+  --card-warning-soft: #fffaeb;
+  --card-body: #475467;
+  --card-label: #667085;
+  --card-value: #101828;
 }
 
 #projectDetailsView {

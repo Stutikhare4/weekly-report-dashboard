@@ -1,4 +1,4 @@
-const CACHE_NAME = "weekly-dashboard-v158";
+const CACHE_NAME = "weekly-dashboard-v162";
 const ASSETS = ["./", "./index.html", "./styles.css", "./plan-engine.js", "./app.js", "./week-templates.json", "./demo-data/index.json", "./demo-data/salad-days.json", "./manifest.webmanifest", "./icon.svg"];
 
 self.addEventListener("install", (event) => {

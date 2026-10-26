@@ -520,6 +520,32 @@ default), which is the only thing the rule was wanted for, so the wizard is unaf
 A screen whose content is shorter than the viewport still reports "trailing blank space" — that
 is `.app-shell`'s `min-height`, filling the window rather than extra scroll, and is correct.
 
+## Theme: the WebEngage studio palette
+
+The light theme matches the Atlas studio: a near-white page, flat white cards defined by a 1px
+rule rather than a drop shadow, 10px corners, and an **indigo accent** (`#5b4fe3`) in place of
+the orange that used to carry buttons. The dark theme keeps the same roles at higher contrast
+(`#8b80ff` accent) so the app reads in both.
+
+The **sidebar is dark navy in both themes**, which is the most recognisable part of the studio's
+chrome. That is why it has tokens of its own — `--sidebar-text`, `--sidebar-text-muted`,
+`--sidebar-active-bg`, `--sidebar-active-text`, `--sidebar-hover-bg`. `.nav-item` used to read
+`--muted` and `--active-nav-text`, which flip with the theme and would have left the rail's text
+near-invisible on navy in light mode. The active item is a solid indigo pill, not a translucent
+wash.
+
+Everything else came from retuning tokens rather than rewriting components: `--bg*`, `--border*`,
+`--text`/`--muted`, `--shadow`, `--radius`, `--accent*` and the `--card-*` set. The two
+background washes (`--bg-wash-1/2`, previously orange and sky) are `transparent` in light mode —
+the studio has no colour behind its content.
+
+Three component rules hard-coded colour and had to change with them: `.primary-button` and
+`.secondary-button` (gradients → flat indigo, and an outlined secondary), and the Ongoing /
+Completed folder cards, whose orange and sky gradient fills became plain surfaces with a
+coloured top rule.
+
+Status colours are deliberately untouched: green, amber and red carry meaning, not branding.
+
 ## Typography
 
 One font for the whole app — `-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, …` — and one
