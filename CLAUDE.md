@@ -189,6 +189,20 @@ Three steps — Basic Details, Platform Integration, Review & Summary — inside
 whose only job was to say "done" and offer a button to where the person was already going. What
 it usefully said — how many weeks were pre-created — survives as a self-clearing banner.
 
+## Dashboard tiles
+
+Four tiles: Total Projects, Ongoing, Completed, Blocked/Delayed. **Weekly Updates was removed** —
+it was the last tile counting something other than projects, so the row now reads as four of a
+kind rather than four project counts and one report count.
+
+**Every tile opens the list of what it counted.** The click is delegated off `data-category` in
+`index.html`, and `CATEGORY_VIEWS` decides what each one shows, so a tile is added or removed in
+the markup alone. Each view carries its own `match` predicate rather than a `status` value,
+because `all` and `blocked` cut across the Ongoing/Completed folders instead of being folders:
+`blocked` reads `alertingStages()`, the same table the tile's own count reads, so the number and
+the list it opens cannot disagree. The tiles are `<button>`s, not `<article>`s, so they are
+reachable by keyboard; `.stat-tile` undoes the browser's button defaults.
+
 ## Projects list (folder screen)
 
 Dashboard → Ongoing / Completed opens the folder screen as a stacked list: one full-width row

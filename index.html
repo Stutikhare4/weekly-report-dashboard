@@ -137,32 +137,29 @@
                 <button id="homeAddProject" class="primary-button" type="button" style="padding: 8px 14px; font-size: 0.85rem; border-radius: 10px;">+ New Project</button>
               </div>
             </div>
+            <!-- Each tile opens the list of the projects it counts, so the number is a way in
+                 rather than a dead end. They are buttons, not articles, for the keyboard. -->
             <div class="stat-tile-row">
-              <article class="stat-tile tile-total">
+              <button class="stat-tile tile-total" type="button" data-category="all">
                 <span class="stat-tile-label">Total Projects</span>
                 <span class="stat-tile-value" id="dashProjectCount">0</span>
                 <svg class="stat-tile-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
-              </article>
-              <article class="stat-tile tile-ongoing">
+              </button>
+              <button class="stat-tile tile-ongoing" type="button" data-category="current">
                 <span class="stat-tile-label">Ongoing</span>
                 <span class="stat-tile-value" id="dashCurrentCount">0</span>
                 <svg class="stat-tile-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
-              </article>
-              <article class="stat-tile tile-completed">
+              </button>
+              <button class="stat-tile tile-completed" type="button" data-category="closed">
                 <span class="stat-tile-label">Completed</span>
                 <span class="stat-tile-value" id="dashClosedCount">0</span>
                 <svg class="stat-tile-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m8.5 12.5 2.5 2.5 4.5-5"/></svg>
-              </article>
-              <article class="stat-tile tile-updates">
-                <span class="stat-tile-label">Weekly Updates</span>
-                <span class="stat-tile-value" id="dashUpdateCount">0</span>
-                <svg class="stat-tile-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 18 9 11l4 4 7-8"/><path d="M15 7h5v5"/></svg>
-              </article>
-              <article class="stat-tile tile-blocked">
+              </button>
+              <button class="stat-tile tile-blocked" type="button" data-category="blocked">
                 <span class="stat-tile-label">Blocked/Delayed</span>
                 <span class="stat-tile-value tone-blocked" id="dashAlertCount">0</span>
                 <svg class="stat-tile-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M10 9v6M14 9v6"/></svg>
-              </article>
+              </button>
             </div>
 
             <h3 style="margin-top: 24px; margin-bottom: 14px;">Weekly Reports</h3>
@@ -194,13 +191,13 @@
             <div class="screen-head">
               <button id="backToHome" class="ghost-button" type="button">Back</button>
               <div class="screen-title">
-                <p class="eyebrow">Folder</p>
+                <p class="eyebrow" id="categoryEyebrow">Folder</p>
                 <h2 id="categoryTitle">Projects</h2>
               </div>
               <span id="categoryBadge" class="pill pill-dark">0</span>
             </div>
 
-            <p class="muted" id="categorySubtitle">Active integrations in progress</p>
+            <p class="muted" id="categorySubtitle"></p>
             <div id="categoryList" class="project-card-grid"></div>
             <div class="category-more" id="categoryMore" hidden>
               <span class="muted" id="categoryCount"></span>

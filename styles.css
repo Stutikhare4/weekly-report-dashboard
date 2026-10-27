@@ -1149,10 +1149,30 @@ button {
   display: grid;
   gap: 4px;
   align-content: start;
+  /* Each tile is a <button> that opens the list it counts, so the browser's button defaults
+     — centred text, its own font, a visible chrome border — have to be undone. */
+  width: 100%;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  appearance: none;
+  transition: transform 120ms ease, border-color 120ms ease, box-shadow 120ms ease;
+}
+
+.stat-tile:hover {
+  border-color: var(--card-primary);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(15, 23, 42, 0.08);
+}
+
+.stat-tile:focus-visible {
+  outline: 2px solid var(--card-primary);
+  outline-offset: 2px;
 }
 
 /* Tinted tiles with a watermark icon, one hue per metric, so the row reads at a glance instead
-   of as five identical boxes. The tints are derived from the app's own accent tokens rather
+   of as four identical boxes. The tints are derived from the app's own accent tokens rather
    than new hex values, so dark mode and the WebEngage palette still hold. */
 .stat-tile {
   position: relative;
@@ -1172,13 +1192,11 @@ button {
 .tile-total     { background: color-mix(in srgb, var(--card-accent) 10%, var(--surface-2)); }
 .tile-ongoing   { background: color-mix(in srgb, #8b5cf6 12%, var(--surface-2)); }
 .tile-completed { background: color-mix(in srgb, var(--card-done) 12%, var(--surface-2)); }
-.tile-updates   { background: color-mix(in srgb, var(--card-accent) 16%, var(--surface-2)); }
 .tile-blocked   { background: color-mix(in srgb, var(--card-risk) 10%, var(--surface-2)); }
 
 .tile-total .stat-tile-icon     { color: var(--card-accent); }
 .tile-ongoing .stat-tile-icon   { color: #8b5cf6; }
 .tile-completed .stat-tile-icon { color: var(--card-done); }
-.tile-updates .stat-tile-icon   { color: var(--card-accent); }
 .tile-blocked .stat-tile-icon   { color: var(--card-risk); }
 
 /* A folder card is no longer one big button: it holds a heading button plus a row per project,

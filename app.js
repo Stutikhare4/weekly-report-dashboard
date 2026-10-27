@@ -272,7 +272,6 @@ const nodes = {
   dashProjectCount: document.getElementById("dashProjectCount"),
   dashCurrentCount: document.getElementById("dashCurrentCount"),
   dashClosedCount: document.getElementById("dashClosedCount"),
-  dashUpdateCount: document.getElementById("dashUpdateCount"),
   dashAlertCount: document.getElementById("dashAlertCount"),
   dashRecentList: document.getElementById("dashRecentList"),
 
@@ -283,6 +282,7 @@ const nodes = {
   closedProjectCount: document.getElementById("closedProjectCount"),
   backToHome: document.getElementById("backToHome"),
   backToCategory: document.getElementById("backToCategory"),
+  categoryEyebrow: document.getElementById("categoryEyebrow"),
   categoryTitle: document.getElementById("categoryTitle"),
   categoryBadge: document.getElementById("categoryBadge"),
   categoryList: document.getElementById("categoryList"),
@@ -478,6 +478,12 @@ function boot() {
      whenever the folder had one, so the list only ever appeared when the folder was empty. */
   nodes.openCurrent.addEventListener("click", () => openCategory("current"));
   nodes.openClosed.addEventListener("click", () => openCategory("closed"));
+
+  /* Every dashboard tile opens the list of what it counted. Delegated off `data-category` so a
+     tile is added or removed in index.html alone, with CATEGORY_VIEWS deciding what it shows. */
+  document.querySelectorAll(".stat-tile[data-category]").forEach((tile) => {
+    tile.addEventListener("click", () => openCategory(tile.dataset.category));
+  });
   nodes.backToHome.addEventListener("click", () => openDashboard());
   nodes.backToCategory.addEventListener("click", () => openCategory(uiState.category));
   nodes.generateReport.addEventListener("click", () => generateReportPdf());
@@ -1162,11 +1168,11 @@ function renderDashboardScreen() {
   nodes.dashProjectCount.textContent = `${state.projects.length}`;
   nodes.dashCurrentCount.textContent = `${currentProjects}`;
   nodes.dashClosedCount.textContent = `${closedProjects}`;
-  nodes.dashUpdateCount.textContent = `${state.updates.length}`;
-  /* Projects marked At Risk, Parked or Cancelled — a project count, like the four tiles beside
+  /* Projects marked At Risk, Parked or Cancelled — a project count, like the three tiles beside
      it. It used to count blocked/delayed *sub-tasks*, which is a different unit entirely and
-     read as though five numbers in a row were comparable when they were not. The sub-task list
-     still has a home: it is what the notification bell shows. */
+     read as though the numbers in a row were comparable when they were not. The sub-task list
+     still has a home: it is what the notification bell shows. (Weekly Updates was the last tile
+     counting something other than projects, and it is gone, so the row is now four of a kind.) */
   const blocked = blockedProjects();
   nodes.dashAlertCount.textContent = `${blocked.length}`;
   const tile = nodes.dashAlertCount.closest(".stat-tile");
@@ -1227,7 +1233,8 @@ function renderFolderCounts() {
 
 /* ---------- Weekly Reports (folder / category / project) ---------- */
 
-function openCategory(category) {
+function openCategory(value) {
+  const category = categoryView(value).value;
   /* Only start again from the first page when the folder actually changes — coming back from a
      project should leave you where you were, not throw away a Load more. */
   if (uiState.category !== category) uiState.categoryShown = CATEGORY_PAGE_SIZE;
@@ -1248,6 +1255,55 @@ function openProject(projectId) {
 }
 
 const CATEGORY_PAGE_SIZE = 12;
+
+/* The four lists the dashboard tiles open. Each tile counts something, and clicking it shows
+   exactly what it counted, so the number is a way in rather than a dead end — which means the
+   filter here and the count on the tile have to be the same question asked once. "all" and
+   "blocked" cut across the Ongoing/Completed folders rather than being folders themselves,
+   which is why this matches on a predicate instead of on `status`. */
+const CATEGORY_VIEWS = [
+  {
+    value: "all",
+    eyebrow: "Projects",
+    title: "All projects",
+    subtitle: "Every project, ongoing and completed",
+    empty: "No projects yet",
+    hint: "Create one to get started.",
+    match: () => true,
+  },
+  {
+    value: "current",
+    eyebrow: "Folder",
+    title: "Ongoing projects",
+    subtitle: "Integrations still open, including any flagged At Risk, Parked or Cancelled",
+    empty: "No ongoing projects",
+    hint: "Every project has gone live.",
+    match: (project) => project.status === "current",
+  },
+  {
+    value: "closed",
+    eyebrow: "Folder",
+    title: "Completed projects",
+    subtitle: "Integrations that have gone live",
+    empty: "No completed projects",
+    hint: "Nothing has gone live yet.",
+    match: (project) => project.status === "closed",
+  },
+  {
+    value: "blocked",
+    eyebrow: "Flagged",
+    title: "Blocked / delayed projects",
+    subtitle: "Anything marked At Risk, Parked or Cancelled",
+    empty: "Nothing is blocked or delayed",
+    hint: "No project is At Risk, Parked or Cancelled.",
+    /* Reads the same stage table the tile's count does, so the two cannot drift. */
+    match: (project) => alertingStages().includes(projectStage(project)),
+  },
+];
+
+function categoryView(value) {
+  return CATEGORY_VIEWS.find((view) => view.value === value) || CATEGORY_VIEWS[1];
+}
 
 /* Projects carry no "modified" stamp of their own, so activity is the most recent thing that
    happened to them: an explicit save, the project's own creation, or the newest weekly report
@@ -1278,16 +1334,14 @@ function relativeDay(time) {
 }
 
 function renderCategoryScreen() {
+  const view = categoryView(uiState.category);
   const projects = state.projects
-    .filter((project) => project.status === uiState.category)
+    .filter((project) => view.match(project))
     .sort((left, right) => (projectLastActivity(right) || 0) - (projectLastActivity(left) || 0));
 
-  const ongoing = uiState.category === "current";
-  const label = ongoing ? "Ongoing projects" : "Completed projects";
-  nodes.categoryTitle.textContent = label;
-  nodes.categorySubtitle.textContent = ongoing
-    ? "Integrations still open, including any flagged At Risk, Parked or Cancelled"
-    : "Integrations that have gone live";
+  if (nodes.categoryEyebrow) nodes.categoryEyebrow.textContent = view.eyebrow;
+  nodes.categoryTitle.textContent = view.title;
+  nodes.categorySubtitle.textContent = view.subtitle;
   nodes.categoryBadge.textContent = `${projects.length} project${projects.length === 1 ? "" : "s"}`;
 
   const shown = Math.min(uiState.categoryShown, projects.length);
@@ -1314,8 +1368,8 @@ function renderCategoryScreen() {
           </button>`;
       }).join("")
     : `<div class="empty-state">
-         <p><strong>No ${escapeHtml(label.toLowerCase())}</strong></p>
-         <p class="muted">${ongoing ? "Every project has gone live." : "Nothing has gone live yet."}</p>
+         <p><strong>${escapeHtml(view.empty)}</strong></p>
+         <p class="muted">${escapeHtml(view.hint)}</p>
        </div>`;
 
   const more = projects.length > shown;

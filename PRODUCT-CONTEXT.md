@@ -262,7 +262,10 @@ The sidebar holds Dashboard, Project Reports, Templates, Calendar, Team and Sett
 **+ New Project** button at the bottom.
 
 ### Dashboard
-- **Five tiles:** Total Projects, Ongoing, Completed, Weekly Updates, Blocked/Delayed.
+- **Four tiles:** Total Projects, Ongoing, Completed, Blocked/Delayed. **Each one is clickable**
+  and opens the list of exactly the projects it counted — All projects, Ongoing, Completed, or
+  Blocked / delayed. Weekly Updates was removed: it counted weekly reports rather than projects,
+  so it was the one number in the row that was not comparable with the others.
 - **Two folders:** Ongoing projects and Completed projects. **Only Completed closes a project.**
   Cancelled stays in Ongoing and is counted as Blocked/Delayed — a cancelled integration has not
   gone live, and the Completed folder is what gets shown when someone asks what shipped, so a
@@ -270,8 +273,11 @@ The sidebar holds Dashboard, Project Reports, Templates, Calendar, Team and Sett
   on load as well as on change, so the two can never disagree.
 - **Recent updates:** one row per project showing its latest week, ordered by date, up to 10.
 
-### Projects folder (Ongoing / Completed)
-Both dashboard folders open this list.
+### Projects list (opened from a tile or a folder)
+Both dashboard folders and all four tiles open this same list, with four views: **All projects**,
+**Ongoing projects**, **Completed projects** and **Blocked / delayed projects**. The last two
+views cut across the folders, so each view filters on its own rule rather than on the stored
+folder.
 
 - One full-width row per project: name, and a dot naming its **stage** — On Track, Slow Moving,
   At Risk, Parked, Completed or Cancelled, coloured by how that stage reads.
@@ -637,6 +643,11 @@ earlier commits used.
   the leave prompts were kept.
 
 **27 October**
+- **The dashboard tiles are clickable.** Each opens the list of what it counted, through one
+  `CATEGORY_VIEWS` table that also feeds the two folder buttons, so a count and the list behind
+  it are the same question asked once.
+- **Weekly Updates tile removed.** It counted weekly reports, not projects — the only number in
+  the row that was not comparable with the rest.
 - **Cancelled no longer counts as Completed.** It kept `closes: true` purely because Completed was
   the only other folder; it now stays in Ongoing and shows under Blocked/Delayed, where it is
   visible rather than filed away as delivered. `ensureDefaults` derives `status` from the stage on
