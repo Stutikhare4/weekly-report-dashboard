@@ -203,6 +203,35 @@ because `all` and `blocked` cut across the Ongoing/Completed folders instead of 
 the list it opens cannot disagree. The tiles are `<button>`s, not `<article>`s, so they are
 reachable by keyboard; `.stat-tile` undoes the browser's button defaults.
 
+## All projects (the editable table)
+
+The **All projects** view is a table, not a stack of cards — it is the one view meant to be read
+across projects, column by column, the way the team already reads it in their own sheet. The
+folder views stay as cards: those are read one project at a time.
+
+Columns live in `PROJECT_TABLE_COLUMNS`, in the sheet's order: #, Name, KO Date, Onboarding
+Manager, TSS, Subscription ETA, Actual Subscription Start, Actual Transfer Date. Widths are
+percentages that **must total exactly 100**, because the table is `table-layout: fixed` — a fixed
+column never grows to fit its contents. `min-width: 1120px` is what keeps a 12% date column wide
+enough for `dd/mm/yyyy` plus its picker icon; below that the wrapper scrolls.
+
+Everything except # and Name is **edited in the cell**. Saves fire on `change`, never on `input`,
+and deliberately **do not re-render the table** — rebuilding it would pull focus out of the cell
+being typed in, and the only thing on screen that depends on the value is the cell itself.
+
+Two consequences worth knowing before changing this:
+
+- The table is sorted by `createdAt`, not by last activity like the card views. Editing a cell
+  stamps `updatedAt`, so an activity sort would renumber and reorder rows under the pointer the
+  moment a cell was filled in.
+- `#categoryScreen` needs `min-width: 0`. `.content` is a grid and a grid item defaults to
+  `min-width: auto`, so without it the screen widens to the table's own min-width and hands the
+  horizontal scrollbar to the whole page. Same fix `.content` already carries, one level in.
+
+The two people columns offer `knownWebengageNames()` through a `<datalist>` — every WebEngage name
+already on any project. It suggests, it does not restrict: there is no user directory in this app,
+and adding one here would be a second source of truth for who exists.
+
 ## Projects list (folder screen)
 
 Dashboard → Ongoing / Completed opens the folder screen as a stacked list: one full-width row

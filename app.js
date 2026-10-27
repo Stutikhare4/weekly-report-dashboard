@@ -303,6 +303,7 @@ const nodes = {
   projName: document.getElementById("projName"),
   projCsm: document.getElementById("projCsm"),
   projOwner: document.getElementById("projOwner"),
+  projOnboardingManager: document.getElementById("projOnboardingManager"),
   projSalesOwner: document.getElementById("projSalesOwner"),
   projCycleWeeks: document.getElementById("projCycleWeeks"),
   projTechTeam: document.getElementById("projTechTeam"),
@@ -1265,6 +1266,7 @@ const CATEGORY_VIEWS = [
   {
     value: "all",
     eyebrow: "Projects",
+    table: true,
     title: "All projects",
     subtitle: "Every project, ongoing and completed",
     empty: "No projects yet",
@@ -1335,9 +1337,15 @@ function relativeDay(time) {
 
 function renderCategoryScreen() {
   const view = categoryView(uiState.category);
+  /* The card views lead with whatever moved most recently. The table must not: its rows are
+     numbered and edited in place, and sorting on activity would renumber and reorder them under
+     the pointer the moment a cell was filled in. It is ordered by when each project was created,
+     which never changes. */
   const projects = state.projects
     .filter((project) => view.match(project))
-    .sort((left, right) => (projectLastActivity(right) || 0) - (projectLastActivity(left) || 0));
+    .sort(view.table
+      ? (left, right) => (Date.parse(left.createdAt) || 0) - (Date.parse(right.createdAt) || 0)
+      : (left, right) => (projectLastActivity(right) || 0) - (projectLastActivity(left) || 0));
 
   if (nodes.categoryEyebrow) nodes.categoryEyebrow.textContent = view.eyebrow;
   nodes.categoryTitle.textContent = view.title;
@@ -1346,6 +1354,16 @@ function renderCategoryScreen() {
 
   const shown = Math.min(uiState.categoryShown, projects.length);
 
+  /* All projects is a table rather than a stack of cards: it is the one view meant to be read
+     across projects, column by column, the way the team already reads it in the sheet. The
+     folder views stay as cards — they are read one project at a time. */
+  if (view.table) {
+    renderProjectTable(projects.slice(0, shown), view);
+    renderCategoryPager(projects.length, shown);
+    return;
+  }
+
+  nodes.categoryList.className = "project-card-grid";
   nodes.categoryList.innerHTML = projects.length
     ? projects.slice(0, shown).map((project) => {
         const activity = projectLastActivity(project);
@@ -1372,18 +1390,124 @@ function renderCategoryScreen() {
          <p class="muted">${escapeHtml(view.hint)}</p>
        </div>`;
 
-  const more = projects.length > shown;
-  nodes.categoryMore.hidden = projects.length <= CATEGORY_PAGE_SIZE;
-  nodes.categoryCount.textContent = `Showing ${shown} of ${projects.length}`;
-  nodes.categoryLoadMore.hidden = !more;
+  renderCategoryPager(projects.length, shown);
 
   nodes.categoryList.querySelectorAll("[data-project-id]").forEach((button) => {
     button.addEventListener("click", () => openProject(button.dataset.projectId));
   });
 }
 
+function renderCategoryPager(total, shown) {
+  const more = total > shown;
+  nodes.categoryMore.hidden = total <= CATEGORY_PAGE_SIZE;
+  nodes.categoryCount.textContent = `Showing ${shown} of ${total}`;
+  nodes.categoryLoadMore.hidden = !more;
+}
+
 function projectCardRow(label, value) {
   return `<span class="project-card-row"><span>${escapeHtml(label)}</span><span>${escapeHtml(value)}</span></span>`;
+}
+
+/* ---------- All projects: the editable table ---------- */
+
+/* The columns, in the order the team's own sheet has them. `field` is the property each cell
+   reads and writes; a column without one is not editable. Widths are percentages that must add
+   up to 100, because the table is `table-layout: fixed` — a fixed column never grows to fit
+   its contents, so the total has to be exact rather than approximately right. */
+const PROJECT_TABLE_COLUMNS = [
+  { key: "index",  label: "#",                         width: "4%",  type: "index" },
+  { key: "name",   label: "Name",                      width: "20%", type: "link" },
+  { key: "ko",     label: "KO Date",                   width: "12%", type: "date", field: "kickoffDate" },
+  { key: "om",     label: "Onboarding Manager",        width: "15%", type: "person", field: "onboardingManager" },
+  { key: "tss",    label: "TSS",                       width: "13%", type: "person", field: "tss" },
+  { key: "eta",    label: "Subscription ETA",          width: "12%", type: "date", field: "subscriptionEta" },
+  { key: "start",  label: "Actual Subscription Start", width: "12%", type: "date", field: "actualSubscriptionStart" },
+  { key: "xfer",   label: "Actual Transfer Date",      width: "12%", type: "date", field: "actualTransferDate" },
+];
+
+/* Every WebEngage name already on any project, offered as suggestions on the two people
+   columns. It is a convenience, not a restriction: the inputs still take anything typed, because
+   there is no user directory in this app and inventing one here would be a second source of
+   truth for who exists. */
+function knownWebengageNames() {
+  const names = new Set();
+  state.projects.forEach((project) => {
+    projectPeople(project).webengage.forEach((person) => {
+      if (person.name) names.add(person.name);
+    });
+  });
+  return [...names].sort((left, right) => left.localeCompare(right));
+}
+
+function renderProjectTable(projects, view) {
+  if (!projects.length) {
+    nodes.categoryList.className = "project-card-grid";
+    nodes.categoryList.innerHTML = `
+      <div class="empty-state">
+        <p><strong>${escapeHtml(view.empty)}</strong></p>
+        <p class="muted">${escapeHtml(view.hint)}</p>
+      </div>`;
+    return;
+  }
+
+  const listId = "projectTablePeople";
+  const datalist = `<datalist id="${listId}">${knownWebengageNames()
+    .map((name) => `<option value="${escapeHtml(name)}"></option>`).join("")}</datalist>`;
+
+  const cell = (project, column, index) => {
+    const value = column.field ? (project[column.field] || "") : "";
+    switch (column.type) {
+      case "index":
+        return `<td class="pt-index">${index + 1}</td>`;
+      case "link":
+        return `<td class="pt-name">
+            <button type="button" class="pt-link" data-project-id="${project.id}">${escapeHtml(project.name || "Untitled project")}</button>
+          </td>`;
+      case "date":
+        return `<td><input type="date" class="pt-input${value ? "" : " is-empty"}" value="${escapeHtml(value)}"
+            data-project-id="${project.id}" data-field="${column.field}" aria-label="${escapeHtml(column.label)}" /></td>`;
+      case "person":
+        return `<td><input type="text" class="pt-input" value="${escapeHtml(value)}" list="${listId}"
+            data-project-id="${project.id}" data-field="${column.field}" aria-label="${escapeHtml(column.label)}"
+            placeholder="—" /></td>`;
+      default:
+        return "<td></td>";
+    }
+  };
+
+  nodes.categoryList.className = "project-table-wrap";
+  nodes.categoryList.innerHTML = `
+    ${datalist}
+    <table class="project-table">
+      <colgroup>${PROJECT_TABLE_COLUMNS.map((column) => `<col style="width:${column.width}" />`).join("")}</colgroup>
+      <thead>
+        <tr>${PROJECT_TABLE_COLUMNS.map((column) => `<th scope="col">${escapeHtml(column.label)}</th>`).join("")}</tr>
+      </thead>
+      <tbody>
+        ${projects.map((project, index) => `<tr>${PROJECT_TABLE_COLUMNS
+          .map((column) => cell(project, column, index)).join("")}</tr>`).join("")}
+      </tbody>
+    </table>`;
+
+  nodes.categoryList.querySelectorAll(".pt-link").forEach((button) => {
+    button.addEventListener("click", () => openProject(button.dataset.projectId));
+  });
+
+  /* Saved on change, not on every keystroke, and without re-rendering the table — rebuilding it
+     here would take the focus out of the cell being typed in. The only thing on screen that
+     depends on these values is the cell itself, which already holds what was typed. */
+  nodes.categoryList.querySelectorAll(".pt-input").forEach((input) => {
+    input.addEventListener("change", () => {
+      const project = state.projects.find((item) => item.id === input.dataset.projectId);
+      if (!project) return;
+      const next = input.value.trim();
+      if (project[input.dataset.field] === next) return;
+      project[input.dataset.field] = next;
+      input.classList.toggle("is-empty", input.type === "date" && !next);
+      stampProjectActivity(project.id);
+      saveState();
+    });
+  });
 }
 
 function renderProjectScreen() {
@@ -2073,7 +2197,7 @@ function renderTeamScreen() {
    each person covers are still counted for the badge but no longer named underneath: the lines
    repeated the project names on every row and crowded the list. Nothing is stored here: the
    names are read from every project's Basic Details, the one place to edit them. */
-const WEBENGAGE_ROLES = ["Project Owner", "Sales Owner", "CSM"];
+const WEBENGAGE_ROLES = ["Project Owner", "Onboarding Manager", "Sales Owner", "CSM"];
 
 function renderWebengageTeam() {
   if (!nodes.teamWebengage) return;
@@ -2081,7 +2205,8 @@ function renderWebengageTeam() {
   /* role -> person -> the projects where they hold that role */
   const byRole = new Map(WEBENGAGE_ROLES.map((role) => [role, new Map()]));
   state.projects.forEach((project) => {
-    [["Project Owner", project.implementationOwner], ["Sales Owner", project.salesOwner], ["CSM", project.csm]]
+    [["Project Owner", project.implementationOwner], ["Onboarding Manager", project.onboardingManager],
+      ["Sales Owner", project.salesOwner], ["CSM", project.csm]]
       .forEach(([role, raw]) => {
         const name = (raw || "").trim();
         if (!name) return;
@@ -2317,7 +2442,9 @@ function ensureDefaults(targetState) {
     if (project.vendorName === undefined) project.vendorName = "";
     if (project.crmTool === undefined) project.crmTool = "";
 
-    ["csm", "implementationOwner", "salesOwner", "kickoffDate", "goLiveDate",
+    ["csm", "implementationOwner", "salesOwner", "onboardingManager", "tss",
+      "subscriptionEta", "actualSubscriptionStart", "actualTransferDate",
+      "kickoffDate", "goLiveDate",
       "otherToolName", "cdpOtherName", "integrationRequirementOther", "accessRequiredOther", "specialRequirements",
       "knownBlockers", "dependencies", "additionalComments", "docsLink", "testEnvironment",
       "integrationNotes"].forEach((key) => {
@@ -2497,12 +2624,13 @@ function overviewFields(rows) {
 }
 
 /* Who is on a project, in the two groups the team thinks in: WebEngage staff and the client's
-   people. The WebEngage side comes from the three fields the creation wizard already captures,
-   plus anyone added for this project alone on the Team page — nothing here is entered twice. */
+   people. The WebEngage side comes from the four fields the creation wizard captures, plus
+   anyone added for this project alone on the Team page — nothing here is entered twice. */
 function projectPeople(project) {
   const webengage = [
     { name: (project.csm || "").trim(), role: "CSM" },
     { name: (project.implementationOwner || "").trim(), role: "Project Owner" },
+    { name: (project.onboardingManager || "").trim(), role: "Onboarding Manager" },
     { name: (project.salesOwner || "").trim(), role: "Sales Owner" },
     /* The Team page's "+ Add member" roster is gone, but anyone added through it before that
        is still read here, so existing data keeps working and those names stay assignable. */
@@ -2579,6 +2707,26 @@ function buildProjectDetailsHtml(project) {
       <span class="overview-value">${escapeHtml(project.name || "Untitled project")}</span>
     </div>`;
 
+  /* The commercial dates are entered in the All projects table, which is where the team reads
+     them across projects. They are shown here so the project's own page is not missing data that
+     exists — read-only, so there is one place that writes them. */
+  const commercial = [
+    ["TSS", project.tss],
+    ["Subscription ETA", project.subscriptionEta ? formatSummaryDate(project.subscriptionEta) : ""],
+    ["Actual subscription start", project.actualSubscriptionStart ? formatSummaryDate(project.actualSubscriptionStart) : ""],
+    ["Actual transfer date", project.actualTransferDate ? formatSummaryDate(project.actualTransferDate) : ""],
+  ].filter(([, value]) => value);
+
+  const commercialHtml = commercial.length
+    ? `<div class="people-group">
+         <p class="people-group-title">Subscription</p>
+         ${commercial.map(([label, value]) => `<div class="overview-field">
+            <span class="overview-label">${escapeHtml(label)}</span>
+            <span class="overview-value">${escapeHtml(value)}</span>
+          </div>`).join("")}
+       </div>`
+    : "";
+
   return `<div class="people-group">${name}</div>`
     + group("WebEngage team", webengage, "No CSM, project owner or sales owner set yet.")
     + group("Client team", client.map((poc) => ({
@@ -2586,7 +2734,8 @@ function buildProjectDetailsHtml(project) {
         /* The address belongs beside the name, not in the label column, where it read as
            though the email were the person's job title. */
         name: poc.email ? `${poc.name} · ${poc.email}` : poc.name,
-      })), "No client points of contact captured yet.");
+      })), "No client points of contact captured yet.")
+    + commercialHtml;
 }
 
 function buildIntegrationScopeHtml(project) {
@@ -2942,9 +3091,16 @@ function collectWizardData() {
     notes: fieldValue("npNotes"),
     csm: fieldValue("npCsm"),
     implementationOwner: fieldValue("npImplOwner"),
+    onboardingManager: fieldValue("npOnboardingManager"),
     clientPocs: collectRows(nodes.npPocList, ["name", "email"]),
     team: [],
     salesOwner: fieldValue("npSalesOwner"),
+    /* The remaining All-projects columns are filled in that table rather than here: they are
+       commercial dates that are not known at kickoff. */
+    tss: "",
+    subscriptionEta: "",
+    actualSubscriptionStart: "",
+    actualTransferDate: "",
     kickoffDate: fieldValue("npKickoffDate"),
     goLiveDate: computeGoLiveDate(fieldValue("npKickoffDate"), Number(fieldValue("npCycleWeeks")) || DEFAULT_CYCLE_WEEKS),
     cycleWeeks: Number(fieldValue("npCycleWeeks")) || DEFAULT_CYCLE_WEEKS,
@@ -3062,6 +3218,7 @@ function renderWizardSummary() {
       ${summaryRow("Project Name", data.name)}
       ${summaryRow("CSM", data.csm)}
       ${summaryRow("Project Owner", data.implementationOwner)}
+      ${summaryRow("Onboarding Manager", data.onboardingManager)}
       ${summaryRow("Client POCs", data.clientPocs.map(formatPoc).join(", "))}
       ${summaryRow("Sales Owner", data.salesOwner)}
       ${summaryRow("Kickoff Date", formatSummaryDate(data.kickoffDate))}
@@ -3125,6 +3282,7 @@ function renderWizardReview() {
       ["Project Name", data.name],
       ["CSM", data.csm],
       ["Project Owner", data.implementationOwner],
+      ["Onboarding Manager", data.onboardingManager],
       ["Client POCs", data.clientPocs.map(formatPoc).join(", ")],
       ["Sales Owner", data.salesOwner],
       ["Kickoff Date", formatSummaryDate(data.kickoffDate)],
@@ -4242,6 +4400,7 @@ function saveProjectDetails(event) {
   project.name = name;
   project.csm = nodes.projCsm.value.trim();
   project.implementationOwner = nodes.projOwner.value.trim();
+  project.onboardingManager = nodes.projOnboardingManager.value.trim();
   project.salesOwner = nodes.projSalesOwner.value.trim();
   project.techTeam = nodes.projTechTeam.value;
   project.vendorName = project.techTeam === "outsourced" ? nodes.projVendorName.value.trim() : "";
@@ -4300,6 +4459,7 @@ function renderProjectTimeline(project) {
   nodes.projName.value = project.name || "";
   nodes.projCsm.value = project.csm || "";
   nodes.projOwner.value = project.implementationOwner || "";
+  nodes.projOnboardingManager.value = project.onboardingManager || "";
   nodes.projSalesOwner.value = project.salesOwner || "";
   nodes.projKickoff.value = project.kickoffDate || "";
   nodes.projCycleWeeks.value = String(project.cycleWeeks || DEFAULT_CYCLE_WEEKS);
