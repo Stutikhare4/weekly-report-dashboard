@@ -217,7 +217,7 @@ p {
 .topbar-brand {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 11px;
 }
 
 .topbar-title {
@@ -480,18 +480,23 @@ p {
   backdrop-filter: blur(18px);
 }
 
+/* The same mark the sign-in screen shows, so the header and the way in agree. It was an orange
+   gradient square holding the letter S, from before the WebEngage palette. */
 .brand-mark {
-  width: 44px;
-  height: 44px;
+  width: 34px;
+  height: 34px;
+  flex: none;
   display: grid;
   place-items: center;
-  border-radius: 12px;
-  color: #08101c;
-  font-size: 1.15rem;
-  font-weight: 800;
-  font-family: inherit;
-  background: linear-gradient(135deg, #f8fafc, #fdba74);
-  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.14), 0 16px 30px rgba(249, 115, 22, 0.22);
+  border-radius: 9px;
+  color: var(--card-primary);
+  background: color-mix(in srgb, var(--card-primary) 11%, var(--surface-2));
+  border: 1px solid color-mix(in srgb, var(--card-primary) 26%, transparent);
+}
+
+.brand-mark svg {
+  width: 19px;
+  height: 19px;
 }
 
 .eyebrow {
@@ -4135,10 +4140,6 @@ small,
   line-height: 1.5;
 }
 
-/* The brand square is gone from the header — the wordmark carries it. */
-.brand-mark {
-  display: none !important;
-}
 
 
 /* Slippage from earlier weeks, shown in the accordion summary and the week modal's title.
@@ -4231,7 +4232,9 @@ small,
     <div class="app-shell">
       <header class="topbar">
         <div class="topbar-brand">
-          <div class="brand-mark">S</div>
+          <div class="brand-mark" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="m8.5 12.5 2.5 2.5 4.5-5"/></svg>
+          </div>
           <div>
             <p class="eyebrow">Weekly status</p>
             <h1 class="topbar-title">Weekly Report</h1>

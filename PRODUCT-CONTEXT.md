@@ -648,6 +648,11 @@ earlier commits used.
 - A Save button added to the week modal's header, then removed on request; change detection and
   the leave prompts were kept.
 
+**28 October**
+- **The header has a mark again** — the same indigo check-circle the sign-in screen shows. The
+  square that used to sit there held the letter S on an orange gradient, from before the WebEngage
+  palette, and had been hidden rather than restyled.
+
 **27 October**
 - **Week banners carry the week and its dates only** — "Week 5 (3rd September to 9th September) —
   last week". The phase label that used to sit between them ran to three phases joined by plus
