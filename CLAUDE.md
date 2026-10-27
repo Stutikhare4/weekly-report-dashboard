@@ -229,6 +229,41 @@ progress.
 Because of this, **ongoing + completed does not equal total.** That is the point of the All
 projects card, and why the three counts should never be presented as a breakdown of each other.
 
+## Fitting 1440×900
+
+**The page itself never scrolls.** Each `.screen` is capped at `calc(100vh - 87px)` (69px sticky
+top bar plus `.content` padding) and scrolls inside itself, with its `.card-head` / `.screen-head`
+sticky at the top of that pane. Measured at 1280×800, 1440×900 and 1920×1080, light and dark:
+zero vertical and zero horizontal page overflow on every screen.
+
+This is the honest reading of "fit everything on screen without scrolling". Templates alone is 100
+tasks across five phases — roughly 4,500px of content. No spacing pass fits that in 900px, and the
+brief also said to keep every feature and all the data, so the pane scrolls in place instead and
+nothing is hidden. How much of each screen is visible at once, with six projects and three weeks
+of tasks:
+
+| screen | visible at once |
+| --- | --- |
+| Dashboard, Calendar, Team, Projects list | 100% |
+| Settings | 95% |
+| Project Details | 79% |
+| Project Reports (the printed preview) | 64% |
+| Templates | 17% |
+
+Two of those earned their fit structurally rather than by tightening numbers, and both are worth
+keeping: the **Team** screen's role and client groups became `auto-fill` columns (they were short
+lists of one name and one pill stacked down a full-width column — 1883px for a page that now fits
+in 699px), and **Basic Details** runs its label/value pairs two abreast, since it carries more
+fields than any other card.
+
+`.screen[hidden] { display: none }` has to be restated here: `.screen` now sets `overflow`, and
+other rules give screens a display value, so without it every screen renders at once.
+
+Before changing spacing, note the density baseline: `.content` gap 14 / padding 12-18,
+`.card` padding 13-16, `.folder-card` 11-13, `.overview-card` 12-14, `.team-roster-row` 7-11,
+`.template-row` inputs 4-8. These were tuned together against the measurements above; raising one
+in isolation is what will push a screen back over.
+
 ## Dashboard cards
 
 Four full cards in a 2×2 grid, one per view in `CATEGORY_VIEWS`: Total Projects, Ongoing

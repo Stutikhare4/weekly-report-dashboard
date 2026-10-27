@@ -649,6 +649,12 @@ earlier commits used.
   the leave prompts were kept.
 
 **27 October**
+- **The whole app fits 1440×900 without a page scrollbar.** Every screen is capped to the viewport
+  and scrolls inside itself, with its heading sticky; a density pass cut the spacing throughout,
+  the Team screen's groups became columns, and Basic Details runs its fields two abreast. Nothing
+  was removed. Dashboard, Calendar, Team and the projects list now show 100% of their content at
+  once; Templates shows 17%, because 100 template tasks cannot fit 900px and scroll in place
+  instead.
 - **Cancelled is out of Ongoing too.** It had been left in Ongoing and merely flagged, on the
   grounds that Completed was the only other card. With four cards that reasoning is gone: an
   `ongoing` flag on `PROJECT_STAGES` now excludes it, so a cancelled project appears only on
