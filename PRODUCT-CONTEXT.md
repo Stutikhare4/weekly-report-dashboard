@@ -649,6 +649,9 @@ earlier commits used.
   the leave prompts were kept.
 
 **27 October**
+- **Week banners carry the week and its dates only** — "Week 5 (3rd September to 9th September) —
+  last week". The phase label that used to sit between them ran to three phases joined by plus
+  signs on a multi-phase week; the phase is still in the table's own Phase column.
 - **The report's Project summary is down to three rows** — project name, kickoff, target go-live.
   Onboarding manager, Client POC and Status were removed from all three copies of the report (the
   on-screen preview, the printed PDF and the emailed HTML), so a report never shows one thing on

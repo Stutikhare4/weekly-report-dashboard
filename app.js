@@ -1527,10 +1527,17 @@ function buildReport(projectId) {
   };
 }
 
+/* The week number, its dates, and whether it is last week or this one — nothing else. The phase
+   label used to sit between them ("Week 5 (3rd September to 9th September) — Production
+   Deployment — last week"), which on a multi-phase week ran to three phases joined by plus signs
+   and pushed the part that matters, the dates, off to the side. The phase is still on every row
+   of the table underneath, in its own column, so it is not lost.
+
+   `week.label` stays on the report model: it is what the week is, it is just not printed here. */
 function weekHeading(week) {
   const prefix = week.weekNumber ? `Week ${week.weekNumber}` : "Week";
   const tag = week.tag ? ` — ${week.tag} week` : "";
-  return `${prefix} (${week.range})${week.label ? ` — ${week.label}` : ""}${tag}`;
+  return `${prefix} (${week.range})${tag}`;
 }
 
 /* Last week first, then this one: a reader wants what was delivered before what is still in
