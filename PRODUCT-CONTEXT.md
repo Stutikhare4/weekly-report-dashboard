@@ -39,7 +39,7 @@ Everything built to date, written to be read without access to the code. It refl
 
 ## 1. What it is
 
-An internal tool for WebEngage onboarding managers (OBMs) and project owners to run client
+An internal tool for WebEngage onboarding managers (OBMs) to run client
 integration projects week by week and send the client a weekly status report.
 
 A project is created once, with a kickoff date, a cycle length (how many weeks), and the domains
@@ -302,7 +302,7 @@ Opening a project always lands here.
 - **Integration Scope** (editable in place): platforms, channels, technical team and vendor,
   historical migration, user identifier. Changing scope does **not** regenerate existing weeks —
   that would wipe entered status. Use "Add week from template" for newly added domains.
-- **Project Details** (editable form): name, CSM, project owner, onboarding manager, sales owner, kickoff, cycle
+- **Project Details** (editable form): name, CSM, onboarding manager, sales owner, kickoff, cycle
   length, technical team, vendor and notes. Target go-live is read-only, with a line saying how
   many weeks were generated and the go-live date.
 - **Timeline:** kickoff, go-live and cycle length; its Edit button opens the Project Details form.
@@ -319,7 +319,7 @@ Opened by View Report. It shows "Project Name — Weekly Report", a Back button,
 report, **Generate report (PDF)** (the browser print dialog) and **Copy HTML for email**.
 
 ### Create project wizard (3 steps)
-1. **Basic Details:** project name (required), CSM, project owner, sales owner, kickoff date,
+1. **Basic Details:** project name (required), CSM, onboarding manager, sales owner, kickoff date,
    target go-live (calculated, read-only), cycle length, technical team and vendor, client points
    of contact, notes.
 2. **Platform Integration:** platform cards (Website, Android, iOS, Web App, CRM), platform links,
@@ -662,9 +662,10 @@ earlier commits used.
   sight: a grid of inputs read as clutter, and the stripped version added nothing the cards did
   not already say. The tile now opens the same stacked card list as the other three. The four
   fields were never kept, and `ensureDefaults` has no trace of them.
-- **Onboarding Manager is a fourth WebEngage role**, alongside Project Owner, Sales Owner and CSM:
-  on the creation wizard, the project's Basic Details, and the Team page's role grouping. Added
-  with the table, kept when it was reverted.
+- **Onboarding Manager replaced Project Owner.** It went in first as a *fourth* role beside it,
+  on the basis that they were different people. A day later they turned out to be the same, so
+  `implementationOwner` was removed and its value migrated into `onboardingManager`. The WebEngage
+  roles are now Onboarding Manager, Sales Owner and CSM.
 - **The dashboard tiles are clickable.** Each opens the list of what it counted, through one
   `CATEGORY_VIEWS` table that also feeds the two folder buttons, so a count and the list behind
   it are the same question asked once.

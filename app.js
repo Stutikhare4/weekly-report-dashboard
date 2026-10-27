@@ -307,7 +307,6 @@ const nodes = {
   projCancelEdit: document.getElementById("projCancelEdit"),
   projName: document.getElementById("projName"),
   projCsm: document.getElementById("projCsm"),
-  projOwner: document.getElementById("projOwner"),
   projOnboardingManager: document.getElementById("projOnboardingManager"),
   projSalesOwner: document.getElementById("projSalesOwner"),
   projCycleWeeks: document.getElementById("projCycleWeeks"),
@@ -983,11 +982,11 @@ function progressBarHtml(percent) {
 }
 
 /* The person a project is fronted by. No avatar images exist anywhere in the app, so the
-   circle carries initials from the project owner, falling back to the CSM. */
+   circle carries initials from the onboarding manager, falling back to the CSM. */
 function projectLeadName(projectId) {
   const project = state.projects.find((item) => item.id === projectId);
   if (!project) return "";
-  return (project.implementationOwner || project.csm || "").trim();
+  return (project.onboardingManager || project.csm || "").trim();
 }
 
 function initialsFor(name) {
@@ -1519,7 +1518,7 @@ function buildReport(projectId) {
     projectStatus: project.status,
     projectNotes: project.notes || "No notes yet",
     csm: project.csm || "",
-    projectOwner: project.implementationOwner || "",
+    onboardingManager: project.onboardingManager || "",
     clientPocs: (project.clientPocs || []).map(formatPoc).filter(Boolean).join(", "),
     kickoffDate: project.kickoffDate || "",
     goLiveDate: project.goLiveDate || "",
@@ -1671,7 +1670,7 @@ function renderReport(report) {
 function buildProjectSummaryCard(report) {
   const rows = [
     ["Project name", report.projectName],
-    ["Project owner", report.projectOwner],
+    ["Onboarding manager", report.onboardingManager],
     ["Client POC", report.clientPocs],
     ["Status", formatStatus(report.projectStatus)],
     ["Kickoff", report.kickoffDate ? formatSummaryDate(report.kickoffDate) : ""],
@@ -1728,7 +1727,7 @@ function buildReportPrintHtml(report) {
 
   const summaryRows = [
     ["Project name", report.projectName],
-    ["Project owner", report.projectOwner],
+    ["Onboarding manager", report.onboardingManager],
     ["Client POC", report.clientPocs],
     ["Status", formatStatus(report.projectStatus)],
     ["Kickoff", report.kickoffDate ? formatSummaryDate(report.kickoffDate) : ""],
@@ -1804,7 +1803,7 @@ function buildReportEmailHtml(report) {
 
   const summaryRows = [
     ["Project name", report.projectName],
-    ["Project owner", report.projectOwner],
+    ["Onboarding manager", report.onboardingManager],
     ["Client POC", report.clientPocs],
     ["Status", formatStatus(report.projectStatus)],
     ["Kickoff", report.kickoffDate ? formatSummaryDate(report.kickoffDate) : ""],
@@ -2073,7 +2072,7 @@ function renderTeamScreen() {
    each person covers are still counted for the badge but no longer named underneath: the lines
    repeated the project names on every row and crowded the list. Nothing is stored here: the
    names are read from every project's Basic Details, the one place to edit them. */
-const WEBENGAGE_ROLES = ["Project Owner", "Onboarding Manager", "Sales Owner", "CSM"];
+const WEBENGAGE_ROLES = ["Onboarding Manager", "Sales Owner", "CSM"];
 
 function renderWebengageTeam() {
   if (!nodes.teamWebengage) return;
@@ -2081,8 +2080,8 @@ function renderWebengageTeam() {
   /* role -> person -> the projects where they hold that role */
   const byRole = new Map(WEBENGAGE_ROLES.map((role) => [role, new Map()]));
   state.projects.forEach((project) => {
-    [["Project Owner", project.implementationOwner], ["Onboarding Manager", project.onboardingManager],
-      ["Sales Owner", project.salesOwner], ["CSM", project.csm]]
+    [["Onboarding Manager", project.onboardingManager], ["Sales Owner", project.salesOwner],
+      ["CSM", project.csm]]
       .forEach(([role, raw]) => {
         const name = (raw || "").trim();
         if (!name) return;
@@ -2114,7 +2113,7 @@ function renderWebengageTeam() {
     .join("");
 
   nodes.teamWebengage.innerHTML = groups
-    || `<p class="muted">No CSM, project owner or sales owner set on any project yet. They are captured when a project is created, and editable under a project's Basic Details.</p>`;
+    || `<p class="muted">No CSM, onboarding manager or sales owner set on any project yet. They are captured when a project is created, and editable under a project's Basic Details.</p>`;
 }
 
 /* One section per project, headed by its name, listing that project's client points of contact.
@@ -2309,6 +2308,18 @@ function ensureDefaults(targetState) {
     });
   });
 
+  /* Project Owner and Onboarding Manager turned out to be the same person, so the two fields
+     became one. The value moves across rather than being dropped: every existing project has a
+     project owner and almost none has an onboarding manager, so deleting the field on its own
+     would have emptied the column it was being merged into.
+
+     Only fills a blank, so a project that already names an onboarding manager keeps it. */
+  targetState.projects.forEach((project) => {
+    const owner = (project.implementationOwner || "").trim();
+    if (owner && !(project.onboardingManager || "").trim()) project.onboardingManager = owner;
+    delete project.implementationOwner;
+  });
+
   targetState.projects.forEach((project) => {
     if (!Array.isArray(project.platforms)) project.platforms = [];
     if (!Array.isArray(project.builtOn)) project.builtOn = [];
@@ -2318,7 +2329,7 @@ function ensureDefaults(targetState) {
     if (project.vendorName === undefined) project.vendorName = "";
     if (project.crmTool === undefined) project.crmTool = "";
 
-    ["csm", "implementationOwner", "salesOwner", "onboardingManager", "kickoffDate", "goLiveDate",
+    ["csm", "salesOwner", "onboardingManager", "kickoffDate", "goLiveDate",
       "otherToolName", "cdpOtherName", "integrationRequirementOther", "accessRequiredOther", "specialRequirements",
       "knownBlockers", "dependencies", "additionalComments", "docsLink", "testEnvironment",
       "integrationNotes"].forEach((key) => {
@@ -2503,7 +2514,6 @@ function overviewFields(rows) {
 function projectPeople(project) {
   const webengage = [
     { name: (project.csm || "").trim(), role: "CSM" },
-    { name: (project.implementationOwner || "").trim(), role: "Project Owner" },
     { name: (project.onboardingManager || "").trim(), role: "Onboarding Manager" },
     { name: (project.salesOwner || "").trim(), role: "Sales Owner" },
     /* The Team page's "+ Add member" roster is gone, but anyone added through it before that
@@ -2519,7 +2529,7 @@ function projectPeople(project) {
 }
 
 /* The body of the Basic Details card. That card used to render nothing but two notes: the
-   project name, CSM, project owner, sales owner and client POCs were all captured by the
+   project name, CSM, onboarding manager, sales owner and client POCs were all captured by the
    wizard and stored, but visible only after clicking Edit — so the details a person had just
    typed in looked lost. The client POCs were shown, but under Integration Scope, a card about
    platforms and channels rather than people.
@@ -2582,7 +2592,7 @@ function buildProjectDetailsHtml(project) {
     </div>`;
 
   return `<div class="people-group">${name}</div>`
-    + group("WebEngage team", webengage, "No CSM, project owner or sales owner set yet.")
+    + group("WebEngage team", webengage, "No CSM, onboarding manager or sales owner set yet.")
     + group("Client team", client.map((poc) => ({
         role: "Client POC",
         /* The address belongs beside the name, not in the label column, where it read as
@@ -2943,7 +2953,6 @@ function collectWizardData() {
     status: "current", /* new projects are always Ongoing; closed via the project page */
     notes: fieldValue("npNotes"),
     csm: fieldValue("npCsm"),
-    implementationOwner: fieldValue("npImplOwner"),
     onboardingManager: fieldValue("npOnboardingManager"),
     clientPocs: collectRows(nodes.npPocList, ["name", "email"]),
     team: [],
@@ -2994,7 +3003,7 @@ function projectOwnerOptions(projectId) {
   if (!project) return { team: [], pocs: [], legacy: [] };
 
   const clean = (list) => [...new Set(list.map((name) => (name || "").trim()).filter(Boolean))];
-  /* The CSM, project owner and sales owner are on the project as much as anyone added by hand,
+  /* The CSM, onboarding manager and sales owner are on the project as much as anyone added by hand,
      so they are offered as task owners too — otherwise the people named in Basic Details could
      not be assigned any of the work. */
   const team = clean(projectPeople(project).webengage.map((person) => person.name));
@@ -3064,7 +3073,6 @@ function renderWizardSummary() {
       ${summaryGroupHead("Basic Details", 1)}
       ${summaryRow("Project Name", data.name)}
       ${summaryRow("CSM", data.csm)}
-      ${summaryRow("Project Owner", data.implementationOwner)}
       ${summaryRow("Onboarding Manager", data.onboardingManager)}
       ${summaryRow("Client POCs", data.clientPocs.map(formatPoc).join(", "))}
       ${summaryRow("Sales Owner", data.salesOwner)}
@@ -3128,7 +3136,6 @@ function renderWizardReview() {
     reviewGroup("Basic Details", 1, [
       ["Project Name", data.name],
       ["CSM", data.csm],
-      ["Project Owner", data.implementationOwner],
       ["Onboarding Manager", data.onboardingManager],
       ["Client POCs", data.clientPocs.map(formatPoc).join(", ")],
       ["Sales Owner", data.salesOwner],
@@ -4246,7 +4253,6 @@ function saveProjectDetails(event) {
 
   project.name = name;
   project.csm = nodes.projCsm.value.trim();
-  project.implementationOwner = nodes.projOwner.value.trim();
   project.onboardingManager = nodes.projOnboardingManager.value.trim();
   project.salesOwner = nodes.projSalesOwner.value.trim();
   project.techTeam = nodes.projTechTeam.value;
@@ -4305,7 +4311,6 @@ function renderProjectTimeline(project) {
 
   nodes.projName.value = project.name || "";
   nodes.projCsm.value = project.csm || "";
-  nodes.projOwner.value = project.implementationOwner || "";
   nodes.projOnboardingManager.value = project.onboardingManager || "";
   nodes.projSalesOwner.value = project.salesOwner || "";
   nodes.projKickoff.value = project.kickoffDate || "";

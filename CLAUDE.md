@@ -189,6 +189,25 @@ Three steps — Basic Details, Platform Integration, Review & Summary — inside
 whose only job was to say "done" and offer a button to where the person was already going. What
 it usefully said — how many weeks were pre-created — survives as a self-clearing banner.
 
+## There is no Project Owner
+
+Project Owner and Onboarding Manager were the same person, so the two fields are one. **The one
+that survived is `onboardingManager`** — `implementationOwner` is gone from the model, both forms,
+the wizard's review step, the Team page's role grouping, `projectPeople()`, the printed report and
+the dashboard avatar's initials.
+
+`ensureDefaults` **moves the value across** rather than deleting the field: every project had a
+project owner and almost none had an onboarding manager, so dropping the field alone would have
+emptied the one it was being merged into. It only fills a blank, so a project naming both keeps
+its onboarding manager — which does mean a differing project owner is discarded, on the grounds
+that they were asserted to be the same person. It is idempotent: once the key is deleted there is
+nothing left to move.
+
+Onboarding Manager had been added days earlier as a *fourth* role beside Project Owner, on the
+explicit basis that they were different people. If a second owner-like role is ever wanted again,
+note that `projectLeadName()` (the dashboard avatar) and `projectOwnerOptions()` (the week
+editor's owner dropdown) both read whichever field is canonical, so both move together.
+
 ## Which card a project appears on
 
 Three flags on `PROJECT_STAGES`, read by the cards rather than each card naming stages of its own:
