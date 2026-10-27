@@ -229,6 +229,24 @@ progress.
 Because of this, **ongoing + completed does not equal total.** That is the point of the All
 projects card, and why the three counts should never be presented as a breakdown of each other.
 
+## Two icon files, on purpose
+
+- **`favicon.svg`** — the browser tab, and the header's `.brand-mark` inlines the same artwork.
+  Four bars and a line rising over them on a dark rounded square. Stripped to what survives 16px:
+  no calendar, no body text.
+- **`icon.svg`** — the manifest, so the phone home screen and installed-app icon. The fuller
+  composition: a report sheet with the bar chart, a rising line, three lines of body text, a
+  purple sheet behind it and a spiral-bound calendar over the corner.
+
+They are deliberately not one file. `icon.svg` reads well at 96px and up and turns to mud at 16px,
+which is the size a tab favicon is actually drawn at.
+
+Three things move together when either changes: `ASSETS` in `sw.js` (plus a `CACHE_NAME` bump),
+the `<link rel="icon">` in `index.html`, and the data-URI replacement in `build-standalone.py` —
+that last one matches the link tag **by its exact text** and now asserts rather than silently
+leaving the standalone file pointing at a file it cannot load. The script's "external references
+remaining" line is what catches this; it should always say `none`.
+
 ## Fitting 1440×900
 
 **The page itself never scrolls.** Each `.screen` is capped at `calc(100vh - 87px)` (69px sticky

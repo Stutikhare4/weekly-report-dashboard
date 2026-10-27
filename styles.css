@@ -468,23 +468,22 @@ p {
   backdrop-filter: blur(18px);
 }
 
-/* The same mark the sign-in screen shows, so the header and the way in agree. It was an orange
-   gradient square holding the letter S, from before the WebEngage palette. */
+/* The same artwork as favicon.svg, inline so the header, the browser tab and the home screen all
+   show one mark. It carries its own dark ground, so unlike the outline glyph it replaced it needs
+   no tinted container of its own. */
 .brand-mark {
   width: 34px;
   height: 34px;
   flex: none;
-  display: grid;
-  place-items: center;
+  display: block;
   border-radius: 9px;
-  color: var(--card-primary);
-  background: color-mix(in srgb, var(--card-primary) 11%, var(--surface-2));
-  border: 1px solid color-mix(in srgb, var(--card-primary) 26%, transparent);
+  overflow: hidden;
 }
 
 .brand-mark svg {
-  width: 19px;
-  height: 19px;
+  display: block;
+  width: 100%;
+  height: 100%;
 }
 
 .eyebrow {

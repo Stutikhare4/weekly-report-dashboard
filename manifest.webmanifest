@@ -1,12 +1,12 @@
 {
-  "name": "Hi, Stuti",
-  "short_name": "Weekly App",
-  "description": "Weekly project status dashboard for multiple projects.",
+  "name": "Weekly Report",
+  "short_name": "Weekly Report",
+  "description": "Weekly project status dashboard for client integration projects.",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
-  "background_color": "#07111f",
-  "theme_color": "#07111f",
+  "background_color": "#f6f7fb",
+  "theme_color": "#5b4fe3",
   "icons": [
     {
       "src": "icon.svg",

@@ -49,12 +49,12 @@ def main():
         "demos": demos,
     }
 
-    # favicon as a data URI so the single file carries its own icon
-    icon = base64.b64encode((HERE / "icon.svg").read_bytes()).decode("ascii")
-    html = html.replace(
-        '<link rel="icon" href="icon.svg" type="image/svg+xml" />',
-        f'<link rel="icon" href="data:image/svg+xml;base64,{icon}" />',
-    )
+    # favicon as a data URI so the single file carries its own icon. favicon.svg, not icon.svg:
+    # the tab needs the mark that still reads at 16px.
+    icon = base64.b64encode((HERE / "favicon.svg").read_bytes()).decode("ascii")
+    link = '<link rel="icon" href="favicon.svg" type="image/svg+xml" />'
+    assert link in html, "the favicon link in index.html no longer matches this replacement"
+    html = html.replace(link, f'<link rel="icon" href="data:image/svg+xml;base64,{icon}" />')
 
     # a single file cannot install as a PWA, and the SW would 404 from disk
     html = html.replace('<link rel="manifest" href="manifest.webmanifest" />\n    ', "")

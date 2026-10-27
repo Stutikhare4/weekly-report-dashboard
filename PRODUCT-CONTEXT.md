@@ -649,9 +649,13 @@ earlier commits used.
   the leave prompts were kept.
 
 **28 October**
-- **The header has a mark again** — the same indigo check-circle the sign-in screen shows. The
-  square that used to sit there held the letter S on an orange gradient, from before the WebEngage
-  palette, and had been hidden rather than restyled.
+- **New artwork for the icon and the header mark** — a report sheet with a bar chart and a rising
+  line. `favicon.svg` (new) is the simplified version for the browser tab and the header's brand
+  mark; `icon.svg` keeps the fuller composition, with body text and a spiral-bound calendar, for
+  the home screen. The old `icon.svg` was orange "Hi, Stuti" artwork from before the WebEngage
+  palette, and the header's mark was a hidden square holding the letter S.
+- **The manifest said "Hi, Stuti".** Renamed to Weekly Report, with the theme colour moved from
+  `#07111f` to the indigo accent.
 
 **27 October**
 - **Week banners carry the week and its dates only** — "Week 5 (3rd September to 9th September) —

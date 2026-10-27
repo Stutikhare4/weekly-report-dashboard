@@ -1,5 +1,5 @@
-const CACHE_NAME = "weekly-dashboard-v182";
-const ASSETS = ["./", "./index.html", "./styles.css", "./plan-engine.js", "./app.js", "./week-templates.json", "./demo-data/index.json", "./demo-data/salad-days.json", "./manifest.webmanifest", "./icon.svg"];
+const CACHE_NAME = "weekly-dashboard-v183";
+const ASSETS = ["./", "./index.html", "./styles.css", "./plan-engine.js", "./app.js", "./week-templates.json", "./demo-data/index.json", "./demo-data/salad-days.json", "./manifest.webmanifest", "./icon.svg", "./favicon.svg"];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
