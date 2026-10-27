@@ -2139,25 +2139,26 @@ function renderClientTeamsByProject() {
       rows.push(`
         <tr${rule}>
           <td class="team-table-project">${name}</td>
-          <td class="team-table-name muted">—</td>
-          <td class="muted">None captured</td>
+          <td class="team-table-name muted">None captured</td>
         </tr>`);
       return;
     }
 
+    /* Names only. The address is still captured on the project and still shown on its Basic
+       Details card; this screen is for who is on which project, and a column of addresses was
+       the widest thing on it while being the least read. */
     pocs.forEach((poc, index) => {
       rows.push(`
         <tr${index === 0 ? rule : ""}>
           <td class="team-table-project">${index === 0 ? name : ""}</td>
           <td class="team-table-name">${escapeHtml(poc.name)}</td>
-          <td class="team-table-email">${poc.email ? escapeHtml(poc.email) : '<span class="muted">No email</span>'}</td>
         </tr>`);
     });
   });
 
   nodes.teamByProject.innerHTML = `
     <table class="team-table">
-      <thead><tr><th>Project</th><th>Contact</th><th>Email</th></tr></thead>
+      <thead><tr><th>Project</th><th>Contacts</th></tr></thead>
       <tbody>${rows.join("")}</tbody>
     </table>`;
 }

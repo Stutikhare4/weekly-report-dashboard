@@ -3787,7 +3787,7 @@ button {
    WebEngage side is three roles, so it takes the narrow column. */
 .team-grid {
   display: grid;
-  grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 12px;
   align-items: start;
 }
@@ -3837,10 +3837,6 @@ button {
 
 .team-table-name {
   font-weight: 600;
-}
-
-.team-table-email {
-  color: var(--card-body);
 }
 
 .team-table-count {

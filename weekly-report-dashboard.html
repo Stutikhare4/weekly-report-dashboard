@@ -3799,7 +3799,7 @@ button {
    WebEngage side is three roles, so it takes the narrow column. */
 .team-grid {
   display: grid;
-  grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 12px;
   align-items: start;
 }
@@ -3849,10 +3849,6 @@ button {
 
 .team-table-name {
   font-weight: 600;
-}
-
-.team-table-email {
-  color: var(--card-body);
 }
 
 .team-table-count {
@@ -4740,7 +4736,7 @@ small,
               <section class="wizard-section">
                 <h3 class="wizard-section-title">Client teams</h3>
                 <p class="muted small-note team-note">
-                  Each project&rsquo;s points of contact, captured when the project was created.
+                  Who is on the client side of each project. Addresses are on the project&rsquo;s own page.
                 </p>
                 <div id="teamByProject"></div>
               </section>
@@ -7097,25 +7093,26 @@ function renderClientTeamsByProject() {
       rows.push(`
         <tr${rule}>
           <td class="team-table-project">${name}</td>
-          <td class="team-table-name muted">—</td>
-          <td class="muted">None captured</td>
+          <td class="team-table-name muted">None captured</td>
         </tr>`);
       return;
     }
 
+    /* Names only. The address is still captured on the project and still shown on its Basic
+       Details card; this screen is for who is on which project, and a column of addresses was
+       the widest thing on it while being the least read. */
     pocs.forEach((poc, index) => {
       rows.push(`
         <tr${index === 0 ? rule : ""}>
           <td class="team-table-project">${index === 0 ? name : ""}</td>
           <td class="team-table-name">${escapeHtml(poc.name)}</td>
-          <td class="team-table-email">${poc.email ? escapeHtml(poc.email) : '<span class="muted">No email</span>'}</td>
         </tr>`);
     });
   });
 
   nodes.teamByProject.innerHTML = `
     <table class="team-table">
-      <thead><tr><th>Project</th><th>Contact</th><th>Email</th></tr></thead>
+      <thead><tr><th>Project</th><th>Contacts</th></tr></thead>
       <tbody>${rows.join("")}</tbody>
     </table>`;
 }

@@ -656,7 +656,9 @@ earlier commits used.
   once; Templates shows 17%, because 100 template tasks cannot fit 900px and scroll in place
   instead.
 - **The Team screen became two tables.** WebEngage Team is Role / Name / Projects, Client teams is
-  Project / Contact / Email, side by side, with each role or project named once per group. It had
+  Project / Contacts, side by side, with each role or project named once per group. Client email
+  addresses were dropped from this screen — they are still captured and still shown on the
+  project's own Basic Details card. It had
   been a bordered card per person holding a single name — 1883px of page for data that now reads
   in 427px.
 - **Cancelled is out of Ongoing too.** It had been left in Ongoing and merely flagged, on the

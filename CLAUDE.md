@@ -253,8 +253,11 @@ of tasks:
 Two of those earned their fit structurally rather than by tightening numbers, and both are worth
 keeping. **Basic Details** runs its label/value pairs two abreast, since it carries more fields
 than any other card. And the **Team** screen is two tables side by side — `#teamWebengage` is Role
-/ Name / Projects, `#teamByProject` is Project / Contact / Email, each group's label written only
-on its first row with a rule above it. Every entry on that screen is a name plus at most one other
+/ Name / Projects, `#teamByProject` is Project / Contacts, each group's label written only on its
+first row with a rule above it. Client **addresses are deliberately not on this screen**: it
+answers who is on which project, and a column of addresses was the widest thing on it while being
+the least read. They are still captured on the project and still shown on its Basic Details card,
+so nothing was lost. Every entry on that screen is a name plus at most one other
 field, so a bordered card per name made the page mostly whitespace: 1883px originally, 699px after
 it became columns of cards, **427px as tables**, against 811px of room.
 
