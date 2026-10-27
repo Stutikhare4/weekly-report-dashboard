@@ -262,8 +262,8 @@ The sidebar holds Dashboard, Project Reports, Templates, Calendar, Team and Sett
 **+ New Project** button at the bottom.
 
 ### Dashboard
-- **Four cards**, 2×2: All projects, Ongoing projects, Completed projects, Blocked / delayed
-  projects. Each shows its count, up to four projects with their week position and progress, and
+- **Four cards**, 2×2: Total Projects, Ongoing Projects, Completed Projects, Blocked / Delayed
+  Projects. Each shows its count, up to four projects with their week position and progress, and
   a "+ N more" line; the heading opens the full list and a row opens its project. On the blocked
   card each project shows its stage instead of its week. Each is tinted to match what it holds:
   purple for all projects, blue for ongoing, green for completed, red for blocked.

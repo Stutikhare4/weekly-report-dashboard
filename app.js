@@ -1263,7 +1263,7 @@ const CATEGORY_VIEWS = [
   {
     value: "all",
     eyebrow: "Projects",
-    title: "All projects",
+    title: "Total Projects",
     subtitle: "Every project, whatever its status — the only card where all of them are counted",
     empty: "No projects yet",
     hint: "Create one to get started.",
@@ -1272,7 +1272,7 @@ const CATEGORY_VIEWS = [
   {
     value: "current",
     eyebrow: "Folder",
-    title: "Ongoing projects",
+    title: "Ongoing Projects",
     subtitle: "Integrations being worked on, including any flagged At Risk or Parked",
     empty: "No ongoing projects",
     hint: "Nothing is in progress right now.",
@@ -1283,7 +1283,7 @@ const CATEGORY_VIEWS = [
   {
     value: "closed",
     eyebrow: "Folder",
-    title: "Completed projects",
+    title: "Completed Projects",
     subtitle: "Integrations that have gone live",
     empty: "No completed projects",
     hint: "Nothing has gone live yet.",
@@ -1292,7 +1292,7 @@ const CATEGORY_VIEWS = [
   {
     value: "blocked",
     eyebrow: "Flagged",
-    title: "Blocked / delayed projects",
+    title: "Blocked / Delayed Projects",
     subtitle: "Anything marked At Risk, Parked or Cancelled",
     empty: "Nothing is blocked or delayed",
     hint: "No project is At Risk, Parked or Cancelled.",

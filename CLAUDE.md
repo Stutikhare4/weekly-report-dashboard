@@ -212,8 +212,8 @@ projects card, and why the three counts should never be presented as a breakdown
 
 ## Dashboard cards
 
-Four full cards in a 2×2 grid, one per view in `CATEGORY_VIEWS`: All projects, Ongoing,
-Completed, Blocked / delayed. Each has a heading that opens the full list, a count, up to
+Four full cards in a 2×2 grid, one per view in `CATEGORY_VIEWS`: Total Projects, Ongoing
+Projects, Completed Projects, Blocked / Delayed Projects. Each has a heading that opens the full list, a count, up to
 `DASH_CARD_LIMIT` projects with their week position and progress bar, and a "+ N more" line.
 
 All of it is built in `renderDashFolderLists()` from the same `CATEGORY_VIEWS` entry, so a card's
