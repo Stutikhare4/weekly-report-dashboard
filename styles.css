@@ -3843,7 +3843,7 @@ button {
   margin-bottom: 24px;
 }
 
-/* ---------- All projects: the editable table ---------- */
+/* ---------- All projects: the table ---------- */
 
 /* `.content` is a grid, and a grid item defaults to `min-width: auto`, so it grows to its widest
    child rather than letting that child scroll. Without this the whole screen widens to the
@@ -3853,21 +3853,17 @@ button {
   min-width: 0;
 }
 
-/* The wrapper scrolls, not the page: eight columns do not fit a narrow window, and a table that
-   widens its own page hands a horizontal scrollbar to everything else on screen. */
+/* The wrapper scrolls, not the page: on a narrow window the table keeps its columns and this
+   scrolls, rather than the table widening its own page and handing a horizontal scrollbar to
+   everything else on screen. */
 .project-table-wrap {
-  margin-bottom: 24px;
+  margin: 16px 0 24px;
   overflow-x: auto;
-  border: 1px solid var(--border-soft);
-  border-radius: 10px;
-  background: var(--surface-2);
 }
 
 .project-table {
   width: 100%;
-  /* Wide enough that a 12% date column still fits dd/mm/yyyy plus its picker icon; below this
-     the wrapper scrolls rather than the dates being clipped. */
-  min-width: 1120px;
+  min-width: 760px;
   border-collapse: collapse;
   /* Fixed, so the columns keep the widths in PROJECT_TABLE_COLUMNS rather than being resized by
      whichever project has the longest name. */
@@ -3875,97 +3871,60 @@ button {
 }
 
 .project-table th {
-  position: sticky;
-  top: 0;
-  z-index: 1;
   text-align: left;
   font-size: 11px;
   font-weight: 600;
   letter-spacing: 0.04em;
   text-transform: uppercase;
   color: var(--card-label);
-  background: var(--surface-3);
-  padding: 10px 12px;
+  padding: 0 14px 10px;
   border-bottom: 1px solid var(--border);
-  /* Headers wrap onto a second line rather than being cut off: "Actual Subscription Start" read
-     as "ACTUAL SUBS..." on every width, which is the problem the sheet already has. */
-  line-height: 1.25;
-  vertical-align: bottom;
+  white-space: nowrap;
 }
 
 .project-table td {
-  padding: 4px 6px;
+  padding: 14px;
   border-bottom: 1px solid var(--border-soft);
   vertical-align: middle;
-  font-size: 13px;
-}
-
-.project-table tbody tr:last-child td { border-bottom: 0; }
-.project-table tbody tr:hover td { background: var(--card-hover); }
-
-.project-table .pt-index {
-  padding-left: 12px;
-  color: var(--card-label);
-  font-variant-numeric: tabular-nums;
-}
-
-.project-table .pt-name { padding-left: 6px; }
-
-.pt-link {
-  width: 100%;
-  padding: 6px;
-  border: 0;
-  border-radius: 6px;
-  background: none;
-  font: inherit;
-  font-weight: 600;
+  font-size: 13.5px;
   color: var(--card-value);
-  text-align: left;
-  cursor: pointer;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.pt-link:hover { color: var(--card-primary); text-decoration: underline; }
-.pt-link:focus-visible { outline: 2px solid var(--card-primary); outline-offset: -2px; }
+.project-table tbody tr:last-child td { border-bottom: 0; }
 
-/* Cells are edited in place, so each input has to read as a cell until it is used: no border or
-   fill of its own, and the full width of the column so the whole cell is the hit area. */
-.pt-input {
-  width: 100%;
-  padding: 6px 8px;
-  border: 1px solid transparent;
-  border-radius: 6px;
-  background: none;
-  font: inherit;
-  font-size: 13px;
-  color: var(--card-value);
-  min-width: 0;
-}
-
-.pt-input:hover { border-color: var(--border); }
-
-.pt-input:focus {
-  outline: none;
-  border-color: var(--card-primary);
-  background: var(--surface-1);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--card-primary) 18%, transparent);
-}
-
-/* An empty date input still prints dd/mm/yyyy, which reads as noise down a column of blanks.
-   It comes back as soon as the cell is hovered or focused. `:placeholder-shown` does not match a
-   date input, so emptiness is carried on a class the renderer keeps in step. */
-.pt-input.is-empty:not(:focus):not(:hover)::-webkit-datetime-edit {
-  color: transparent;
-}
-
-.pt-input[type="date"]::-webkit-calendar-picker-indicator {
-  opacity: 0.45;
+/* The whole row is the target, so it has to look like one. */
+.project-table tbody tr {
   cursor: pointer;
+  transition: background 120ms ease;
 }
 
-.pt-input[type="date"]:hover::-webkit-calendar-picker-indicator { opacity: 0.8; }
+.project-table tbody tr:hover td { background: var(--card-hover); }
+
+.project-table tbody tr:focus-visible {
+  outline: 2px solid var(--card-primary);
+  outline-offset: -2px;
+}
+
+.project-table .pt-index {
+  text-align: right;
+  padding-right: 16px;
+  color: var(--card-label);
+  font-variant-numeric: tabular-nums;
+}
+
+.project-table .pt-name {
+  font-weight: 600;
+}
+
+.project-table .pt-muted { color: var(--card-body); }
+.project-table .pt-date { font-variant-numeric: tabular-nums; }
+
+/* An absent date or domain reads as a quiet dash rather than an empty cell, which otherwise
+   looks like the row failed to render. */
+.pt-blank { color: var(--card-label); opacity: 0.6; }
 
 .project-card {
   width: 100%;

@@ -1408,35 +1408,52 @@ function projectCardRow(label, value) {
   return `<span class="project-card-row"><span>${escapeHtml(label)}</span><span>${escapeHtml(value)}</span></span>`;
 }
 
-/* ---------- All projects: the editable table ---------- */
+/* ---------- All projects: the table ---------- */
 
-/* The columns, in the order the team's own sheet has them. `field` is the property each cell
-   reads and writes; a column without one is not editable. Widths are percentages that must add
-   up to 100, because the table is `table-layout: fixed` — a fixed column never grows to fit
-   its contents, so the total has to be exact rather than approximately right. */
+/* The columns of the All projects table. Widths are percentages that must add up to 100,
+   because the table is `table-layout: fixed` — a fixed column never grows to fit its contents,
+   so the total has to be exact rather than approximately right.
+
+   Every column reads something the project already has. The table does not edit: it is read
+   across projects, and a row opens the project where all of this is edited in one place. An
+   earlier version put a text or date input in each cell, which made eight columns of picker
+   icons and read as clutter rather than as a list. */
 const PROJECT_TABLE_COLUMNS = [
-  { key: "index",  label: "#",                         width: "4%",  type: "index" },
-  { key: "name",   label: "Name",                      width: "20%", type: "link" },
-  { key: "ko",     label: "KO Date",                   width: "12%", type: "date", field: "kickoffDate" },
-  { key: "om",     label: "Onboarding Manager",        width: "15%", type: "person", field: "onboardingManager" },
-  { key: "tss",    label: "TSS",                       width: "13%", type: "person", field: "tss" },
-  { key: "eta",    label: "Subscription ETA",          width: "12%", type: "date", field: "subscriptionEta" },
-  { key: "start",  label: "Actual Subscription Start", width: "12%", type: "date", field: "actualSubscriptionStart" },
-  { key: "xfer",   label: "Actual Transfer Date",      width: "12%", type: "date", field: "actualTransferDate" },
+  { key: "index",  label: "#",              width: "5%",  align: "right" },
+  { key: "name",   label: "Project name",   width: "26%" },
+  { key: "domains", label: "Domains",       width: "19%" },
+  { key: "weeks",  label: "Duration",       width: "11%" },
+  { key: "ko",     label: "Kickoff date",   width: "13%" },
+  { key: "golive", label: "Go live date",   width: "13%" },
+  { key: "stage",  label: "Status",         width: "13%" },
 ];
 
-/* Every WebEngage name already on any project, offered as suggestions on the two people
-   columns. It is a convenience, not a restriction: the inputs still take anything typed, because
-   there is no user directory in this app and inventing one here would be a second source of
-   truth for who exists. */
-function knownWebengageNames() {
-  const names = new Set();
-  state.projects.forEach((project) => {
-    projectPeople(project).webengage.forEach((person) => {
-      if (person.name) names.add(person.name);
-    });
-  });
-  return [...names].sort((left, right) => left.localeCompare(right));
+function projectTableCell(project, column, index) {
+  const text = (value, extra = "") =>
+    `<td class="${extra}">${value ? escapeHtml(value) : '<span class="pt-blank">—</span>'}</td>`;
+
+  switch (column.key) {
+    case "index":
+      return `<td class="pt-index">${index + 1}</td>`;
+    case "name":
+      return `<td class="pt-name">${escapeHtml(project.name || "Untitled project")}</td>`;
+    case "domains":
+      return text((project.platforms || []).map(platformLabel).join(", "), "pt-muted");
+    case "weeks":
+      return text(`${project.cycleWeeks || DEFAULT_CYCLE_WEEKS} weeks`, "pt-muted");
+    case "ko":
+      return text(project.kickoffDate ? formatSummaryDate(project.kickoffDate) : "", "pt-date");
+    case "golive":
+      return text(project.goLiveDate ? formatSummaryDate(project.goLiveDate) : "", "pt-date");
+    case "stage": {
+      const stage = projectStage(project);
+      return `<td><span class="project-card-status tone-${stageTone(stage)}">
+          <span class="project-card-dot" aria-hidden="true"></span>${escapeHtml(stageLabel(stage))}
+        </span></td>`;
+    }
+    default:
+      return "<td></td>";
+  }
 }
 
 function renderProjectTable(projects, view) {
@@ -1450,62 +1467,35 @@ function renderProjectTable(projects, view) {
     return;
   }
 
-  const listId = "projectTablePeople";
-  const datalist = `<datalist id="${listId}">${knownWebengageNames()
-    .map((name) => `<option value="${escapeHtml(name)}"></option>`).join("")}</datalist>`;
-
-  const cell = (project, column, index) => {
-    const value = column.field ? (project[column.field] || "") : "";
-    switch (column.type) {
-      case "index":
-        return `<td class="pt-index">${index + 1}</td>`;
-      case "link":
-        return `<td class="pt-name">
-            <button type="button" class="pt-link" data-project-id="${project.id}">${escapeHtml(project.name || "Untitled project")}</button>
-          </td>`;
-      case "date":
-        return `<td><input type="date" class="pt-input${value ? "" : " is-empty"}" value="${escapeHtml(value)}"
-            data-project-id="${project.id}" data-field="${column.field}" aria-label="${escapeHtml(column.label)}" /></td>`;
-      case "person":
-        return `<td><input type="text" class="pt-input" value="${escapeHtml(value)}" list="${listId}"
-            data-project-id="${project.id}" data-field="${column.field}" aria-label="${escapeHtml(column.label)}"
-            placeholder="—" /></td>`;
-      default:
-        return "<td></td>";
-    }
-  };
-
   nodes.categoryList.className = "project-table-wrap";
   nodes.categoryList.innerHTML = `
-    ${datalist}
     <table class="project-table">
       <colgroup>${PROJECT_TABLE_COLUMNS.map((column) => `<col style="width:${column.width}" />`).join("")}</colgroup>
       <thead>
-        <tr>${PROJECT_TABLE_COLUMNS.map((column) => `<th scope="col">${escapeHtml(column.label)}</th>`).join("")}</tr>
+        <tr>${PROJECT_TABLE_COLUMNS
+          .map((column) => `<th scope="col" class="${column.align === "right" ? "pt-index" : ""}">${escapeHtml(column.label)}</th>`)
+          .join("")}</tr>
       </thead>
       <tbody>
-        ${projects.map((project, index) => `<tr>${PROJECT_TABLE_COLUMNS
-          .map((column) => cell(project, column, index)).join("")}</tr>`).join("")}
+        ${projects.map((project, index) => `
+          <tr tabindex="0" role="button" data-project-id="${project.id}"
+              aria-label="Open ${escapeHtml(project.name || "Untitled project")}">
+            ${PROJECT_TABLE_COLUMNS.map((column) => projectTableCell(project, column, index)).join("")}
+          </tr>`).join("")}
       </tbody>
     </table>`;
 
-  nodes.categoryList.querySelectorAll(".pt-link").forEach((button) => {
-    button.addEventListener("click", () => openProject(button.dataset.projectId));
-  });
-
-  /* Saved on change, not on every keystroke, and without re-rendering the table — rebuilding it
-     here would take the focus out of the cell being typed in. The only thing on screen that
-     depends on these values is the cell itself, which already holds what was typed. */
-  nodes.categoryList.querySelectorAll(".pt-input").forEach((input) => {
-    input.addEventListener("change", () => {
-      const project = state.projects.find((item) => item.id === input.dataset.projectId);
-      if (!project) return;
-      const next = input.value.trim();
-      if (project[input.dataset.field] === next) return;
-      project[input.dataset.field] = next;
-      input.classList.toggle("is-empty", input.type === "date" && !next);
-      stampProjectActivity(project.id);
-      saveState();
+  /* The whole row opens the project, rather than only the name: in a table the row is what the
+     eye and the pointer both treat as the thing. Rows take focus and Enter so that still holds
+     on a keyboard. */
+  nodes.categoryList.querySelectorAll("tr[data-project-id]").forEach((row) => {
+    const open = () => openProject(row.dataset.projectId);
+    row.addEventListener("click", open);
+    row.addEventListener("keydown", (event) => {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        open();
+      }
     });
   });
 }
@@ -2442,14 +2432,19 @@ function ensureDefaults(targetState) {
     if (project.vendorName === undefined) project.vendorName = "";
     if (project.crmTool === undefined) project.crmTool = "";
 
-    ["csm", "implementationOwner", "salesOwner", "onboardingManager", "tss",
-      "subscriptionEta", "actualSubscriptionStart", "actualTransferDate",
+    ["csm", "implementationOwner", "salesOwner", "onboardingManager",
       "kickoffDate", "goLiveDate",
       "otherToolName", "cdpOtherName", "integrationRequirementOther", "accessRequiredOther", "specialRequirements",
       "knownBlockers", "dependencies", "additionalComments", "docsLink", "testEnvironment",
       "integrationNotes"].forEach((key) => {
       if (project[key] === undefined) project[key] = "";
     });
+
+    /* Added for an eight-column All projects table, then dropped with it when the table was cut
+       back to what the project already has. Deleted rather than ignored, so a stored project does
+       not carry keys nothing reads. */
+    ["tss", "subscriptionEta", "actualSubscriptionStart", "actualTransferDate"]
+      .forEach((key) => { delete project[key]; });
 
     if (project.isDraft === undefined) project.isDraft = false;
     if (!Number.isFinite(project.cycleWeeks)) project.cycleWeeks = DEFAULT_CYCLE_WEEKS;
@@ -2707,26 +2702,6 @@ function buildProjectDetailsHtml(project) {
       <span class="overview-value">${escapeHtml(project.name || "Untitled project")}</span>
     </div>`;
 
-  /* The commercial dates are entered in the All projects table, which is where the team reads
-     them across projects. They are shown here so the project's own page is not missing data that
-     exists — read-only, so there is one place that writes them. */
-  const commercial = [
-    ["TSS", project.tss],
-    ["Subscription ETA", project.subscriptionEta ? formatSummaryDate(project.subscriptionEta) : ""],
-    ["Actual subscription start", project.actualSubscriptionStart ? formatSummaryDate(project.actualSubscriptionStart) : ""],
-    ["Actual transfer date", project.actualTransferDate ? formatSummaryDate(project.actualTransferDate) : ""],
-  ].filter(([, value]) => value);
-
-  const commercialHtml = commercial.length
-    ? `<div class="people-group">
-         <p class="people-group-title">Subscription</p>
-         ${commercial.map(([label, value]) => `<div class="overview-field">
-            <span class="overview-label">${escapeHtml(label)}</span>
-            <span class="overview-value">${escapeHtml(value)}</span>
-          </div>`).join("")}
-       </div>`
-    : "";
-
   return `<div class="people-group">${name}</div>`
     + group("WebEngage team", webengage, "No CSM, project owner or sales owner set yet.")
     + group("Client team", client.map((poc) => ({
@@ -2734,8 +2709,7 @@ function buildProjectDetailsHtml(project) {
         /* The address belongs beside the name, not in the label column, where it read as
            though the email were the person's job title. */
         name: poc.email ? `${poc.name} · ${poc.email}` : poc.name,
-      })), "No client points of contact captured yet.")
-    + commercialHtml;
+      })), "No client points of contact captured yet.");
 }
 
 function buildIntegrationScopeHtml(project) {
@@ -3095,12 +3069,6 @@ function collectWizardData() {
     clientPocs: collectRows(nodes.npPocList, ["name", "email"]),
     team: [],
     salesOwner: fieldValue("npSalesOwner"),
-    /* The remaining All-projects columns are filled in that table rather than here: they are
-       commercial dates that are not known at kickoff. */
-    tss: "",
-    subscriptionEta: "",
-    actualSubscriptionStart: "",
-    actualTransferDate: "",
     kickoffDate: fieldValue("npKickoffDate"),
     goLiveDate: computeGoLiveDate(fieldValue("npKickoffDate"), Number(fieldValue("npCycleWeeks")) || DEFAULT_CYCLE_WEEKS),
     cycleWeeks: Number(fieldValue("npCycleWeeks")) || DEFAULT_CYCLE_WEEKS,

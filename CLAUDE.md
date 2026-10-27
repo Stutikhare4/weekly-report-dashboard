@@ -203,34 +203,31 @@ because `all` and `blocked` cut across the Ongoing/Completed folders instead of 
 the list it opens cannot disagree. The tiles are `<button>`s, not `<article>`s, so they are
 reachable by keyboard; `.stat-tile` undoes the browser's button defaults.
 
-## All projects (the editable table)
+## All projects (the table)
 
 The **All projects** view is a table, not a stack of cards — it is the one view meant to be read
-across projects, column by column, the way the team already reads it in their own sheet. The
-folder views stay as cards: those are read one project at a time.
+across projects, column by column. The folder views stay as cards: those are read one project at
+a time.
 
-Columns live in `PROJECT_TABLE_COLUMNS`, in the sheet's order: #, Name, KO Date, Onboarding
-Manager, TSS, Subscription ETA, Actual Subscription Start, Actual Transfer Date. Widths are
-percentages that **must total exactly 100**, because the table is `table-layout: fixed` — a fixed
-column never grows to fit its contents. `min-width: 1120px` is what keeps a 12% date column wide
-enough for `dd/mm/yyyy` plus its picker icon; below that the wrapper scrolls.
+Columns live in `PROJECT_TABLE_COLUMNS`: #, Project name, Domains, Duration, Kickoff date, Go
+live date, Status. Widths are percentages that **must total exactly 100**, because the table is
+`table-layout: fixed` — a fixed column never grows to fit its contents.
 
-Everything except # and Name is **edited in the cell**. Saves fire on `change`, never on `input`,
-and deliberately **do not re-render the table** — rebuilding it would pull focus out of the cell
-being typed in, and the only thing on screen that depends on the value is the cell itself.
+**The table does not edit.** Every column reads something the project already has, and the whole
+row opens the project, where all of it is edited in one place. An earlier version added four
+fields of its own (TSS, Subscription ETA, Actual Subscription Start, Actual Transfer Date) with a
+text or date input in every cell; eight columns of picker icons read as clutter rather than as a
+list, and the four fields were dropped with it. `ensureDefaults` deletes those keys from anything
+that stored them, so no project carries data nothing reads. Onboarding Manager stayed, as a
+WebEngage role rather than a column.
 
-Two consequences worth knowing before changing this:
+Two things to keep in mind before changing this:
 
-- The table is sorted by `createdAt`, not by last activity like the card views. Editing a cell
-  stamps `updatedAt`, so an activity sort would renumber and reorder rows under the pointer the
-  moment a cell was filled in.
+- The table is sorted by `createdAt`, not by last activity like the card views, so the row
+  numbers hold still.
 - `#categoryScreen` needs `min-width: 0`. `.content` is a grid and a grid item defaults to
   `min-width: auto`, so without it the screen widens to the table's own min-width and hands the
   horizontal scrollbar to the whole page. Same fix `.content` already carries, one level in.
-
-The two people columns offer `knownWebengageNames()` through a `<datalist>` — every WebEngage name
-already on any project. It suggests, it does not restrict: there is no user directory in this app,
-and adding one here would be a second source of truth for who exists.
 
 ## Projects list (folder screen)
 
