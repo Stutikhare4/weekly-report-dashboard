@@ -256,7 +256,6 @@ const STATUS_FILL = {
 
 const nodes = {
   headerDisplayName: document.getElementById("headerDisplayName"),
-  headerAvatar: document.getElementById("headerAvatar"),
   themeToggle: document.getElementById("themeToggle"),
   searchInput: document.getElementById("searchInput"),
   searchDropdown: document.getElementById("searchDropdown"),
@@ -1147,7 +1146,6 @@ function renderDashFolderLists() {
 
 function renderHeader() {
   nodes.headerDisplayName.textContent = state.settings.displayName;
-  nodes.headerAvatar.textContent = state.settings.displayName.trim().charAt(0).toUpperCase() || "?";
 
   const alerts = computeAlertItems();
   nodes.notifBadge.textContent = `${alerts.length}`;

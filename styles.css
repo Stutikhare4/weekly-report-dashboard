@@ -430,23 +430,14 @@ p {
 .user-widget {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 6px 10px 6px 6px;
+  gap: 8px;
+  /* Was left-light (6px) to sit tight against the avatar circle; with only the name left it
+     wants even padding. */
+  padding: 7px 12px;
   border-radius: 999px;
   background: rgba(148, 163, 184, 0.1);
   border: 1px solid rgba(148, 163, 184, 0.16);
   color: var(--text);
-}
-
-.avatar {
-  width: 34px;
-  height: 34px;
-  border-radius: 50%;
-  display: grid;
-  place-items: center;
-  background: linear-gradient(135deg, #f8fafc, #fdba74);
-  color: #08101c;
-  font-weight: 800;
 }
 
 .user-widget-text {
