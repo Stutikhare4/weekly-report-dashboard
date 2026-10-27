@@ -106,7 +106,7 @@ task appears at every cycle length** and the dates are the sheet's own. A week w
 would show as empty, which would reflect a real gap in the plan rather than a bug; with the
 current sheet no cycle from 2 to 12 weeks has an empty week.
 
-### Weeks start on the kickoff date
+### Weeks start on the kickoff date, then go their own way
 
 **Week 1 begins on the project's kickoff date, not on the Monday of the calendar week it falls
 in.** A project starting Wednesday 30 September runs Wed–Tue: 30 Sep–6 Oct, 7–13 Oct, 14–20 Oct,
@@ -114,8 +114,8 @@ in.** A project starting Wednesday 30 September runs Wed–Tue: 30 Sep–6 Oct, 
 it starts on, and `computeGoLiveDate()` is kickoff + weeks×7 − 1, which already agreed.
 
 Five places anchored weeks and all five now use the kickoff: `generateWeeklyPlan`, the first week
-of "+ Add week from template" and of "+ New report", and the re-dating done when the kickoff or
-cycle length changes. `mondayOnOrBefore` and `mondayOnOrAfter` were deleted with the last of
+of "+ Add week from template" and of "+ New report", and the re-dating done when the cycle length
+changes. `mondayOnOrBefore` and `mondayOnOrAfter` were deleted with the last of
 their callers; `tools/generate-weekly-report.js` anchors identically, since the whole point of
 the shared engine is that the app and the generated artifacts cannot disagree.
 
@@ -126,10 +126,27 @@ anchor, `lead` pushed an N+5 task into week 2 for any project starting Wednesday
 and N+10 now land in weeks 1 and 2 on their own, so the pin states intent rather than correcting
 for the calendar — verified, SDK Set Up → week 1 and User Tracking → week 2 on a Wednesday start.
 
-`alignWeeksToKickoff()` re-dates projects created under the old rule, once, on load, and says so
-through a banner. It moves each week to kickoff + index×7, drags each task's `startDate` and
-`dueDate` along, and refreshes go-live. A Monday kickoff is already aligned and is skipped, which
-is why it is safe to run on every load — it is idempotent by construction.
+#### `kickoffDate` seeds the schedule; it does not own it
+
+The kickoff is **the date of the kickoff call**, and the report prints it as that. It seeds week 1
+when a project is created, and after that the two are allowed to diverge: a call on the 15th with
+delivery beginning on the 19th is an ordinary thing to want to record, and correcting the call
+date months later must not drag a plan people have been working to back onto it.
+
+So **nothing schedules off `project.kickoffDate` any more.** `projectAnchorDate(project)` returns
+the first week's `weekStart`, falling back to the kickoff only when a project has no weeks yet,
+and every calculation reads that: `computeProjectGoLive`, the go-live preview on the details form,
+and the re-dating in `saveProjectDetails`. Saving the details form treats only a **cycle-length**
+change as a re-date; editing the kickoff field writes `kickoffDate` and touches nothing else.
+
+Week dates are moved in one place only, the week editor on Project Reports, where changing a
+week's start cascades the same offset onto every later week via `shiftWeeksFrom()`. That function
+deliberately leaves `kickoffDate` alone.
+
+An earlier `alignWeeksToKickoff()` migration, which re-dated every week to kickoff + index×7 on
+load, has been **deleted**. It was the direct cause of a cascade appearing to revert on reload,
+and under the rule above it is not merely unnecessary but wrong: it would erase exactly the
+divergence the feature exists to allow.
 
 Tasks are filtered to the project twice: by `platforms` (domain) and by `channels`. Channel
 filtering only applies once the project has chosen channels, so an early draft still gets the

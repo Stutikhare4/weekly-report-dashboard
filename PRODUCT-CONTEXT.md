@@ -221,17 +221,24 @@ At creation the tool:
 
 **Week 1 starts on the kickoff date itself** — not the Monday of that calendar week. A project
 starting Wednesday 30 September runs 30 Sep–6 Oct, 7–13 Oct, 14–20 Oct, 21–27 Oct, 28 Oct–3 Nov,
-with go-live on 3 November. This holds for every starting weekday, and projects created under the
-old Monday-aligned rule are re-dated once, with a banner saying so.
+with go-live on 3 November. This holds for every starting weekday.
+
+That is where the kickoff's involvement ends. **The kickoff is the date of the kickoff call**: it
+seeds week 1 at creation and is printed on the report, but it does not own the schedule
+afterwards. Week dates are changed per week on Project Reports, where a new start cascades the
+same offset onto every later week, and the kickoff stays where it is. Equally, correcting the
+kickoff does not move any week. So a call on 15 October with delivery running from the 19th is
+recordable, and the report shows both truthfully.
 
 **A cycle length the sheet doesn't cover is interpolated** between the two nearest tabs — 8 weeks
 sits between the 6- and 12-week plans — so new cycle lengths need no edits. **Every task appears
 at every cycle length**, and Go Live is never dropped. Verified for every cycle from 2 to 12
 weeks: all 100 tasks placed, no empty weeks, phases in order.
 
-The **target go-live** is calculated, never typed. It is whichever is later: kickoff plus the
-cycle length, or the last task's due date. Changing the kickoff or the cycle length re-dates every
-weekly report. A task whose planned date moves into another week is re-filed into that week.
+The **target go-live** is calculated, never typed. It is whichever is later: the first week's
+start plus the cycle length, or the last task's due date. Changing the cycle length re-dates every
+weekly report; changing the kickoff re-dates nothing. A task whose planned date moves into another
+week is re-filed into that week.
 
 `plan-engine.js` holds these rules and is used by both the browser and the Node tools, so the app
 and any generated artifact cannot disagree.
@@ -623,6 +630,16 @@ earlier commits used.
 **16 September**
 - A Save button added to the week modal's header, then removed on request; change detection and
   the leave prompts were kept.
+
+**27 October**
+- **Kickoff and schedule decoupled.** Editing the kickoff on the details form used to re-date
+  every week back to it, so a cascade done in the week editor was undone the next time anyone
+  touched Basic Details — and a project could not record a call on the 15th with delivery from
+  the 19th. Now `projectAnchorDate()` (the first week's start) drives go-live and every re-date,
+  only a cycle-length change re-dates weeks, and the report prints the kickoff as the call date
+  above whatever the weeks actually are.
+- **`alignWeeksToKickoff()` deleted.** The one-shot migration re-ran on every load and was what
+  made cascaded week dates appear to revert on reload.
 
 **26 October**
 - **Theme matched to the WebEngage/Atlas studio:** indigo accent instead of orange, a dark navy

@@ -4305,7 +4305,7 @@ small,
                     <button type="button" id="projEditToggle" class="overview-edit">Edit</button>
                   </div>
                   <div id="projectDetailsFields" class="overview-fields"></div>
-                  <p class="muted" id="projDetailsNote">Go-live is calculated from kickoff and cycle length. Changing either re-dates every weekly report.</p>
+                  <p class="muted" id="projDetailsNote">The kickoff is the date of the kickoff call. Week dates are set per week on the Project Reports screen — changing the kickoff here does not move them.</p>
                   <p class="overview-highlight" id="projTimelineNote"></p>
 
                   <form id="projDetailsForm" class="timeline-fields" hidden>
@@ -5370,10 +5370,12 @@ function boot() {
   nodes.projTechTeam.addEventListener("change", () => {
     nodes.projVendorField.hidden = nodes.projTechTeam.value !== "outsourced";
   });
-  [nodes.projKickoff, nodes.projCycleWeeks].forEach((node) => {
-    node.addEventListener("change", () => {
-      nodes.projGoLive.value = computeGoLiveDate(nodes.projKickoff.value, nodes.projCycleWeeks.value);
-    });
+  /* Only the cycle length moves go-live now; the kickoff is the call date and schedules
+     nothing. */
+  nodes.projCycleWeeks.addEventListener("change", () => {
+    const project = state.projects.find((item) => item.id === uiState.projectId);
+    const anchor = project ? projectAnchorDate(project) : nodes.projKickoff.value;
+    nodes.projGoLive.value = computeGoLiveDate(anchor, nodes.projCycleWeeks.value);
   });
   ["npKickoffDate", "npCycleWeeks"].forEach((id) => {
     const node = document.getElementById(id);
@@ -5491,18 +5493,14 @@ renderDemoDataOptions();
     });
   }
 
-  /* Before the sweep, because week boundaries decide which weeks have ended. */
-  const realigned = alignWeeksToKickoff();
-  if (realigned) {
-    showAppInfo(`${realigned} project${realigned === 1 ? "" : "s"} re-dated: weeks now start on the project's own kickoff date rather than the Monday of that week.`);
-  }
-
   /* On load as well as on opening the reports screen: a week can run out while nobody is
      looking, and the work that outlived it should be on the next week's list by the time
      anyone reads the dashboard. */
   const carried = carryForwardOverdueTasks();
-  if (realigned || carried) renderAll();
-  if (carried) announceCarriedForward(carried);
+  if (carried) {
+    renderAll();
+    announceCarriedForward(carried);
+  }
 }
 
 /* Stale either because the version moved on, or because the stored plan predates a field the
@@ -8989,8 +8987,9 @@ function toggleProjectDetails(editing) {
   if (!editing) renderProjectTimeline(state.projects.find((item) => item.id === uiState.projectId));
 }
 
-/* Saves the whole details block. Changing kickoff or cycle length re-dates every weekly
-   report for the project, so the plan stays consistent with the timeline. */
+/* Saves the whole details block. Changing the cycle length re-dates every weekly report for
+   the project, so the plan stays consistent with the timeline. The kickoff is the call date and
+   re-dates nothing. */
 function saveProjectDetails(event) {
   event.preventDefault();
 
@@ -9005,7 +9004,10 @@ function saveProjectDetails(event) {
 
   const kickoff = nodes.projKickoff.value;
   const weeks = Number(nodes.projCycleWeeks.value) || DEFAULT_CYCLE_WEEKS;
-  const datesChanged = kickoff !== project.kickoffDate || weeks !== project.cycleWeeks;
+  /* Only a cycle-length change re-dates anything now. The kickoff is the call date: correcting
+     it must not drag the weekly plan back to it, which is the whole point of letting the two
+     differ. Week dates are moved by the week editor, which cascades. */
+  const datesChanged = weeks !== project.cycleWeeks;
 
   project.name = name;
   project.csm = nodes.projCsm.value.trim();
@@ -9020,10 +9022,11 @@ function saveProjectDetails(event) {
     .filter((item) => item.projectId === project.id)
     .sort((left, right) => left.weekStart.localeCompare(right.weekStart));
 
-  if (datesChanged && kickoff && updates.length) {
-    /* Weeks run from the kickoff date, so re-dating starts there rather than at a Monday. */
+  const anchor = projectAnchorDate(project);
+  if (datesChanged && anchor && updates.length) {
+    /* Re-dated from where the weeks already start, not from the kickoff. */
     updates.forEach((update, index) => {
-      update.weekStart = toInputDate(shiftDays(new Date(`${kickoff}T00:00:00`), index * 7));
+      update.weekStart = toInputDate(shiftDays(new Date(`${anchor}T00:00:00`), index * 7));
       update.weekRange = formatWeekRange(update.weekStart);
     });
   }
@@ -9033,7 +9036,7 @@ function saveProjectDetails(event) {
   });
 
   /* Re-dating the weeks moves every task with them, then go-live follows the task ends. */
-  if (datesChanged && kickoff) {
+  if (datesChanged && anchor) {
     state.updates.filter((item) => item.projectId === project.id).forEach((update) => {
       (update.tasks || []).forEach((task) => {
         task.startDate = update.weekStart;
@@ -9049,7 +9052,7 @@ function saveProjectDetails(event) {
   toggleProjectDetails(false);
   renderAll();
   showAppSuccess(datesChanged && updates.length
-    ? `Details saved. ${updates.length} week(s) re-dated from ${formatSummaryDate(kickoff)}.`
+    ? `Details saved. ${updates.length} week(s) re-dated from ${formatSummaryDate(anchor)}.`
     : "Project details saved.");
 }
 
@@ -9070,7 +9073,7 @@ function renderProjectTimeline(project) {
   nodes.projSalesOwner.value = project.salesOwner || "";
   nodes.projKickoff.value = project.kickoffDate || "";
   nodes.projCycleWeeks.value = String(project.cycleWeeks || DEFAULT_CYCLE_WEEKS);
-  nodes.projGoLive.value = project.goLiveDate || computeGoLiveDate(project.kickoffDate, project.cycleWeeks);
+  nodes.projGoLive.value = project.goLiveDate || computeGoLiveDate(projectAnchorDate(project), project.cycleWeeks);
   nodes.projTechTeam.value = project.techTeam || "in-house";
   nodes.projVendorField.hidden = nodes.projTechTeam.value !== "outsourced";
   nodes.projVendorName.value = project.vendorName || "";
@@ -9155,9 +9158,18 @@ function taskDueDate(startValue, days) {
   return toInputDate(shiftDays(start, Math.max(1, Number(days) || 1) - 1));
 }
 
+/* When the project's weeks actually begin. `kickoffDate` is the day of the kickoff *call* and
+   is reported as such; it seeds week 1 at creation, but the two are allowed to diverge after a
+   week has been re-dated — a call on the 22nd and delivery starting on the 26th is an ordinary
+   thing to want to record. Everything that schedules reads this instead. */
+function projectAnchorDate(project) {
+  const first = projectWeeksSorted(project.id)[0];
+  return (first && first.weekStart) || project.kickoffDate || "";
+}
+
 /* Go-live is whichever is later: the end of the nominal cycle, or the last task to finish. */
 function computeProjectGoLive(project, updates) {
-  const nominal = computeGoLiveDate(project.kickoffDate, project.cycleWeeks);
+  const nominal = computeGoLiveDate(projectAnchorDate(project), project.cycleWeeks);
   const ends = (updates || [])
     .flatMap((update) => update.tasks || [])
     .map((task) => task.dueDate)
@@ -9774,34 +9786,6 @@ function forwardTaskToNextWeek(task, editingWeek, { auto = false } = {}) {
     subtasks: (task.subtasks || []).map((sub) => ({ ...sub, id: newId(), date: "" })),
   });
   return true;
-}
-
-/* Weeks used to begin on the Monday of the calendar week the kickoff fell in. They now begin on
-   the kickoff date itself, so a project that started mid-week is re-dated once to match: a
-   Wednesday kickoff runs Wed-Tue. A Monday kickoff is already aligned and is left untouched.
-   Tasks move with their week, and go-live follows. */
-function alignWeeksToKickoff() {
-  let realigned = 0;
-
-  state.projects.forEach((project) => {
-    if (!project.kickoffDate) return;
-    const weeks = projectWeeksSorted(project.id);
-    if (!weeks.length || weeks[0].weekStart === project.kickoffDate) return;
-
-    weeks.forEach((week, index) => {
-      week.weekStart = toInputDate(shiftDays(new Date(`${project.kickoffDate}T00:00:00`), index * 7));
-      week.weekRange = formatWeekRange(week.weekStart);
-      (week.tasks || []).forEach((task) => {
-        task.startDate = week.weekStart;
-        task.dueDate = taskDueDate(week.weekStart, task.days || templateDefaultDays());
-      });
-    });
-    refreshProjectGoLive(project.id);
-    realigned += 1;
-  });
-
-  if (realigned) saveState();
-  return realigned;
 }
 
 /* Work marked pending or in progress does not stop being due when its week runs out. Marking a
