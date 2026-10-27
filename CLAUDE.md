@@ -192,8 +192,14 @@ it usefully said — how many weeks were pre-created — survives as a self-clea
 ## Projects list (folder screen)
 
 Dashboard → Ongoing / Completed opens the folder screen as a stacked list: one full-width row
-per project, the name and Active/Idle status on the first line, the domains, cycle length,
-go-live and last-touched time sharing the second. The whole row opens the project.
+per project, the name and its **stage** on the first line, the domains, cycle length, go-live and
+last-touched time sharing the second. The whole row opens the project.
+
+The pill used to read **Active** or **Idle** off a 7-day recency window. It now reads the stage
+— On Track, Slow Moving, At Risk, Parked, Completed, Cancelled — coloured by `tone` on
+`PROJECT_STAGES`. Recency was saying less than the "Updated today" line directly below it, and on
+a completed or cancelled project it flatly contradicted the stage: the Completed folder listed
+every project as "Active". `ACTIVE_WINDOW_DAYS` went with it.
 
 Both folder buttons call `openCategory()`. They used to jump straight to the first project by
 name whenever the folder had one, so the list only appeared when a folder was empty. That jump

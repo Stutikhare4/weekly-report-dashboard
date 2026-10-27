@@ -1173,13 +1173,13 @@ button {
 .tile-ongoing   { background: color-mix(in srgb, #8b5cf6 12%, var(--surface-2)); }
 .tile-completed { background: color-mix(in srgb, var(--card-done) 12%, var(--surface-2)); }
 .tile-updates   { background: color-mix(in srgb, var(--card-accent) 16%, var(--surface-2)); }
-.tile-blocked   { background: color-mix(in srgb, #ef4444 10%, var(--surface-2)); }
+.tile-blocked   { background: color-mix(in srgb, var(--card-risk) 10%, var(--surface-2)); }
 
 .tile-total .stat-tile-icon     { color: var(--card-accent); }
 .tile-ongoing .stat-tile-icon   { color: #8b5cf6; }
 .tile-completed .stat-tile-icon { color: var(--card-done); }
 .tile-updates .stat-tile-icon   { color: var(--card-accent); }
-.tile-blocked .stat-tile-icon   { color: #ef4444; }
+.tile-blocked .stat-tile-icon   { color: var(--card-risk); }
 
 /* A folder card is no longer one big button: it holds a heading button plus a row per project,
    and a button cannot be nested inside a button. */
@@ -2534,6 +2534,7 @@ button {
   --card-hover: rgba(77, 159, 255, 0.14);
   --card-warning: #fcd34d;
   --card-warning-soft: rgba(234, 179, 8, 0.16);
+  --card-risk: #ef4444;
   --card-body: var(--muted);
   --card-label: var(--muted);
   --card-value: var(--text);
@@ -3882,8 +3883,15 @@ button {
   background: currentColor;
 }
 
-.project-card-status.is-active { color: var(--card-done); }
-.project-card-status.is-idle { color: var(--card-label); }
+/* The pill names the project's stage, so it is coloured by that stage rather than by how
+   recently anyone touched it. Recency is already on the card's last line ("Updated today"),
+   which is why the old Active/Idle marker could be dropped rather than moved: it said less
+   than the line below it and contradicted the stage on a completed or cancelled project. */
+.project-card-status.tone-good  { color: var(--card-done); }
+.project-card-status.tone-done  { color: var(--card-done); }
+.project-card-status.tone-warn  { color: var(--card-warning); }
+.project-card-status.tone-risk  { color: var(--card-risk); }
+.project-card-status.tone-muted { color: var(--card-label); }
 
 /* The details run along one line; each keeps its label above its value so the row stays
    readable without separators. */

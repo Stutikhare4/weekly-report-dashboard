@@ -20,17 +20,24 @@ const WEEK_STATUSES = ["not started", "on track", "needs attention", "blocked", 
 const ALLOWED_EMAIL_DOMAIN = "webengage.com";
 
 /* How a project is going, set by hand on its page. Separate from `status`, which is only the
-   Ongoing/Completed folder a project sits in — but the two are kept in step: marking a project
-   completed or cancelled files it under Completed, anything else under Ongoing. Until now
-   nothing in the app ever wrote `status` anything but "current", so the Completed folder could
-   not be reached at all. */
+   Ongoing/Completed folder a project sits in — but the two are kept in step, from `closes`
+   below, so there is never a stage saying one thing and a folder another.
+
+   `closes` files the project under Completed. Only "Completed" does: **Cancelled deliberately
+   does not.** A cancelled integration has not gone live, and the Completed folder is what gets
+   shown when someone asks what shipped — putting a cancellation in there overstates delivery.
+   It is flagged instead, which is what `alerts` does: those stages are what the dashboard's
+   Blocked/Delayed tile counts. A cancelled project therefore stays in Ongoing and shows up as
+   Blocked/Delayed, where it is visible rather than filed away.
+
+   `tone` is only how the stage is coloured wherever it is shown as a pill. */
 const PROJECT_STAGES = [
-  { value: "on track",     label: "On Track",     closes: false, alerts: false },
-  { value: "slow moving",  label: "Slow Moving",  closes: false, alerts: false },
-  { value: "at risk",      label: "At Risk",      closes: false, alerts: true },
-  { value: "parked",       label: "Parked",       closes: false, alerts: true },
-  { value: "completed",    label: "Completed",    closes: true,  alerts: false },
-  { value: "cancelled",    label: "Cancelled",    closes: true,  alerts: true },
+  { value: "on track",     label: "On Track",     closes: false, alerts: false, tone: "good" },
+  { value: "slow moving",  label: "Slow Moving",  closes: false, alerts: false, tone: "warn" },
+  { value: "at risk",      label: "At Risk",      closes: false, alerts: true,  tone: "risk" },
+  { value: "parked",       label: "Parked",       closes: false, alerts: true,  tone: "warn" },
+  { value: "completed",    label: "Completed",    closes: true,  alerts: false, tone: "done" },
+  { value: "cancelled",    label: "Cancelled",    closes: false, alerts: true,  tone: "muted" },
 ];
 
 /* The states the dashboard's Blocked/Delayed tile counts. Kept on the stage table so the tile
@@ -42,6 +49,18 @@ function alertingStages() {
 function stageLabel(value) {
   const stage = PROJECT_STAGES.find((item) => item.value === value);
   return stage ? stage.label : String(value || "");
+}
+
+function stageTone(value) {
+  const stage = PROJECT_STAGES.find((item) => item.value === value);
+  return stage ? stage.tone : "muted";
+}
+
+/* Whether a stage puts the project in the Completed folder. One reading of `closes`, so a
+   screen can ask the question without re-deriving the rule. */
+function stageCloses(value) {
+  const stage = PROJECT_STAGES.find((item) => item.value === value);
+  return Boolean(stage && stage.closes);
 }
 
 function blockedProjects() {
@@ -1229,12 +1248,11 @@ function openProject(projectId) {
 }
 
 const CATEGORY_PAGE_SIZE = 12;
-const ACTIVE_WINDOW_DAYS = 7;
 
 /* Projects carry no "modified" stamp of their own, so activity is the most recent thing that
    happened to them: an explicit save, the project's own creation, or the newest weekly report
    added to it. Older projects predate the stamp and fall back to the other two. */
-/* Editing a week is activity on its project: the folder list's Active/Idle marker reads
+/* Editing a week is activity on its project: the folder list's "Updated ..." line reads
    `updatedAt`, and a week edited today should not leave a project looking untouched. */
 function stampProjectActivity(projectId) {
   const project = state.projects.find((item) => item.id === projectId);
@@ -1268,24 +1286,23 @@ function renderCategoryScreen() {
   const label = ongoing ? "Ongoing projects" : "Completed projects";
   nodes.categoryTitle.textContent = label;
   nodes.categorySubtitle.textContent = ongoing
-    ? "Active integrations in progress"
-    : "Integrations that have gone live or been closed";
+    ? "Integrations still open, including any flagged At Risk, Parked or Cancelled"
+    : "Integrations that have gone live";
   nodes.categoryBadge.textContent = `${projects.length} project${projects.length === 1 ? "" : "s"}`;
 
   const shown = Math.min(uiState.categoryShown, projects.length);
-  const cutoff = Date.now() - ACTIVE_WINDOW_DAYS * 86400000;
 
   nodes.categoryList.innerHTML = projects.length
     ? projects.slice(0, shown).map((project) => {
         const activity = projectLastActivity(project);
-        const active = activity !== null && activity > cutoff;
+        const stage = projectStage(project);
         const domains = (project.platforms || []).map(platformLabel).join(", ");
         return `
           <button class="project-card" type="button" data-project-id="${project.id}">
             <span class="project-card-head">
               <span class="project-card-name">${escapeHtml(project.name)}</span>
-              <span class="project-card-status ${active ? "is-active" : "is-idle"}">
-                <span class="project-card-dot" aria-hidden="true"></span>${active ? "Active" : "Idle"}
+              <span class="project-card-status tone-${stageTone(stage)}">
+                <span class="project-card-dot" aria-hidden="true"></span>${escapeHtml(stageLabel(stage))}
               </span>
             </span>
             <span class="project-card-rows">
@@ -1298,7 +1315,7 @@ function renderCategoryScreen() {
       }).join("")
     : `<div class="empty-state">
          <p><strong>No ${escapeHtml(label.toLowerCase())}</strong></p>
-         <p class="muted">${ongoing ? "Every project is completed or closed." : "Nothing has been closed yet."}</p>
+         <p class="muted">${ongoing ? "Every project has gone live." : "Nothing has gone live yet."}</p>
        </div>`;
 
   const more = projects.length > shown;
@@ -2203,6 +2220,13 @@ function ensureDefaults(targetState) {
 
   targetState.projects.forEach((project) => {
     if (!project.stage) project.stage = project.status === "closed" ? "completed" : "on track";
+
+    /* The folder is derived from the stage, never stored independently, so whatever the stage
+       says wins. This is what moves projects marked Cancelled under the old rule — which filed
+       them under Completed — back into Ongoing, where they are counted as Blocked/Delayed.
+       Idempotent: once a project agrees with its stage there is nothing left to change. */
+    const closed = stageCloses(projectStage(project)) ? "closed" : "current";
+    if (project.status !== closed) project.status = closed;
   });
 
   targetState.updates.forEach((update) => {
@@ -2458,9 +2482,13 @@ function renderProjectStage(project) {
     .join("");
   nodes.projStage.className = `stage-select ${stageClass(current)}`;
 
-  const closes = PROJECT_STAGES.find((stage) => stage.value === current);
-  nodes.projStageNote.textContent = closes && closes.closes
-    ? "Filed under Completed projects."
+  /* Say where this choice files the project, including when it flags it. A cancelled project
+     stays in Ongoing and is counted as Blocked/Delayed, which is surprising enough to spell
+     out at the point of choosing it. */
+  const stage = PROJECT_STAGES.find((item) => item.value === current);
+  nodes.projStageNote.textContent = !stage ? ""
+    : stage.closes ? "Filed under Completed projects."
+    : stage.alerts ? "Stays under Ongoing projects, and counted as Blocked/Delayed."
     : "Filed under Ongoing projects.";
 }
 
@@ -2470,9 +2498,8 @@ function setProjectStage(value) {
   if (!project || !stage) return;
 
   project.stage = stage.value;
-  /* Completed and Cancelled both leave the Ongoing folder. "Completed" is the only other
-     folder there is, so a cancelled project lands there too — it is not ongoing, and inventing
-     a third folder for it would change every count and list on the dashboard. */
+  /* The folder follows the stage, and only Completed closes a project — see PROJECT_STAGES for
+     why Cancelled does not. */
   project.status = stage.closes ? "closed" : "current";
   project.updatedAt = new Date().toISOString();
   saveState();

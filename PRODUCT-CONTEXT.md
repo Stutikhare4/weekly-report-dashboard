@@ -263,16 +263,21 @@ The sidebar holds Dashboard, Project Reports, Templates, Calendar, Team and Sett
 
 ### Dashboard
 - **Five tiles:** Total Projects, Ongoing, Completed, Weekly Updates, Blocked/Delayed.
-- **Two folders:** Ongoing projects and Completed projects.
+- **Two folders:** Ongoing projects and Completed projects. **Only Completed closes a project.**
+  Cancelled stays in Ongoing and is counted as Blocked/Delayed — a cancelled integration has not
+  gone live, and the Completed folder is what gets shown when someone asks what shipped, so a
+  cancellation filed in there overstates delivery. The folder is always derived from the stage,
+  on load as well as on change, so the two can never disagree.
 - **Recent updates:** one row per project showing its latest week, ordered by date, up to 10.
 
 ### Projects folder (Ongoing / Completed)
 Both dashboard folders open this list.
 
-- One full-width row per project: name, and an **Active** (green) or **Idle** (grey) dot.
+- One full-width row per project: name, and a dot naming its **stage** — On Track, Slow Moving,
+  At Risk, Parked, Completed or Cancelled, coloured by how that stage reads.
 - A second line with domains, duration, go-live and "Updated today / N days ago".
-- **Active** means something happened within 7 days: a save, the project's creation, or a new
-  weekly report.
+- The pill used to say Active or Idle, from a 7-day activity window. It was dropped: the line
+  below it already gives recency, and in the Completed folder every project read "Active".
 - Sorted by most recent activity, 12 at a time with **Load more**. Your place in the list is kept
   when you come back from a project.
 - There is an empty state for a folder with no projects.
@@ -632,6 +637,12 @@ earlier commits used.
   the leave prompts were kept.
 
 **27 October**
+- **Cancelled no longer counts as Completed.** It kept `closes: true` purely because Completed was
+  the only other folder; it now stays in Ongoing and shows under Blocked/Delayed, where it is
+  visible rather than filed away as delivered. `ensureDefaults` derives `status` from the stage on
+  every load, which also moves projects cancelled under the old rule.
+- **The folder list's pill names the stage** instead of Active/Idle. The Completed folder was
+  labelling every project "Active", and recency already sits on the line below.
 - **Kickoff and schedule decoupled.** Editing the kickoff on the details form used to re-date
   every week back to it, so a cascade done in the week editor was undone the next time anyone
   touched Basic Details — and a project could not record a call on the 15th with delivery from
