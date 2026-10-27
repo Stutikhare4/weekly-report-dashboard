@@ -137,49 +137,10 @@
                 <button id="homeAddProject" class="primary-button" type="button" style="padding: 8px 14px; font-size: 0.85rem; border-radius: 10px;">+ New Project</button>
               </div>
             </div>
-            <!-- Each tile opens the list of the projects it counts, so the number is a way in
-                 rather than a dead end. They are buttons, not articles, for the keyboard. -->
-            <div class="stat-tile-row">
-              <button class="stat-tile tile-total" type="button" data-category="all">
-                <span class="stat-tile-label">Total Projects</span>
-                <span class="stat-tile-value" id="dashProjectCount">0</span>
-                <svg class="stat-tile-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
-              </button>
-              <button class="stat-tile tile-ongoing" type="button" data-category="current">
-                <span class="stat-tile-label">Ongoing</span>
-                <span class="stat-tile-value" id="dashCurrentCount">0</span>
-                <svg class="stat-tile-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
-              </button>
-              <button class="stat-tile tile-completed" type="button" data-category="closed">
-                <span class="stat-tile-label">Completed</span>
-                <span class="stat-tile-value" id="dashClosedCount">0</span>
-                <svg class="stat-tile-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m8.5 12.5 2.5 2.5 4.5-5"/></svg>
-              </button>
-              <button class="stat-tile tile-blocked" type="button" data-category="blocked">
-                <span class="stat-tile-label">Blocked/Delayed</span>
-                <span class="stat-tile-value tone-blocked" id="dashAlertCount">0</span>
-                <svg class="stat-tile-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M10 9v6M14 9v6"/></svg>
-              </button>
-            </div>
-
-            <h3 style="margin-top: 24px; margin-bottom: 14px;">Weekly Reports</h3>
-            <div class="home-grid">
-              <section class="folder-card folder-button-warm">
-                <button class="folder-card-head" id="openCurrent" type="button">
-                  <span class="folder-label">Ongoing projects</span>
-                  <span id="currentProjectCount" class="folder-count">0</span>
-                </button>
-                <div id="dashOngoingList" class="folder-card-list"></div>
-              </section>
-
-              <section class="folder-card folder-button-cool">
-                <button class="folder-card-head" id="openClosed" type="button">
-                  <span class="folder-label">Completed projects</span>
-                  <span id="closedProjectCount" class="folder-count">0</span>
-                </button>
-                <div id="dashClosedList" class="folder-card-list"></div>
-              </section>
-            </div>
+            <!-- Four cards, one per view, built from CATEGORY_VIEWS so the heading, the count
+                 and the list behind it cannot disagree. The small tile row these replaced said
+                 the same four numbers without showing which projects they stood for. -->
+            <div class="home-grid" id="dashFolderGrid"></div>
 
             <div class="detail-panel" style="margin-top: 24px;">
               <h3>Recent updates</h3>

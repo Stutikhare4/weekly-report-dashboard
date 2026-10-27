@@ -189,19 +189,32 @@ Three steps — Basic Details, Platform Integration, Review & Summary — inside
 whose only job was to say "done" and offer a button to where the person was already going. What
 it usefully said — how many weeks were pre-created — survives as a self-clearing banner.
 
-## Dashboard tiles
+## Dashboard cards
 
-Four tiles: Total Projects, Ongoing, Completed, Blocked/Delayed. **Weekly Updates was removed** —
-it was the last tile counting something other than projects, so the row now reads as four of a
-kind rather than four project counts and one report count.
+Four full cards in a 2×2 grid, one per view in `CATEGORY_VIEWS`: All projects, Ongoing,
+Completed, Blocked / delayed. Each has a heading that opens the full list, a count, up to
+`DASH_CARD_LIMIT` projects with their week position and progress bar, and a "+ N more" line.
 
-**Every tile opens the list of what it counted.** The click is delegated off `data-category` in
-`index.html`, and `CATEGORY_VIEWS` decides what each one shows, so a tile is added or removed in
-the markup alone. Each view carries its own `match` predicate rather than a `status` value,
-because `all` and `blocked` cut across the Ongoing/Completed folders instead of being folders:
-`blocked` reads `alertingStages()`, the same table the tile's own count reads, so the number and
-the list it opens cannot disagree. The tiles are `<button>`s, not `<article>`s, so they are
-reachable by keyboard; `.stat-tile` undoes the browser's button defaults.
+All of it is built in `renderDashFolderLists()` from the same `CATEGORY_VIEWS` entry, so a card's
+count is the length of the filter its own list is drawn from — a card cannot claim a number it
+does not show. Each view carries a `match` predicate rather than a `status` value, because `all`
+and `blocked` cut across the Ongoing/Completed folders instead of being folders; `blocked` reads
+`alertingStages()`, the same table the Status dropdown writes. On the blocked card the line under
+each name is the **stage**, not the week position — "Week 2 of 4" is not why that project is on
+that card.
+
+What this replaced, in order: a row of five small tiles (one of them Weekly Updates, which counted
+reports rather than projects), then four clickable tiles plus two folder cards below a "Weekly
+Reports" heading — which listed Ongoing and Completed twice over, once as a number and once as a
+list. The headings are wired up inside the renderer rather than once in `boot()`, because the
+cards are rebuilt on every render.
+
+`.stat-tile` still exists, but only for `buildStatTileRow()` — the task-status tiles on a
+project's weekly report. Removing the dashboard's tile CSS took that row's base styles with it
+once; they are back, with a comment saying who owns them.
+
+`.folder-card.dash-card` is qualified deliberately: `.folder-card` sets the `border` shorthand and
+is defined later in the file, so an unqualified `.dash-card` loses its accent border.
 
 ## All projects is not a table
 

@@ -262,11 +262,13 @@ The sidebar holds Dashboard, Project Reports, Templates, Calendar, Team and Sett
 **+ New Project** button at the bottom.
 
 ### Dashboard
-- **Four tiles:** Total Projects, Ongoing, Completed, Blocked/Delayed. **Each one is clickable**
-  and opens the list of exactly the projects it counted — All projects, Ongoing, Completed, or
-  Blocked / delayed. Weekly Updates was removed: it counted weekly reports rather than projects,
-  so it was the one number in the row that was not comparable with the others.
-- **Two folders:** Ongoing projects and Completed projects. **Only Completed closes a project.**
+- **Four cards**, 2×2: All projects, Ongoing projects, Completed projects, Blocked / delayed
+  projects. Each shows its count, up to four projects with their week position and progress, and
+  a "+ N more" line; the heading opens the full list and a row opens its project. On the blocked
+  card each project shows its stage instead of its week.
+  These replaced a row of small tiles plus two folder cards, which listed Ongoing and Completed
+  twice — once as a bare number and once as a list. Weekly Updates went with the tiles: it counted
+  weekly reports rather than projects, the one number in the row not comparable with the others. **Only Completed closes a project.**
   Cancelled stays in Ongoing and is counted as Blocked/Delayed — a cancelled integration has not
   gone live, and the Completed folder is what gets shown when someone asks what shipped, so a
   cancellation filed in there overstates delivery. The folder is always derived from the stage,
@@ -643,6 +645,9 @@ earlier commits used.
   the leave prompts were kept.
 
 **27 October**
+- **The dashboard is four cards.** The tile row and the two folder cards under "Weekly Reports"
+  became one 2×2 grid of full cards, all four built from `CATEGORY_VIEWS`, so each count is the
+  length of the list beneath it. Ongoing and Completed had been appearing twice over.
 - **All projects was built as a table, then reverted.** First as the team's own eight-column sheet
   (adding TSS, Subscription ETA, Actual Subscription Start and Actual Transfer Date, with an input
   in every cell), then cut back to the six fields a project already has. Both were rejected on

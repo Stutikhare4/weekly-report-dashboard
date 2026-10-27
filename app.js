@@ -269,17 +269,10 @@ const nodes = {
   teamScreen: document.getElementById("teamScreen"),
   settingsScreen: document.getElementById("settingsScreen"),
 
-  dashProjectCount: document.getElementById("dashProjectCount"),
-  dashCurrentCount: document.getElementById("dashCurrentCount"),
-  dashClosedCount: document.getElementById("dashClosedCount"),
-  dashAlertCount: document.getElementById("dashAlertCount"),
+  dashFolderGrid: document.getElementById("dashFolderGrid"),
   dashRecentList: document.getElementById("dashRecentList"),
 
   homeAddProject: document.getElementById("homeAddProject"),
-  openCurrent: document.getElementById("openCurrent"),
-  openClosed: document.getElementById("openClosed"),
-  currentProjectCount: document.getElementById("currentProjectCount"),
-  closedProjectCount: document.getElementById("closedProjectCount"),
   backToHome: document.getElementById("backToHome"),
   backToCategory: document.getElementById("backToCategory"),
   categoryEyebrow: document.getElementById("categoryEyebrow"),
@@ -316,8 +309,6 @@ const nodes = {
   projectScope: document.getElementById("projectScope"),
   projectTimelineFields: document.getElementById("projectTimelineFields"),
   projectDetailsFields: document.getElementById("projectDetailsFields"),
-  dashOngoingList: document.getElementById("dashOngoingList"),
-  dashClosedList: document.getElementById("dashClosedList"),
   teamWebengage: document.getElementById("teamWebengage"),
   teamByProject: document.getElementById("teamByProject"),
   projectPhases: document.getElementById("projectPhases"),
@@ -475,16 +466,8 @@ function boot() {
     });
   });
 
-  /* Both folders open their list. They used to jump straight to the first project by name
-     whenever the folder had one, so the list only ever appeared when the folder was empty. */
-  nodes.openCurrent.addEventListener("click", () => openCategory("current"));
-  nodes.openClosed.addEventListener("click", () => openCategory("closed"));
-
-  /* Every dashboard tile opens the list of what it counted. Delegated off `data-category` so a
-     tile is added or removed in index.html alone, with CATEGORY_VIEWS deciding what it shows. */
-  document.querySelectorAll(".stat-tile[data-category]").forEach((tile) => {
-    tile.addEventListener("click", () => openCategory(tile.dataset.category));
-  });
+  /* The dashboard's four cards are rebuilt on every render, so their headings are wired up in
+     renderDashFolderLists() rather than once here. */
   nodes.backToHome.addEventListener("click", () => openDashboard());
   nodes.backToCategory.addEventListener("click", () => openCategory(uiState.category));
   nodes.generateReport.addEventListener("click", () => generateReportPdf());
@@ -892,7 +875,6 @@ function selectDebugText() {
 function renderAll() {
   safeRender(renderScreen);
   safeRender(renderHeader);
-  safeRender(renderFolderCounts);
   safeRender(renderDashboardScreen);
   safeRender(renderCategoryScreen);
   safeRender(renderProjectScreen);
@@ -1005,40 +987,66 @@ function initialsFor(name) {
 /* The two folder cards list the projects they stand for, each with how far it has got, so the
    dashboard answers "where is everything?" without opening the folder. The card heading is
    still the button into the full list. */
+/* The dashboard's four cards, one per view in CATEGORY_VIEWS. The heading opens the full list,
+   each row opens its project, and the count on the heading is the length of the same filter the
+   list is drawn from — so a card cannot claim a number it does not show.
+
+   These replaced a row of four small tiles. The tiles carried the same four numbers and nothing
+   else, so the dashboard said how many projects were blocked without saying which. */
+const DASH_CARD_LIMIT = 4;
+
 function renderDashFolderLists() {
-  const render = (node, status, emptyText) => {
-    if (!node) return;
-    const projects = state.projects
-      .filter((project) => project.status === status)
-      .sort((left, right) => (projectLastActivity(right) || 0) - (projectLastActivity(left) || 0))
-      .slice(0, 4);
+  const grid = nodes.dashFolderGrid;
+  if (!grid) return;
 
-    node.innerHTML = projects.length
-      ? projects.map((project) => {
-          const weeks = projectWeeksSorted(project.id);
-          const today = toInputDate(new Date());
-          const position = weeks.findIndex((week) => isDateInUpdateWeek(today, week)) + 1;
-          const where = position
-            ? `Week ${position} of ${weeks.length}`
-            : (weeks.length ? `${weeks.length} week${weeks.length === 1 ? "" : "s"}` : "No weeks yet");
-          return `
-            <button type="button" class="folder-card-row" data-project-id="${project.id}">
-              <span class="folder-card-row-main">
-                <span class="folder-card-row-name">${escapeHtml(project.name || "Untitled project")}</span>
-                <span class="folder-card-row-meta">${escapeHtml(where)}</span>
-              </span>
-              ${progressBarHtml(projectProgress(project.id))}
-            </button>`;
-        }).join("")
-      : `<p class="muted small-note">${escapeHtml(emptyText)}</p>`;
+  const today = toInputDate(new Date());
 
-    node.querySelectorAll(".folder-card-row").forEach((button) => {
-      button.addEventListener("click", () => openProject(button.dataset.projectId));
-    });
+  /* What to say under a project's name. Week position is the useful thing for work in flight;
+     on the blocked card it is the stage, because "Week 2 of 4" is not why that project is on
+     that card. */
+  const subtitle = (project, view) => {
+    if (view.value === "blocked") return stageLabel(projectStage(project));
+    const weeks = projectWeeksSorted(project.id);
+    const position = weeks.findIndex((week) => isDateInUpdateWeek(today, week)) + 1;
+    if (position) return `Week ${position} of ${weeks.length}`;
+    return weeks.length ? `${weeks.length} week${weeks.length === 1 ? "" : "s"}` : "No weeks yet";
   };
 
-  render(nodes.dashOngoingList, "current", "No ongoing projects yet.");
-  render(nodes.dashClosedList, "closed", "Nothing completed yet.");
+  grid.innerHTML = CATEGORY_VIEWS.map((view) => {
+    const projects = state.projects
+      .filter((project) => view.match(project))
+      .sort((left, right) => (projectLastActivity(right) || 0) - (projectLastActivity(left) || 0));
+    const shown = projects.slice(0, DASH_CARD_LIMIT);
+    const rest = projects.length - shown.length;
+
+    const rows = shown.length
+      ? shown.map((project) => `
+          <button type="button" class="folder-card-row" data-project-id="${project.id}">
+            <span class="folder-card-row-main">
+              <span class="folder-card-row-name">${escapeHtml(project.name || "Untitled project")}</span>
+              <span class="folder-card-row-meta">${escapeHtml(subtitle(project, view))}</span>
+            </span>
+            ${progressBarHtml(projectProgress(project.id))}
+          </button>`).join("")
+      : `<p class="muted small-note">${escapeHtml(view.hint)}</p>`;
+
+    return `
+      <section class="folder-card dash-card dash-card-${view.value}">
+        <button class="folder-card-head" type="button" data-category="${view.value}">
+          <span class="folder-label">${escapeHtml(view.title)}</span>
+          <span class="folder-count">${projects.length}</span>
+        </button>
+        <div class="folder-card-list">${rows}</div>
+        ${rest > 0 ? `<p class="muted small-note dash-card-more">+ ${rest} more</p>` : ""}
+      </section>`;
+  }).join("");
+
+  grid.querySelectorAll(".folder-card-row").forEach((button) => {
+    button.addEventListener("click", () => openProject(button.dataset.projectId));
+  });
+  grid.querySelectorAll(".folder-card-head").forEach((button) => {
+    button.addEventListener("click", () => openCategory(button.dataset.category));
+  });
 }
 
 function renderHeader() {
@@ -1163,25 +1171,9 @@ function openDashboard() {
 }
 
 function renderDashboardScreen() {
-  const currentProjects = state.projects.filter((p) => p.status === "current").length;
-  const closedProjects = state.projects.filter((p) => p.status === "closed").length;
-
-  nodes.dashProjectCount.textContent = `${state.projects.length}`;
-  nodes.dashCurrentCount.textContent = `${currentProjects}`;
-  nodes.dashClosedCount.textContent = `${closedProjects}`;
-  /* Projects marked At Risk, Parked or Cancelled — a project count, like the three tiles beside
-     it. It used to count blocked/delayed *sub-tasks*, which is a different unit entirely and
-     read as though the numbers in a row were comparable when they were not. The sub-task list
-     still has a home: it is what the notification bell shows. (Weekly Updates was the last tile
-     counting something other than projects, and it is gone, so the row is now four of a kind.) */
-  const blocked = blockedProjects();
-  nodes.dashAlertCount.textContent = `${blocked.length}`;
-  const tile = nodes.dashAlertCount.closest(".stat-tile");
-  if (tile) {
-    tile.title = blocked.length
-      ? blocked.map((project) => `${project.name || "Untitled"} — ${stageLabel(projectStage(project))}`).join("\n")
-      : "No project is At Risk, Parked or Cancelled.";
-  }
+  /* The four counts now live on the cards renderDashFolderLists() draws, each taken from the
+     same filter as the list under it. They used to be written here into a row of tiles, which
+     meant a count and the list it stood for were produced in two places. */
 
   /* One row per project. Listing every weekly report meant a project with eight weeks filled
      the list on its own and pushed the others out. "Latest" is the greatest weekStart rather
@@ -1223,13 +1215,6 @@ function renderDashboardScreen() {
   nodes.dashRecentList.querySelectorAll(".btn-dash-update").forEach((button) => {
     button.addEventListener("click", () => openProject(button.dataset.projectId));
   });
-}
-
-function renderFolderCounts() {
-  const currentProjects = state.projects.filter((p) => p.status === "current").length;
-  const closedProjects = state.projects.filter((p) => p.status === "closed").length;
-  nodes.currentProjectCount.textContent = `${currentProjects}`;
-  nodes.closedProjectCount.textContent = `${closedProjects}`;
 }
 
 /* ---------- Weekly Reports (folder / category / project) ---------- */

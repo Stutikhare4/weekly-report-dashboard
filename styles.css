@@ -623,6 +623,37 @@ p {
   gap: 20px;
 }
 
+/* The dashboard's four cards. Two columns, so each stays wide enough for a project name and its
+   progress bar side by side; four across would make them narrow strips. One tint per card, taken
+   from the app's own tokens, so the four read as distinct at a glance rather than as four
+   identical boxes — the same job the small tiles' colours used to do. */
+/* `.folder-card` sets the `border` shorthand and is defined after this, so the accent has to be
+   qualified to survive it rather than relying on source order. */
+.folder-card.dash-card {
+  background: var(--surface-2);
+  border-top: 3px solid var(--card-border);
+  min-height: 190px;
+}
+
+.folder-card.dash-card-all     { border-top-color: var(--card-accent); }
+.folder-card.dash-card-current { border-top-color: #8b5cf6; }
+.folder-card.dash-card-closed  { border-top-color: var(--card-done); }
+.folder-card.dash-card-blocked { border-top-color: var(--card-risk); }
+
+.dash-card .folder-label {
+  font-size: 1rem;
+  font-weight: 650;
+}
+
+.dash-card-more {
+  margin: 2px 0 0 2px;
+}
+
+@media (max-width: 900px) {
+  .home-grid { grid-template-columns: minmax(0, 1fr); }
+  .folder-card.dash-card { min-height: 0; }
+}
+
 .folder-button {
   padding: 24px;
   border-radius: 22px;
@@ -1134,6 +1165,10 @@ button {
 
 /* ---------- Stat tiles ---------- */
 
+/* The task-status tiles on a project's weekly report (buildStatTileRow): Total / Completed /
+   In Progress / Delayed / Blocked / Not Started. The dashboard had a row of these too, with one
+   tint per metric and a click that opened the list; that row became four full cards, and its
+   extra rules went with it. These are plain `<article>`s and are not clickable. */
 .stat-tile-row {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
@@ -1149,55 +1184,7 @@ button {
   display: grid;
   gap: 4px;
   align-content: start;
-  /* Each tile is a <button> that opens the list it counts, so the browser's button defaults
-     — centred text, its own font, a visible chrome border — have to be undone. */
-  width: 100%;
-  text-align: left;
-  font: inherit;
-  color: inherit;
-  cursor: pointer;
-  appearance: none;
-  transition: transform 120ms ease, border-color 120ms ease, box-shadow 120ms ease;
 }
-
-.stat-tile:hover {
-  border-color: var(--card-primary);
-  transform: translateY(-1px);
-  box-shadow: 0 6px 16px rgba(15, 23, 42, 0.08);
-}
-
-.stat-tile:focus-visible {
-  outline: 2px solid var(--card-primary);
-  outline-offset: 2px;
-}
-
-/* Tinted tiles with a watermark icon, one hue per metric, so the row reads at a glance instead
-   of as four identical boxes. The tints are derived from the app's own accent tokens rather
-   than new hex values, so dark mode and the WebEngage palette still hold. */
-.stat-tile {
-  position: relative;
-  overflow: hidden;
-}
-
-.stat-tile-icon {
-  position: absolute;
-  right: 12px;
-  bottom: 10px;
-  width: 26px;
-  height: 26px;
-  opacity: 0.32;
-  pointer-events: none;
-}
-
-.tile-total     { background: color-mix(in srgb, var(--card-accent) 10%, var(--surface-2)); }
-.tile-ongoing   { background: color-mix(in srgb, #8b5cf6 12%, var(--surface-2)); }
-.tile-completed { background: color-mix(in srgb, var(--card-done) 12%, var(--surface-2)); }
-.tile-blocked   { background: color-mix(in srgb, var(--card-risk) 10%, var(--surface-2)); }
-
-.tile-total .stat-tile-icon     { color: var(--card-accent); }
-.tile-ongoing .stat-tile-icon   { color: #8b5cf6; }
-.tile-completed .stat-tile-icon { color: var(--card-done); }
-.tile-blocked .stat-tile-icon   { color: var(--card-risk); }
 
 /* A folder card is no longer one big button: it holds a heading button plus a row per project,
    and a button cannot be nested inside a button. */
