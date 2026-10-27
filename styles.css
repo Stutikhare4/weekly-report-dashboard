@@ -1338,29 +1338,6 @@ button {
   background: var(--card-accent);
 }
 
-/* Recent updates: the text column, then the bar, then the initials circle. */
-.dash-update-row {
-  display: grid;
-  grid-template-columns: 1fr 110px 34px;
-  align-items: center;
-  gap: 14px;
-}
-
-.dash-update-main { display: grid; gap: 3px; min-width: 0; }
-.dash-update-row .status-badge { justify-self: start; }
-
-.dash-avatar {
-  width: 32px;
-  height: 32px;
-  border-radius: 999px;
-  display: grid;
-  place-items: center;
-  font-size: 0.72rem;
-  font-weight: 700;
-  color: var(--card-value);
-  background: color-mix(in srgb, var(--card-primary) 26%, var(--surface-2));
-}
-
 .stat-tile-label {
   color: var(--muted);
   font-size: 0.8rem;

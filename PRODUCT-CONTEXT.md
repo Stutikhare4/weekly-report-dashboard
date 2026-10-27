@@ -277,7 +277,9 @@ The sidebar holds Dashboard, Project Reports, Templates, Calendar, Team and Sett
   under Completed would overstate delivery, and it is not being worked on, so listing it under
   Ongoing would overstate what is in progress. It appears only on Blocked / delayed, and on All
   projects. That is what makes All worth having: ongoing + completed no longer adds up to it.
-- **Recent updates:** one row per project showing its latest week, ordered by date, up to 10.
+- That is the whole dashboard. A **Recent updates** panel used to sit under the cards — one row
+  per project showing its latest week, with the same progress bar the cards carry — which was the
+  same information twice on one screen. Removed.
 
 ### Projects list (opened from a tile or a folder)
 Both dashboard folders and all four tiles open this same list, with four views: **All projects**,
@@ -649,6 +651,10 @@ earlier commits used.
   the leave prompts were kept.
 
 **28 October**
+- **Recent updates panel removed** from the dashboard. It listed each project's latest week and
+  progress, which the four cards above it already showed.
+- **The header user widget is the name alone**, and the header has new artwork; the orange initial
+  circle and the "Weekly status" eyebrow are gone.
 - **The bell reports overdue work.** A task whose week has ended and which is not completed is now
   listed as Overdue, named against the week it missed. It also lists blocked and delayed *tasks*,
   not only sub-tasks — previously a task marked Blocked or Delayed raised nothing, so the bell

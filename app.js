@@ -281,7 +281,6 @@ const nodes = {
   settingsScreen: document.getElementById("settingsScreen"),
 
   dashFolderGrid: document.getElementById("dashFolderGrid"),
-  dashRecentList: document.getElementById("dashRecentList"),
 
   homeAddProject: document.getElementById("homeAddProject"),
   backToHome: document.getElementById("backToHome"),
@@ -1065,23 +1064,6 @@ function progressBarHtml(percent) {
   </span>`;
 }
 
-/* The person a project is fronted by. No avatar images exist anywhere in the app, so the
-   circle carries initials from the onboarding manager, falling back to the CSM. */
-function projectLeadName(projectId) {
-  const project = state.projects.find((item) => item.id === projectId);
-  if (!project) return "";
-  return (project.onboardingManager || project.csm || "").trim();
-}
-
-function initialsFor(name) {
-  const parts = String(name || "").trim().split(/\s+/).filter(Boolean);
-  if (!parts.length) return "—";
-  return parts.slice(0, 2).map((part) => part.charAt(0).toUpperCase()).join("");
-}
-
-/* The two folder cards list the projects they stand for, each with how far it has got, so the
-   dashboard answers "where is everything?" without opening the folder. The card heading is
-   still the button into the full list. */
 /* The dashboard's four cards, one per view in CATEGORY_VIEWS. The heading opens the full list,
    each row opens its project, and the count on the heading is the length of the same filter the
    list is drawn from — so a card cannot claim a number it does not show.
@@ -1269,51 +1251,11 @@ function openDashboard() {
   renderAll();
 }
 
+/* The dashboard is the four cards and nothing else. A "Recent updates" panel used to sit under
+   them, one row per project showing its latest week — which the cards already list, with the same
+   progress bar, so it was a second copy of the same information further down the page. */
 function renderDashboardScreen() {
-  /* The four counts now live on the cards renderDashFolderLists() draws, each taken from the
-     same filter as the list under it. They used to be written here into a row of tiles, which
-     meant a count and the list it stood for were produced in two places. */
-
-  /* One row per project. Listing every weekly report meant a project with eight weeks filled
-     the list on its own and pushed the others out. "Latest" is the greatest weekStart rather
-     than the last element: weeks are added by hand and moved between each other, so array
-     order is not chronological. */
   renderDashFolderLists();
-
-  const latestByProject = new Map();
-  state.updates.forEach((update) => {
-    const seen = latestByProject.get(update.projectId);
-    if (!seen || update.weekStart > seen.weekStart) latestByProject.set(update.projectId, update);
-  });
-
-  const recent = [...latestByProject.values()]
-    .sort((left, right) => right.weekStart.localeCompare(left.weekStart))
-    .slice(0, 10);
-
-  nodes.dashRecentList.innerHTML = recent.length
-    ? recent
-        .map(
-          (update) => {
-            const done = projectProgress(update.projectId);
-            return `
-            <button type="button" class="project-name-card dash-update-row btn-dash-update" data-project-id="${update.projectId}">
-              <span class="dash-update-main">
-                <span class="project-name">${escapeHtml(update.projectName)}</span>
-                <span class="project-meta">${escapeHtml(update.weekRange)}</span>
-                <span class="status-badge ${statusClass(update.statusTag)}">${escapeHtml(update.statusTag)}</span>
-              </span>
-              ${progressBarHtml(done)}
-              <span class="dash-avatar" title="${escapeHtml(projectLeadName(update.projectId) || "Unassigned")}">${escapeHtml(initialsFor(projectLeadName(update.projectId)))}</span>
-            </button>
-          `;
-          }
-        )
-        .join("")
-    : `<div class="empty-state">No weekly updates yet.</div>`;
-
-  nodes.dashRecentList.querySelectorAll(".btn-dash-update").forEach((button) => {
-    button.addEventListener("click", () => openProject(button.dataset.projectId));
-  });
 }
 
 /* ---------- Weekly Reports (folder / category / project) ---------- */
