@@ -1958,6 +1958,11 @@ button {
   margin: 0 0 7px;
 }
 
+/* The Team screen's two titles sit directly on their tables, with no explanatory note between. */
+.team-grid .wizard-section-title {
+  margin-bottom: 9px;
+}
+
 .wizard-section-head {
   display: flex;
   align-items: center;
@@ -3804,10 +3809,6 @@ button {
   align-items: start;
 }
 
-.team-note {
-  margin: 0 0 6px;
-}
-
 .team-table {
   width: 100%;
   border-collapse: collapse;
@@ -4727,17 +4728,11 @@ small,
             <div class="team-grid">
               <section class="wizard-section">
                 <h3 class="wizard-section-title">WebEngage Team</h3>
-                <p class="muted small-note team-note">
-                  From each project&rsquo;s Basic Details &mdash; edit them there.
-                </p>
                 <div id="teamWebengage"></div>
               </section>
 
               <section class="wizard-section">
                 <h3 class="wizard-section-title">Client teams</h3>
-                <p class="muted small-note team-note">
-                  Who is on the client side of each project. Addresses are on the project&rsquo;s own page.
-                </p>
                 <div id="teamByProject"></div>
               </section>
             </div>
