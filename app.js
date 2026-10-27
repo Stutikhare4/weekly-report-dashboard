@@ -1666,13 +1666,14 @@ function renderReport(report) {
   `;
 }
 
-/* The one card that stays — kept at the top so it lands in the first fold of the report. */
+/* The one card that stays — kept at the top so it lands in the first fold of the report. It is
+   the project name and its two dates only: the onboarding manager, client POCs and project status
+   were dropped, since the client reading this knows who they are dealing with and the internal
+   status is not theirs to read. The same three rows come out of the printed and emailed copies,
+   so a report never shows one thing on screen and another when it is sent. */
 function buildProjectSummaryCard(report) {
   const rows = [
     ["Project name", report.projectName],
-    ["Onboarding manager", report.onboardingManager],
-    ["Client POC", report.clientPocs],
-    ["Status", formatStatus(report.projectStatus)],
     ["Kickoff", report.kickoffDate ? formatSummaryDate(report.kickoffDate) : ""],
     ["Target go-live", report.goLiveDate ? formatSummaryDate(report.goLiveDate) : ""],
   ].filter(([, value]) => value);
@@ -1727,9 +1728,6 @@ function buildReportPrintHtml(report) {
 
   const summaryRows = [
     ["Project name", report.projectName],
-    ["Onboarding manager", report.onboardingManager],
-    ["Client POC", report.clientPocs],
-    ["Status", formatStatus(report.projectStatus)],
     ["Kickoff", report.kickoffDate ? formatSummaryDate(report.kickoffDate) : ""],
     ["Target go-live", report.goLiveDate ? formatSummaryDate(report.goLiveDate) : ""],
   ].filter(([, value]) => value);
@@ -1803,9 +1801,6 @@ function buildReportEmailHtml(report) {
 
   const summaryRows = [
     ["Project name", report.projectName],
-    ["Onboarding manager", report.onboardingManager],
-    ["Client POC", report.clientPocs],
-    ["Status", formatStatus(report.projectStatus)],
     ["Kickoff", report.kickoffDate ? formatSummaryDate(report.kickoffDate) : ""],
     ["Target go-live", report.goLiveDate ? formatSummaryDate(report.goLiveDate) : ""],
   ].filter(([, value]) => value);

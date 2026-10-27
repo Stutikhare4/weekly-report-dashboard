@@ -649,6 +649,10 @@ earlier commits used.
   the leave prompts were kept.
 
 **27 October**
+- **The report's Project summary is down to three rows** — project name, kickoff, target go-live.
+  Onboarding manager, Client POC and Status were removed from all three copies of the report (the
+  on-screen preview, the printed PDF and the emailed HTML), so a report never shows one thing on
+  screen and another when it is sent. The fields stay on the project's own pages.
 - **The whole app fits 1440×900 without a page scrollbar.** Every screen is capped to the viewport
   and scrolls inside itself, with its heading sticky; a density pass cut the spacing throughout,
   the Team screen's groups became columns, and Basic Details runs its fields two abreast. Nothing
