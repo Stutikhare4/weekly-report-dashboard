@@ -269,11 +269,14 @@ The sidebar holds Dashboard, Project Reports, Templates, Calendar, Team and Sett
   purple for all projects, blue for ongoing, green for completed, red for blocked.
   These replaced a row of small tiles plus two folder cards, which listed Ongoing and Completed
   twice — once as a bare number and once as a list. Weekly Updates went with the tiles: it counted
-  weekly reports rather than projects, the one number in the row not comparable with the others. **Only Completed closes a project.**
-  Cancelled stays in Ongoing and is counted as Blocked/Delayed — a cancelled integration has not
-  gone live, and the Completed folder is what gets shown when someone asks what shipped, so a
-  cancellation filed in there overstates delivery. The folder is always derived from the stage,
-  on load as well as on change, so the two can never disagree.
+  weekly reports rather than projects, the one number in the row not comparable with the others.
+- **Where each stage appears** is decided by three flags on `PROJECT_STAGES`, which every card
+  reads rather than naming stages of its own: `closes` → Completed, `ongoing` → Ongoing,
+  `alerts` → Blocked / delayed. At Risk and Parked are ongoing *and* flagged, so they appear on
+  both. **Cancelled is on neither Ongoing nor Completed** — it has not gone live, so filing it
+  under Completed would overstate delivery, and it is not being worked on, so listing it under
+  Ongoing would overstate what is in progress. It appears only on Blocked / delayed, and on All
+  projects. That is what makes All worth having: ongoing + completed no longer adds up to it.
 - **Recent updates:** one row per project showing its latest week, ordered by date, up to 10.
 
 ### Projects list (opened from a tile or a folder)
@@ -646,6 +649,10 @@ earlier commits used.
   the leave prompts were kept.
 
 **27 October**
+- **Cancelled is out of Ongoing too.** It had been left in Ongoing and merely flagged, on the
+  grounds that Completed was the only other card. With four cards that reasoning is gone: an
+  `ongoing` flag on `PROJECT_STAGES` now excludes it, so a cancelled project appears only on
+  Blocked / delayed and on All projects.
 - **The dashboard is four cards.** The tile row and the two folder cards under "Weekly Reports"
   became one 2×2 grid of full cards, all four built from `CATEGORY_VIEWS`, so each count is the
   length of the list beneath it. Ongoing and Completed had been appearing twice over.

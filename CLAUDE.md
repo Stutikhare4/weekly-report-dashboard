@@ -189,6 +189,27 @@ Three steps — Basic Details, Platform Integration, Review & Summary — inside
 whose only job was to say "done" and offer a button to where the person was already going. What
 it usefully said — how many weeks were pre-created — survives as a self-clearing banner.
 
+## Which card a project appears on
+
+Three flags on `PROJECT_STAGES`, read by the cards rather than each card naming stages of its own:
+
+| stage | `closes` | `ongoing` | `alerts` | appears on |
+| --- | --- | --- | --- | --- |
+| On Track, Slow Moving | — | yes | — | All, Ongoing |
+| At Risk, Parked | — | yes | yes | All, Ongoing, Blocked |
+| Completed | yes | — | — | All, Completed |
+| Cancelled | — | — | yes | All, Blocked |
+
+`ongoing` is **not** the negation of `closes`: Cancelled closes nothing and is not ongoing either,
+which is the whole reason the flag exists. It went in when Cancelled was taken out of Ongoing —
+until then it had been left there and merely flagged, because Completed was the only other card to
+put it on, and that reasoning died with the four-card dashboard. `project.status` still follows
+`closes` alone, so a cancelled project stays `"current"`: it is not closed, it is just not in
+progress.
+
+Because of this, **ongoing + completed does not equal total.** That is the point of the All
+projects card, and why the three counts should never be presented as a breakdown of each other.
+
 ## Dashboard cards
 
 Four full cards in a 2×2 grid, one per view in `CATEGORY_VIEWS`: All projects, Ongoing,

@@ -4872,25 +4872,30 @@ const WEEK_STATUSES = ["not started", "on track", "needs attention", "blocked", 
    signing in with an unknown address just gets an empty dashboard. */
 const ALLOWED_EMAIL_DOMAIN = "webengage.com";
 
-/* How a project is going, set by hand on its page. Separate from `status`, which is only the
-   Ongoing/Completed folder a project sits in — but the two are kept in step, from `closes`
-   below, so there is never a stage saying one thing and a folder another.
+/* How a project is going, set by hand on its page. Three flags decide which dashboard cards it
+   appears on, and each card reads them rather than naming stages of its own, so the dropdown and
+   the cards cannot drift apart.
 
-   `closes` files the project under Completed. Only "Completed" does: **Cancelled deliberately
-   does not.** A cancelled integration has not gone live, and the Completed folder is what gets
-   shown when someone asks what shipped — putting a cancellation in there overstates delivery.
-   It is flagged instead, which is what `alerts` does: those stages are what the dashboard's
-   Blocked/Delayed tile counts. A cancelled project therefore stays in Ongoing and shows up as
-   Blocked/Delayed, where it is visible rather than filed away.
+   `closes`  → Completed. Only "Completed" sets it: a cancelled integration has not gone live, and
+             the Completed card is what gets shown when someone asks what shipped, so a
+             cancellation filed there would overstate delivery.
+   `ongoing` → Ongoing. At Risk and Parked keep it: that work is still live, just flagged.
+             **Cancelled does not** — it is not work in progress, and listing it among the
+             ongoing projects overstates what is actually being worked on.
+   `alerts`  → Blocked / delayed.
+
+   Cancelled is therefore the one stage on neither Ongoing nor Completed. It appears on Blocked /
+   delayed, and on All projects, which is what makes "All" worth having: it is the only card where
+   every project is accounted for, and ongoing + completed no longer adds up to it.
 
    `tone` is only how the stage is coloured wherever it is shown as a pill. */
 const PROJECT_STAGES = [
-  { value: "on track",     label: "On Track",     closes: false, alerts: false, tone: "good" },
-  { value: "slow moving",  label: "Slow Moving",  closes: false, alerts: false, tone: "warn" },
-  { value: "at risk",      label: "At Risk",      closes: false, alerts: true,  tone: "risk" },
-  { value: "parked",       label: "Parked",       closes: false, alerts: true,  tone: "warn" },
-  { value: "completed",    label: "Completed",    closes: true,  alerts: false, tone: "done" },
-  { value: "cancelled",    label: "Cancelled",    closes: false, alerts: true,  tone: "muted" },
+  { value: "on track",     label: "On Track",     closes: false, ongoing: true,  alerts: false, tone: "good" },
+  { value: "slow moving",  label: "Slow Moving",  closes: false, ongoing: true,  alerts: false, tone: "warn" },
+  { value: "at risk",      label: "At Risk",      closes: false, ongoing: true,  alerts: true,  tone: "risk" },
+  { value: "parked",       label: "Parked",       closes: false, ongoing: true,  alerts: true,  tone: "warn" },
+  { value: "completed",    label: "Completed",    closes: true,  ongoing: false, alerts: false, tone: "done" },
+  { value: "cancelled",    label: "Cancelled",    closes: false, ongoing: false, alerts: true,  tone: "muted" },
 ];
 
 /* The states the dashboard's Blocked/Delayed tile counts. Kept on the stage table so the tile
@@ -4914,6 +4919,13 @@ function stageTone(value) {
 function stageCloses(value) {
   const stage = PROJECT_STAGES.find((item) => item.value === value);
   return Boolean(stage && stage.closes);
+}
+
+/* Whether a stage counts as work in progress. Not simply the opposite of `closes`: Cancelled
+   closes nothing and is not ongoing either. */
+function stageIsOngoing(value) {
+  const stage = PROJECT_STAGES.find((item) => item.value === value);
+  return Boolean(stage && stage.ongoing);
 }
 
 function blockedProjects() {
@@ -6105,7 +6117,7 @@ const CATEGORY_VIEWS = [
     value: "all",
     eyebrow: "Projects",
     title: "All projects",
-    subtitle: "Every project, ongoing and completed",
+    subtitle: "Every project, whatever its status — the only card where all of them are counted",
     empty: "No projects yet",
     hint: "Create one to get started.",
     match: () => true,
@@ -6114,10 +6126,12 @@ const CATEGORY_VIEWS = [
     value: "current",
     eyebrow: "Folder",
     title: "Ongoing projects",
-    subtitle: "Integrations still open, including any flagged At Risk, Parked or Cancelled",
+    subtitle: "Integrations being worked on, including any flagged At Risk or Parked",
     empty: "No ongoing projects",
-    hint: "Every project has gone live.",
-    match: (project) => project.status === "current",
+    hint: "Nothing is in progress right now.",
+    /* Cancelled is excluded by `ongoing`, not by `status`: it is still not closed, it is just
+       not in progress. It shows on Blocked / delayed instead. */
+    match: (project) => project.status === "current" && stageIsOngoing(projectStage(project)),
   },
   {
     value: "closed",
@@ -7377,13 +7391,13 @@ function renderProjectStage(project) {
     .join("");
   nodes.projStage.className = `stage-select ${stageClass(current)}`;
 
-  /* Say where this choice files the project, including when it flags it. A cancelled project
-     stays in Ongoing and is counted as Blocked/Delayed, which is surprising enough to spell
-     out at the point of choosing it. */
+  /* Say which dashboard cards this choice puts the project on. Cancelled is on neither Ongoing
+     nor Completed, which is surprising enough to spell out at the point of choosing it. */
   const stage = PROJECT_STAGES.find((item) => item.value === current);
   nodes.projStageNote.textContent = !stage ? ""
     : stage.closes ? "Filed under Completed projects."
-    : stage.alerts ? "Stays under Ongoing projects, and counted as Blocked/Delayed."
+    : !stage.ongoing ? "Shown under Blocked / delayed only — not Ongoing, not Completed."
+    : stage.alerts ? "Stays under Ongoing projects, and counted as Blocked / delayed."
     : "Filed under Ongoing projects.";
 }
 
