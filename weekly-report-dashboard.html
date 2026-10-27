@@ -222,9 +222,13 @@ p {
   gap: 11px;
 }
 
+/* The only line in the brand now that the "Weekly status" eyebrow above it is gone, so it sets
+   its own line height rather than inheriting one sized for a stacked pair. */
 .topbar-title {
+  margin: 0;
   font-size: 18px;
   font-weight: 600;
+  line-height: 1.2;
 }
 
 .topbar-actions {
@@ -4245,10 +4249,7 @@ small,
               <polyline points="24.5,26 35.5,19 46.5,11" fill="none" stroke="#7ed957" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
           </div>
-          <div>
-            <p class="eyebrow">Weekly status</p>
-            <h1 class="topbar-title">Weekly Report</h1>
-          </div>
+          <h1 class="topbar-title">Weekly Report</h1>
         </div>
         <div class="topbar-actions">
           <div class="search-wrap">

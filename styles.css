@@ -208,9 +208,13 @@ p {
   gap: 11px;
 }
 
+/* The only line in the brand now that the "Weekly status" eyebrow above it is gone, so it sets
+   its own line height rather than inheriting one sized for a stacked pair. */
 .topbar-title {
+  margin: 0;
   font-size: 18px;
   font-weight: 600;
+  line-height: 1.2;
 }
 
 .topbar-actions {
