@@ -2092,61 +2092,74 @@ function renderWebengageTeam() {
       });
   });
 
-  const groups = WEBENGAGE_ROLES
-    .filter((role) => byRole.get(role).size)   /* a role nobody holds is not shown at all */
-    .map((role) => `
-      <div class="team-project-group">
-        <p class="people-group-title">${escapeHtml(role)}</p>
-        <div class="row-list">
-          ${[...byRole.get(role).values()]
-            .sort((left, right) => left.name.localeCompare(right.name))
-            .map((person) => `
-              <article class="team-roster-row">
-                <div class="team-roster-name">${escapeHtml(person.name)}</div>
-                <div class="team-roster-badges">
-                  <span class="pill">${person.projects.size} project${person.projects.size === 1 ? "" : "s"}</span>
-                </div>
-              </article>`)
-            .join("")}
-        </div>
-      </div>`)
-    .join("");
+  /* One row per person per role. The role cell is written only on the first of its rows, so a
+     role held by several people reads as one block rather than as the word repeated down the
+     column. A role nobody holds is left out entirely. */
+  const rows = [];
+  WEBENGAGE_ROLES.forEach((role) => {
+    const people = [...byRole.get(role).values()].sort((a, b) => a.name.localeCompare(b.name));
+    people.forEach((person, index) => {
+      rows.push(`
+        <tr${index === 0 && rows.length ? ' class="team-table-rule"' : ""}>
+          <td class="team-table-role">${index === 0 ? escapeHtml(role) : ""}</td>
+          <td class="team-table-name">${escapeHtml(person.name)}</td>
+          <td class="team-table-count">${person.projects.size}</td>
+        </tr>`);
+    });
+  });
 
-  nodes.teamWebengage.innerHTML = groups
-    || `<p class="muted">No CSM, onboarding manager or sales owner set on any project yet. They are captured when a project is created, and editable under a project's Basic Details.</p>`;
+  nodes.teamWebengage.innerHTML = rows.length
+    ? `<table class="team-table">
+         <thead><tr><th>Role</th><th>Name</th><th class="team-table-count">Projects</th></tr></thead>
+         <tbody>${rows.join("")}</tbody>
+       </table>`
+    : `<p class="muted small-note">No CSM, onboarding manager or sales owner set on any project yet. They are captured when a project is created, and editable under a project's Basic Details.</p>`;
 }
 
-/* One section per project, headed by its name, listing that project's client points of contact.
-   Clients are the part that changes from project to project, which is why they are grouped this
-   way round rather than pooled like the WebEngage team. */
+/* One row per client contact, with its project named once per group. Clients are the part that
+   changes from project to project, which is why they are grouped this way round rather than
+   pooled like the WebEngage team. */
 function renderClientTeamsByProject() {
   if (!nodes.teamByProject) return;
 
   if (!state.projects.length) {
-    nodes.teamByProject.innerHTML = `<p class="muted">Create a project first — client contacts belong to a project.</p>`;
+    nodes.teamByProject.innerHTML = `<p class="muted small-note">Create a project first — client contacts belong to a project.</p>`;
     return;
   }
 
-  nodes.teamByProject.innerHTML = state.projects
-    .slice()
-    .sort((a, b) => (a.name || "").localeCompare(b.name || ""))
-    .map((project) => {
-      const pocs = projectPeople(project).client;
-      return `
-        <div class="team-project-group">
-          <p class="people-group-title">${escapeHtml(project.name || "Untitled project")}</p>
-          ${pocs.length
-            ? `<div class="row-list">${pocs.map((poc) => `
-                <article class="team-roster-row">
-                  <div class="team-roster-name">${escapeHtml(poc.name)}</div>
-                  <div class="team-roster-badges">
-                    ${poc.email ? `<span class="pill">${escapeHtml(poc.email)}</span>` : `<span class="pill">Client POC</span>`}
-                  </div>
-                </article>`).join("")}</div>`
-            : `<p class="muted small-note">No client points of contact captured for this project.</p>`}
-        </div>`;
-    })
-    .join("");
+  const projects = state.projects.slice().sort((a, b) => (a.name || "").localeCompare(b.name || ""));
+
+  const rows = [];
+  projects.forEach((project) => {
+    const pocs = projectPeople(project).client;
+    const name = escapeHtml(project.name || "Untitled project");
+    const rule = rows.length ? ' class="team-table-rule"' : "";
+
+    if (!pocs.length) {
+      rows.push(`
+        <tr${rule}>
+          <td class="team-table-project">${name}</td>
+          <td class="team-table-name muted">—</td>
+          <td class="muted">None captured</td>
+        </tr>`);
+      return;
+    }
+
+    pocs.forEach((poc, index) => {
+      rows.push(`
+        <tr${index === 0 ? rule : ""}>
+          <td class="team-table-project">${index === 0 ? name : ""}</td>
+          <td class="team-table-name">${escapeHtml(poc.name)}</td>
+          <td class="team-table-email">${poc.email ? escapeHtml(poc.email) : '<span class="muted">No email</span>'}</td>
+        </tr>`);
+    });
+  });
+
+  nodes.teamByProject.innerHTML = `
+    <table class="team-table">
+      <thead><tr><th>Project</th><th>Contact</th><th>Email</th></tr></thead>
+      <tbody>${rows.join("")}</tbody>
+    </table>`;
 }
 
 

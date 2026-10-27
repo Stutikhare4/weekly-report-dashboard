@@ -655,6 +655,10 @@ earlier commits used.
   was removed. Dashboard, Calendar, Team and the projects list now show 100% of their content at
   once; Templates shows 17%, because 100 template tasks cannot fit 900px and scroll in place
   instead.
+- **The Team screen became two tables.** WebEngage Team is Role / Name / Projects, Client teams is
+  Project / Contact / Email, side by side, with each role or project named once per group. It had
+  been a bordered card per person holding a single name — 1883px of page for data that now reads
+  in 427px.
 - **Cancelled is out of Ongoing too.** It had been left in Ongoing and merely flagged, on the
   grounds that Completed was the only other card. With four cards that reasoning is gone: an
   `ongoing` flag on `PROJECT_STAGES` now excludes it, so a cancelled project appears only on

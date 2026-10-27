@@ -251,10 +251,12 @@ of tasks:
 | Templates | 17% |
 
 Two of those earned their fit structurally rather than by tightening numbers, and both are worth
-keeping: the **Team** screen's role and client groups became `auto-fill` columns (they were short
-lists of one name and one pill stacked down a full-width column — 1883px for a page that now fits
-in 699px), and **Basic Details** runs its label/value pairs two abreast, since it carries more
-fields than any other card.
+keeping. **Basic Details** runs its label/value pairs two abreast, since it carries more fields
+than any other card. And the **Team** screen is two tables side by side — `#teamWebengage` is Role
+/ Name / Projects, `#teamByProject` is Project / Contact / Email, each group's label written only
+on its first row with a rule above it. Every entry on that screen is a name plus at most one other
+field, so a bordered card per name made the page mostly whitespace: 1883px originally, 699px after
+it became columns of cards, **427px as tables**, against 811px of room.
 
 `.screen[hidden] { display: none }` has to be restated here: `.screen` now sets `overflow`, and
 other rules give screens a display value, so without it every screen renders at once.

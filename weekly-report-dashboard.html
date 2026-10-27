@@ -1539,28 +1539,6 @@ button {
 
 /* ---------- Team ---------- */
 
-.team-roster-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 8px;
-  padding: 7px 11px;
-  border-radius: 9px;
-  background: var(--surface-2);
-  border: 1px solid var(--border-soft);
-}
-
-.team-roster-name {
-  font-weight: 700;
-}
-
-.team-roster-badges {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-}
-
 /* ---------- Sheet-style report tables ----------
    Intentionally always light/paper-like in both themes, since this
    mimics a printed or exported spreadsheet excerpt, not app chrome. */
@@ -3816,19 +3794,75 @@ button {
   border-top: 1px solid var(--border-soft);
 }
 
-/* The Team screen's groups — one per role, one per project — are short lists of one name and
-   one pill, so stacking them down a full-width column wasted most of the screen. They sit in
-   columns instead, which is what brings the page inside the viewport without hiding anything. */
-#teamWebengage,
-#teamByProject {
+/* The Team screen is two tables rather than cards. Every entry here is a name and at most one
+   other field, which a bordered card per name turned into a page of mostly whitespace. The
+   WebEngage side is three roles, so it takes the narrow column. */
+.team-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-  gap: 10px 14px;
-  align-content: start;
+  grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+  gap: 12px;
+  align-items: start;
 }
 
-.team-project-group {
-  min-width: 0;
+.team-note {
+  margin: 0 0 6px;
+}
+
+.team-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12.5px;
+}
+
+.team-table th {
+  text-align: left;
+  padding: 0 8px 5px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--card-label);
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+
+.team-table td {
+  padding: 4px 8px;
+  vertical-align: baseline;
+  color: var(--card-value);
+  overflow-wrap: anywhere;
+}
+
+/* A rule only where a new role or project starts, so each group reads as a block without the
+   label being repeated down the column. */
+.team-table tbody tr.team-table-rule > td {
+  border-top: 1px solid var(--border-soft);
+  padding-top: 7px;
+}
+
+.team-table-role,
+.team-table-project {
+  font-weight: 600;
+  color: var(--card-body);
+  white-space: nowrap;
+}
+
+.team-table-name {
+  font-weight: 600;
+}
+
+.team-table-email {
+  color: var(--card-body);
+}
+
+.team-table-count {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+@media (max-width: 1000px) {
+  .team-grid { grid-template-columns: minmax(0, 1fr); }
 }
 
 /* Only applies where groups still stack (a project's Basic Details card), not in the columns
@@ -4690,22 +4724,27 @@ small,
               </div>
             </div>
 
-            <section class="wizard-section">
-              <h3 class="wizard-section-title">WebEngage Team</h3>
-              <p class="muted small-note" style="margin-top:0;margin-bottom:10px;">
-                The CSM, onboarding manager and sales owner across every project. These come from each
-                project&rsquo;s Basic Details &mdash; edit them there.
-              </p>
-              <div id="teamWebengage" class="row-list"></div>
-            </section>
+            <!-- Two tables side by side: the WebEngage side is three roles, the client side is one
+                 row per contact per project, so the narrow column goes left and the wide one right.
+                 Both were stacks of bordered cards holding a single name each, which is what made
+                 this page mostly whitespace. -->
+            <div class="team-grid">
+              <section class="wizard-section">
+                <h3 class="wizard-section-title">WebEngage Team</h3>
+                <p class="muted small-note team-note">
+                  From each project&rsquo;s Basic Details &mdash; edit them there.
+                </p>
+                <div id="teamWebengage"></div>
+              </section>
 
-            <section class="wizard-section">
-              <h3 class="wizard-section-title">Client teams</h3>
-              <p class="muted small-note" style="margin-top:0;margin-bottom:10px;">
-                Each project&rsquo;s client points of contact, captured when the project was created.
-              </p>
-              <div id="teamByProject"></div>
-            </section>
+              <section class="wizard-section">
+                <h3 class="wizard-section-title">Client teams</h3>
+                <p class="muted small-note team-note">
+                  Each project&rsquo;s points of contact, captured when the project was created.
+                </p>
+                <div id="teamByProject"></div>
+              </section>
+            </div>
 
           </section>
 
@@ -7011,61 +7050,74 @@ function renderWebengageTeam() {
       });
   });
 
-  const groups = WEBENGAGE_ROLES
-    .filter((role) => byRole.get(role).size)   /* a role nobody holds is not shown at all */
-    .map((role) => `
-      <div class="team-project-group">
-        <p class="people-group-title">${escapeHtml(role)}</p>
-        <div class="row-list">
-          ${[...byRole.get(role).values()]
-            .sort((left, right) => left.name.localeCompare(right.name))
-            .map((person) => `
-              <article class="team-roster-row">
-                <div class="team-roster-name">${escapeHtml(person.name)}</div>
-                <div class="team-roster-badges">
-                  <span class="pill">${person.projects.size} project${person.projects.size === 1 ? "" : "s"}</span>
-                </div>
-              </article>`)
-            .join("")}
-        </div>
-      </div>`)
-    .join("");
+  /* One row per person per role. The role cell is written only on the first of its rows, so a
+     role held by several people reads as one block rather than as the word repeated down the
+     column. A role nobody holds is left out entirely. */
+  const rows = [];
+  WEBENGAGE_ROLES.forEach((role) => {
+    const people = [...byRole.get(role).values()].sort((a, b) => a.name.localeCompare(b.name));
+    people.forEach((person, index) => {
+      rows.push(`
+        <tr${index === 0 && rows.length ? ' class="team-table-rule"' : ""}>
+          <td class="team-table-role">${index === 0 ? escapeHtml(role) : ""}</td>
+          <td class="team-table-name">${escapeHtml(person.name)}</td>
+          <td class="team-table-count">${person.projects.size}</td>
+        </tr>`);
+    });
+  });
 
-  nodes.teamWebengage.innerHTML = groups
-    || `<p class="muted">No CSM, onboarding manager or sales owner set on any project yet. They are captured when a project is created, and editable under a project's Basic Details.</p>`;
+  nodes.teamWebengage.innerHTML = rows.length
+    ? `<table class="team-table">
+         <thead><tr><th>Role</th><th>Name</th><th class="team-table-count">Projects</th></tr></thead>
+         <tbody>${rows.join("")}</tbody>
+       </table>`
+    : `<p class="muted small-note">No CSM, onboarding manager or sales owner set on any project yet. They are captured when a project is created, and editable under a project's Basic Details.</p>`;
 }
 
-/* One section per project, headed by its name, listing that project's client points of contact.
-   Clients are the part that changes from project to project, which is why they are grouped this
-   way round rather than pooled like the WebEngage team. */
+/* One row per client contact, with its project named once per group. Clients are the part that
+   changes from project to project, which is why they are grouped this way round rather than
+   pooled like the WebEngage team. */
 function renderClientTeamsByProject() {
   if (!nodes.teamByProject) return;
 
   if (!state.projects.length) {
-    nodes.teamByProject.innerHTML = `<p class="muted">Create a project first — client contacts belong to a project.</p>`;
+    nodes.teamByProject.innerHTML = `<p class="muted small-note">Create a project first — client contacts belong to a project.</p>`;
     return;
   }
 
-  nodes.teamByProject.innerHTML = state.projects
-    .slice()
-    .sort((a, b) => (a.name || "").localeCompare(b.name || ""))
-    .map((project) => {
-      const pocs = projectPeople(project).client;
-      return `
-        <div class="team-project-group">
-          <p class="people-group-title">${escapeHtml(project.name || "Untitled project")}</p>
-          ${pocs.length
-            ? `<div class="row-list">${pocs.map((poc) => `
-                <article class="team-roster-row">
-                  <div class="team-roster-name">${escapeHtml(poc.name)}</div>
-                  <div class="team-roster-badges">
-                    ${poc.email ? `<span class="pill">${escapeHtml(poc.email)}</span>` : `<span class="pill">Client POC</span>`}
-                  </div>
-                </article>`).join("")}</div>`
-            : `<p class="muted small-note">No client points of contact captured for this project.</p>`}
-        </div>`;
-    })
-    .join("");
+  const projects = state.projects.slice().sort((a, b) => (a.name || "").localeCompare(b.name || ""));
+
+  const rows = [];
+  projects.forEach((project) => {
+    const pocs = projectPeople(project).client;
+    const name = escapeHtml(project.name || "Untitled project");
+    const rule = rows.length ? ' class="team-table-rule"' : "";
+
+    if (!pocs.length) {
+      rows.push(`
+        <tr${rule}>
+          <td class="team-table-project">${name}</td>
+          <td class="team-table-name muted">—</td>
+          <td class="muted">None captured</td>
+        </tr>`);
+      return;
+    }
+
+    pocs.forEach((poc, index) => {
+      rows.push(`
+        <tr${index === 0 ? rule : ""}>
+          <td class="team-table-project">${index === 0 ? name : ""}</td>
+          <td class="team-table-name">${escapeHtml(poc.name)}</td>
+          <td class="team-table-email">${poc.email ? escapeHtml(poc.email) : '<span class="muted">No email</span>'}</td>
+        </tr>`);
+    });
+  });
+
+  nodes.teamByProject.innerHTML = `
+    <table class="team-table">
+      <thead><tr><th>Project</th><th>Contact</th><th>Email</th></tr></thead>
+      <tbody>${rows.join("")}</tbody>
+    </table>`;
 }
 
 

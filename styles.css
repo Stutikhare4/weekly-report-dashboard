@@ -1527,28 +1527,6 @@ button {
 
 /* ---------- Team ---------- */
 
-.team-roster-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 8px;
-  padding: 7px 11px;
-  border-radius: 9px;
-  background: var(--surface-2);
-  border: 1px solid var(--border-soft);
-}
-
-.team-roster-name {
-  font-weight: 700;
-}
-
-.team-roster-badges {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-}
-
 /* ---------- Sheet-style report tables ----------
    Intentionally always light/paper-like in both themes, since this
    mimics a printed or exported spreadsheet excerpt, not app chrome. */
@@ -3804,19 +3782,75 @@ button {
   border-top: 1px solid var(--border-soft);
 }
 
-/* The Team screen's groups — one per role, one per project — are short lists of one name and
-   one pill, so stacking them down a full-width column wasted most of the screen. They sit in
-   columns instead, which is what brings the page inside the viewport without hiding anything. */
-#teamWebengage,
-#teamByProject {
+/* The Team screen is two tables rather than cards. Every entry here is a name and at most one
+   other field, which a bordered card per name turned into a page of mostly whitespace. The
+   WebEngage side is three roles, so it takes the narrow column. */
+.team-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-  gap: 10px 14px;
-  align-content: start;
+  grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+  gap: 12px;
+  align-items: start;
 }
 
-.team-project-group {
-  min-width: 0;
+.team-note {
+  margin: 0 0 6px;
+}
+
+.team-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12.5px;
+}
+
+.team-table th {
+  text-align: left;
+  padding: 0 8px 5px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--card-label);
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+
+.team-table td {
+  padding: 4px 8px;
+  vertical-align: baseline;
+  color: var(--card-value);
+  overflow-wrap: anywhere;
+}
+
+/* A rule only where a new role or project starts, so each group reads as a block without the
+   label being repeated down the column. */
+.team-table tbody tr.team-table-rule > td {
+  border-top: 1px solid var(--border-soft);
+  padding-top: 7px;
+}
+
+.team-table-role,
+.team-table-project {
+  font-weight: 600;
+  color: var(--card-body);
+  white-space: nowrap;
+}
+
+.team-table-name {
+  font-weight: 600;
+}
+
+.team-table-email {
+  color: var(--card-body);
+}
+
+.team-table-count {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+@media (max-width: 1000px) {
+  .team-grid { grid-template-columns: minmax(0, 1fr); }
 }
 
 /* Only applies where groups still stack (a project's Basic Details card), not in the columns

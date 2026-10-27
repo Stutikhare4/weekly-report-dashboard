@@ -549,22 +549,27 @@
               </div>
             </div>
 
-            <section class="wizard-section">
-              <h3 class="wizard-section-title">WebEngage Team</h3>
-              <p class="muted small-note" style="margin-top:0;margin-bottom:10px;">
-                The CSM, onboarding manager and sales owner across every project. These come from each
-                project&rsquo;s Basic Details &mdash; edit them there.
-              </p>
-              <div id="teamWebengage" class="row-list"></div>
-            </section>
+            <!-- Two tables side by side: the WebEngage side is three roles, the client side is one
+                 row per contact per project, so the narrow column goes left and the wide one right.
+                 Both were stacks of bordered cards holding a single name each, which is what made
+                 this page mostly whitespace. -->
+            <div class="team-grid">
+              <section class="wizard-section">
+                <h3 class="wizard-section-title">WebEngage Team</h3>
+                <p class="muted small-note team-note">
+                  From each project&rsquo;s Basic Details &mdash; edit them there.
+                </p>
+                <div id="teamWebengage"></div>
+              </section>
 
-            <section class="wizard-section">
-              <h3 class="wizard-section-title">Client teams</h3>
-              <p class="muted small-note" style="margin-top:0;margin-bottom:10px;">
-                Each project&rsquo;s client points of contact, captured when the project was created.
-              </p>
-              <div id="teamByProject"></div>
-            </section>
+              <section class="wizard-section">
+                <h3 class="wizard-section-title">Client teams</h3>
+                <p class="muted small-note team-note">
+                  Each project&rsquo;s points of contact, captured when the project was created.
+                </p>
+                <div id="teamByProject"></div>
+              </section>
+            </div>
 
           </section>
 
