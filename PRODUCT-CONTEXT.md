@@ -265,7 +265,8 @@ The sidebar holds Dashboard, Project Reports, Templates, Calendar, Team and Sett
 - **Four cards**, 2×2: All projects, Ongoing projects, Completed projects, Blocked / delayed
   projects. Each shows its count, up to four projects with their week position and progress, and
   a "+ N more" line; the heading opens the full list and a row opens its project. On the blocked
-  card each project shows its stage instead of its week.
+  card each project shows its stage instead of its week. Each is tinted to match what it holds:
+  purple for all projects, blue for ongoing, green for completed, red for blocked.
   These replaced a row of small tiles plus two folder cards, which listed Ongoing and Completed
   twice — once as a bare number and once as a list. Weekly Updates went with the tiles: it counted
   weekly reports rather than projects, the one number in the row not comparable with the others. **Only Completed closes a project.**

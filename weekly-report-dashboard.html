@@ -639,18 +639,43 @@ p {
    progress bar side by side; four across would make them narrow strips. One tint per card, taken
    from the app's own tokens, so the four read as distinct at a glance rather than as four
    identical boxes — the same job the small tiles' colours used to do. */
-/* `.folder-card` sets the `border` shorthand and is defined after this, so the accent has to be
-   qualified to survive it rather than relying on source order. */
+/* `.folder-card` sets the `border` and `background` shorthands and is defined after this, so both
+   have to be qualified to survive it rather than relying on source order.
+
+   One tint per card: purple, blue, green, red. Each is mixed from the app's own token rather than
+   written as a second hex value, so the same rules hold in dark mode — a few percent of a bright
+   hue over a dark surface reads as a tint there just as it does over a light one. */
 .folder-card.dash-card {
   background: var(--surface-2);
   border-top: 3px solid var(--card-border);
   min-height: 190px;
 }
 
-.folder-card.dash-card-all     { border-top-color: var(--card-accent); }
-.folder-card.dash-card-current { border-top-color: #8b5cf6; }
-.folder-card.dash-card-closed  { border-top-color: var(--card-done); }
-.folder-card.dash-card-blocked { border-top-color: var(--card-risk); }
+.folder-card.dash-card-all {
+  background: color-mix(in srgb, var(--card-accent) 11%, var(--surface-2));
+  border-top-color: var(--card-accent);
+}
+
+.folder-card.dash-card-current {
+  background: color-mix(in srgb, var(--card-info) 11%, var(--surface-2));
+  border-top-color: var(--card-info);
+}
+
+.folder-card.dash-card-closed {
+  background: color-mix(in srgb, var(--card-done) 12%, var(--surface-2));
+  border-top-color: var(--card-done);
+}
+
+.folder-card.dash-card-blocked {
+  background: color-mix(in srgb, var(--card-risk) 10%, var(--surface-2));
+  border-top-color: var(--card-risk);
+}
+
+/* The rows sit on a tint now, so they need a surface of their own to stay legible rather than
+   the near-transparent one that worked on a plain card. */
+.folder-card.dash-card .folder-card-row {
+  background: color-mix(in srgb, var(--surface-1) 86%, transparent);
+}
 
 .dash-card .folder-label {
   font-size: 1rem;
@@ -2552,6 +2577,7 @@ button {
   --card-warning: #fcd34d;
   --card-warning-soft: rgba(234, 179, 8, 0.16);
   --card-risk: #ef4444;
+  --card-info: #3b82f6;
   --card-body: var(--muted);
   --card-label: var(--muted);
   --card-value: var(--text);

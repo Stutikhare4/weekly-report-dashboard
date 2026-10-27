@@ -213,8 +213,16 @@ cards are rebuilt on every render.
 project's weekly report. Removing the dashboard's tile CSS took that row's base styles with it
 once; they are back, with a comment saying who owns them.
 
-`.folder-card.dash-card` is qualified deliberately: `.folder-card` sets the `border` shorthand and
-is defined later in the file, so an unqualified `.dash-card` loses its accent border.
+Each card is tinted — purple, blue, green, red — with a matching 3px top edge. The tints are
+`color-mix` over `--surface-2` from `--card-accent`, `--card-info`, `--card-done` and
+`--card-risk` rather than second hex values, so the same four rules hold in dark mode: a tenth of
+a bright hue over a dark surface reads as a tint there just as it does over a light one. The rows
+inside need their own `86%` surface to stay legible on a tint; the near-transparent one they use
+on a plain card disappears into it.
+
+`.folder-card.dash-card` is qualified deliberately: `.folder-card` sets both the `border` and
+`background` shorthands and is defined later in the file, so an unqualified `.dash-card` loses
+both its accent border and its tint.
 
 ## All projects is not a table
 
