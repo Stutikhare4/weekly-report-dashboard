@@ -229,6 +229,34 @@ progress.
 Because of this, **ongoing + completed does not equal total.** That is the point of the All
 projects card, and why the three counts should never be presented as a breakdown of each other.
 
+## What the notification bell lists
+
+`computeAlertItems()`. **Overdue is the main case**: a task whose week has ended and which is not
+completed. The week end *is* the deadline — there is no separate per-task deadline — so work still
+open when its week runs out is late whatever its status says.
+
+Two things make it harder than it reads, and testing found both:
+
+1. **Unfinished work does not stay in the past.** `carryForwardOverdueTasks()` copies pending and
+   in-progress tasks into the current week, so by the time the bell looks, a task that missed its
+   week is sitting in a week that has not ended. Asking "has *this* week ended" therefore missed
+   exactly the tasks the feature exists for — it reported 2 of 4 overdue cases. It asks
+   `taskOriginWeekIndex()` instead: has the week this work *started* in ended. The row names that
+   week too ("due 5th October to 11th October"), since "Overdue" beside the current week's dates
+   reads as a contradiction.
+2. **One job, one row.** A chain of copies is reported against its newest link only
+   (`taskWasForwarded` skips the older ones), and a task that is already listed does not also list
+   its sub-tasks. Without the second rule a blocked sub-task on a carried task appeared twice.
+
+Blocked and delayed are listed as well, at **both** levels. They used to be read off `subtasks`
+alone, so a *task* marked Blocked or Delayed raised nothing at all — and sub-tasks are an optional
+extra level behind a "+ Sub" link, so most real data has none. The bell read "No blocked or
+delayed items. Nice." while the report printed delayed rows, which is worse than no bell: it
+actively reassures.
+
+Not to be confused with the dashboard's **Blocked / Delayed Projects** card, which counts whole
+projects by their Status stage. Different unit, different source.
+
 ## Two icon files, on purpose
 
 - **`favicon.svg`** — the browser tab, and the header's `.brand-mark` inlines the same artwork.

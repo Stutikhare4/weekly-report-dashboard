@@ -649,6 +649,11 @@ earlier commits used.
   the leave prompts were kept.
 
 **28 October**
+- **The bell reports overdue work.** A task whose week has ended and which is not completed is now
+  listed as Overdue, named against the week it missed. It also lists blocked and delayed *tasks*,
+  not only sub-tasks — previously a task marked Blocked or Delayed raised nothing, so the bell
+  usually read "No blocked or delayed items" while the report printed delayed rows. Carried work is
+  traced back to the week it started in and reported once, against its newest copy.
 - **New artwork for the icon and the header mark** — a report sheet with a bar chart and a rising
   line. `favicon.svg` (new) is the simplified version for the browser tab and the header's brand
   mark; `icon.svg` keeps the fuller composition, with body text and a spiral-bound calendar, for

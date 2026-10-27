@@ -941,24 +941,109 @@ function navigateToScreen(screen) {
 
 /* ---------- Header (notifications + profile) ---------- */
 
+/* Walks a carried task back to the week it started in. A task that outlives its week is copied
+   forward, so the copy sitting in the current week may be the fourth link in a chain; its
+   deadline is the end of the *first* week, not the one it has been pushed into. */
+function taskOriginWeekIndex(task, weeks, index) {
+  let current = task;
+  let origin = index;
+  /* Bounded: a corrupt `copiedFromTaskId` cycle must not hang the header render. */
+  for (let step = 0; step < 60 && current && current.copiedFromTaskId; step += 1) {
+    let foundAt = -1;
+    let parent = null;
+    for (let week = 0; week < origin; week += 1) {
+      const hit = (weeks[week].tasks || []).find((item) => item.id === current.copiedFromTaskId);
+      if (hit) {
+        foundAt = week;
+        parent = hit;
+      }
+    }
+    if (foundAt === -1) break;
+    origin = foundAt;
+    current = parent;
+  }
+  return origin;
+}
+
+/* What the notification bell lists.
+
+   **Overdue is the main one**: a task whose week has ended and which is not completed. The week
+   end is the deadline — there is no separate per-task deadline to miss — so work still open when
+   its week runs out is late, whatever its status says.
+
+   Two things make this harder than it reads, and both were caught by testing rather than guessed:
+
+   1. Unfinished work does not stay in the past. `carryForwardOverdueTasks()` copies pending and
+      in-progress tasks into the current week, so by the time the bell looks, a task that missed
+      its week is sitting in a week that has not ended. Asking "has *this* week ended" therefore
+      missed exactly the tasks the feature is for. It asks `taskOriginWeekIndex()` instead — has
+      the week this work *started* in ended — so carried work is reported as late, which it is.
+   2. The same job must be counted once. A chain of copies is reported against its newest link
+      only (`taskWasForwarded` skips the older ones), and a task already listed does not also
+      list its sub-tasks, or one blocked job would show up as two rows and then three.
+
+   Blocked and delayed are listed too, at both levels. They used to be read off `subtasks` alone,
+   so a *task* marked Blocked or Delayed raised nothing — and sub-tasks are an optional extra
+   level behind a "+ Sub" link, so most real data has none. The bell read "No blocked or delayed
+   items" while the report printed delayed rows. */
 function computeAlertItems() {
   const items = [];
-  state.updates.forEach((update) => {
-    (update.tasks || []).forEach((task) => {
-      (task.subtasks || []).forEach((sub) => {
-        if (sub.status === "blocked" || sub.status === "delayed") {
+  const today = toInputDate(new Date());
+
+  state.projects.forEach((project) => {
+    const weeks = projectWeeksSorted(project.id);
+
+    weeks.forEach((week, index) => {
+      (week.tasks || []).forEach((task) => {
+        /* A later copy stands for this one — its sub-tasks included. */
+        if (taskWasForwarded(task, weeks, index)) return;
+        if (task.status === "completed") return;
+
+        const origin = weeks[taskOriginWeekIndex(task, weeks, index)];
+        const late = origin && origin.weekStart && weekHasEnded(origin, today);
+        const flagged = task.status === "blocked" || task.status === "delayed";
+
+        const base = {
+          projectId: project.id,
+          projectName: project.name || "Untitled project",
+          context: week.weekRange || formatWeekRange(week.weekStart),
+        };
+
+        if (late) {
+          /* Names the week it missed, not the one it has since been carried into — "Overdue"
+             beside the current week's dates reads as a contradiction. */
           items.push({
-            projectId: update.projectId,
-            projectName: update.projectName,
-            taskTitle: task.title,
-            subtaskTitle: sub.title,
-            status: sub.status,
+            ...base,
+            kind: "overdue",
+            title: task.title,
+            status: "delayed",
+            label: "Overdue",
+            context: `due ${origin.weekRange || formatWeekRange(origin.weekStart)}`,
           });
+          return;
         }
+        if (flagged) {
+          items.push({ ...base, kind: "flagged", title: task.title, status: task.status, label: formatStatus(task.status) });
+          return;
+        }
+
+        /* Only reached when the task itself raised nothing, so one job is never two rows. */
+        (task.subtasks || []).forEach((sub) => {
+          if (sub.status !== "blocked" && sub.status !== "delayed") return;
+          items.push({
+            ...base,
+            kind: "flagged",
+            title: `${task.title} → ${sub.title || "Sub-task"}`,
+            status: sub.status,
+            label: formatStatus(sub.status),
+          });
+        });
       });
     });
   });
-  return items;
+
+  /* Overdue first: it is the one with a date already behind it. */
+  return items.sort((left, right) => (left.kind === right.kind ? 0 : left.kind === "overdue" ? -1 : 1));
 }
 
 /* How far a project has actually got: completed tasks over all its tasks, across every week.
@@ -1067,19 +1152,24 @@ function renderHeader() {
   const alerts = computeAlertItems();
   nodes.notifBadge.textContent = `${alerts.length}`;
   nodes.notifBadge.hidden = alerts.length === 0;
+  nodes.notifBell.title = alerts.length
+    ? `${alerts.length} item${alerts.length === 1 ? "" : "s"} needing attention`
+    : "Nothing overdue, blocked or delayed";
 
   nodes.notifDropdownList.innerHTML = alerts.length
     ? alerts
         .map(
           (item) => `
             <button type="button" class="notif-item btn-notif-item" data-project-id="${item.projectId}">
-              <span class="status-badge ${statusClass(item.status)}">${escapeHtml(formatStatus(item.status))}</span>
-              <span class="notif-item-text">${escapeHtml(item.subtaskTitle)} <span class="meta">(${escapeHtml(item.projectName)})</span></span>
+              <span class="status-badge ${statusClass(item.status)}">${escapeHtml(item.label)}</span>
+              <span class="notif-item-text">${escapeHtml(item.title)}
+                <span class="meta">${escapeHtml(item.projectName)} · ${escapeHtml(item.context)}</span>
+              </span>
             </button>
           `
         )
         .join("")
-    : `<div class="empty-state">No blocked or delayed items. Nice.</div>`;
+    : `<div class="empty-state">Nothing overdue, blocked or delayed. Nice.</div>`;
 
   nodes.notifDropdownList.querySelectorAll(".btn-notif-item").forEach((button) => {
     button.addEventListener("click", () => {
