@@ -643,16 +643,15 @@ earlier commits used.
   the leave prompts were kept.
 
 **27 October**
-- **All projects is a table:** #, Project name, Domains, Duration, Kickoff date, Go live date,
-  Status, ordered by creation date so the row numbers hold still. Read-only — the whole row opens
-  the project, which is where those fields are edited.
-  Built first as an eight-column editable grid matching the team's sheet (adding TSS, Subscription
-  ETA, Actual Subscription Start and Actual Transfer Date, each cell an input); that read as
-  clutter rather than as a list, so the four fields and all the inline editing were removed the
-  same day and the keys are deleted from stored projects.
+- **All projects was built as a table, then reverted.** First as the team's own eight-column sheet
+  (adding TSS, Subscription ETA, Actual Subscription Start and Actual Transfer Date, with an input
+  in every cell), then cut back to the six fields a project already has. Both were rejected on
+  sight: a grid of inputs read as clutter, and the stripped version added nothing the cards did
+  not already say. The tile now opens the same stacked card list as the other three. The four
+  fields were never kept, and `ensureDefaults` has no trace of them.
 - **Onboarding Manager is a fourth WebEngage role**, alongside Project Owner, Sales Owner and CSM:
-  on the creation wizard, the project's Basic Details, and the Team page's role grouping. It is
-  not a table column.
+  on the creation wizard, the project's Basic Details, and the Team page's role grouping. Added
+  with the table, kept when it was reverted.
 - **The dashboard tiles are clickable.** Each opens the list of what it counted, through one
   `CATEGORY_VIEWS` table that also feeds the two folder buttons, so a count and the list behind
   it are the same question asked once.

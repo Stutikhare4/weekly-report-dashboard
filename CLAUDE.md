@@ -203,31 +203,15 @@ because `all` and `blocked` cut across the Ongoing/Completed folders instead of 
 the list it opens cannot disagree. The tiles are `<button>`s, not `<article>`s, so they are
 reachable by keyboard; `.stat-tile` undoes the browser's button defaults.
 
-## All projects (the table)
+## All projects is not a table
 
-The **All projects** view is a table, not a stack of cards — it is the one view meant to be read
-across projects, column by column. The folder views stay as cards: those are read one project at
-a time.
-
-Columns live in `PROJECT_TABLE_COLUMNS`: #, Project name, Domains, Duration, Kickoff date, Go
-live date, Status. Widths are percentages that **must total exactly 100**, because the table is
-`table-layout: fixed` — a fixed column never grows to fit its contents.
-
-**The table does not edit.** Every column reads something the project already has, and the whole
-row opens the project, where all of it is edited in one place. An earlier version added four
-fields of its own (TSS, Subscription ETA, Actual Subscription Start, Actual Transfer Date) with a
-text or date input in every cell; eight columns of picker icons read as clutter rather than as a
-list, and the four fields were dropped with it. `ensureDefaults` deletes those keys from anything
-that stored them, so no project carries data nothing reads. Onboarding Manager stayed, as a
-WebEngage role rather than a column.
-
-Two things to keep in mind before changing this:
-
-- The table is sorted by `createdAt`, not by last activity like the card views, so the row
-  numbers hold still.
-- `#categoryScreen` needs `min-width: 0`. `.content` is a grid and a grid item defaults to
-  `min-width: auto`, so without it the screen widens to the table's own min-width and hands the
-  horizontal scrollbar to the whole page. Same fix `.content` already carries, one level in.
+All four dashboard tiles open the same stacked card list; `CATEGORY_VIEWS` differs only in which
+projects each one shows. **All projects was twice built as a table and twice rejected** — first as
+the team's eight-column sheet with an editable cell per column, then cut back to the six fields a
+project already has. The first read as a grid of input chrome rather than a list; the second said
+nothing the cards did not. If it comes back, the two things that cost time were `#categoryScreen`
+needing `min-width: 0` (`.content` is a grid, and a grid item grows to its widest child instead of
+letting it scroll) and sorting by `createdAt` rather than activity, so edits do not renumber rows.
 
 ## Projects list (folder screen)
 

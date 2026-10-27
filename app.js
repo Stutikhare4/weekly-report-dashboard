@@ -1266,7 +1266,6 @@ const CATEGORY_VIEWS = [
   {
     value: "all",
     eyebrow: "Projects",
-    table: true,
     title: "All projects",
     subtitle: "Every project, ongoing and completed",
     empty: "No projects yet",
@@ -1337,15 +1336,9 @@ function relativeDay(time) {
 
 function renderCategoryScreen() {
   const view = categoryView(uiState.category);
-  /* The card views lead with whatever moved most recently. The table must not: its rows are
-     numbered and edited in place, and sorting on activity would renumber and reorder them under
-     the pointer the moment a cell was filled in. It is ordered by when each project was created,
-     which never changes. */
   const projects = state.projects
     .filter((project) => view.match(project))
-    .sort(view.table
-      ? (left, right) => (Date.parse(left.createdAt) || 0) - (Date.parse(right.createdAt) || 0)
-      : (left, right) => (projectLastActivity(right) || 0) - (projectLastActivity(left) || 0));
+    .sort((left, right) => (projectLastActivity(right) || 0) - (projectLastActivity(left) || 0));
 
   if (nodes.categoryEyebrow) nodes.categoryEyebrow.textContent = view.eyebrow;
   nodes.categoryTitle.textContent = view.title;
@@ -1354,16 +1347,6 @@ function renderCategoryScreen() {
 
   const shown = Math.min(uiState.categoryShown, projects.length);
 
-  /* All projects is a table rather than a stack of cards: it is the one view meant to be read
-     across projects, column by column, the way the team already reads it in the sheet. The
-     folder views stay as cards — they are read one project at a time. */
-  if (view.table) {
-    renderProjectTable(projects.slice(0, shown), view);
-    renderCategoryPager(projects.length, shown);
-    return;
-  }
-
-  nodes.categoryList.className = "project-card-grid";
   nodes.categoryList.innerHTML = projects.length
     ? projects.slice(0, shown).map((project) => {
         const activity = projectLastActivity(project);
@@ -1390,114 +1373,18 @@ function renderCategoryScreen() {
          <p class="muted">${escapeHtml(view.hint)}</p>
        </div>`;
 
-  renderCategoryPager(projects.length, shown);
+  const more = projects.length > shown;
+  nodes.categoryMore.hidden = projects.length <= CATEGORY_PAGE_SIZE;
+  nodes.categoryCount.textContent = `Showing ${shown} of ${projects.length}`;
+  nodes.categoryLoadMore.hidden = !more;
 
   nodes.categoryList.querySelectorAll("[data-project-id]").forEach((button) => {
     button.addEventListener("click", () => openProject(button.dataset.projectId));
   });
 }
 
-function renderCategoryPager(total, shown) {
-  const more = total > shown;
-  nodes.categoryMore.hidden = total <= CATEGORY_PAGE_SIZE;
-  nodes.categoryCount.textContent = `Showing ${shown} of ${total}`;
-  nodes.categoryLoadMore.hidden = !more;
-}
-
 function projectCardRow(label, value) {
   return `<span class="project-card-row"><span>${escapeHtml(label)}</span><span>${escapeHtml(value)}</span></span>`;
-}
-
-/* ---------- All projects: the table ---------- */
-
-/* The columns of the All projects table. Widths are percentages that must add up to 100,
-   because the table is `table-layout: fixed` — a fixed column never grows to fit its contents,
-   so the total has to be exact rather than approximately right.
-
-   Every column reads something the project already has. The table does not edit: it is read
-   across projects, and a row opens the project where all of this is edited in one place. An
-   earlier version put a text or date input in each cell, which made eight columns of picker
-   icons and read as clutter rather than as a list. */
-const PROJECT_TABLE_COLUMNS = [
-  { key: "index",  label: "#",              width: "5%",  align: "right" },
-  { key: "name",   label: "Project name",   width: "26%" },
-  { key: "domains", label: "Domains",       width: "19%" },
-  { key: "weeks",  label: "Duration",       width: "11%" },
-  { key: "ko",     label: "Kickoff date",   width: "13%" },
-  { key: "golive", label: "Go live date",   width: "13%" },
-  { key: "stage",  label: "Status",         width: "13%" },
-];
-
-function projectTableCell(project, column, index) {
-  const text = (value, extra = "") =>
-    `<td class="${extra}">${value ? escapeHtml(value) : '<span class="pt-blank">—</span>'}</td>`;
-
-  switch (column.key) {
-    case "index":
-      return `<td class="pt-index">${index + 1}</td>`;
-    case "name":
-      return `<td class="pt-name">${escapeHtml(project.name || "Untitled project")}</td>`;
-    case "domains":
-      return text((project.platforms || []).map(platformLabel).join(", "), "pt-muted");
-    case "weeks":
-      return text(`${project.cycleWeeks || DEFAULT_CYCLE_WEEKS} weeks`, "pt-muted");
-    case "ko":
-      return text(project.kickoffDate ? formatSummaryDate(project.kickoffDate) : "", "pt-date");
-    case "golive":
-      return text(project.goLiveDate ? formatSummaryDate(project.goLiveDate) : "", "pt-date");
-    case "stage": {
-      const stage = projectStage(project);
-      return `<td><span class="project-card-status tone-${stageTone(stage)}">
-          <span class="project-card-dot" aria-hidden="true"></span>${escapeHtml(stageLabel(stage))}
-        </span></td>`;
-    }
-    default:
-      return "<td></td>";
-  }
-}
-
-function renderProjectTable(projects, view) {
-  if (!projects.length) {
-    nodes.categoryList.className = "project-card-grid";
-    nodes.categoryList.innerHTML = `
-      <div class="empty-state">
-        <p><strong>${escapeHtml(view.empty)}</strong></p>
-        <p class="muted">${escapeHtml(view.hint)}</p>
-      </div>`;
-    return;
-  }
-
-  nodes.categoryList.className = "project-table-wrap";
-  nodes.categoryList.innerHTML = `
-    <table class="project-table">
-      <colgroup>${PROJECT_TABLE_COLUMNS.map((column) => `<col style="width:${column.width}" />`).join("")}</colgroup>
-      <thead>
-        <tr>${PROJECT_TABLE_COLUMNS
-          .map((column) => `<th scope="col" class="${column.align === "right" ? "pt-index" : ""}">${escapeHtml(column.label)}</th>`)
-          .join("")}</tr>
-      </thead>
-      <tbody>
-        ${projects.map((project, index) => `
-          <tr tabindex="0" role="button" data-project-id="${project.id}"
-              aria-label="Open ${escapeHtml(project.name || "Untitled project")}">
-            ${PROJECT_TABLE_COLUMNS.map((column) => projectTableCell(project, column, index)).join("")}
-          </tr>`).join("")}
-      </tbody>
-    </table>`;
-
-  /* The whole row opens the project, rather than only the name: in a table the row is what the
-     eye and the pointer both treat as the thing. Rows take focus and Enter so that still holds
-     on a keyboard. */
-  nodes.categoryList.querySelectorAll("tr[data-project-id]").forEach((row) => {
-    const open = () => openProject(row.dataset.projectId);
-    row.addEventListener("click", open);
-    row.addEventListener("keydown", (event) => {
-      if (event.key === "Enter" || event.key === " ") {
-        event.preventDefault();
-        open();
-      }
-    });
-  });
 }
 
 function renderProjectScreen() {
@@ -2432,19 +2319,12 @@ function ensureDefaults(targetState) {
     if (project.vendorName === undefined) project.vendorName = "";
     if (project.crmTool === undefined) project.crmTool = "";
 
-    ["csm", "implementationOwner", "salesOwner", "onboardingManager",
-      "kickoffDate", "goLiveDate",
+    ["csm", "implementationOwner", "salesOwner", "onboardingManager", "kickoffDate", "goLiveDate",
       "otherToolName", "cdpOtherName", "integrationRequirementOther", "accessRequiredOther", "specialRequirements",
       "knownBlockers", "dependencies", "additionalComments", "docsLink", "testEnvironment",
       "integrationNotes"].forEach((key) => {
       if (project[key] === undefined) project[key] = "";
     });
-
-    /* Added for an eight-column All projects table, then dropped with it when the table was cut
-       back to what the project already has. Deleted rather than ignored, so a stored project does
-       not carry keys nothing reads. */
-    ["tss", "subscriptionEta", "actualSubscriptionStart", "actualTransferDate"]
-      .forEach((key) => { delete project[key]; });
 
     if (project.isDraft === undefined) project.isDraft = false;
     if (!Number.isFinite(project.cycleWeeks)) project.cycleWeeks = DEFAULT_CYCLE_WEEKS;
@@ -2619,8 +2499,8 @@ function overviewFields(rows) {
 }
 
 /* Who is on a project, in the two groups the team thinks in: WebEngage staff and the client's
-   people. The WebEngage side comes from the four fields the creation wizard captures, plus
-   anyone added for this project alone on the Team page — nothing here is entered twice. */
+   people. The WebEngage side comes from the three fields the creation wizard already captures,
+   plus anyone added for this project alone on the Team page — nothing here is entered twice. */
 function projectPeople(project) {
   const webengage = [
     { name: (project.csm || "").trim(), role: "CSM" },
