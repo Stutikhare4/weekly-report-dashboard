@@ -3146,6 +3146,40 @@ button {
   line-height: 1.6;
 }
 
+/* The executive summary, between the project summary and the week tables. A label column and a
+   value column, so Progress / Milestones / Delivered / Blockers line up down the left and the
+   eye can find the one it wants without reading the others. */
+.exec-summary-card .exec-summary-list {
+  display: grid;
+  grid-template-columns: minmax(130px, max-content) minmax(0, 1fr);
+  gap: 4px 18px;
+  margin: 8px 0 0;
+  font-size: 0.88rem;
+  line-height: 1.55;
+}
+
+.exec-summary-card dt {
+  font-weight: 600;
+  color: var(--card-body);
+}
+
+.exec-summary-card dd {
+  margin: 0;
+  color: var(--card-value);
+  overflow-wrap: anywhere;
+}
+
+/* A blocker after the first has no label of its own — the group is headed once — so its value
+   still sits in the value column. */
+.exec-summary-card dt:empty {
+  min-height: 1px;
+}
+
+@media (max-width: 700px) {
+  .exec-summary-card .exec-summary-list { grid-template-columns: minmax(0, 1fr); }
+  .exec-summary-card dt { margin-top: 6px; }
+}
+
 .log-card .sheet-report {
   margin-top: 4px;
 }

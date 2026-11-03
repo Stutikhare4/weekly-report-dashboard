@@ -650,6 +650,12 @@ earlier commits used.
 - A Save button added to the week modal's header, then removed on request; change detection and
   the leave prompts were kept.
 
+**3 November**
+- **The report opens with an executive summary.** Above the week tables: overall progress, phases
+  completed, what was delivered in the weeks shown, and each blocker with its owner and the reason
+  recorded against it. All of it derived from the tasks, so it cannot disagree with the tables, and
+  it appears identically in the on-screen preview, the printed PDF and the emailed HTML.
+
 **28 October**
 - **Recent updates panel removed** from the dashboard. It listed each project's latest week and
   progress, which the four cards above it already showed.

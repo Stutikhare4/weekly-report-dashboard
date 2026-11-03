@@ -3160,6 +3160,40 @@ button {
   line-height: 1.6;
 }
 
+/* The executive summary, between the project summary and the week tables. A label column and a
+   value column, so Progress / Milestones / Delivered / Blockers line up down the left and the
+   eye can find the one it wants without reading the others. */
+.exec-summary-card .exec-summary-list {
+  display: grid;
+  grid-template-columns: minmax(130px, max-content) minmax(0, 1fr);
+  gap: 4px 18px;
+  margin: 8px 0 0;
+  font-size: 0.88rem;
+  line-height: 1.55;
+}
+
+.exec-summary-card dt {
+  font-weight: 600;
+  color: var(--card-body);
+}
+
+.exec-summary-card dd {
+  margin: 0;
+  color: var(--card-value);
+  overflow-wrap: anywhere;
+}
+
+/* A blocker after the first has no label of its own — the group is headed once — so its value
+   still sits in the value column. */
+.exec-summary-card dt:empty {
+  min-height: 1px;
+}
+
+@media (max-width: 700px) {
+  .exec-summary-card .exec-summary-list { grid-template-columns: minmax(0, 1fr); }
+  .exec-summary-card dt { margin-top: 6px; }
+}
+
 .log-card .sheet-report {
   margin-top: 4px;
 }
@@ -6495,7 +6529,109 @@ function buildReport(projectId) {
     goLiveDate: project.goLiveDate || "",
     totalUpdates: allWeeks.length,
     weeks,
+    summary: buildExecutiveSummary(project, allWeeks, weeks),
   };
+}
+
+/* The executive summary that sits above the week tables.
+
+   It answers the two questions someone asks before they read a task table: what got finished,
+   and what is stuck. Everything here is derived — nothing new is stored and nothing is typed a
+   second time — so it cannot disagree with the tables underneath it.
+
+   The percentage comes from `projectProgress()`, the same function behind every progress bar in
+   the app. Computing it here instead would be a second definition of "done", and the summary
+   would eventually read 67% beside a bar drawn at 71%.
+
+   Delivered and blockers are scoped to the **weeks the report covers**, because that is what the
+   report is about. Milestones are scoped to the **whole project**: a phase is a milestone only
+   once all of it is finished, whenever that happened. */
+function buildExecutiveSummary(project, allWeeks, reportWeeks) {
+  const rows = reportWeeks.flatMap((week) => week.rows || []);
+
+  /* By title: a task carried across weeks is one piece of work, and a report covering two weeks
+     would otherwise list it twice. */
+  const uniqueTitles = (list) => [...new Set(list.map((row) => (row.title || "").trim()).filter(Boolean))];
+
+  const delivered = uniqueTitles(rows.filter((row) => row.status === "completed"));
+
+  const blockers = [];
+  const blockerSeen = new Set();
+  rows.forEach((row) => {
+    if (row.status !== "blocked" && row.status !== "delayed") return;
+    const title = (row.title || "").trim();
+    if (!title || blockerSeen.has(title)) return;
+    blockerSeen.add(title);
+    blockers.push({
+      title,
+      owner: (row.owner || "").trim(),
+      status: row.status,
+      /* Whatever the week editor recorded about why. `blocker` is the dedicated field; comments
+         is where people actually write it, so both are read. */
+      note: (row.blocker || row.comments || "").trim(),
+    });
+  });
+
+  /* A phase counts as a milestone when every task in it, across every week of the project, is
+     completed. A phase with nothing in it yet is not a milestone. */
+  const phases = new Map();
+  allWeeks.forEach((week) => {
+    (week.tasks || []).forEach((task) => {
+      const phase = (task.phase || "").trim();
+      if (!phase) return;
+      if (!phases.has(phase)) phases.set(phase, { total: 0, done: 0 });
+      const entry = phases.get(phase);
+      entry.total += 1;
+      if (task.status === "completed") entry.done += 1;
+    });
+  });
+  const milestones = [...phases.entries()]
+    .filter(([, entry]) => entry.total && entry.done === entry.total)
+    .map(([phase]) => phase);
+
+  let total = 0;
+  let done = 0;
+  allWeeks.forEach((week) => (week.tasks || []).forEach((task) => {
+    total += 1;
+    if (task.status === "completed") done += 1;
+  }));
+
+  return {
+    percent: projectProgress(project.id),
+    done,
+    total,
+    delivered,
+    blockers,
+    milestones,
+  };
+}
+
+/* The summary as label/value pairs, so the on-screen, printed and emailed copies format one set
+   of content three ways rather than deriving it three times. A line with nothing to say is left
+   out entirely — "Blockers: none" is noise in a report that is read for its blockers. */
+function executiveSummaryLines(summary) {
+  if (!summary) return [];
+  const lines = [];
+
+  if (summary.total) {
+    lines.push(["Progress", `${summary.percent}% complete — ${summary.done} of ${summary.total} tasks`]);
+  }
+  if (summary.milestones.length) {
+    lines.push(["Milestones complete", summary.milestones.join(", ")]);
+  }
+  if (summary.delivered.length) {
+    lines.push([`Delivered this period (${summary.delivered.length})`, summary.delivered.join(", ")]);
+  }
+  summary.blockers.forEach((item, index) => {
+    const who = item.owner ? ` (${item.owner})` : "";
+    const why = item.note ? ` — ${item.note}` : "";
+    lines.push([
+      index === 0 ? `${summary.blockers.length === 1 ? "Blocker" : "Blockers"} (${summary.blockers.length})` : "",
+      `${item.title}${who}${why}`,
+    ]);
+  });
+
+  return lines;
 }
 
 /* The week number, its dates, and whether it is last week or this one — nothing else. The phase
@@ -6640,6 +6776,7 @@ function renderReport(report) {
 
   nodes.projectReportOutput.innerHTML = `
     ${buildProjectSummaryCard(report)}
+    ${buildExecutiveSummaryCard(report)}
     ${weekTables}
   `;
 }
@@ -6664,6 +6801,25 @@ function buildProjectSummaryCard(report) {
           <div><strong>${escapeHtml(label)}:</strong> ${escapeHtml(value)}</div>
         `).join("")}
       </div>
+    </div>
+  `;
+}
+
+/* Above the tables, under the project summary: what got finished and what is stuck, before any
+   detail. The tables stay for whoever needs them. */
+function buildExecutiveSummaryCard(report) {
+  const lines = executiveSummaryLines(report.summary);
+  if (!lines.length) return "";
+
+  return `
+    <div class="report-block exec-summary-card">
+      <h3>Executive summary</h3>
+      <dl class="exec-summary-list">
+        ${lines.map(([label, value]) => `
+          <dt>${escapeHtml(label)}</dt>
+          <dd>${escapeHtml(value)}</dd>
+        `).join("")}
+      </dl>
     </div>
   `;
 }
@@ -6696,10 +6852,13 @@ function buildReportPrintHtml(report) {
     .summary-card { border: 1px solid #d1d5db; border-radius: 6px; padding: 14px 16px; margin-bottom: 22px; background: #f9fafb; break-inside: avoid; }
     .summary-card h2 { font-family: Georgia, "Times New Roman", serif; font-size: 1.05rem; margin: 0 0 10px; }
     .summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 6px 20px; font-size: 0.84rem; }
+    .exec-line { font-size: 0.84rem; line-height: 1.5; margin: 0 0 4px; }
+    .exec-line:last-child { margin-bottom: 0; }
     @page { size: landscape; margin: 12mm; }
     @media print { body { padding: 0; } }
   `;
 
+  const execLines = executiveSummaryLines(report.summary);
   const weeksHtml = report.weeks.length
     ? report.weeks.map((week) => buildSheetReportTable(weekHeading(week), week.rows, true)).join("")
     : `<div class="sheet-report"><div class="empty-note">No weekly reports entered yet for this project.</div></div>`;
@@ -6725,6 +6884,10 @@ function buildReportPrintHtml(report) {
       ${summaryRows.map(([label, value]) => `<div><strong>${escapeHtml(label)}:</strong> ${escapeHtml(value)}</div>`).join("")}
     </div>
   </div>
+  ${execLines.length ? `<div class="summary-card exec-card">
+    <h2>Executive summary</h2>
+    ${execLines.map(([label, value]) => `<p class="exec-line">${label ? `<strong>${escapeHtml(label)}:</strong> ` : ""}${escapeHtml(value)}</p>`).join("")}
+  </div>` : ""}
   ${weeksHtml}
 </body>
 </html>`;
@@ -6761,6 +6924,7 @@ const EMAIL_STYLE = {
   card: "border:1px solid #d1d5db;border-radius:6px;padding:12px 14px;margin:0 0 18px;background:#f9fafb;",
   cardH: "font-size:15px;margin:0 0 8px;font-family:Georgia,'Times New Roman',serif;",
   cardRow: "font-size:13px;padding:2px 16px 2px 0;",
+  execLine: "font-size:13px;line-height:1.5;margin:0 0 4px;",
   banner: "background:#fde047;color:#1f2937;font-weight:bold;text-align:center;padding:9px;font-size:14px;border:1px solid #d1d5db;border-bottom:0;",
   table: "width:100%;border-collapse:collapse;background:#ffffff;margin:0 0 18px;",
   th: "background:#fef9c3;color:#1f2937;padding:7px 9px;border:1px solid #d1d5db;font-size:12px;text-align:left;",
@@ -6783,6 +6947,7 @@ function buildReportEmailHtml(report) {
     ["Target go-live", report.goLiveDate ? formatSummaryDate(report.goLiveDate) : ""],
   ].filter(([, value]) => value);
 
+  const execLines = executiveSummaryLines(report.summary);
   const tables = report.weeks.map((week) => {
     const body = week.rows.map((row) => `
       <tr>
@@ -6808,6 +6973,10 @@ function buildReportEmailHtml(report) {
 <div style="${EMAIL_STYLE.cardH}">Project summary</div>
 <table cellspacing="0" cellpadding="0" border="0"><tr>${summaryRows.map(([l, v]) => `<td style="${EMAIL_STYLE.cardRow}"><strong>${escapeHtml(l)}:</strong> ${escapeHtml(v)}</td>`).join("")}</tr></table>
 </div>
+${execLines.length ? `<div style="${EMAIL_STYLE.card}">
+<div style="${EMAIL_STYLE.cardH}">Executive summary</div>
+${execLines.map(([l, v]) => `<div style="${EMAIL_STYLE.execLine}">${l ? `<strong>${escapeHtml(l)}:</strong> ` : ""}${escapeHtml(v)}</div>`).join("")}
+</div>` : ""}
 ${tables}
 </div>`;
 }

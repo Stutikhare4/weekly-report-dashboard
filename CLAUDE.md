@@ -229,6 +229,31 @@ progress.
 Because of this, **ongoing + completed does not equal total.** That is the point of the All
 projects card, and why the three counts should never be presented as a breakdown of each other.
 
+## The report's executive summary
+
+Between the project summary and the week tables: **what got finished, and what is stuck**, before
+any detail. The tables stay for whoever needs them.
+
+`buildExecutiveSummary()` puts it on the report model as `report.summary`, and
+`executiveSummaryLines()` turns that into label/value pairs. The three report builders — on
+screen, printed PDF, emailed HTML — then format **one** set of content three ways, rather than
+each deriving it again. Lines with nothing to say are dropped: "Blockers: none" is noise in a
+report people open to read the blockers.
+
+Everything is derived, nothing stored, so the summary cannot disagree with the tables beneath it.
+Two deliberate choices:
+
+- The percentage comes from `projectProgress()`, the same function behind every progress bar in
+  the app. Computing it here would be a second definition of "done", and the summary would
+  eventually read 67% beside a bar drawn at 71%.
+- **Delivered and blockers cover the weeks the report shows**; **milestones cover the whole
+  project.** A phase is a milestone only when all of it is finished, whenever that happened — not
+  only if it finished this fortnight. Both delivered and blockers dedupe by title, since a task
+  carried between the two reported weeks is one piece of work, not two.
+
+A blocker's "why" reads `blocker` first, then `comments`: `blocker` is the dedicated field but
+`comments` is where people actually write it.
+
 ## What the notification bell lists
 
 `computeAlertItems()`. **Overdue is the main case**: a task whose week has ended and which is not
