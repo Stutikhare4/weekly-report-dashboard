@@ -1564,11 +1564,11 @@ function buildReport(projectId) {
    and what is stuck. Everything here is derived — nothing new is stored and nothing is typed a
    second time — so it cannot disagree with the tables underneath it.
 
-   The percentage comes from `projectProgress()`, the same function behind every progress bar in
-   the app. Computing it here instead would be a second definition of "done", and the summary
-   would eventually read 67% beside a bar drawn at 71%.
+   It carried an overall percentage at the top, which was dropped: the summary is a list of what
+   is done, open and stuck, and a figure for the whole project sat oddly above three lists scoped
+   to a fortnight.
 
-   Delivered and blockers are scoped to the **weeks the report covers**, because that is what the
+   Completed, incomplete and blockers are scoped to the **weeks the report covers**, because that is what the
    report is about. Milestones are scoped to the **whole project**: a phase is a milestone only
    once all of it is finished, whenever that happened. */
 function buildExecutiveSummary(project, allWeeks, reportWeeks) {
@@ -1579,6 +1579,13 @@ function buildExecutiveSummary(project, allWeeks, reportWeeks) {
   const uniqueTitles = (list) => [...new Set(list.map((row) => (row.title || "").trim()).filter(Boolean))];
 
   const delivered = uniqueTitles(rows.filter((row) => row.status === "completed"));
+
+  /* Everything still open and not blocked. "not started" is in here alongside in-progress and
+     pending: it is plainly incomplete, and leaving it out would let a task appear nowhere in the
+     summary at all. Blocked and delayed are left for the blockers line, so no task is listed
+     twice. */
+  const incomplete = uniqueTitles(rows.filter((row) =>
+    row.status === "in progress" || row.status === "pending" || row.status === "not started"));
 
   const blockers = [];
   const blockerSeen = new Set();
@@ -1614,18 +1621,9 @@ function buildExecutiveSummary(project, allWeeks, reportWeeks) {
     .filter(([, entry]) => entry.total && entry.done === entry.total)
     .map(([phase]) => phase);
 
-  let total = 0;
-  let done = 0;
-  allWeeks.forEach((week) => (week.tasks || []).forEach((task) => {
-    total += 1;
-    if (task.status === "completed") done += 1;
-  }));
-
   return {
-    percent: projectProgress(project.id),
-    done,
-    total,
     delivered,
+    incomplete,
     blockers,
     milestones,
   };
@@ -1638,14 +1636,14 @@ function executiveSummaryLines(summary) {
   if (!summary) return [];
   const lines = [];
 
-  if (summary.total) {
-    lines.push(["Progress", `${summary.percent}% complete — ${summary.done} of ${summary.total} tasks`]);
-  }
   if (summary.milestones.length) {
     lines.push(["Milestones complete", summary.milestones.join(", ")]);
   }
   if (summary.delivered.length) {
-    lines.push([`Delivered this period (${summary.delivered.length})`, summary.delivered.join(", ")]);
+    lines.push([`Completed (${summary.delivered.length})`, summary.delivered.join(", ")]);
+  }
+  if (summary.incomplete.length) {
+    lines.push([`Incomplete (${summary.incomplete.length})`, summary.incomplete.join(", ")]);
   }
   summary.blockers.forEach((item, index) => {
     const who = item.owner ? ` (${item.owner})` : "";

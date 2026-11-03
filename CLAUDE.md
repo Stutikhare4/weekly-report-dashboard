@@ -240,16 +240,21 @@ screen, printed PDF, emailed HTML — then format **one** set of content three w
 each deriving it again. Lines with nothing to say are dropped: "Blockers: none" is noise in a
 report people open to read the blockers.
 
+The lines are **Milestones complete**, **Completed**, **Incomplete**, **Blockers**. It also
+carried an overall percentage at the top, which was dropped — a figure for the whole project sat
+oddly above three lists scoped to a fortnight.
+
 Everything is derived, nothing stored, so the summary cannot disagree with the tables beneath it.
 Two deliberate choices:
 
-- The percentage comes from `projectProgress()`, the same function behind every progress bar in
-  the app. Computing it here would be a second definition of "done", and the summary would
-  eventually read 67% beside a bar drawn at 71%.
-- **Delivered and blockers cover the weeks the report shows**; **milestones cover the whole
-  project.** A phase is a milestone only when all of it is finished, whenever that happened — not
-  only if it finished this fortnight. Both delivered and blockers dedupe by title, since a task
-  carried between the two reported weeks is one piece of work, not two.
+- **Every task lands in exactly one list.** Completed, then in-progress / pending / not-started
+  under Incomplete, then blocked / delayed under Blockers. "not started" is counted as incomplete
+  rather than left out, or a task would appear nowhere in the summary at all; blocked and delayed
+  are kept out of Incomplete so nothing is listed twice.
+- **Completed, incomplete and blockers cover the weeks the report shows**; **milestones cover the
+  whole project.** A phase is a milestone only when all of it is finished, whenever that happened
+  — not only if it finished this fortnight. All three lists dedupe by title, since a task carried
+  between the two reported weeks is one piece of work, not two.
 
 A blocker's "why" reads `blocker` first, then `comments`: `blocker` is the dedicated field but
 `comments` is where people actually write it.

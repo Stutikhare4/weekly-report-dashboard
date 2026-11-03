@@ -651,9 +651,9 @@ earlier commits used.
   the leave prompts were kept.
 
 **3 November**
-- **The report opens with an executive summary.** Above the week tables: overall progress, phases
-  completed, what was delivered in the weeks shown, and each blocker with its owner and the reason
-  recorded against it. All of it derived from the tasks, so it cannot disagree with the tables, and
+- **The report opens with an executive summary.** Above the week tables: phases completed, the
+  tasks finished in the weeks shown, the tasks still open, and each blocker with its owner and the
+  reason recorded against it. Every task falls into exactly one of those lists. All of it derived from the tasks, so it cannot disagree with the tables, and
   it appears identically in the on-screen preview, the printed PDF and the emailed HTML.
 
 **28 October**
