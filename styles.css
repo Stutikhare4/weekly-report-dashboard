@@ -3169,6 +3169,18 @@ button {
   overflow-wrap: anywhere;
 }
 
+/* Status reads at a glance: green when nothing is blocked, red when something is. Tokens, so
+   both hold up in dark mode. */
+.exec-summary-card .exec-tone-good {
+  color: var(--card-done);
+  font-weight: 700;
+}
+
+.exec-summary-card .exec-tone-risk {
+  color: var(--card-risk);
+  font-weight: 700;
+}
+
 /* A blocker after the first has no label of its own — the group is headed once — so its value
    still sits in the value column. */
 .exec-summary-card dt:empty {

@@ -651,9 +651,13 @@ earlier commits used.
   the leave prompts were kept.
 
 **3 November**
-- **The report opens with an executive summary.** Above the week tables: phases completed, the
-  tasks finished in the weeks shown, the tasks still open, and each blocker with its owner and the
-  reason recorded against it. Every task falls into exactly one of those lists. All of it derived from the tasks, so it cannot disagree with the tables, and
+- **The report opens with an executive summary** — four lines, for senior readers: **Status**
+  (At risk in red when anything is blocked, otherwise On track in green), **Done** (phases fully
+  complete, plus how many tasks finished this week), **Blocker** (one line per blocked task: name,
+  short reason, owner — or "None"), and **Next** (the first open task of the following week). All
+  derived from the tasks, and identical in the on-screen, PDF and email copies. It was first built
+  as full lists of completed and incomplete task names with a progress percentage, which was
+  accurate and far too long for the people it is written for. All of it derived from the tasks, so it cannot disagree with the tables, and
   it appears identically in the on-screen preview, the printed PDF and the emailed HTML.
 
 **28 October**

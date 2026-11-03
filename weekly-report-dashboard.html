@@ -3183,6 +3183,18 @@ button {
   overflow-wrap: anywhere;
 }
 
+/* Status reads at a glance: green when nothing is blocked, red when something is. Tokens, so
+   both hold up in dark mode. */
+.exec-summary-card .exec-tone-good {
+  color: var(--card-done);
+  font-weight: 700;
+}
+
+.exec-summary-card .exec-tone-risk {
+  color: var(--card-risk);
+  font-weight: 700;
+}
+
 /* A blocker after the first has no label of its own — the group is headed once — so its value
    still sits in the value column. */
 .exec-summary-card dt:empty {
@@ -6533,54 +6545,36 @@ function buildReport(projectId) {
   };
 }
 
-/* The executive summary that sits above the week tables.
+/* The executive summary above the week tables — four lines, written for someone who will not
+   read the tables: Status, Done, Blocker, Next. The tables stay underneath for whoever needs them.
 
-   It answers the two questions someone asks before they read a task table: what got finished,
-   and what is stuck. Everything here is derived — nothing new is stored and nothing is typed a
-   second time — so it cannot disagree with the tables underneath it.
-
-   It carried an overall percentage at the top, which was dropped: the summary is a list of what
-   is done, open and stuck, and a figure for the whole project sat oddly above three lists scoped
-   to a fortnight.
-
-   Completed, incomplete and blockers are scoped to the **weeks the report covers**, because that is what the
-   report is about. Milestones are scoped to the **whole project**: a phase is a milestone only
-   once all of it is finished, whenever that happened. */
+   Everything is derived from the tasks, so the summary cannot disagree with the tables below it,
+   and the same four lines are produced for every project and every week. */
 function buildExecutiveSummary(project, allWeeks, reportWeeks) {
-  const rows = reportWeeks.flatMap((week) => week.rows || []);
+  const current = reportWeeks.find((week) => week.tag === "current") || reportWeeks[reportWeeks.length - 1];
+  const currentRows = (current && current.rows) || [];
 
-  /* By title: a task carried across weeks is one piece of work, and a report covering two weeks
-     would otherwise list it twice. */
-  const uniqueTitles = (list) => [...new Set(list.map((row) => (row.title || "").trim()).filter(Boolean))];
+  /* Status is read off blocked work alone, not the project's own stage: the stage is an internal
+     judgement and was deliberately kept out of this report. */
+  const blockedRows = reportWeeks
+    .flatMap((week) => week.rows || [])
+    .filter((row) => row.status === "blocked");
 
-  const delivered = uniqueTitles(rows.filter((row) => row.status === "completed"));
-
-  /* Everything still open and not blocked. "not started" is in here alongside in-progress and
-     pending: it is plainly incomplete, and leaving it out would let a task appear nowhere in the
-     summary at all. Blocked and delayed are left for the blockers line, so no task is listed
-     twice. */
-  const incomplete = uniqueTitles(rows.filter((row) =>
-    row.status === "in progress" || row.status === "pending" || row.status === "not started"));
-
+  const seen = new Set();
   const blockers = [];
-  const blockerSeen = new Set();
-  rows.forEach((row) => {
-    if (row.status !== "blocked" && row.status !== "delayed") return;
+  blockedRows.forEach((row) => {
     const title = (row.title || "").trim();
-    if (!title || blockerSeen.has(title)) return;
-    blockerSeen.add(title);
+    if (!title || seen.has(title)) return;
+    seen.add(title);
     blockers.push({
       title,
       owner: (row.owner || "").trim(),
-      status: row.status,
-      /* Whatever the week editor recorded about why. `blocker` is the dedicated field; comments
-         is where people actually write it, so both are read. */
-      note: (row.blocker || row.comments || "").trim(),
+      reason: shortReason(row.blocker || row.comments || ""),
     });
   });
 
-  /* A phase counts as a milestone when every task in it, across every week of the project, is
-     completed. A phase with nothing in it yet is not a milestone. */
+  /* A phase is a milestone only when every task in it, across the whole project, is completed —
+     so a phase with anything still open or blocked is never listed. */
   const phases = new Map();
   allWeeks.forEach((week) => {
     (week.tasks || []).forEach((task) => {
@@ -6596,39 +6590,76 @@ function buildExecutiveSummary(project, allWeeks, reportWeeks) {
     .filter(([, entry]) => entry.total && entry.done === entry.total)
     .map(([phase]) => phase);
 
+  const completedThisWeek = new Set(
+    currentRows.filter((row) => row.status === "completed")
+      .map((row) => (row.title || "").trim())
+      .filter(Boolean)
+  ).size;
+
   return {
-    delivered,
-    incomplete,
-    blockers,
+    status: blockers.length ? { label: "At risk", tone: "risk" } : { label: "On track", tone: "good" },
     milestones,
+    completedThisWeek,
+    blockers,
+    next: nextScheduledTask(allWeeks, current),
   };
 }
 
-/* The summary as label/value pairs, so the on-screen, printed and emailed copies format one set
-   of content three ways rather than deriving it three times. A line with nothing to say is left
-   out entirely — "Blockers: none" is noise in a report that is read for its blockers. */
+/* The blocker reason as written in the week editor, cut to about ten words. The full text is in
+   the table's Comments column; this line is for someone scanning four lines. */
+function shortReason(text) {
+  const words = String(text || "").replace(/\s+/g, " ").trim().replace(/[.;]+$/, "").split(" ").filter(Boolean);
+  if (!words.length) return "";
+  return words.length <= 10 ? words.join(" ") : `${words.slice(0, 10).join(" ")}\u2026`;
+}
+
+/* The first open task of the week after the one being reported — what happens next. Ordered by
+   due date, then by the order the week itself holds, so "first by schedule" means the same thing
+   whether or not dates have been filled in. */
+function nextScheduledTask(allWeeks, current) {
+  if (!current) return "";
+  const following = allWeeks
+    .filter((week) => week.weekStart > current.weekStart)
+    .sort((left, right) => left.weekStart.localeCompare(right.weekStart))[0];
+  if (!following) return "";
+
+  const open = (following.tasks || [])
+    .map((task, index) => ({ task, index }))
+    .filter(({ task }) => task.status !== "completed")
+    .sort((left, right) => {
+      const byDate = String(left.task.dueDate || "").localeCompare(String(right.task.dueDate || ""));
+      return byDate || left.index - right.index;
+    })[0];
+
+  return open ? (open.task.title || "").trim() : "";
+}
+
+/* The four lines, as { label, value, tone }. The three report builders — on screen, printed,
+   emailed — format this one set of content three ways rather than each deriving it again, which
+   is what keeps the HTML, PDF and email copies identical. */
 function executiveSummaryLines(summary) {
   if (!summary) return [];
-  const lines = [];
 
-  if (summary.milestones.length) {
-    lines.push(["Milestones complete", summary.milestones.join(", ")]);
-  }
-  if (summary.delivered.length) {
-    lines.push([`Completed (${summary.delivered.length})`, summary.delivered.join(", ")]);
-  }
-  if (summary.incomplete.length) {
-    lines.push([`Incomplete (${summary.incomplete.length})`, summary.incomplete.join(", ")]);
-  }
-  summary.blockers.forEach((item, index) => {
-    const who = item.owner ? ` (${item.owner})` : "";
-    const why = item.note ? ` — ${item.note}` : "";
-    lines.push([
-      index === 0 ? `${summary.blockers.length === 1 ? "Blocker" : "Blockers"} (${summary.blockers.length})` : "",
-      `${item.title}${who}${why}`,
-    ]);
-  });
+  const done = [];
+  if (summary.milestones.length) done.push(`${summary.milestones.join(" \u2713, ")} \u2713`);
+  done.push(`${summary.completedThisWeek} task${summary.completedThisWeek === 1 ? "" : "s"} completed this week`);
 
+  const lines = [
+    { label: "Status", value: summary.status.label, tone: summary.status.tone },
+    { label: "Done", value: done.join(" \u00b7 "), tone: "" },
+  ];
+
+  if (!summary.blockers.length) {
+    lines.push({ label: "Blocker", value: "None", tone: "" });
+  } else {
+    summary.blockers.forEach((item, index) => {
+      const who = item.owner ? ` (${item.owner})` : "";
+      const why = item.reason ? `: ${item.reason}` : "";
+      lines.push({ label: index === 0 ? "Blocker" : "", value: `${item.title}${why}${who}`, tone: "" });
+    });
+  }
+
+  lines.push({ label: "Next", value: summary.next || "Nothing scheduled", tone: "" });
   return lines;
 }
 
@@ -6813,9 +6844,9 @@ function buildExecutiveSummaryCard(report) {
     <div class="report-block exec-summary-card">
       <h3>Executive summary</h3>
       <dl class="exec-summary-list">
-        ${lines.map(([label, value]) => `
-          <dt>${escapeHtml(label)}</dt>
-          <dd>${escapeHtml(value)}</dd>
+        ${lines.map((line) => `
+          <dt>${escapeHtml(line.label)}</dt>
+          <dd${line.tone ? ` class="exec-tone-${line.tone}"` : ""}>${escapeHtml(line.value)}</dd>
         `).join("")}
       </dl>
     </div>
@@ -6852,6 +6883,8 @@ function buildReportPrintHtml(report) {
     .summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 6px 20px; font-size: 0.84rem; }
     .exec-line { font-size: 0.84rem; line-height: 1.5; margin: 0 0 4px; }
     .exec-line:last-child { margin-bottom: 0; }
+    .exec-tone-good { color: #15803d; font-weight: bold; }
+    .exec-tone-risk { color: #b91c1c; font-weight: bold; }
     @page { size: landscape; margin: 12mm; }
     @media print { body { padding: 0; } }
   `;
@@ -6884,7 +6917,7 @@ function buildReportPrintHtml(report) {
   </div>
   ${execLines.length ? `<div class="summary-card exec-card">
     <h2>Executive summary</h2>
-    ${execLines.map(([label, value]) => `<p class="exec-line">${label ? `<strong>${escapeHtml(label)}:</strong> ` : ""}${escapeHtml(value)}</p>`).join("")}
+    ${execLines.map((line) => `<p class="exec-line">${line.label ? `<strong>${escapeHtml(line.label)}:</strong> ` : ""}<span${line.tone ? ` class="exec-tone-${line.tone}"` : ""}>${escapeHtml(line.value)}</span></p>`).join("")}
   </div>` : ""}
   ${weeksHtml}
 </body>
@@ -6923,6 +6956,8 @@ const EMAIL_STYLE = {
   cardH: "font-size:15px;margin:0 0 8px;font-family:Georgia,'Times New Roman',serif;",
   cardRow: "font-size:13px;padding:2px 16px 2px 0;",
   execLine: "font-size:13px;line-height:1.5;margin:0 0 4px;",
+  execGood: "color:#15803d;font-weight:bold;",
+  execRisk: "color:#b91c1c;font-weight:bold;",
   banner: "background:#fde047;color:#1f2937;font-weight:bold;text-align:center;padding:9px;font-size:14px;border:1px solid #d1d5db;border-bottom:0;",
   table: "width:100%;border-collapse:collapse;background:#ffffff;margin:0 0 18px;",
   th: "background:#fef9c3;color:#1f2937;padding:7px 9px;border:1px solid #d1d5db;font-size:12px;text-align:left;",
@@ -6973,7 +7008,7 @@ function buildReportEmailHtml(report) {
 </div>
 ${execLines.length ? `<div style="${EMAIL_STYLE.card}">
 <div style="${EMAIL_STYLE.cardH}">Executive summary</div>
-${execLines.map(([l, v]) => `<div style="${EMAIL_STYLE.execLine}">${l ? `<strong>${escapeHtml(l)}:</strong> ` : ""}${escapeHtml(v)}</div>`).join("")}
+${execLines.map((line) => `<div style="${EMAIL_STYLE.execLine}">${line.label ? `<strong>${escapeHtml(line.label)}:</strong> ` : ""}${line.tone ? `<span style="${line.tone === "risk" ? EMAIL_STYLE.execRisk : EMAIL_STYLE.execGood}">${escapeHtml(line.value)}</span>` : escapeHtml(line.value)}</div>`).join("")}
 </div>` : ""}
 ${tables}
 </div>`;

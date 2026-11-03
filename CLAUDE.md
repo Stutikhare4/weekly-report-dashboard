@@ -231,33 +231,37 @@ projects card, and why the three counts should never be presented as a breakdown
 
 ## The report's executive summary
 
-Between the project summary and the week tables: **what got finished, and what is stuck**, before
-any detail. The tables stay for whoever needs them.
+Four lines above the week tables, for someone who will not read the tables. The tables are
+untouched beneath it.
 
-`buildExecutiveSummary()` puts it on the report model as `report.summary`, and
-`executiveSummaryLines()` turns that into label/value pairs. The three report builders — on
-screen, printed PDF, emailed HTML — then format **one** set of content three ways, rather than
-each deriving it again. Lines with nothing to say are dropped: "Blockers: none" is noise in a
-report people open to read the blockers.
+```
+Status   On track | At risk          green when nothing is blocked, red when something is
+Done     <phases> ✓ · <n> tasks completed this week
+Blocker  <task>: <reason, ≤10 words> (<owner>)     one line each, or "None"
+Next     <first open task of the following week>
+```
 
-The lines are **Milestones complete**, **Completed**, **Incomplete**, **Blockers**. It also
-carried an overall percentage at the top, which was dropped — a figure for the whole project sat
-oddly above three lists scoped to a fortnight.
+`buildExecutiveSummary()` derives it, `executiveSummaryLines()` returns `{label, value, tone}`,
+and the three report builders format that one set three ways — which is what keeps the HTML, PDF
+and email copies identical. The Status colour reaches each differently: a CSS class on screen
+(tokens, so dark mode holds), a class in the print stylesheet, and an inline `style` in the email,
+since email clients strip `<style>`.
 
-Everything is derived, nothing stored, so the summary cannot disagree with the tables beneath it.
-Two deliberate choices:
+The rules worth keeping:
 
-- **Every task lands in exactly one list.** Completed, then in-progress / pending / not-started
-  under Incomplete, then blocked / delayed under Blockers. "not started" is counted as incomplete
-  rather than left out, or a task would appear nowhere in the summary at all; blocked and delayed
-  are kept out of Incomplete so nothing is listed twice.
-- **Completed, incomplete and blockers cover the weeks the report shows**; **milestones cover the
-  whole project.** A phase is a milestone only when all of it is finished, whenever that happened
-  — not only if it finished this fortnight. All three lists dedupe by title, since a task carried
-  between the two reported weeks is one piece of work, not two.
+- **Status reads blocked work only**, never the project's own stage. The stage is an internal
+  judgement and was deliberately kept out of this report; deriving Status from it would put it
+  back. Note that `delayed` does **not** raise At risk — only `blocked` does.
+- **A phase is a milestone only when every task in it, across the whole project, is completed.**
+  A phase with anything open or blocked is never listed, so "Kickoff ✓" cannot appear while
+  Kickoff still has work in it.
+- **"Completed this week" counts the current report week**, not the whole project.
+- **Next looks at the week after the one reported**, taking the first task that is not completed,
+  ordered by due date and then by the order the week holds — so it means the same thing whether or
+  not due dates have been filled in.
 
-A blocker's "why" reads `blocker` first, then `comments`: `blocker` is the dedicated field but
-`comments` is where people actually write it.
+An earlier version listed every completed and incomplete task by name and led with a percentage.
+It was accurate and far too long to be read by the people the summary is for.
 
 ## What the notification bell lists
 
