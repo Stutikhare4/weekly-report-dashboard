@@ -3169,8 +3169,19 @@ button {
   overflow-wrap: anywhere;
 }
 
-/* Status reads at a glance: green when nothing is blocked, red when something is. Tokens, so
-   both hold up in dark mode. */
+/* Pending is a line per owner, bulleted, inside the value column. */
+.exec-summary-card .exec-pending {
+  margin: 0;
+  padding-left: 16px;
+  list-style: disc;
+}
+
+.exec-summary-card .exec-pending li {
+  margin-bottom: 2px;
+}
+
+/* Status reads at a glance: green when nothing is blocked or carried over, red when something
+   is. Tokens, so both hold up in dark mode. */
 .exec-summary-card .exec-tone-good {
   color: var(--card-done);
   font-weight: 700;

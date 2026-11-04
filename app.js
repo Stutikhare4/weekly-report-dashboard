@@ -1558,121 +1558,172 @@ function buildReport(projectId) {
   };
 }
 
-/* The executive summary above the week tables — four lines, written for someone who will not
-   read the tables: Status, Done, Blocker, Next. The tables stay underneath for whoever needs them.
+/* The executive summary above the week tables: Status, Completed till date, Pending. Written for
+   someone who will not read the tables, which stay underneath unchanged.
 
-   Everything is derived from the tasks, so the summary cannot disagree with the tables below it,
-   and the same four lines are produced for every project and every week. */
+   It is derived entirely from the tasks, so it cannot disagree with the tables below it, and the
+   same three blocks are produced for every project and every week. */
 function buildExecutiveSummary(project, allWeeks, reportWeeks) {
   const current = reportWeeks.find((week) => week.tag === "current") || reportWeeks[reportWeeks.length - 1];
-  const currentRows = (current && current.rows) || [];
+  const currentStart = current ? current.weekStart : "";
 
-  /* Status is read off blocked work alone, not the project's own stage: the stage is an internal
-     judgement and was deliberately kept out of this report. */
-  const blockedRows = reportWeeks
-    .flatMap((week) => week.rows || [])
-    .filter((row) => row.status === "blocked");
+  /* "Up to today" is every week from kickoff through the current one. Later weeks are excluded:
+     work not yet scheduled is neither done nor outstanding. */
+  const weeksToDate = allWeeks.filter((week) => !currentStart || week.weekStart <= currentStart);
+  const previousStart = [...weeksToDate]
+    .map((week) => week.weekStart)
+    .filter((start) => start < currentStart)
+    .sort()
+    .pop() || "";
 
-  const seen = new Set();
-  const blockers = [];
-  blockedRows.forEach((row) => {
-    const title = (row.title || "").trim();
-    if (!title || seen.has(title)) return;
-    seen.add(title);
-    blockers.push({
-      title,
-      owner: (row.owner || "").trim(),
-      reason: shortReason(row.blocker || row.comments || ""),
-    });
-  });
+  /* ---- Completed till date ---- */
 
-  /* A phase is a milestone only when every task in it, across the whole project, is completed —
-     so a phase with anything still open or blocked is never listed. */
-  const phases = new Map();
+  /* Phase totals span every week, including later ones: a phase with work still scheduled ahead
+     of today is not finished, however much of it is done so far. */
+  const phaseTotals = new Map();
   allWeeks.forEach((week) => {
     (week.tasks || []).forEach((task) => {
       const phase = (task.phase || "").trim();
       if (!phase) return;
-      if (!phases.has(phase)) phases.set(phase, { total: 0, done: 0 });
-      const entry = phases.get(phase);
+      if (!phaseTotals.has(phase)) phaseTotals.set(phase, { total: 0, done: 0 });
+      const entry = phaseTotals.get(phase);
       entry.total += 1;
       if (task.status === "completed") entry.done += 1;
     });
   });
-  const milestones = [...phases.entries()]
-    .filter(([, entry]) => entry.total && entry.done === entry.total)
-    .map(([phase]) => phase);
 
-  const completedThisWeek = new Set(
-    currentRows.filter((row) => row.status === "completed")
-      .map((row) => (row.title || "").trim())
-      .filter(Boolean)
-  ).size;
+  /* Phases in the order they are first worked on, so the line reads as the project ran. */
+  const phaseOrder = [];
+  const completedByPhase = new Map();
+  weeksToDate.forEach((week) => {
+    (week.tasks || []).forEach((task) => {
+      const phase = (task.phase || "").trim();
+      if (!phase) return;
+      if (!completedByPhase.has(phase)) {
+        completedByPhase.set(phase, []);
+        phaseOrder.push(phase);
+      }
+      if (task.status !== "completed") return;
+      const title = (task.title || "").trim();
+      const list = completedByPhase.get(phase);
+      if (title && !list.includes(title)) list.push(title);
+    });
+  });
+
+  const completed = [];
+  phaseOrder.forEach((phase) => {
+    const totals = phaseTotals.get(phase) || { total: 0, done: 0 };
+    if (totals.total && totals.done === totals.total) {
+      completed.push(`${phase} \u2713`);
+      return;
+    }
+    const titles = completedByPhase.get(phase) || [];
+    if (titles.length) completed.push(`${phase}: ${titles.join(", ")}`);
+  });
+
+  /* ---- Pending ---- */
+
+  /* One entry per task, however many weeks it has been carried through: the copies are one piece
+     of work. `overdue` means it was already scheduled before this week and is still not done. */
+  const pending = new Map();
+  weeksToDate.forEach((week) => {
+    (week.tasks || []).forEach((task) => {
+      if (task.status === "completed") return;
+      const title = (task.title || "").trim();
+      if (!title) return;
+      const owner = (task.owner || "").trim() || "Unassigned";
+      const key = `${owner}\u0000${title}`;
+      if (!pending.has(key)) {
+        pending.set(key, { owner, title, note: "", blocked: false, overdue: false });
+      }
+      const entry = pending.get(key);
+      if (task.status === "blocked") entry.blocked = true;
+      if (currentStart && week.weekStart < currentStart) entry.overdue = true;
+      /* The comment is usually written once, on whichever copy someone was looking at. */
+      if (!entry.note) entry.note = shortReason(task.blocker || task.comments || "");
+    });
+  });
+
+  const byOwner = new Map();
+  [...pending.values()].forEach((entry) => {
+    if (!byOwner.has(entry.owner)) byOwner.set(entry.owner, { owner: entry.owner, tasks: [], overdue: 0 });
+    const group = byOwner.get(entry.owner);
+    group.tasks.push(entry);
+    if (entry.overdue) group.overdue += 1;
+  });
+
+  /* Most overdue work first \u2014 that is who the reader needs to chase. Then the longest list, so
+     the order is stable rather than whatever the weeks happened to yield. */
+  const pendingGroups = [...byOwner.values()].sort((left, right) =>
+    right.overdue - left.overdue || right.tasks.length - left.tasks.length || left.owner.localeCompare(right.owner));
+
+  /* ---- Status ---- */
+
+  const blockedCount = [...pending.values()].filter((entry) => entry.blocked).length;
+  const carriedCount = [...pending.values()].filter((entry) => entry.overdue).length;
+
+  const reasons = [];
+  if (blockedCount) reasons.push(`${blockedCount} task${blockedCount === 1 ? "" : "s"} blocked`);
+  if (carriedCount) {
+    /* "last week" only when that is literally where they are from. */
+    const allFromLastWeek = previousStart && [...pending.values()]
+      .filter((entry) => entry.overdue).length === carriedCount
+      && weeksToDate.filter((week) => week.weekStart < previousStart)
+        .every((week) => (week.tasks || []).every((task) => task.status === "completed"));
+    reasons.push(`${carriedCount} task${carriedCount === 1 ? "" : "s"} carried over from ${allFromLastWeek ? "last week" : "earlier weeks"}`);
+  }
 
   return {
-    status: blockers.length ? { label: "At risk", tone: "risk" } : { label: "On track", tone: "good" },
-    milestones,
-    completedThisWeek,
-    blockers,
-    next: nextScheduledTask(allWeeks, current),
+    status: reasons.length
+      ? { label: "At risk", tone: "risk", reason: reasons.join(", ") }
+      : { label: "On track", tone: "good", reason: "" },
+    completed,
+    pendingGroups,
   };
 }
 
-/* The blocker reason as written in the week editor, cut to about ten words. The full text is in
-   the table's Comments column; this line is for someone scanning four lines. */
+/* A comment as written in the week editor, cut to about ten words. The full text is in the
+   table's Comments column; this is for someone scanning three lines. */
 function shortReason(text) {
   const words = String(text || "").replace(/\s+/g, " ").trim().replace(/[.;]+$/, "").split(" ").filter(Boolean);
   if (!words.length) return "";
   return words.length <= 10 ? words.join(" ") : `${words.slice(0, 10).join(" ")}\u2026`;
 }
 
-/* The first open task of the week after the one being reported — what happens next. Ordered by
-   due date, then by the order the week itself holds, so "first by schedule" means the same thing
-   whether or not dates have been filled in. */
-function nextScheduledTask(allWeeks, current) {
-  if (!current) return "";
-  const following = allWeeks
-    .filter((week) => week.weekStart > current.weekStart)
-    .sort((left, right) => left.weekStart.localeCompare(right.weekStart))[0];
-  if (!following) return "";
-
-  const open = (following.tasks || [])
-    .map((task, index) => ({ task, index }))
-    .filter(({ task }) => task.status !== "completed")
-    .sort((left, right) => {
-      const byDate = String(left.task.dueDate || "").localeCompare(String(right.task.dueDate || ""));
-      return byDate || left.index - right.index;
-    })[0];
-
-  return open ? (open.task.title || "").trim() : "";
-}
-
-/* The four lines, as { label, value, tone }. The three report builders — on screen, printed,
-   emailed — format this one set of content three ways rather than each deriving it again, which
-   is what keeps the HTML, PDF and email copies identical. */
+/* The summary as { label, value, tone, items }. The three report builders \u2014 on screen, printed,
+   emailed \u2014 format this one set three ways rather than each deriving it again, which is what
+   keeps the copies identical. */
 function executiveSummaryLines(summary) {
   if (!summary) return [];
 
-  const done = [];
-  if (summary.milestones.length) done.push(`${summary.milestones.join(" \u2713, ")} \u2713`);
-  done.push(`${summary.completedThisWeek} task${summary.completedThisWeek === 1 ? "" : "s"} completed this week`);
+  const lines = [{
+    label: "Status",
+    value: summary.status.reason ? `${summary.status.label}: ${summary.status.reason}` : summary.status.label,
+    tone: summary.status.tone,
+  }];
 
-  const lines = [
-    { label: "Status", value: summary.status.label, tone: summary.status.tone },
-    { label: "Done", value: done.join(" \u00b7 "), tone: "" },
-  ];
+  lines.push({
+    label: "Completed till date",
+    value: summary.completed.length ? summary.completed.join(" \u00b7 ") : "Nothing completed yet",
+    tone: "",
+  });
 
-  if (!summary.blockers.length) {
-    lines.push({ label: "Blocker", value: "None", tone: "" });
-  } else {
-    summary.blockers.forEach((item, index) => {
-      const who = item.owner ? ` (${item.owner})` : "";
-      const why = item.reason ? `: ${item.reason}` : "";
-      lines.push({ label: index === 0 ? "Blocker" : "", value: `${item.title}${why}${who}`, tone: "" });
-    });
-  }
+  lines.push({
+    label: "Pending",
+    value: summary.pendingGroups.length ? "" : "None",
+    tone: "",
+    items: summary.pendingGroups.map((group) => {
+      /* One bracket, not two: "(Blocked) (reason)" back to back reads as a stutter. */
+      const tasks = group.tasks.map((task) => {
+        const parts = [];
+        if (task.blocked) parts.push("Blocked");
+        if (task.note) parts.push(task.note);
+        return parts.length ? `${task.title} (${parts.join(": ")})` : task.title;
+      });
+      return `${group.owner}: ${tasks.join(", ")}`;
+    }),
+  });
 
-  lines.push({ label: "Next", value: summary.next || "Nothing scheduled", tone: "" });
   return lines;
 }
 
@@ -1859,7 +1910,9 @@ function buildExecutiveSummaryCard(report) {
       <dl class="exec-summary-list">
         ${lines.map((line) => `
           <dt>${escapeHtml(line.label)}</dt>
-          <dd${line.tone ? ` class="exec-tone-${line.tone}"` : ""}>${escapeHtml(line.value)}</dd>
+          <dd${line.tone ? ` class="exec-tone-${line.tone}"` : ""}>${line.items && line.items.length
+            ? `<ul class="exec-pending">${line.items.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>`
+            : escapeHtml(line.value)}</dd>
         `).join("")}
       </dl>
     </div>
@@ -1898,6 +1951,7 @@ function buildReportPrintHtml(report) {
     .exec-line:last-child { margin-bottom: 0; }
     .exec-tone-good { color: #15803d; font-weight: bold; }
     .exec-tone-risk { color: #b91c1c; font-weight: bold; }
+    .exec-bullet { font-size: 0.84rem; line-height: 1.5; margin: 0 0 3px 14px; }
     @page { size: landscape; margin: 12mm; }
     @media print { body { padding: 0; } }
   `;
@@ -1930,7 +1984,9 @@ function buildReportPrintHtml(report) {
   </div>
   ${execLines.length ? `<div class="summary-card exec-card">
     <h2>Executive summary</h2>
-    ${execLines.map((line) => `<p class="exec-line">${line.label ? `<strong>${escapeHtml(line.label)}:</strong> ` : ""}<span${line.tone ? ` class="exec-tone-${line.tone}"` : ""}>${escapeHtml(line.value)}</span></p>`).join("")}
+    ${execLines.map((line) => `<p class="exec-line"><strong>${escapeHtml(line.label)}:</strong> <span${line.tone ? ` class="exec-tone-${line.tone}"` : ""}>${escapeHtml(line.value)}</span></p>${line.items && line.items.length
+      ? line.items.map((item) => `<p class="exec-bullet">\u2022 ${escapeHtml(item)}</p>`).join("")
+      : ""}`).join("")}
   </div>` : ""}
   ${weeksHtml}
 </body>
@@ -1971,6 +2027,7 @@ const EMAIL_STYLE = {
   execLine: "font-size:13px;line-height:1.5;margin:0 0 4px;",
   execGood: "color:#15803d;font-weight:bold;",
   execRisk: "color:#b91c1c;font-weight:bold;",
+  execBullet: "font-size:13px;line-height:1.5;margin:0 0 3px 14px;",
   banner: "background:#fde047;color:#1f2937;font-weight:bold;text-align:center;padding:9px;font-size:14px;border:1px solid #d1d5db;border-bottom:0;",
   table: "width:100%;border-collapse:collapse;background:#ffffff;margin:0 0 18px;",
   th: "background:#fef9c3;color:#1f2937;padding:7px 9px;border:1px solid #d1d5db;font-size:12px;text-align:left;",
@@ -2021,7 +2078,9 @@ function buildReportEmailHtml(report) {
 </div>
 ${execLines.length ? `<div style="${EMAIL_STYLE.card}">
 <div style="${EMAIL_STYLE.cardH}">Executive summary</div>
-${execLines.map((line) => `<div style="${EMAIL_STYLE.execLine}">${line.label ? `<strong>${escapeHtml(line.label)}:</strong> ` : ""}${line.tone ? `<span style="${line.tone === "risk" ? EMAIL_STYLE.execRisk : EMAIL_STYLE.execGood}">${escapeHtml(line.value)}</span>` : escapeHtml(line.value)}</div>`).join("")}
+${execLines.map((line) => `<div style="${EMAIL_STYLE.execLine}"><strong>${escapeHtml(line.label)}:</strong> ${line.tone ? `<span style="${line.tone === "risk" ? EMAIL_STYLE.execRisk : EMAIL_STYLE.execGood}">${escapeHtml(line.value)}</span>` : escapeHtml(line.value)}</div>${line.items && line.items.length
+  ? line.items.map((item) => `<div style="${EMAIL_STYLE.execBullet}">\u2022 ${escapeHtml(item)}</div>`).join("")
+  : ""}`).join("")}
 </div>` : ""}
 ${tables}
 </div>`;

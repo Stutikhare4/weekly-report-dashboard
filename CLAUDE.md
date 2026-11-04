@@ -231,37 +231,47 @@ projects card, and why the three counts should never be presented as a breakdown
 
 ## The report's executive summary
 
-Four lines above the week tables, for someone who will not read the tables. The tables are
+Three blocks above the week tables, for someone who will not read the tables. The tables are
 untouched beneath it.
 
 ```
-Status   On track | At risk          green when nothing is blocked, red when something is
-Done     <phases> ✓ · <n> tasks completed this week
-Blocker  <task>: <reason, ≤10 words> (<owner>)     one line each, or "None"
-Next     <first open task of the following week>
+Status               On track | At risk: <reason>      green / red
+Completed till date  <finished phases> ✓ · <part-done phase>: <its completed tasks>
+Pending              • <owner>: <task> (Blocked: <reason>), <task> (<reason>)
+                     • <owner>: …                          one line per owner, or "None"
 ```
 
-`buildExecutiveSummary()` derives it, `executiveSummaryLines()` returns `{label, value, tone}`,
-and the three report builders format that one set three ways — which is what keeps the HTML, PDF
-and email copies identical. The Status colour reaches each differently: a CSS class on screen
-(tokens, so dark mode holds), a class in the print stylesheet, and an inline `style` in the email,
-since email clients strip `<style>`.
+`buildExecutiveSummary()` derives it, `executiveSummaryLines()` returns `{label, value, tone,
+items}`, and the three report builders format that one set three ways — which is what keeps the
+HTML, PDF and email copies identical. The Status colour reaches each differently: a token-based
+CSS class on screen so dark mode holds, a class in the print stylesheet, and an inline `style` in
+the email, since email clients strip `<style>`.
 
-The rules worth keeping:
+The rules, and why they are what they are:
 
-- **Status reads blocked work only**, never the project's own stage. The stage is an internal
-  judgement and was deliberately kept out of this report; deriving Status from it would put it
-  back. Note that `delayed` does **not** raise At risk — only `blocked` does.
-- **A phase is a milestone only when every task in it, across the whole project, is completed.**
-  A phase with anything open or blocked is never listed, so "Kickoff ✓" cannot appear while
-  Kickoff still has work in it.
-- **"Completed this week" counts the current report week**, not the whole project.
-- **Next looks at the week after the one reported**, taking the first task that is not completed,
-  ordered by due date and then by the order the week holds — so it means the same thing whether or
-  not due dates have been filled in.
+- **"Up to today" means every week from kickoff through the current one.** Later weeks are
+  excluded from both blocks: work not yet scheduled is neither done nor outstanding. A task in
+  next week's list must never appear under Pending.
+- **A phase shows as `✓` only when every task in it is completed, counted across _all_ weeks** —
+  including weeks still ahead. A phase with work scheduled later is not finished however much of
+  it is done so far. Phases that are part-done list their completed task names instead; phases
+  with nothing completed are left out.
+- **Pending is one entry per task, however many weeks it has been carried through.** The copies
+  are one piece of work. The comment is taken from whichever copy carries one, since people write
+  it once, on whichever week they were looking at.
+- **Owners are ordered by overdue count**, then by how many tasks they hold, then by name — so the
+  person to chase is first and the order is stable rather than whatever the weeks happened to
+  yield.
+- **Status is At risk when anything is blocked _or_ anything from an earlier week is still open**,
+  with a counted reason. It says "from last week" only when that is literally true, and "from
+  earlier weeks" otherwise. It never reads the project's own stage: that is an internal judgement
+  and was deliberately kept out of this report.
+- **Blocked and a comment share one bracket** — `(Blocked: reason)`. Two adjacent bracket groups
+  read as a stutter.
 
-An earlier version listed every completed and incomplete task by name and led with a percentage.
-It was accurate and far too long to be read by the people the summary is for.
+Earlier versions of this block listed every completed and incomplete task by name under a
+progress percentage, then became four lines ending in a "Next" line. Both were replaced; the
+second was accurate but counted only the current week, which understated what had been delivered.
 
 ## What the notification bell lists
 
