@@ -84,6 +84,25 @@ insert into public.bootstrap_admins (email) values ('stuti.khare@webengage.com')
 on conflict (email) do nothing;
 alter table public.bootstrap_admins enable row level security;
 
+-- Roles assigned by email, by the admin (Settings → Managers). Works before the person has
+-- ever signed in: handle_new_user reads it at sign-up, and a trigger below applies changes
+-- to anyone already signed in. No row = Team member.
+create table if not exists public.wr_role_assignments (
+  email       text primary key,
+  role        text not null check (role in ('admin', 'manager', 'user')),
+  updated_at  timestamptz not null default now(),
+  updated_by  text
+);
+alter table public.wr_role_assignments enable row level security;
+
+-- The first managers. `do nothing`: re-running this file never undoes a later change made in
+-- the app.
+insert into public.wr_role_assignments (email, role, updated_by) values
+  ('shaharyar.zaidi@webengage.com',   'manager', 'schema.sql'),
+  ('pritesh.burngule@webengage.com',  'manager', 'schema.sql'),
+  ('sachin.padikkala@webengage.com',  'manager', 'schema.sql')
+on conflict (email) do nothing;
+
 -- ============================================================ projects
 create table if not exists public.wr_projects (
   id           text primary key,                       -- the app's own project id
@@ -201,6 +220,8 @@ create policy "activity admin" on public.wr_activity_log for select to authentic
 -- ============================================================ table privileges
 revoke all on public.profiles, public.wr_projects, public.wr_project_shares, public.wr_activity_log,
               public.access_rules, public.bootstrap_admins from anon;
+-- Read and written only through assign_role() / list_role_assignments().
+revoke all on public.wr_role_assignments from anon, authenticated;
 revoke insert, update, delete on public.profiles from authenticated;
 grant select on public.profiles, public.access_rules to authenticated;
 grant select, insert, update, delete on public.wr_projects, public.wr_project_shares to authenticated;
@@ -221,6 +242,10 @@ begin
 
   if exists (select 1 from public.bootstrap_admins where lower(email) = lower(new.email)) then
     granted := 'admin';
+  else
+    -- A role the admin assigned by email before this person ever signed in.
+    select role into granted from public.wr_role_assignments where email = lower(new.email);
+    granted := coalesce(granted, 'user');
   end if;
 
   insert into public.profiles (id, email, display_name, role)
@@ -298,18 +323,67 @@ returns void language sql security definer set search_path = public as $$
 $$;
 grant execute on function public.touch_last_seen() to authenticated;
 
+-- Changing a signed-in person's role goes through the assignments table too, so there is one
+-- record of who was given what.
 create or replace function public.set_user_role(target uuid, new_role text)
 returns void language plpgsql security definer set search_path = public as $$
+declare target_email text;
 begin
   if not public.is_admin() then raise exception 'only an admin may change roles'; end if;
-  if new_role not in ('admin', 'manager', 'user') then raise exception 'unknown role: %', new_role; end if;
-  if target = auth.uid() and new_role <> 'admin' then
-    raise exception 'you cannot remove your own admin role';
-  end if;
-  update public.profiles set role = new_role where id = target;
+  select email into target_email from public.profiles where id = target;
+  if target_email is null then raise exception 'no such user'; end if;
+  perform public.assign_role(target_email, new_role);
 end;
 $$;
 grant execute on function public.set_user_role(uuid, text) to authenticated;
+
+-- Assign a role by email (signed in or not). 'user' removes the assignment.
+create or replace function public.assign_role(target_email text, new_role text)
+returns void language plpgsql security definer set search_path = public as $$
+declare addr text := lower(trim(target_email));
+begin
+  if not public.is_admin() then raise exception 'only an admin may change roles'; end if;
+  if new_role not in ('admin', 'manager', 'user') then raise exception 'unknown role: %', new_role; end if;
+  if addr = public.my_email() and new_role <> 'admin' then
+    raise exception 'you cannot remove your own admin role';
+  end if;
+  if addr not like '%@' || (select lower(allowed_domain) from public.access_rules where id = 1) then
+    raise exception 'only company addresses can be given a role';
+  end if;
+
+  if new_role = 'user' then
+    delete from public.wr_role_assignments where email = addr;
+  else
+    insert into public.wr_role_assignments (email, role, updated_at, updated_by)
+    values (addr, new_role, now(), public.my_email())
+    on conflict (email) do update set role = excluded.role, updated_at = now(), updated_by = excluded.updated_by;
+  end if;
+
+  update public.profiles set role = new_role where email = addr;
+end;
+$$;
+grant execute on function public.assign_role(text, text) to authenticated;
+
+-- Everyone with a role other than Team member, signed in yet or not (admin only).
+create or replace function public.list_role_assignments()
+returns table (email text, role text, signed_in boolean, updated_at timestamptz, updated_by text)
+language plpgsql security definer set search_path = public as $$
+begin
+  if not public.is_admin() then raise exception 'only an admin may view roles'; end if;
+  return query
+    select a.email, a.role, exists (select 1 from public.profiles p where p.email = a.email),
+           a.updated_at, a.updated_by
+    from public.wr_role_assignments a
+    order by a.role, a.email;
+end;
+$$;
+grant execute on function public.list_role_assignments() to authenticated;
+
+-- Apply the assignments to anyone who signed in before they were made (e.g. the three seeded
+-- managers, if they had already signed in as Team members).
+update public.profiles p set role = a.role
+from public.wr_role_assignments a
+where p.email = a.email and p.role <> a.role and p.role <> 'admin';
 
 -- The admin's usage view: one row per person.
 drop function if exists public.admin_usage();

@@ -69,6 +69,12 @@ who may do what (RLS), the app only mirrors it. Empty config → the local email
 `project` JSONB + `updates` JSONB array of its weeks, `owner_id`, `updated_at`),
 `wr_project_shares` (project_id, email, `read`|`edit` — by email, so it works before the person
 signs in), `wr_activity_log` (written by triggers; feeds `admin_usage()`).
+`wr_role_assignments` (email → manager|admin; no row = Team member) is the record of roles: it
+is read by `handle_new_user` at sign-up and written only by `assign_role(email, role)`, which
+also updates `profiles.role` for anyone already signed in, so roles can be given before a person
+first signs in. `set_user_role()` (the Users & usage dropdown) goes through it too. Seeded with
+three managers via `on conflict do nothing`, so re-running `schema.sql` never undoes an in-app
+change. UI: Settings → Managers & roles (`loadRoleAssignments` / `assignRole`).
 The `wr_` prefix exists because this Supabase project already held an unrelated `projects`
 table (uuid ids) and a `profiles` table from an earlier setup; `schema.sql` upgrades `profiles`
 in place and never touches the old `projects`. Supabase Auth: Google provider (client in GCP

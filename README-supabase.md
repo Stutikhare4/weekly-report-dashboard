@@ -13,8 +13,10 @@ Project: `dkiqptehifzxwejsduhy` — URL and publishable key are already in `supa
 
 The database enforces all of it (row-level security in `supabase/schema.sql`); the app only
 hides what someone cannot do. Anyone listed in `bootstrap_admins` (stuti.khare@webengage.com)
-becomes admin on first sign-in; everyone else starts as Team member and the admin promotes
-managers in **Settings → Users & usage**.
+becomes admin on first sign-in. Managers are assigned **by email** in **Settings → Managers &
+roles** (admin only) — this works before the person has ever signed in, and removing them makes
+them a Team member again. Everyone not listed is a Team member. The first three managers
+(Shaharyar Zaidi, Pritesh Burngule, Sachin Padikkala) are seeded by `schema.sql`.
 
 ## 1. Create the tables
 **SQL Editor → New query** → paste all of `supabase/schema.sql` → **Run**. Safe to re-run.

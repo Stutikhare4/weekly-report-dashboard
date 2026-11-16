@@ -4516,10 +4516,89 @@ function renderAccountPanel() {
       <button type="button" id="settingsSignOut" class="ghost-button">Sign out</button>
     </div>
     ${cloud.enabled && cloud.role === "admin" ? `
+      <h3 class="settings-head">Managers &amp; roles <span class="muted">(admin only)</span></h3>
+      <p class="muted" style="font-size:0.8rem;margin-bottom:8px;">Everyone not listed here is a Team member.
+        Works for people who have not signed in yet — the role applies on their first sign-in.</p>
+      <form id="roleAssignForm" class="share-form">
+        <input type="email" id="roleAssignEmail" required placeholder="name.surname@webengage.com" aria-label="Email" />
+        <select id="roleAssignRole" aria-label="Role">
+          <option value="manager">Manager</option>
+          <option value="admin">Admin</option>
+        </select>
+        <button type="submit" class="primary-button">Add</button>
+      </form>
+      <div id="roleAssignments" class="share-list" style="margin-top:8px;"><p class="muted">Loading…</p></div>
       <h3 class="settings-head">Users &amp; usage <span class="muted">(admin only)</span></h3>
       <div id="adminUsage" class="admin-usage"><p class="muted">Loading…</p></div>` : ""}`;
   document.getElementById("settingsSignOut").addEventListener("click", () => signOutSession());
-  if (cloud.enabled && cloud.role === "admin") loadAdminUsage();
+  if (cloud.enabled && cloud.role === "admin") {
+    document.getElementById("roleAssignForm").addEventListener("submit", (event) => {
+      event.preventDefault();
+      const email = document.getElementById("roleAssignEmail").value.trim().toLowerCase();
+      if (!isAllowedEmail(email)) {
+        showAppError(`Use a @${ALLOWED_EMAIL_DOMAIN} address.`);
+        return;
+      }
+      assignRole(email, document.getElementById("roleAssignRole").value);
+    });
+    loadRoleAssignments();
+    loadAdminUsage();
+  }
+}
+
+/* Roles by email (wr_role_assignments): the admin's list of managers and admins, including
+   people who have not signed in yet. Removing someone makes them a Team member again. */
+async function loadRoleAssignments() {
+  const target = document.getElementById("roleAssignments");
+  if (!target) return;
+
+  const { data, error } = await cloud.client.rpc("list_role_assignments");
+  if (error) {
+    target.innerHTML = `<p class="auth-error">Roles unavailable (${escapeHtml(error.message)}).</p>`;
+    return;
+  }
+  if (!data || !data.length) {
+    target.innerHTML = `<p class="muted">No managers yet.</p>`;
+    return;
+  }
+
+  target.innerHTML = data.map((row) => `
+    <div class="share-row" data-email="${escapeHtml(row.email)}">
+      <span class="share-who"><strong>${escapeHtml(userDisplayName(row.email))}</strong>
+        <span class="muted">${escapeHtml(row.email)}${row.signed_in ? "" : " · not signed in yet"}</span></span>
+      ${row.email === currentSession.email
+        ? `<span class="muted">${escapeHtml(ROLE_LABELS[row.role] || row.role)} (you)</span><span></span>`
+        : `<select class="share-access role-change" aria-label="Role for ${escapeHtml(row.email)}">
+            <option value="manager" ${row.role === "manager" ? "selected" : ""}>Manager</option>
+            <option value="admin" ${row.role === "admin" ? "selected" : ""}>Admin</option>
+          </select>
+          <button type="button" class="row-remove role-remove">Remove</button>`}
+    </div>`).join("");
+
+  target.querySelectorAll(".share-row").forEach((row) => {
+    const email = row.dataset.email;
+    const select = row.querySelector(".role-change");
+    if (select) select.addEventListener("change", () => assignRole(email, select.value));
+    const remove = row.querySelector(".role-remove");
+    if (remove) remove.addEventListener("click", () => {
+      if (confirm(`Make ${email} a Team member again?`)) assignRole(email, "user");
+    });
+  });
+}
+
+async function assignRole(email, role) {
+  const { error } = await cloud.client.rpc("assign_role", { target_email: email, new_role: role });
+  if (error) {
+    showAppError(`Could not change the role (${error.message}).`);
+  } else {
+    const input = document.getElementById("roleAssignEmail");
+    if (input) input.value = "";
+    showAppSuccess(role === "user"
+      ? `${email} is a Team member again.`
+      : `${email} is now ${ROLE_LABELS[role]}. It applies the next time they load the app.`);
+  }
+  loadRoleAssignments();
+  loadAdminUsage();
 }
 
 function formatAgo(iso) {
