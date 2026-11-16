@@ -59,13 +59,42 @@ name in the header, Settings → Change password / Users & Roles, `tools/hash-pa
 **`TEAM_ROLES` is unrelated** — OBM, TSS, CSM and so on are job titles on a project's team, not
 access levels, and they stay.
 
-## Accounts via Supabase (not currently wired up)
+## Shared projects via Supabase (Google sign-in, three roles)
 
-With `supabase-config.json` filled in, the app gets email/password accounts and syncs each
-user's whole `state` object to one JSONB row in `public.user_state`, protected by row-level
-security — every person sees only their own dashboard. Settings → Account shows who is signed
-in and a usage count from the `usage_stats()` function. Leave the config empty and the app
-behaves exactly as before: no login, local only. Setup steps are in `README-supabase.md`.
+Project `dkiqptehifzxwejsduhy`; URL + publishable key in `supabase-config.json`. Setup and the
+permission table are in `README-supabase.md`; `supabase/schema.sql` is the source of truth for
+who may do what (RLS), the app only mirrors it. Empty config → the local email gate above.
+
+**Tables**: `profiles` (role: `user` | `manager` | `admin`), `wr_projects` (one row per project:
+`project` JSONB + `updates` JSONB array of its weeks, `owner_id`, `updated_at`),
+`wr_project_shares` (project_id, email, `read`|`edit` — by email, so it works before the person
+signs in), `wr_activity_log` (written by triggers; feeds `admin_usage()`).
+The `wr_` prefix exists because this Supabase project already held an unrelated `projects`
+table (uuid ids) and a `profiles` table from an earlier setup; `schema.sql` upgrades `profiles`
+in place and never touches the old `projects`. Supabase Auth: Google provider (client in GCP
+project `global-incline-501907-m0`, Internal consent screen); Site URL must be the bare URL —
+a stray "Site URL: " prefix once made every callback 500.
+
+**Sync model** — the app still works on `state.projects` / `state.updates` in memory.
+`loadCloudProjects()` fills them from `wr_projects` and snapshots each project's JSON into
+`cloud.synced`; `saveState()` → `scheduleCloudSave()` (1s debounce) → `pushCloudChanges()`
+diffs against the snapshots and inserts / updates / deletes only what changed. Updates are
+conditional on `updated_at` (optimistic concurrency): a concurrent save by someone else makes
+ours affect 0 rows, and the app reloads instead of overwriting. Changes to a project the person
+may not edit/delete are reverted from the snapshot, not sent (`restoreProject`).
+
+`cloud.ready` gates every push until the first load finishes, so leftover local-only data can
+never be uploaded at sign-in. Refresh happens on window focus and every 60s, skipped while
+anything is unsynced or an input has focus.
+
+`canEditProject` / `canDeleteProject` / `canShareProject` drive the UI: `renderProjectAccess()`
+(called from `renderAll`) sets `.is-readonly` on the project and week screens (CSS makes
+inputs inert and hides edit/add/delete controls), the owner line, and the Share button.
+`carryForwardOverdueTasks()` skips view-only projects. Admin sees Settings → Users & usage
+(`admin_usage()`, role picker via `set_user_role()`).
+
+Not shared: the master plan (`state.weekTemplates`) and settings stay per browser.
+`build-standalone.py` strips the supabase-js tag; the single file is always local-only.
 
 ## Master plan and cycle length
 
@@ -256,6 +285,11 @@ The rules, and why they are what they are:
   including weeks still ahead. A phase with work scheduled later is not finished however much of
   it is done so far. Phases that are part-done list their completed task names instead; phases
   with nothing completed are left out.
+- **Kickoff is reported from the data model only.** `summaryPhaseOf()` drops the Kickoff
+  housekeeping tasks (Kick-off Meeting, Discovery, Scope of Work, Create Staging Dashboard) from
+  Completed till date and reports Data Modelling / Data Model Finalised under "Data Model". That
+  phase's ✓ therefore means both data-model tasks are done. Pending and Status still see every
+  task.
 - **Pending is one entry per task, however many weeks it has been carried through.** The copies
   are one piece of work. The comment is taken from whichever copy carries one, since people write
   it once, on whichever week they were looking at.

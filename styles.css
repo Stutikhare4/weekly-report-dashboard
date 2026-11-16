@@ -4216,3 +4216,115 @@ small,
   border-color: var(--card-done);
   color: #ffffff;
 }
+
+/* ---- Shared projects: access line, read-only mode, share dialog, admin usage ---- */
+.project-access-line {
+  margin: 2px 0 0;
+  font-size: 12px;
+}
+
+/* View-only project: every editing control is inert and the destructive / editing buttons go.
+   The database refuses the write anyway; this keeps the screen from pretending otherwise. */
+.screen.is-readonly input,
+.screen.is-readonly select,
+.screen.is-readonly textarea {
+  pointer-events: none;
+  opacity: 0.7;
+}
+
+.screen.is-readonly .overview-edit,
+.screen.is-readonly .row-remove,
+.screen.is-readonly .week-task-actions,
+.screen.is-readonly [data-action="add-task"],
+.screen.is-readonly [data-add-task],
+.screen.is-readonly #addWeekFromTemplate,
+.screen.is-readonly #reportsNewBtn,
+.screen.is-readonly #deleteProjectBtn {
+  display: none !important;
+}
+
+.share-card {
+  width: min(560px, 100%);
+}
+
+.share-form {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  gap: 8px;
+  align-items: center;
+}
+
+.share-note {
+  margin: 8px 0 12px;
+  font-size: 12px;
+}
+
+.share-list {
+  display: grid;
+  gap: 6px;
+  padding-bottom: 18px;
+}
+
+.share-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  gap: 8px;
+  align-items: center;
+  padding: 8px 10px;
+  border: 1px solid var(--border-soft);
+  border-radius: 8px;
+}
+
+.share-who {
+  display: grid;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.admin-usage-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.admin-usage-stats > div {
+  display: grid;
+  padding: 10px 12px;
+  border: 1px solid var(--border-soft);
+  border-radius: 8px;
+}
+
+.admin-usage-stats strong {
+  font-size: 18px;
+}
+
+.admin-usage-stats span {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.admin-usage-scroll {
+  overflow-x: auto;
+}
+
+.admin-usage-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+.admin-usage-table th,
+.admin-usage-table td {
+  padding: 6px 8px;
+  border-bottom: 1px solid var(--border-soft);
+  text-align: left;
+  vertical-align: top;
+}
+
+@media (max-width: 560px) {
+  .share-form,
+  .share-row {
+    grid-template-columns: 1fr;
+  }
+}

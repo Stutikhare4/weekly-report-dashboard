@@ -60,6 +60,11 @@ def main():
     html = html.replace('<link rel="manifest" href="manifest.webmanifest" />\n    ', "")
     html = html.replace('<link rel="stylesheet" href="styles.css" />', f"<style>\n{css}\n    </style>")
 
+    # A file:// page cannot receive a magic-link redirect, so the standalone build is always
+    # local-only and does not need (or fetch) the Supabase library.
+    html = re.sub(r'\s*<!-- Supabase client.*?-->\s*<script defer src="https://cdn\.jsdelivr\.net/npm/@supabase/[^"]+"></script>',
+                  "", html, count=1, flags=re.S)
+
     # inline scripts ignore `defer`, so app.js moves to the end of <body> where the DOM exists
     html = html.replace('<script defer src="plan-engine.js"></script>\n    ', "")
     html = html.replace('<script defer src="app.js"></script>\n  ', "")

@@ -516,6 +516,7 @@ function boot() {
   nodes.editWeeklyReports.addEventListener("click", () => openCreateReport(uiState.projectId, null, { editing: false }));
   nodes.addWeekFromTemplate.addEventListener("click", () => addWeekToProject(uiState.projectId));
   nodes.deleteProjectBtn.addEventListener("click", () => deleteProject(uiState.projectId));
+  wireCloudControls();
   nodes.projEditToggle.addEventListener("click", () => toggleProjectDetails(true));
   /* Kickoff, go-live and cycle length live in the project details form, so the Timeline card's
      Edit opens that rather than duplicating the fields. */
@@ -642,7 +643,14 @@ function boot() {
   }
 
 
-  startSession();
+  /* Supabase when supabase-config.json is filled in (magic-link accounts, data synced to the
+     database); otherwise the local email gate, exactly as before. */
+  initCloud()
+    .then((enabled) => { if (!enabled) startSession(); })
+    .catch((error) => {
+      debugLog(`cloud init failed: ${error.message}`);
+      startSession();
+    });
 renderDemoDataOptions();
 
   /* Prefer the editable JSON file over the copy compiled into app.js — on first run, and
@@ -892,6 +900,7 @@ function renderAll() {
   safeRender(renderSettingsScreen);
   safeRender(renderTemplatesScreen);
   safeRender(refreshReportsIndex);
+  safeRender(renderProjectAccess);
   }
 
 function safeRender(render) {
@@ -1583,7 +1592,7 @@ function buildExecutiveSummary(project, allWeeks, reportWeeks) {
   const phaseTotals = new Map();
   allWeeks.forEach((week) => {
     (week.tasks || []).forEach((task) => {
-      const phase = (task.phase || "").trim();
+      const phase = summaryPhaseOf(task);
       if (!phase) return;
       if (!phaseTotals.has(phase)) phaseTotals.set(phase, { total: 0, done: 0 });
       const entry = phaseTotals.get(phase);
@@ -1597,7 +1606,7 @@ function buildExecutiveSummary(project, allWeeks, reportWeeks) {
   const completedByPhase = new Map();
   weeksToDate.forEach((week) => {
     (week.tasks || []).forEach((task) => {
-      const phase = (task.phase || "").trim();
+      const phase = summaryPhaseOf(task);
       if (!phase) return;
       if (!completedByPhase.has(phase)) {
         completedByPhase.set(phase, []);
@@ -1680,6 +1689,16 @@ function buildExecutiveSummary(project, allWeeks, reportWeeks) {
     completed,
     pendingGroups,
   };
+}
+
+/* The phase a task is reported under in "Completed till date". Kickoff housekeeping (the call,
+   discovery, scope of work, the staging dashboard) is left out: only its data-model tasks count,
+   and they are reported as "Data Model" so the line reads from there. Every other phase is
+   reported as itself. Pending and Status are unaffected. */
+function summaryPhaseOf(task) {
+  const phase = (task.phase || "").trim();
+  if (phase.toLowerCase() !== "kickoff") return phase;
+  return /data\s*model/i.test(task.title || "") ? "Data Model" : "";
 }
 
 /* A comment as written in the week editor, cut to about ten words. The full text is in the
@@ -3895,6 +3914,11 @@ function handleEmailSignIn(event) {
   event.preventDefault();
   showAuthError("");
 
+  if (cloud.enabled) {
+    signInWithGoogle();
+    return;
+  }
+
   const email = nodes.authEmail.value.trim().toLowerCase();
 
   if (!isAllowedEmail(email)) {
@@ -3902,12 +3926,17 @@ function handleEmailSignIn(event) {
     return;
   }
 
+
   const name = userDisplayName(email);
   saveSession({ email, name, signedInAt: new Date().toISOString() });
   applySession({ email, name });
 }
 
 function signOutSession() {
+  if (cloud.enabled) {
+    signOut();
+    return;
+  }
   if (!confirm("Sign out? Your projects stay in this browser.")) return;
 
   try {
@@ -3921,18 +3950,44 @@ function signOutSession() {
   showAuthOverlay();
 }
 
-/* ---------- Accounts & cloud sync (Supabase) ---------- */
+/* ---------- Accounts & shared projects (Supabase) ---------- */
 
-/* Entirely optional. With no credentials in supabase-config.json the app behaves exactly
-   as it always has: local-only, no login, everything in localStorage. Fill the config in
-   and it gains real email accounts, each with its own dashboard synced to Postgres. */
+/* Entirely optional. With no credentials in supabase-config.json the app behaves exactly as
+   it always has: the local email gate, everything in localStorage. Fill the config in and it
+   becomes a shared, multi-user app:
+
+   - Sign-in is Google. The database refuses any address outside @webengage.com
+     (handle_new_user in supabase/schema.sql); the `hd` hint only filters Google's picker.
+   - Projects live in `public.wr_projects`, one row per project holding the project and all its
+     weekly reports. The app still works on `state.projects` / `state.updates` in memory;
+     `pushCloudChanges()` diffs them against the last copy synced and writes only the
+     projects that changed.
+   - Who may see / edit / delete a project is decided by row-level security, not here.
+     `cloud.access` mirrors it so the UI can hide what someone cannot do, and anything a
+     person changes without the right to is put back rather than sent.
+
+   Roles: user (own + shared), manager (sees all, edits own + shared-with-edit), admin (all). */
 const cloud = {
   client: null,
-  role: null,
   user: null,
+  role: "user",
   enabled: false,
+  /* true once the shared projects have loaded; nothing is pushed before that, so whatever
+     this browser held from local-only use can never be uploaded by accident */
+  ready: false,
   saveTimer: null,
+  pushing: false,
+  /* projectId -> JSON of { project, updates } as last read from / written to the server */
+  synced: new Map(),
+  /* projectId -> updated_at on the server, for "someone else changed this" detection */
+  versions: new Map(),
+  /* projectId -> "owner" | "edit" | "read" */
+  access: new Map(),
+  /* projectId -> owner email */
+  owners: new Map(),
 };
+
+const ROLE_LABELS = { admin: "Admin", manager: "Manager", user: "Team member" };
 
 async function initCloud() {
   let config = bundled("supabaseConfig");
@@ -3948,16 +4003,36 @@ async function initCloud() {
 
   if (!config || !config.url || !config.anonKey) {
     debugLog("cloud disabled - no Supabase credentials configured");
-    return;
+    return false;
+  }
+
+  /* file:// cannot receive the sign-in redirect, so the standalone file stays local. */
+  if (location.protocol === "file:") {
+    debugLog("cloud disabled - sign-in cannot return to a file:// page");
+    return false;
   }
 
   if (!window.supabase || !window.supabase.createClient) {
     showAppError("Could not load the Supabase library — running local-only. Check your connection.");
-    return;
+    return false;
   }
 
   cloud.client = window.supabase.createClient(config.url, config.anonKey);
   cloud.enabled = true;
+  document.body.classList.add("cloud-mode");
+
+  /* Supabase calls must not be awaited inside this callback (it holds the auth lock), so the
+     work is pushed to the next tick. */
+  cloud.client.auth.onAuthStateChange((event, session) => {
+    if (event === "SIGNED_IN" && session && session.user) {
+      setTimeout(() => onSignedIn(session.user), 0);
+    } else if (event === "SIGNED_OUT") {
+      cloud.user = null;
+      cloud.ready = false;
+      currentSession = null;
+      showAuthOverlay();
+    }
+  });
 
   const { data } = await cloud.client.auth.getSession();
   if (data && data.session) {
@@ -3966,18 +4041,27 @@ async function initCloud() {
     showAuthOverlay();
   }
 
-  cloud.client.auth.onAuthStateChange((event, session) => {
-    if (event === "SIGNED_OUT") {
-      cloud.user = null;
-      showAuthOverlay();
-    }
-  });
+  /* Other people's edits arrive when this tab regains focus, and every minute while open. */
+  window.addEventListener("focus", () => refreshFromCloud());
+  setInterval(() => refreshFromCloud(), 60000);
+  return true;
 }
 
 function showAuthOverlay() {
   nodes.authOverlay.hidden = false;
   showAuthError("");
-  if (nodes.authHint) nodes.authHint.textContent = "No password needed — your email is the sign-in.";
+
+  const emailLabel = nodes.authEmail ? nodes.authEmail.closest("label") : null;
+  const submit = nodes.authForm.querySelector('button[type="submit"]');
+
+  if (cloud.enabled) {
+    if (emailLabel) emailLabel.hidden = true;
+    if (nodes.authEmail) nodes.authEmail.required = false;
+    if (submit) submit.textContent = "Sign in with Google";
+    if (nodes.authHint) nodes.authHint.textContent = `Use your @${ALLOWED_EMAIL_DOMAIN} Google account.`;
+  } else if (nodes.authHint) {
+    nodes.authHint.textContent = "No password needed — your email is the sign-in.";
+  }
 }
 
 function showAuthError(message) {
@@ -3985,8 +4069,23 @@ function showAuthError(message) {
   nodes.authError.hidden = !message;
 }
 
+async function signInWithGoogle() {
+  showAuthError("");
+  const { error } = await cloud.client.auth.signInWithOAuth({
+    provider: "google",
+    options: {
+      redirectTo: `${location.origin}${location.pathname}`,
+      /* Pre-selects company accounts in Google's picker. The database is the real check. */
+      queryParams: { hd: ALLOWED_EMAIL_DOMAIN, prompt: "select_account" },
+    },
+  });
+  if (error) showAuthError(`Could not start Google sign-in (${error.message}).`);
+}
+
 async function onSignedIn(user) {
-  /* Domain gate. Also enforced in the database, so this is fast feedback, not the control. */
+  /* getSession and the SIGNED_IN event can both report the same sign-in. */
+  if (cloud.user && cloud.user.id === user.id) return;
+
   if (!isAllowedEmail(user.email)) {
     await cloud.client.auth.signOut();
     cloud.user = null;
@@ -3998,69 +4097,386 @@ async function onSignedIn(user) {
   cloud.user = user;
   nodes.authOverlay.hidden = true;
 
+  const email = String(user.email || "").toLowerCase();
   const meta = user.user_metadata || {};
-  state.settings.displayName = meta.full_name || meta.name || String(user.email || "").split("@")[0] || state.settings.displayName;
+  currentSession = { email, name: meta.full_name || meta.name || userDisplayName(email) };
+  state.settings.displayName = currentSession.name;
 
-  await pullCloudState();
-  await cloud.client.rpc("touch_last_seen").catch(() => {});
-  debugLog(`signed in as ${user.email}`);
+  const { data: profile } = await cloud.client.from("profiles").select("role").eq("id", user.id).maybeSingle();
+  cloud.role = (profile && profile.role) || "user";
+
+  cloud.client.rpc("touch_last_seen").then(() => {}, () => {});
+  await loadCloudProjects();
+  debugLog(`signed in as ${email} (${cloud.role})`);
 }
 
-/* The cloud row wins on sign-in, except the very first time, when whatever is already in
-   this browser is pushed up so nothing is lost when a user moves to accounts. */
-async function pullCloudState() {
-  const { data, error } = await cloud.client
-    .from("user_state")
-    .select("state")
-    .eq("user_id", cloud.user.id)
-    .maybeSingle();
+/* ---- reading ---- */
 
-  if (error) {
-    showAppError(`Could not load your data (${error.message}). Working from this browser only.`);
-    return;
+async function loadCloudProjects() {
+  const [projectsResult, sharesResult] = await Promise.all([
+    cloud.client.from("wr_projects").select("id, owner_id, owner_email, project, updates, updated_at"),
+    cloud.client.from("wr_project_shares").select("project_id, email, access"),
+  ]);
+
+  if (projectsResult.error) {
+    showAppError(`Could not load projects (${projectsResult.error.message}).`);
+    return false;
   }
 
-  if (data && data.state && Object.keys(data.state).length) {
-    state = ensureDefaults(data.state);
-    saveState();
-    applyTheme(state.settings.theme);
-  } else {
-    await pushCloudState();
-  }
+  const me = currentSession.email;
+  const myShares = new Map((sharesResult.data || [])
+    .filter((share) => share.email === me)
+    .map((share) => [share.project_id, share.access]));
 
+  cloud.synced.clear();
+  cloud.versions.clear();
+  cloud.access.clear();
+  cloud.owners.clear();
+
+  const projects = [];
+  const updates = [];
+  (projectsResult.data || []).forEach((row) => {
+    projects.push({ ...row.project, id: row.id });
+    (Array.isArray(row.updates) ? row.updates : []).forEach((update) => updates.push({ ...update, projectId: row.id }));
+    cloud.versions.set(row.id, row.updated_at);
+    cloud.owners.set(row.id, row.owner_email);
+    cloud.access.set(row.id, row.owner_id === cloud.user.id || cloud.role === "admin"
+      ? "owner"
+      : myShares.get(row.id) === "edit" ? "edit" : "read");
+  });
+
+  state.projects = projects;
+  state.updates = updates;
+  state = ensureDefaults(state);
+  state.projects.forEach((project) => cloud.synced.set(project.id, projectPayload(project.id)));
+  cloud.ready = true;
+
+  saveLocalOnly();
+  if (uiState.projectId && !cloud.access.has(uiState.projectId)) {
+    uiState.projectId = null;
+    if (uiState.screen === "reports-project" || uiState.screen === "create-report") uiState.screen = "dashboard";
+  }
   renderAll();
+  return true;
 }
 
-async function pushCloudState() {
-  if (!cloud.enabled || !cloud.user) return;
+/* Pulls other people's changes in, unless this tab has edits of its own still on the way
+   or someone is mid-typing (re-rendering would steal their cursor). */
+async function refreshFromCloud() {
+  if (!cloud.enabled || !cloud.user || cloud.pushing || cloud.saveTimer) return;
+  const active = document.activeElement;
+  if (active && /^(INPUT|TEXTAREA|SELECT)$/.test(active.tagName)) return;
+  if (!nodes.authOverlay.hidden) return;
+  if (hasUnsyncedChanges()) return;
+  await loadCloudProjects();
+}
 
-  const { error } = await cloud.client
-    .from("user_state")
-    .upsert({ user_id: cloud.user.id, state, updated_at: new Date().toISOString() });
+/* ---- writing ---- */
 
-  if (error) {
-    debugLog(`cloud save failed: ${error.message}`);
-    showAppError(`Changes are saved in this browser but did not reach the server (${error.message}).`);
+function projectPayload(projectId) {
+  const project = state.projects.find((item) => item.id === projectId);
+  const updates = state.updates.filter((item) => item.projectId === projectId);
+  return JSON.stringify({ project, updates });
+}
+
+function hasUnsyncedChanges() {
+  if (state.projects.length !== cloud.synced.size) return true;
+  return state.projects.some((project) => cloud.synced.get(project.id) !== projectPayload(project.id));
+}
+
+/* localStorage only — the cloud push is driven separately. */
+function saveLocalOnly() {
+  try {
+    localStorage.setItem(STATE_KEY, JSON.stringify(state));
+  } catch (error) {
+    debugLog(`local cache failed: ${error.message}`);
   }
 }
 
 /* Debounced so typing does not fire a request per keystroke. */
 function scheduleCloudSave() {
-  if (!cloud.enabled || !cloud.user) return;
+  if (!cloud.enabled || !cloud.user || !cloud.ready) return;
   clearTimeout(cloud.saveTimer);
-  cloud.saveTimer = setTimeout(() => pushCloudState(), 1200);
+  cloud.saveTimer = setTimeout(() => {
+    cloud.saveTimer = null;
+    pushCloudChanges();
+  }, 1000);
+}
+
+function canEditProject(projectId) {
+  if (!cloud.enabled) return true;
+  if (!cloud.synced.has(projectId)) return true;            // new, not yet saved: it is yours
+  const access = cloud.access.get(projectId);
+  return access === "owner" || access === "edit";
+}
+
+function canDeleteProject(projectId) {
+  if (!cloud.enabled) return true;
+  if (!cloud.synced.has(projectId)) return true;
+  return cloud.access.get(projectId) === "owner";
+}
+
+function canShareProject(projectId) {
+  return cloud.enabled && cloud.access.get(projectId) === "owner";
+}
+
+/* Puts one project (and its weeks) back to the last synced copy. */
+function restoreProject(projectId) {
+  const snapshot = cloud.synced.get(projectId);
+  if (!snapshot) return;
+  const { project, updates } = JSON.parse(snapshot);
+  state.projects = state.projects.filter((item) => item.id !== projectId);
+  state.updates = state.updates.filter((item) => item.projectId !== projectId);
+  if (project) state.projects.push(project);
+  updates.forEach((update) => state.updates.push(update));
+}
+
+async function pushCloudChanges() {
+  if (!cloud.enabled || !cloud.user || !cloud.ready || cloud.pushing) return;
+  cloud.pushing = true;
+
+  let reverted = 0;
+  let conflict = false;
+  const failures = [];
+
+  try {
+    const liveIds = new Set(state.projects.map((project) => project.id));
+
+    /* Deleted here. */
+    for (const projectId of [...cloud.synced.keys()]) {
+      if (liveIds.has(projectId)) continue;
+      if (!canDeleteProject(projectId)) {
+        restoreProject(projectId);
+        reverted += 1;
+        continue;
+      }
+      const { error } = await cloud.client.from("wr_projects").delete().eq("id", projectId);
+      if (error) {
+        failures.push(error.message);
+        restoreProject(projectId);
+      } else {
+        ["synced", "versions", "access", "owners"].forEach((key) => cloud[key].delete(projectId));
+      }
+    }
+
+    /* Created or changed here. */
+    for (const project of [...state.projects]) {
+      const payload = projectPayload(project.id);
+      if (cloud.synced.get(project.id) === payload) continue;
+
+      const { project: body, updates } = JSON.parse(payload);
+      const weeks = updates.map(({ projectId, ...rest }) => rest);
+
+      if (!cloud.synced.has(project.id)) {
+        const { data, error } = await cloud.client.from("wr_projects")
+          .insert({ id: project.id, owner_id: cloud.user.id, owner_email: currentSession.email, project: body, updates: weeks })
+          .select("updated_at").single();
+        if (error) {
+          failures.push(error.message);
+          continue;
+        }
+        cloud.versions.set(project.id, data.updated_at);
+        cloud.access.set(project.id, "owner");
+        cloud.owners.set(project.id, currentSession.email);
+        cloud.synced.set(project.id, payload);
+        continue;
+      }
+
+      if (!canEditProject(project.id)) {
+        restoreProject(project.id);
+        reverted += 1;
+        continue;
+      }
+
+      /* Only if nobody else saved since we last read it; otherwise reload rather than
+         overwrite their work. */
+      const { data, error } = await cloud.client.from("wr_projects")
+        .update({ project: body, updates: weeks })
+        .eq("id", project.id)
+        .eq("updated_at", cloud.versions.get(project.id))
+        .select("updated_at");
+      if (error) {
+        failures.push(error.message);
+      } else if (!data || !data.length) {
+        conflict = true;
+      } else {
+        cloud.versions.set(project.id, data[0].updated_at);
+        cloud.synced.set(project.id, payload);
+      }
+    }
+  } finally {
+    cloud.pushing = false;
+  }
+
+  if (conflict) {
+    await loadCloudProjects();
+    showAppError("Someone else saved this project at the same time. It has been reloaded with their changes — please re-apply yours.");
+    return;
+  }
+  if (failures.length) {
+    showAppError(`Some changes did not reach the server (${failures[0]}). They are kept in this browser; reload to retry.`);
+  }
+  if (reverted) {
+    saveLocalOnly();
+    renderAll();
+    showAppInfo("You have view-only access to that project, so the change was not saved. Ask its owner for edit access.");
+  }
 }
 
 async function signOut() {
   if (!cloud.enabled) return;
-  if (!confirm("Sign out? Your data stays on the server and comes back when you sign in.")) return;
+  if (!confirm("Sign out? Your projects stay saved on the server.")) return;
 
+  cloud.ready = false;
+  clearTimeout(cloud.saveTimer);
+  cloud.saveTimer = null;
   await cloud.client.auth.signOut();
-  state = ensureDefaults({ projects: [], updates: [], settings: null, templates: [], weekTemplates: null });
-  saveState();
+  state.projects = [];
+  state.updates = [];
+  ["synced", "versions", "access", "owners"].forEach((key) => cloud[key].clear());
+  saveLocalOnly();
+  uiState.projectId = null;
+  uiState.screen = "dashboard";
   renderAll();
   showAuthOverlay();
 }
+
+/* ---- read-only display and sharing on the project screens ---- */
+
+/* Called from renderAll(): marks the project and week screens read-only when the open
+   project is view-only, and fills in the owner / access line and the Share button. */
+function renderProjectAccess() {
+  const projectId = uiState.projectId;
+  const readOnly = Boolean(projectId) && !canEditProject(projectId);
+  nodes.projectScreen.classList.toggle("is-readonly", readOnly);
+  nodes.createReportScreen.classList.toggle("is-readonly", readOnly);
+
+  if (nodes.deleteProjectBtn) nodes.deleteProjectBtn.hidden = Boolean(projectId) && !canDeleteProject(projectId);
+
+  const line = document.getElementById("projectAccessLine");
+  const share = document.getElementById("shareProjectBtn");
+  if (!line || !share) return;
+
+  if (!cloud.enabled || !projectId || !cloud.synced.has(projectId)) {
+    line.hidden = true;
+    share.hidden = !(cloud.enabled && projectId);
+    return;
+  }
+
+  const owner = cloud.owners.get(projectId) || "";
+  const access = cloud.access.get(projectId);
+  const mine = owner === currentSession.email;
+  line.hidden = false;
+  line.textContent = mine
+    ? "Your project"
+    : `Owner: ${userDisplayName(owner)} · ${access === "read" ? "View only" : "You can edit"}`;
+  share.hidden = !canShareProject(projectId);
+}
+
+async function openShareDialog() {
+  const projectId = uiState.projectId;
+  if (!canShareProject(projectId)) return;
+  if (!cloud.synced.has(projectId)) {
+    showAppInfo("Saving the project first — try Share again in a moment.");
+    return;
+  }
+
+  const overlay = document.getElementById("shareOverlay");
+  const project = state.projects.find((item) => item.id === projectId);
+  document.getElementById("shareTitle").textContent = `Share “${project ? project.name : "project"}”`;
+  overlay.hidden = false;
+  await renderShareList(projectId);
+  document.getElementById("shareEmail").focus();
+}
+
+async function renderShareList(projectId) {
+  const list = document.getElementById("shareList");
+  const { data, error } = await cloud.client.from("wr_project_shares")
+    .select("email, access").eq("project_id", projectId).order("email");
+
+  if (error) {
+    list.innerHTML = `<p class="auth-error">Could not load sharing (${escapeHtml(error.message)}).</p>`;
+    return;
+  }
+  if (!data.length) {
+    list.innerHTML = `<p class="muted">Not shared with anyone yet. Managers and the admin can always view it.</p>`;
+    return;
+  }
+
+  list.innerHTML = data.map((share) => `
+    <div class="share-row" data-email="${escapeHtml(share.email)}">
+      <span class="share-who"><strong>${escapeHtml(userDisplayName(share.email))}</strong>
+        <span class="muted">${escapeHtml(share.email)}</span></span>
+      <select class="share-access" aria-label="Access for ${escapeHtml(share.email)}">
+        <option value="read" ${share.access === "read" ? "selected" : ""}>Can view</option>
+        <option value="edit" ${share.access === "edit" ? "selected" : ""}>Can edit</option>
+      </select>
+      <button type="button" class="row-remove share-remove">Remove</button>
+    </div>`).join("");
+
+  list.querySelectorAll(".share-row").forEach((row) => {
+    const email = row.dataset.email;
+    row.querySelector(".share-access").addEventListener("change", async (event) => {
+      const { error: updateError } = await cloud.client.from("wr_project_shares")
+        .update({ access: event.target.value }).eq("project_id", projectId).eq("email", email);
+      if (updateError) showAppError(`Could not change access (${updateError.message}).`);
+    });
+    row.querySelector(".share-remove").addEventListener("click", async () => {
+      const { error: deleteError } = await cloud.client.from("wr_project_shares")
+        .delete().eq("project_id", projectId).eq("email", email);
+      if (deleteError) showAppError(`Could not remove access (${deleteError.message}).`);
+      renderShareList(projectId);
+    });
+  });
+}
+
+async function addShare(event) {
+  event.preventDefault();
+  const projectId = uiState.projectId;
+  const input = document.getElementById("shareEmail");
+  const error = document.getElementById("shareError");
+  const email = input.value.trim().toLowerCase();
+  error.hidden = true;
+
+  if (!isAllowedEmail(email)) {
+    error.textContent = `Use a @${ALLOWED_EMAIL_DOMAIN} address.`;
+    error.hidden = false;
+    return;
+  }
+  if (email === currentSession.email) {
+    error.textContent = "That is you.";
+    error.hidden = false;
+    return;
+  }
+
+  const access = document.getElementById("shareAccess").value;
+  const { error: upsertError } = await cloud.client.from("wr_project_shares")
+    .upsert({ project_id: projectId, email, access }, { onConflict: "project_id,email" });
+  if (upsertError) {
+    error.textContent = `Could not share (${upsertError.message}).`;
+    error.hidden = false;
+    return;
+  }
+  input.value = "";
+  renderShareList(projectId);
+}
+
+function closeShareDialog() {
+  document.getElementById("shareOverlay").hidden = true;
+}
+
+function wireCloudControls() {
+  const share = document.getElementById("shareProjectBtn");
+  if (share) share.addEventListener("click", () => openShareDialog());
+  const form = document.getElementById("shareForm");
+  if (form) form.addEventListener("submit", (event) => addShare(event));
+  const close = document.getElementById("shareClose");
+  if (close) close.addEventListener("click", () => closeShareDialog());
+  const overlay = document.getElementById("shareOverlay");
+  if (overlay) overlay.addEventListener("click", (event) => { if (event.target === overlay) closeShareDialog(); });
+}
+
+/* ---- Settings → Account, and the admin's usage view ---- */
 
 function renderAccountPanel() {
   if (!nodes.settingsAccount) return;
@@ -4070,37 +4486,93 @@ function renderAccountPanel() {
     return;
   }
 
+  const note = cloud.enabled
+    ? `Signed in with Google as <strong>${escapeHtml(ROLE_LABELS[cloud.role] || cloud.role)}</strong>.
+       Projects are saved to the shared database; you see your own, those shared with you${
+         cloud.role === "user" ? "" : ", and every other project as a " + (cloud.role === "admin" ? "admin" : "manager")}.`
+    : `Sign-in is your email alone — no password and no server, so this identifies you rather
+       than protecting anything. Data stays in this browser.`;
+
   nodes.settingsAccount.innerHTML = `
     <p class="muted">Signed in as <strong>${escapeHtml(currentSession.email)}</strong>.</p>
-    <p class="muted" style="margin-top:6px;font-size:0.8rem;">Sign-in is your email alone — no
-    password and no server, so this identifies you rather than protecting anything. Data stays in
-    this browser.</p>
+    <p class="muted" style="margin-top:6px;font-size:0.8rem;">${note}</p>
     <div class="actions" style="margin-top: 12px;">
       <button type="button" id="settingsSignOut" class="ghost-button">Sign out</button>
-    </div>`;
+    </div>
+    ${cloud.enabled && cloud.role === "admin" ? `
+      <h3 class="settings-head">Users &amp; usage <span class="muted">(admin only)</span></h3>
+      <div id="adminUsage" class="admin-usage"><p class="muted">Loading…</p></div>` : ""}`;
   document.getElementById("settingsSignOut").addEventListener("click", () => signOutSession());
+  if (cloud.enabled && cloud.role === "admin") loadAdminUsage();
 }
 
-/* "How many people are using it" — counts only; RLS still stops anyone reading
-   another person's projects. */
-async function loadUsageStats() {
-  const target = document.getElementById("settingsUsageStats");
-  if (!target || !cloud.enabled || !cloud.user) return;
+function formatAgo(iso) {
+  if (!iso) return "—";
+  const minutes = Math.round((Date.now() - new Date(iso).getTime()) / 60000);
+  if (minutes < 2) return "just now";
+  if (minutes < 60) return `${minutes} min ago`;
+  const hours = Math.round(minutes / 60);
+  if (hours < 24) return `${hours} h ago`;
+  const days = Math.round(hours / 24);
+  return days === 1 ? "yesterday" : `${days} days ago`;
+}
 
-  const { data, error } = await cloud.client.rpc("usage_stats");
+async function loadAdminUsage() {
+  const target = document.getElementById("adminUsage");
+  if (!target) return;
+
+  const { data, error } = await cloud.client.rpc("admin_usage");
   if (error) {
-    target.textContent = `Usage stats unavailable (${error.message}).`;
+    target.innerHTML = `<p class="auth-error">Usage unavailable (${escapeHtml(error.message)}).</p>`;
     return;
   }
 
-  const row = Array.isArray(data) ? data[0] : data;
-  if (!row) {
-    target.textContent = "No usage data yet.";
-    return;
-  }
+  const rows = data || [];
+  const dayMs = 86400000;
+  const activeWithin = (days) => rows.filter((row) => row.last_seen_at && Date.now() - new Date(row.last_seen_at).getTime() < days * dayMs).length;
+  const totalProjects = rows.reduce((sum, row) => sum + Number(row.projects_owned || 0), 0);
+  const totalEdits = rows.reduce((sum, row) => sum + Number(row.edits_30d || 0), 0);
 
-  target.textContent =
-    `${row.total_users} account(s) total · ${row.active_7d} active in the last 7 days · ${row.active_30d} in the last 30.`;
+  target.innerHTML = `
+    <div class="admin-usage-stats">
+      <div><strong>${rows.length}</strong><span>people signed up</span></div>
+      <div><strong>${activeWithin(7)}</strong><span>active, last 7 days</span></div>
+      <div><strong>${activeWithin(30)}</strong><span>active, last 30 days</span></div>
+      <div><strong>${totalProjects}</strong><span>projects</span></div>
+      <div><strong>${totalEdits}</strong><span>changes, last 30 days</span></div>
+    </div>
+    <div class="admin-usage-scroll">
+      <table class="admin-usage-table">
+        <thead><tr><th>Person</th><th>Role</th><th>Last seen</th><th>Projects</th><th>Sign-ins (30d)</th><th>Changes (30d)</th></tr></thead>
+        <tbody>${rows.map((row) => `
+          <tr>
+            <td><strong>${escapeHtml(row.display_name || userDisplayName(row.email))}</strong><br><span class="muted">${escapeHtml(row.email)}</span></td>
+            <td>${row.id === cloud.user.id
+              ? escapeHtml(ROLE_LABELS[row.role] || row.role)
+              : `<select class="admin-role" data-user="${escapeHtml(row.id)}">
+                  ${Object.entries(ROLE_LABELS).map(([value, label]) =>
+                    `<option value="${value}" ${row.role === value ? "selected" : ""}>${label}</option>`).join("")}
+                </select>`}</td>
+            <td>${formatAgo(row.last_seen_at)}</td>
+            <td>${row.projects_owned}</td>
+            <td>${row.signins_30d}</td>
+            <td>${row.edits_30d}</td>
+          </tr>`).join("")}
+        </tbody>
+      </table>
+    </div>`;
+
+  target.querySelectorAll(".admin-role").forEach((select) => {
+    select.addEventListener("change", async () => {
+      const { error: roleError } = await cloud.client.rpc("set_user_role", { target: select.dataset.user, new_role: select.value });
+      if (roleError) {
+        showAppError(`Could not change role (${roleError.message}).`);
+        loadAdminUsage();
+      } else {
+        showAppSuccess("Role updated. It applies the next time they load the app.");
+      }
+    });
+  });
 }
 
 /* ---------- Re-apply template wording to existing projects ---------- */
@@ -4308,6 +4780,10 @@ function importBackup(file) {
 function deleteProject(projectId) {
   const project = state.projects.find((item) => item.id === projectId);
   if (!project) return;
+  if (!canDeleteProject(projectId)) {
+    showAppInfo("Only the project's owner or the admin can delete it.");
+    return;
+  }
 
   const reports = state.updates.filter((item) => item.projectId === projectId);
   const taskCount = reports.reduce((total, update) => total + (update.tasks || []).length, 0);
@@ -5304,6 +5780,9 @@ function carryForwardOverdueTasks() {
   let carried = 0;
 
   state.projects.forEach((project) => {
+    /* A view-only project is someone else's to move along; writing here would only be
+       reverted and announced as a refused change the viewer never made. */
+    if (!canEditProject(project.id)) return;
     const weeks = projectWeeksSorted(project.id);
     weeks.slice(0, -1).forEach((week) => {
       if (!weekHasEnded(week, today)) return;

@@ -1,58 +1,58 @@
-# Turning on accounts
+# Shared projects with Supabase
 
-The dashboard runs local-only out of the box. These steps add email login and give every
-person their own dashboard.
+Google sign-in, projects stored in a shared database, sharing per project, three roles.
+Project: `dkiqptehifzxwejsduhy` — URL and publishable key are already in `supabase-config.json`.
 
-## 1. Create the project
-1. Sign up at <https://supabase.com> and create a project (free tier is enough for a small team).
-2. **SQL Editor → New query** → paste all of `supabase/schema.sql` → **Run**.
-   This creates `profiles`, `user_state`, the row-level security policies, and the
-   `usage_stats()` / `touch_last_seen()` functions.
+## Who can do what
 
-## 2. Point the app at it
-**Project Settings → API**, copy the **Project URL** and the **anon / public** key into
-`supabase-config.json`:
+| | Sees | Creates | Edits | Deletes | Shares |
+|---|---|---|---|---|---|
+| **Team member** (default) | own + shared with them | ✓ | own + shared *can edit* | own | own |
+| **Manager** | **every project** | ✓ | own + shared *can edit* | own | own |
+| **Admin** | every project | ✓ | every project | every project | every project, plus roles and usage |
 
-```json
-{ "url": "https://xxxx.supabase.co", "anonKey": "eyJhbGciOi..." }
-```
+The database enforces all of it (row-level security in `supabase/schema.sql`); the app only
+hides what someone cannot do. Anyone listed in `bootstrap_admins` (stuti.khare@webengage.com)
+becomes admin on first sign-in; everyone else starts as Team member and the admin promotes
+managers in **Settings → Users & usage**.
 
-The anon key is designed to sit in client code — row-level security is what protects the
-data, not the key.
+## 1. Create the tables
+**SQL Editor → New query** → paste all of `supabase/schema.sql` → **Run**. Safe to re-run.
 
-Then run `python3 build-standalone.py` if you also use the single-file build.
+## 2. Google sign-in
+1. In [Google Cloud console](https://console.cloud.google.com/apis/credentials) (ideally a
+   project in the WebEngage Google Workspace):
+   - **OAuth consent screen**: user type **Internal** — only WebEngage accounts can then
+     sign in at all. App name "Weekly Report".
+   - **Credentials → Create credentials → OAuth client ID** → *Web application*.
+     **Authorized redirect URI**: `https://dkiqptehifzxwejsduhy.supabase.co/auth/v1/callback`
+2. In Supabase **Authentication → Sign In / Providers → Google**: enable, paste the Client ID
+   and Client Secret, save.
+3. In Supabase **Authentication → URL Configuration**:
+   - **Site URL**: `https://weekly-report-dashboard-one.vercel.app`
+   - **Redirect URLs**: `https://weekly-report-dashboard-one.vercel.app/**` and
+     `http://localhost:8000/**`
 
-## 3. Enable Google sign-in
-Sign-in is **Google only** — there is no password form.
+Even without an Internal consent screen, the database rejects any non-@webengage.com
+account at sign-up.
 
-1. **Authentication → Providers → Google → Enable.**
-2. Create an OAuth client in the [Google Cloud console](https://console.cloud.google.com/apis/credentials)
-   (Web application), and paste its Client ID and Secret into Supabase.
-3. In Google Cloud, add Supabase's callback as an **Authorized redirect URI** — Supabase shows
-   the exact URL on that provider page, of the form
-   `https://<project>.supabase.co/auth/v1/callback`.
-4. In Supabase **Authentication → URL Configuration**, set **Site URL** to wherever you host
-   the app, and add it under **Redirect URLs**.
+## 3. Try it
+Run the app locally (`/serve`, then http://localhost:8000), click **Sign in with Google**.
+Settings shows your role; as admin you also get **Users & usage**.
 
-To restrict to WebEngage accounts only, use an **Internal** OAuth consent screen in Google
-Cloud, or add a domain check — ask and I will add one.
+## How it behaves
+- **Saving**: every change is saved to the database about a second after you make it.
+- **Seeing others' changes**: when the tab regains focus, and every minute.
+- **Two people editing the same project at once**: the second save is refused, the project
+  reloads with the first person's changes, and a banner asks to re-apply. Nothing is silently
+  overwritten.
+- **Sharing**: owner opens the project → **Share** → email + *Can view* / *Can edit*. Works
+  for people who have never signed in yet.
+- **Usage**: Settings → Users & usage (admin only) — people, last seen, sign-ins and changes in
+  the last 30 days, projects owned, and a role picker.
 
-## 4. Host it
-`localStorage` is per-origin, so everyone must use the *same* URL. Any static host works —
-Netlify, Vercel, GitHub Pages, or an internal WebEngage host. Drop the folder in and point
-the team at it.
-
-## Seeing who uses it
-Settings → Account shows total accounts plus 7- and 30-day active counts. `last_seen_at` is
-stamped on each sign-in. For more detail, query in Supabase:
-
-```sql
-select email, created_at, last_seen_at from public.profiles order by last_seen_at desc;
-```
-
-## What is NOT included
-- **No sharing between users.** Each account is an island; there is no shared project or team
-  visibility across accounts. That needs a different schema — ask if you want it.
-- **No admin role.** Anyone signed in can see the aggregate counts (not other people's data).
-- **No migration of existing local data** beyond the first sign-in on the browser that holds
-  it: whatever is in that browser is pushed up once, then the server copy wins.
+## Not included yet
+- The master plan (Templates screen) and personal settings stay in each browser.
+- No live push: others' changes appear on focus / within a minute, not instantly.
+- The single-file `weekly-report-dashboard.html` stays local-only (a `file://` page cannot
+  receive the Google redirect).

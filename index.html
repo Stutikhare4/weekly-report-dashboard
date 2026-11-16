@@ -13,6 +13,9 @@
          fuller artwork the home screen has room for. -->
     <link rel="icon" href="favicon.svg" type="image/svg+xml" />
     <link rel="stylesheet" href="styles.css" />
+    <!-- Supabase client for magic-link sign-in and cloud sync. Pinned; unused (and harmless)
+         while supabase-config.json is empty. -->
+    <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
     <script defer src="plan-engine.js"></script>
     <script defer src="app.js"></script>
   </head>
@@ -47,6 +50,32 @@
 
         <p class="auth-footer">Weekly Report v1.0 · Internal Tool</p>
         <p class="muted auth-note" id="authLocalNote" hidden></p>
+      </div>
+    </div>
+
+    <!-- Share a project by email: view or edit. Only the owner (or admin) sees the Share button. -->
+    <div id="shareOverlay" class="modal-overlay" hidden>
+      <div class="modal-card share-card" role="dialog" aria-modal="true" aria-labelledby="shareTitle">
+        <div class="modal-head">
+          <div>
+            <p class="eyebrow">Sharing</p>
+            <h2 id="shareTitle">Share project</h2>
+          </div>
+          <button type="button" id="shareClose" class="ghost-button">Close</button>
+        </div>
+        <div class="modal-body">
+          <form id="shareForm" class="share-form">
+            <input type="email" id="shareEmail" required placeholder="name.surname@webengage.com" aria-label="Email to share with" />
+            <select id="shareAccess" aria-label="Access">
+              <option value="read">Can view</option>
+              <option value="edit">Can edit</option>
+            </select>
+            <button type="submit" class="primary-button">Share</button>
+          </form>
+          <p id="shareError" class="auth-error" hidden></p>
+          <p class="muted share-note">They see it the next time they open the app — they do not need to have signed in before.</p>
+          <div id="shareList" class="share-list"></div>
+        </div>
       </div>
     </div>
 
@@ -177,9 +206,11 @@
               <div class="screen-title">
                 <p class="eyebrow">Project page</p>
                 <h2 id="projectTitle">Project</h2>
+                <p id="projectAccessLine" class="muted project-access-line" hidden></p>
               </div>
               <div class="project-head-actions">
                 <span id="projectStatusBadge" class="pill pill-dark">Ongoing</span>
+                <button id="shareProjectBtn" class="secondary-button" type="button" hidden>Share</button>
                 <button id="deleteProjectBtn" class="row-remove" type="button">Delete project</button>
               </div>
             </div>
