@@ -601,12 +601,22 @@ function boot() {
 
   /* Nothing should ever fail silently again: surface uncaught errors in the UI, not just
      the console, so a dead-looking button always says why it is dead. */
+  /* ...but only the app's own errors. Browser extensions run scripts on the page too, and their
+     failures arrive here as well (one surfaced as "reading 'M_ID'", from no file of ours). Those
+     are logged for the debug panel and never shown as the app's error. */
+  const isOwnError = (filename, stack) => {
+    const ownSource = (text) => String(text || "").includes(location.origin) || String(text || "").startsWith("file:");
+    if (filename) return ownSource(filename);
+    return ownSource(stack);
+  };
   window.addEventListener("error", (event) => {
     debugLog(`ERROR ${event.message} @ ${event.filename || "?"}:${event.lineno || "?"}`);
+    if (!isOwnError(event.filename, event.error && event.error.stack)) return;
     showAppError(event.message);
   });
   window.addEventListener("unhandledrejection", (event) => {
     debugLog(`REJECTION ${String(event.reason)}`);
+    if (!isOwnError("", event.reason && event.reason.stack)) return;
     showAppError(String(event.reason));
   });
   nodes.appError.addEventListener("click", () => dismissAppBanner());
