@@ -4107,6 +4107,12 @@ async function onSignedIn(user) {
   cloud.user = user;
   nodes.authOverlay.hidden = true;
 
+  /* supabase-js reads the token out of the URL after the Google redirect and clears it with
+     `location.hash = ""`, which leaves a bare "#" behind. Tidy the address bar. */
+  if (location.href.endsWith("#") && window.history && history.replaceState) {
+    history.replaceState(null, "", location.pathname + location.search);
+  }
+
   const email = String(user.email || "").toLowerCase();
   const meta = user.user_metadata || {};
   currentSession = { email, name: meta.full_name || meta.name || userDisplayName(email) };
