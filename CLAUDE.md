@@ -635,11 +635,19 @@ Rules that keep it from running away:
   which has always shown incomplete pinned tasks in later weeks. The copy clears `fixedWeek`:
   keeping it would have the copy claim to be fixed to week 2 while sitting in week 3, wear a
   lock in the wrong week, and refuse to be moved. The original keeps its pin and its lock.
-- **Arrivals go to the top of the week.** A forwarded copy, a task moved in by hand and a task
-  re-dated into the week by `refileTasksIntoWeeks` are all `unshift`ed rather than pushed: work
-  arriving from the week before is what someone opening this week needs to see first. The report
-  reads the same array, so the editor and the document agree on the order. `+ Add task` still
-  appends, since a row a person just created belongs where they clicked.
+- **Where an arriving task lands.** A task **moved** into a week (Move…) or **re-dated** into it
+  (`refileTasksIntoWeeks`) is `push`ed to the **end** of that week's list, in either direction, so
+  the sequence the week already had is untouched — asked for explicitly (Nov 2026), replacing the
+  earlier "arrivals go to the top". A **forwarded copy** (pending / in progress → next week) is
+  still `unshift`ed to the top, since that is this week's carried-over work. The report reads the
+  same array, so the editor and the document agree on the order. `+ Add task` appends.
+- **`realignWeekOrder()` keeps every week in that order, including data saved before the rule.**
+  Within a week: forwarded copies first, then tasks the master plan puts in this week (existing
+  order kept), then tasks that belong to another week, at the end. A task's home week comes from
+  the master plan (`plannedWeekIndexOf`: title + phase → `PlanEngine.placementFor`), because a
+  moved task's dates are rewritten; tasks not in the plan are never moved. Stable and idempotent.
+  Runs on load, after the shared projects load (so fixes sync for editable projects), when a
+  project is opened, and when the reports screen opens — always before a render, never inside one.
 - **Nothing is ever auto-deleted.** Completing a task stops *further* copies but leaves the ones
   already made, because someone may have typed into them. The brief asked for completion to
   "remove it from future weeks"; that cannot hold alongside copies being independently editable
@@ -675,6 +683,17 @@ come from `update.templateWeek`, which holds the master-plan phase a week's firs
 (`slot.stageWeeks[0]`); several weeks can draw on one phase, so a report printed "Week 2" twice
 and a 6-week project's last two weeks read as "Week 3" and "Week 4". `templateWeek` is still the
 right field for finding which template a week came from — it is just not a position.
+
+**Report for (week picker).** The report header's dropdown (`renderReportWeekPicker`) lists
+"This week (live)" — last week + this week, as above — and then every week of the project, each
+marked "(this week)" or "(planned)" where it applies. Picking a week stores
+`uiState.reportWeekId`; `selectReportWeeks(weeks, picked)` then returns **that week alone**, so
+each week's report can be shared separately (asked for explicitly: Week 1, Week 2 and the
+upcoming week's plan as separate reports). Its heading tag is "planned week" if it has not
+started, "current week" if it contains today, none if past. The screen, PDF and email copies all
+follow, and the executive summary counts up to the picked week. Task statuses are today's: a past
+week shows the tasks it contained with their present status, not a snapshot of how it looked
+then. Opening a project resets the picker to live.
 
 ## People: WebEngage team vs client team
 

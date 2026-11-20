@@ -343,6 +343,7 @@ const nodes = {
   editWeeklyReports: document.getElementById("editWeeklyReports"),
   projectReportOutput: document.getElementById("projectReportOutput"),
   projectReportState: document.getElementById("projectReportState"),
+  reportWeekSelect: document.getElementById("reportWeekSelect"),
   generateReport: document.getElementById("generateReport"),
   downloadReport: document.getElementById("downloadReport"),
   addWeekFromTemplate: document.getElementById("addWeekFromTemplate"),
@@ -513,6 +514,10 @@ function boot() {
 
   nodes.openWeeklyReport.addEventListener("click", () => setProjectView("report"));
   nodes.backToProjectDetails.addEventListener("click", () => setProjectView("details"));
+  nodes.reportWeekSelect.addEventListener("change", () => {
+    uiState.reportWeekId = nodes.reportWeekSelect.value || null;
+    renderReport(buildReport(uiState.projectId));
+  });
   nodes.editWeeklyReports.addEventListener("click", () => openCreateReport(uiState.projectId, null, { editing: false }));
   nodes.addWeekFromTemplate.addEventListener("click", () => addWeekToProject(uiState.projectId));
   nodes.deleteProjectBtn.addEventListener("click", () => deleteProject(uiState.projectId));
@@ -681,6 +686,7 @@ renderDemoDataOptions();
   /* On load as well as on opening the reports screen: a week can run out while nobody is
      looking, and the work that outlived it should be on the next week's list by the time
      anyone reads the dashboard. */
+  realignAllProjects();
   const carried = carryForwardOverdueTasks();
   if (carried) {
     renderAll();
@@ -1296,6 +1302,11 @@ function openProject(projectId) {
   uiState.screen = "reports-project";
   uiState.activeNav = "dashboard";
   uiState.projectId = projectId;
+  /* Every project opens on its live report (last week + this week); a week picked on another
+     project's report does not follow. */
+  uiState.reportWeekId = null;
+  /* Before rendering, never during: see realignWeekOrder. */
+  if (realignWeekOrder(projectId)) saveState();
   renderAll();
   setProjectView("details");
 }
@@ -1552,7 +1563,12 @@ function buildReport(projectId) {
     .filter((update) => update.projectId === project.id)
     .sort((left, right) => left.weekStart.localeCompare(right.weekStart));
 
-  const weeks = selectReportWeeks(allWeeks);
+  /* A week picked in "Report for" (uiState.reportWeekId) is reported on its own, with the
+     executive summary counted up to it. A week that no longer exists (deleted) falls back to the
+     live report. */
+  const picked = allWeeks.find((week) => week.id === uiState.reportWeekId) || null;
+  renderReportWeekPicker(allWeeks, picked);
+  const weeks = selectReportWeeks(allWeeks, picked);
 
   latestReportText = [
     `Project weekly report: ${project.name}`,
@@ -1772,13 +1788,14 @@ function weekHeading(week) {
 /* Last week first, then this one: a reader wants what was delivered before what is still in
    hand. Current week = the one whose 7-day range contains today; after go-live it falls back to
    the last week that ended, so the report then shows the final two weeks of the project. */
-function selectReportWeeks(weeksAsc) {
+function selectReportWeeks(weeksAsc, picked = null) {
   if (!weeksAsc.length) return [];
 
   const today = toInputDate(new Date());
   const endOf = (update) => toInputDate(shiftDays(new Date(`${update.weekStart}T00:00:00`), 6));
 
-  const current = weeksAsc.find((update) => update.weekStart <= today && today <= endOf(update))
+  const current = picked
+    || weeksAsc.find((update) => update.weekStart <= today && today <= endOf(update))
     || [...weeksAsc].reverse().find((update) => endOf(update) < today)
     || null;
 
@@ -1791,6 +1808,16 @@ function selectReportWeeks(weeksAsc) {
      rather than the report coming out empty. */
   if (!current) return [toReportWeek(weeksAsc[0], "upcoming", 1)];
 
+  /* A week picked in "Report for" is reported on its own, so each week can be shared
+     separately. A week that has not started is the plan for it ("planned week"); the week
+     containing today keeps "current week"; a past week carries no tag. */
+  if (picked) {
+    const tag = picked.weekStart > today ? "planned"
+      : today <= endOf(picked) ? "current"
+        : "";
+    return [toReportWeek(picked, tag, numberOf(picked))];
+  }
+
   /* Week 1 has no week before it. */
   const previous = [...weeksAsc].reverse().find((update) => update.weekStart < current.weekStart);
 
@@ -1798,6 +1825,23 @@ function selectReportWeeks(weeksAsc) {
     previous ? toReportWeek(previous, "last", numberOf(previous)) : null,
     toReportWeek(current, "current", numberOf(current)),
   ].filter(Boolean);
+}
+
+/* The "Report for" dropdown: the live report first, then every week of the project. */
+function renderReportWeekPicker(allWeeks, picked) {
+  const select = nodes.reportWeekSelect;
+  if (!select) return;
+  const today = toInputDate(new Date());
+  const endOf = (week) => toInputDate(shiftDays(new Date(`${week.weekStart}T00:00:00`), 6));
+  select.innerHTML = [
+    `<option value="">This week (live) — last week + this week</option>`,
+    ...allWeeks.map((week, index) => {
+      const note = week.weekStart > today ? " (planned)" : today <= endOf(week) ? " (this week)" : "";
+      return `<option value="${escapeHtml(week.id)}">Week ${index + 1} · ${escapeHtml(week.weekRange || week.weekStart)}${note}</option>`;
+    }),
+  ].join("");
+  select.value = picked ? picked.id : "";
+  select.disabled = !allWeeks.length;
 }
 
 function toReportWeek(update, tag, weekNumber) {
@@ -4166,6 +4210,9 @@ async function loadCloudProjects() {
   state = ensureDefaults(state);
   state.projects.forEach((project) => cloud.synced.set(project.id, projectPayload(project.id)));
   cloud.ready = true;
+  /* Saved before the "arrivals go to the end" rule? Put it right; editable projects only, and
+     the change is synced like any other edit. */
+  realignAllProjects();
 
   saveLocalOnly();
   if (uiState.projectId && !cloud.access.has(uiState.projectId)) {
@@ -5196,8 +5243,9 @@ function refileTasksIntoWeeks(projectId) {
 
   moves.forEach(({ task, from, to }) => {
     from.tasks = from.tasks.filter((item) => item.id !== task.id);
-    /* An arrival again: it was re-dated into this week rather than planned in it. */
-    to.tasks.unshift(task);
+    /* Re-dated into another week: it joins the END of that week's list, so the order the week
+       already had is left exactly as it was. */
+    to.tasks.push(task);
   });
 
   return moves.length;
@@ -5395,6 +5443,7 @@ function openCreateReport(projectId, focusUpdateId, { editing = Boolean(focusUpd
 
   /* Before the list is drawn, not during: renderAll() calls back into the index, and writing
      state from inside a render would re-enter it. */
+  realignAllProjects();
   announceCarriedForward(carryForwardOverdueTasks());
   renderReportsIndex(projectId || "");
   renderAll();
@@ -5870,6 +5919,68 @@ function forwardTaskToNextWeek(task, editingWeek, { auto = false } = {}) {
    advances one week per real week, rather than a single click filling weeks 3 to 12 at once.
    Weeks are walked in order, so work stranded several weeks back steps forward through each of
    them and every week it was open in keeps a record of it. */
+/* ---- Keep each week in plan order: arrivals at the end ---- */
+
+/* The master-plan week a task belongs to, as a 0-based index into the project's weeks, or null
+   when the task is not in the master plan (a hand-added task) — those are never moved. A moved
+   task's dates are rewritten, so the plan is the only lasting record of where it belongs. */
+function plannedWeekIndexOf(task, project, cycleWeeks) {
+  const title = String(task.title || "").trim().toLowerCase();
+  const phase = String(task.phase || "").trim().toLowerCase();
+  if (!title) return null;
+
+  let match = null;
+  [...(state.weekTemplates || [])].forEach((stage) => {
+    if (match) return;
+    if (phase && String(stage.label || "").trim().toLowerCase() !== phase) return;
+    const found = templateTasksForProject(stage.tasks || [], project)
+      .find((item) => String(item.title || "").trim().toLowerCase() === title);
+    if (found) match = found;
+  });
+  if (!match) return null;
+  return PlanEngine.placementFor(match, cycleWeeks, 0, templateMeta);
+}
+
+/* Within every week of a project: forwarded copies first (this week's carried-over work), then
+   the tasks the plan puts in this week, in the order they already have, then tasks that belong
+   to another week (moved or re-dated in) at the end. Stable, so nothing else is reordered.
+   Asked for explicitly: a task pushed into a week goes to the end of it, never above that
+   week's own tasks — and data saved before that rule had them at the top. */
+function realignWeekOrder(projectId) {
+  const project = state.projects.find((item) => item.id === projectId);
+  if (!project || !canEditProject(projectId)) return false;
+
+  const weeks = projectWeeksSorted(projectId);
+  const cycleWeeks = Math.min(Math.max(Number(project.cycleWeeks) || weeks.length || DEFAULT_CYCLE_WEEKS,
+    MIN_CYCLE_WEEKS), MAX_CYCLE_WEEKS);
+  let changed = false;
+
+  weeks.forEach((week, index) => {
+    const tasks = week.tasks || [];
+    if (tasks.length < 2) return;
+    const rank = (task) => {
+      if (task.copiedFromTaskId) return 0;
+      const planned = plannedWeekIndexOf(task, project, cycleWeeks);
+      return planned === null || planned === index ? 1 : 2;
+    };
+    const ordered = tasks.map((task, position) => ({ task, position, rank: rank(task) }))
+      .sort((left, right) => left.rank - right.rank || left.position - right.position)
+      .map((entry) => entry.task);
+    if (ordered.some((task, position) => task !== tasks[position])) {
+      week.tasks = ordered;
+      changed = true;
+    }
+  });
+
+  return changed;
+}
+
+function realignAllProjects() {
+  const changed = state.projects.map((project) => realignWeekOrder(project.id)).some(Boolean);
+  if (changed) saveState();
+  return changed;
+}
+
 function carryForwardOverdueTasks() {
   const today = toInputDate(new Date());
   let carried = 0;
@@ -5926,8 +6037,9 @@ function moveTaskToWeek(taskId, weekId, editing) {
   task.startDate = target.weekStart;
   task.dueDate = taskDueDate(target.weekStart, task.days || templateDefaultDays());
   target.tasks = target.tasks || [];
-  /* Top of the list, for the same reason as a forwarded copy: it arrived from elsewhere. */
-  target.tasks.unshift(task);
+  /* End of the list: a task moved into a week — earlier or later — is appended, so the tasks
+     already there keep their sequence. */
+  target.tasks.push(task);
 
   saveState();
   stampProjectActivity(target.projectId);
