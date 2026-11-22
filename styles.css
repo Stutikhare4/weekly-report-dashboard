@@ -4583,3 +4583,31 @@ small,
 .screen.is-readonly #importSheetBtn {
   display: none !important;
 }
+
+/* Client team rows in the Basic Details edit form */
+.proj-poc-block {
+  display: grid;
+  gap: 8px;
+}
+
+.proj-poc-list {
+  display: grid;
+  gap: 6px;
+}
+
+.proj-poc-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;
+  gap: 8px;
+  align-items: center;
+}
+
+.proj-poc-block > .secondary-button {
+  justify-self: start;
+}
+
+@media (max-width: 560px) {
+  .proj-poc-row {
+    grid-template-columns: 1fr;
+  }
+}

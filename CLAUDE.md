@@ -770,6 +770,12 @@ fields, and a separate "People" card (built first, and wrong) left Basic Details
 `toggleProjectDetails()` hides the read-only block while the form is open, so the card never
 shows the same fields twice.
 
+The client team is editable in that same form (Nov 2026, asked for): a **Client team** list of
+name + email rows with Remove, and **+ Add client member** (`addProjectPocRow`). Rows are filled
+when the form opens (`fillProjectPocRows` in `toggleProjectDetails(true)`), not on every render,
+so a background refresh cannot wipe what someone is typing; any other fields a POC carries from
+the creation wizard are kept (`data-extra`). Removing a POC does not touch task owners already set.
+
 The Team screen is built from the same function, grouped the way the team thinks:
 
 - **Permanent WebEngage Team** — one common section, since the same CSM runs several projects.

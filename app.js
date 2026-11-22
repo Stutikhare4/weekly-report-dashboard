@@ -522,6 +522,11 @@ function boot() {
   nodes.addWeekFromTemplate.addEventListener("click", () => addWeekToProject(uiState.projectId));
   nodes.deleteProjectBtn.addEventListener("click", () => deleteProject(uiState.projectId));
   wireCloudControls();
+  const addPoc = document.getElementById("projAddPoc");
+  if (addPoc) addPoc.addEventListener("click", () => {
+    const row = addProjectPocRow();
+    if (row) row.querySelector('[data-key="name"]').focus();
+  });
   wireImportControls();
   nodes.projEditToggle.addEventListener("click", () => toggleProjectDetails(true));
   /* Kickoff, go-live and cycle length live in the project details form, so the Timeline card's
@@ -5740,7 +5745,48 @@ function syncCycleWeeksToDates() {
   renderWizardSummary();
 }
 
+/* Client team rows in the Basic Details form: name + email, removable, any number. */
+function addProjectPocRow(poc = {}) {
+  const list = document.getElementById("projPocList");
+  if (!list) return;
+  const row = document.createElement("div");
+  row.className = "proj-poc-row";
+  row.innerHTML = `
+    <input type="text" data-key="name" placeholder="Name" aria-label="Client member name" />
+    <input type="email" data-key="email" placeholder="Email (optional)" aria-label="Client member email" />
+    <button type="button" class="row-remove">Remove</button>`;
+  row.querySelector('[data-key="name"]').value = poc.name || "";
+  row.querySelector('[data-key="email"]').value = poc.email || "";
+  /* Anything else stored on the POC (from the creation wizard) rides along unchanged. */
+  const { name, email, ...extra } = poc;
+  if (Object.keys(extra).length) row.dataset.extra = JSON.stringify(extra);
+  row.querySelector(".row-remove").addEventListener("click", () => row.remove());
+  list.append(row);
+  return row;
+}
+
+function fillProjectPocRows(project) {
+  const list = document.getElementById("projPocList");
+  if (!list) return;
+  list.innerHTML = "";
+  (project.clientPocs || []).forEach((poc) => addProjectPocRow(poc));
+}
+
+function readProjectPocRows() {
+  return [...document.querySelectorAll("#projPocList .proj-poc-row")].map((row) => {
+    const original = row.dataset.extra ? JSON.parse(row.dataset.extra) : {};
+    return {
+      ...original,
+      name: row.querySelector('[data-key="name"]').value.trim(),
+      email: row.querySelector('[data-key="email"]').value.trim(),
+    };
+  }).filter((poc) => poc.name);
+}
+
 function toggleProjectDetails(editing) {
+  /* Filled when the form opens, not on every render, so a background refresh cannot wipe
+     rows someone is in the middle of typing. */
+  if (editing) fillProjectPocRows(state.projects.find((item) => item.id === uiState.projectId) || {});
   nodes.projDetailsForm.hidden = !editing;
   /* One or the other, never the same fields twice in one card. */
   nodes.projectDetailsFields.hidden = editing;
@@ -5778,6 +5824,8 @@ function saveProjectDetails(event) {
   project.techTeam = nodes.projTechTeam.value;
   project.vendorName = project.techTeam === "outsourced" ? nodes.projVendorName.value.trim() : "";
   project.notes = nodes.projNotes.value.trim();
+  /* Client team: edited, added and removed here. Task owners already set keep their names. */
+  project.clientPocs = readProjectPocRows();
   project.kickoffDate = kickoff;
   project.cycleWeeks = weeks;
   const updates = state.updates
