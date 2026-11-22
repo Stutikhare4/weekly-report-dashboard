@@ -33,6 +33,22 @@ TYPOS = {"Histroical": "Historical", "Jounery": "Journey"}
 # here so a re-import cannot quietly hand them back their elastic offsets.
 PINNED_WEEKS = {"SDK Set Up": 1, "User Tracking": 2}
 PINNED_OFFSETS = {1: 5, 2: 10}
+# Audit task names (asked for, Nov 2026): the sheet says "Users and Events Audit" per platform and
+# "Data Validation" for REST API; the plan names each audit by platform and stage, CRM being the
+# REST API domain. Applied here so a re-import keeps the names.
+AUDIT_PLATFORMS = {"Website": "Website", "Web App": "Web App", "Android": "Android", "iOS": "iOS"}
+
+
+def audit_title(title, scope, phase):
+    stage = ("Staging" if phase.startswith("Staging")
+             else "Production" if phase.startswith("Production") else None)
+    if stage and title == "Users and Events Audit" and scope in AUDIT_PLATFORMS:
+        return f"{AUDIT_PLATFORMS[scope]} {stage} Audit"
+    if stage and title == "Data Validation" and scope == "Rest API":
+        return f"CRM {stage} Audit"
+    return title
+
+
 # Web App is not in the sheet: it mirrors Website's tasks with Android/iOS timing.
 WEBAPP_TIMING = {"SDK Set Up": "SDK Set Up", "User Tracking": "User Tracking",
                  "Event Tracking": "Event Tracking", "Web Push Setup": "Push Setup",
@@ -158,7 +174,8 @@ def build(seq):
             seen = {str(c): offsets[c] for c in CYCLE_TABS}
             if pinned:
                 seen = {str(c): PINNED_OFFSETS[pinned] for c in CYCLE_TABS}
-            entry = {"scope": scope, "title": title, "owner": row["owner"], "priority": "medium",
+            entry = {"scope": scope, "title": audit_title(title, scope, row["phase"]),
+                     "owner": row["owner"], "priority": "medium",
                      "platforms": platforms, "channels": list(dict.fromkeys(channels_for(title))),
                      "offsetByCycle": seen, "elastic": len(set(seen.values())) > 1}
             if pinned:

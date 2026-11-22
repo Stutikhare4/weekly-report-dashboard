@@ -107,7 +107,7 @@ const MAX_CYCLE_WEEKS = 12;
 
 /* Bump this whenever the master plan changes shape or content: a browser holding an older
    version re-seeds itself on the next load instead of silently keeping the stale plan. */
-const WEEK_TEMPLATE_VERSION = "2026-09-07-fixed-weeks";
+const WEEK_TEMPLATE_VERSION = "2026-11-20-audit-names";
 
 const WEEK_TEMPLATE_SEED = [
   {
@@ -158,25 +158,25 @@ const WEEK_TEMPLATE_SEED = [
       { scope: "Communication Channels", title: "IVR setup", owner: "Cpaas / Client team", priority: "medium", platforms: [], channels: ["IVR"], elastic: true, offsetByCycle: { "4": 10, "6": 10, "12": 21 } },
       { scope: "Rest API", title: "User Tracking", owner: "Client tech team", priority: "medium", platforms: ["REST API"], channels: [], elastic: false, fixedWeek: 2, offsetByCycle: { "4": 10, "6": 10, "12": 10 } },
       { scope: "Rest API", title: "Event Tracking", owner: "Client tech team", priority: "medium", platforms: ["REST API"], channels: [], elastic: true, offsetByCycle: { "4": 10, "6": 15, "12": 35 } },
-      { scope: "Website", title: "Users and Events Audit", owner: "Webengage OBM", priority: "medium", platforms: ["Website"], channels: [], elastic: true, offsetByCycle: { "4": 15, "6": 17, "12": 42 } },
-      { scope: "Web App", title: "Users and Events Audit", owner: "Webengage OBM", priority: "medium", platforms: ["Web App"], channels: [], elastic: true, offsetByCycle: { "4": 17, "6": 21, "12": 49 } },
+      { scope: "Website", title: "Website Staging Audit", owner: "Webengage OBM", priority: "medium", platforms: ["Website"], channels: [], elastic: true, offsetByCycle: { "4": 15, "6": 17, "12": 42 } },
+      { scope: "Web App", title: "Web App Staging Audit", owner: "Webengage OBM", priority: "medium", platforms: ["Web App"], channels: [], elastic: true, offsetByCycle: { "4": 17, "6": 21, "12": 49 } },
       { scope: "Website", title: "WebPush Audit", owner: "Webengage OBM", priority: "medium", platforms: ["Website"], channels: ["Web Push", "Push"], elastic: true, offsetByCycle: { "4": 15, "6": 17, "12": 42 } },
       { scope: "Web App", title: "WebPush Audit", owner: "Webengage OBM", priority: "medium", platforms: ["Web App"], channels: ["Web Push", "Push"], elastic: true, offsetByCycle: { "4": 17, "6": 21, "12": 49 } },
       { scope: "Website", title: "Onsite Notification Audit", owner: "Webengage OBM", priority: "medium", platforms: ["Website"], channels: ["On-site Notification"], elastic: true, offsetByCycle: { "4": 15, "6": 17, "12": 42 } },
       { scope: "Web App", title: "Onsite Notification Audit", owner: "Webengage OBM", priority: "medium", platforms: ["Web App"], channels: ["On-site Notification"], elastic: true, offsetByCycle: { "4": 17, "6": 21, "12": 49 } },
       { scope: "Website", title: "Staging Fixes as per Audit Report", owner: "Client tech team", priority: "medium", platforms: ["Website"], channels: [], elastic: true, offsetByCycle: { "4": 17, "6": 21, "12": 42 } },
       { scope: "Web App", title: "Staging Fixes as per Audit Report", owner: "Client tech team", priority: "medium", platforms: ["Web App"], channels: [], elastic: true, offsetByCycle: { "4": 21, "6": 25, "12": 49 } },
-      { scope: "Android", title: "Users and Events Audit", owner: "Webengage OBM", priority: "medium", platforms: ["Android"], channels: [], elastic: true, offsetByCycle: { "4": 17, "6": 21, "12": 49 } },
+      { scope: "Android", title: "Android Staging Audit", owner: "Webengage OBM", priority: "medium", platforms: ["Android"], channels: [], elastic: true, offsetByCycle: { "4": 17, "6": 21, "12": 49 } },
       { scope: "Android", title: "Push Android", owner: "Webengage OBM", priority: "medium", platforms: ["Android"], channels: ["Push"], elastic: true, offsetByCycle: { "4": 17, "6": 21, "12": 49 } },
       { scope: "Android", title: "In-App Android", owner: "Webengage OBM", priority: "medium", platforms: ["Android"], channels: ["In-App"], elastic: true, offsetByCycle: { "4": 17, "6": 21, "12": 49 } },
       { scope: "Android", title: "Deeplinks", owner: "Webengage OBM", priority: "medium", platforms: ["Android"], channels: [], elastic: true, offsetByCycle: { "4": 17, "6": 21, "12": 49 } },
       { scope: "Android", title: "Staging Fixes as per Audit Report", owner: "Client tech team", priority: "medium", platforms: ["Android"], channels: [], elastic: true, offsetByCycle: { "4": 21, "6": 25, "12": 49 } },
-      { scope: "iOS", title: "Users and Events Audit", owner: "Webengage OBM", priority: "medium", platforms: ["iOS"], channels: [], elastic: true, offsetByCycle: { "4": 17, "6": 21, "12": 49 } },
+      { scope: "iOS", title: "iOS Staging Audit", owner: "Webengage OBM", priority: "medium", platforms: ["iOS"], channels: [], elastic: true, offsetByCycle: { "4": 17, "6": 21, "12": 49 } },
       { scope: "iOS", title: "Push, Rich Push iOS", owner: "Webengage OBM", priority: "medium", platforms: ["iOS"], channels: ["Push"], elastic: true, offsetByCycle: { "4": 17, "6": 21, "12": 49 } },
       { scope: "iOS", title: "In-App iOS", owner: "Webengage OBM", priority: "medium", platforms: ["iOS"], channels: ["In-App"], elastic: true, offsetByCycle: { "4": 17, "6": 21, "12": 49 } },
       { scope: "iOS", title: "Deeplinks", owner: "Webengage OBM", priority: "medium", platforms: ["iOS"], channels: [], elastic: true, offsetByCycle: { "4": 17, "6": 21, "12": 49 } },
       { scope: "iOS", title: "Staging Fixes as per Audit Report", owner: "Client tech team", priority: "medium", platforms: ["iOS"], channels: [], elastic: true, offsetByCycle: { "4": 21, "6": 25, "12": 49 } },
-      { scope: "Rest API", title: "Data Validation", owner: "Webengage OBM", priority: "medium", platforms: ["REST API"], channels: [], elastic: true, offsetByCycle: { "4": 17, "6": 25, "12": 49 } },
+      { scope: "Rest API", title: "CRM Staging Audit", owner: "Webengage OBM", priority: "medium", platforms: ["REST API"], channels: [], elastic: true, offsetByCycle: { "4": 17, "6": 25, "12": 49 } },
       { scope: "Rest API", title: "Count Matching", owner: "Webengage team + Client team", priority: "medium", platforms: ["REST API"], channels: [], elastic: true, offsetByCycle: { "4": 17, "6": 25, "12": 49 } },
     ],
   },
@@ -200,25 +200,25 @@ const WEEK_TEMPLATE_SEED = [
       { scope: "Communication Channels", title: "Whatsapp setup", owner: "Cpaas / Client team", priority: "medium", platforms: [], channels: ["WhatsApp"], elastic: true, offsetByCycle: { "4": 22, "6": 10, "12": 21 } },
       { scope: "Communication Channels", title: "RCS setup", owner: "Cpaas / Client team", priority: "medium", platforms: [], channels: ["RCS"], elastic: true, offsetByCycle: { "4": 22, "6": 10, "12": 21 } },
       { scope: "Communication Channels", title: "IVR setup", owner: "Cpaas / Client team", priority: "medium", platforms: [], channels: ["IVR"], elastic: true, offsetByCycle: { "4": 23, "6": 10, "12": 21 } },
-      { scope: "Website", title: "Users and Events Audit", owner: "Webengage OBM", priority: "medium", platforms: ["Website"], channels: [], elastic: true, offsetByCycle: { "4": 23, "6": 28, "12": 63 } },
-      { scope: "Web App", title: "Users and Events Audit", owner: "Webengage OBM", priority: "medium", platforms: ["Web App"], channels: [], elastic: true, offsetByCycle: { "4": 24, "6": 31, "12": 63 } },
+      { scope: "Website", title: "Website Production Audit", owner: "Webengage OBM", priority: "medium", platforms: ["Website"], channels: [], elastic: true, offsetByCycle: { "4": 23, "6": 28, "12": 63 } },
+      { scope: "Web App", title: "Web App Production Audit", owner: "Webengage OBM", priority: "medium", platforms: ["Web App"], channels: [], elastic: true, offsetByCycle: { "4": 24, "6": 31, "12": 63 } },
       { scope: "Website", title: "WebPush Audit", owner: "Webengage OBM", priority: "medium", platforms: ["Website"], channels: ["Web Push", "Push"], elastic: true, offsetByCycle: { "4": 23, "6": 28, "12": 63 } },
       { scope: "Web App", title: "WebPush Audit", owner: "Webengage OBM", priority: "medium", platforms: ["Web App"], channels: ["Web Push", "Push"], elastic: true, offsetByCycle: { "4": 24, "6": 31, "12": 63 } },
       { scope: "Website", title: "Onsite Notification Audit", owner: "Webengage OBM", priority: "medium", platforms: ["Website"], channels: ["On-site Notification"], elastic: true, offsetByCycle: { "4": 23, "6": 28, "12": 63 } },
       { scope: "Web App", title: "Onsite Notification Audit", owner: "Webengage OBM", priority: "medium", platforms: ["Web App"], channels: ["On-site Notification"], elastic: true, offsetByCycle: { "4": 24, "6": 31, "12": 63 } },
       { scope: "Website", title: "Prod Fixes as per Audit Report", owner: "Client tech team", priority: "medium", platforms: ["Website"], channels: [], elastic: true, offsetByCycle: { "4": 24, "6": 31, "12": 63 } },
       { scope: "Web App", title: "Prod Fixes as per Audit Report", owner: "Client tech team", priority: "medium", platforms: ["Web App"], channels: [], elastic: true, offsetByCycle: { "4": 25, "6": 36, "12": 70 } },
-      { scope: "Android", title: "Users and Events Audit", owner: "Webengage OBM", priority: "medium", platforms: ["Android"], channels: [], elastic: true, offsetByCycle: { "4": 24, "6": 31, "12": 63 } },
+      { scope: "Android", title: "Android Production Audit", owner: "Webengage OBM", priority: "medium", platforms: ["Android"], channels: [], elastic: true, offsetByCycle: { "4": 24, "6": 31, "12": 63 } },
       { scope: "Android", title: "Push Android", owner: "Webengage OBM", priority: "medium", platforms: ["Android"], channels: ["Push"], elastic: true, offsetByCycle: { "4": 24, "6": 31, "12": 63 } },
       { scope: "Android", title: "In-App Android", owner: "Webengage OBM", priority: "medium", platforms: ["Android"], channels: ["In-App"], elastic: true, offsetByCycle: { "4": 24, "6": 31, "12": 63 } },
       { scope: "Android", title: "Deeplinks", owner: "Webengage OBM", priority: "medium", platforms: ["Android"], channels: [], elastic: true, offsetByCycle: { "4": 24, "6": 31, "12": 63 } },
       { scope: "Android", title: "Prod Fixes as per Audit Report", owner: "Client tech team", priority: "medium", platforms: ["Android"], channels: [], elastic: true, offsetByCycle: { "4": 25, "6": 36, "12": 70 } },
-      { scope: "iOS", title: "Users and Events Audit", owner: "Webengage OBM", priority: "medium", platforms: ["iOS"], channels: [], elastic: true, offsetByCycle: { "4": 24, "6": 31, "12": 63 } },
+      { scope: "iOS", title: "iOS Production Audit", owner: "Webengage OBM", priority: "medium", platforms: ["iOS"], channels: [], elastic: true, offsetByCycle: { "4": 24, "6": 31, "12": 63 } },
       { scope: "iOS", title: "Push, Rich Push iOS", owner: "Webengage OBM", priority: "medium", platforms: ["iOS"], channels: ["Push"], elastic: true, offsetByCycle: { "4": 24, "6": 31, "12": 63 } },
       { scope: "iOS", title: "In-App iOS", owner: "Webengage OBM", priority: "medium", platforms: ["iOS"], channels: ["In-App"], elastic: true, offsetByCycle: { "4": 24, "6": 31, "12": 63 } },
       { scope: "iOS", title: "Deeplinks", owner: "Webengage OBM", priority: "medium", platforms: ["iOS"], channels: [], elastic: true, offsetByCycle: { "4": 24, "6": 31, "12": 63 } },
       { scope: "iOS", title: "Prod Fixes as per Audit Report", owner: "Client tech team", priority: "medium", platforms: ["iOS"], channels: [], elastic: true, offsetByCycle: { "4": 24, "6": 36, "12": 70 } },
-      { scope: "Rest API", title: "Data Validation", owner: "Webengage OBM", priority: "medium", platforms: ["REST API"], channels: [], elastic: true, offsetByCycle: { "4": 25, "6": 37, "12": 70 } },
+      { scope: "Rest API", title: "CRM Production Audit", owner: "Webengage OBM", priority: "medium", platforms: ["REST API"], channels: [], elastic: true, offsetByCycle: { "4": 25, "6": 37, "12": 70 } },
       { scope: "Rest API", title: "Count Matching", owner: "Webengage team + Client team", priority: "medium", platforms: ["REST API"], channels: [], elastic: true, offsetByCycle: { "4": 25, "6": 37, "12": 70 } },
       { scope: "Rest API", title: "Historical User Data Upload", owner: "Client team", priority: "medium", platforms: ["REST API"], channels: [], elastic: true, offsetByCycle: { "4": 23, "6": 31, "12": 63 } },
       { scope: "Rest API", title: "Historical Events Data Upload", owner: "Client team", priority: "medium", platforms: ["REST API"], channels: [], elastic: true, offsetByCycle: { "4": 23, "6": 31, "12": 63 } },
@@ -522,6 +522,7 @@ function boot() {
   nodes.addWeekFromTemplate.addEventListener("click", () => addWeekToProject(uiState.projectId));
   nodes.deleteProjectBtn.addEventListener("click", () => deleteProject(uiState.projectId));
   wireCloudControls();
+  wireImportControls();
   nodes.projEditToggle.addEventListener("click", () => toggleProjectDetails(true));
   /* Kickoff, go-live and cycle length live in the project details form, so the Timeline card's
      Edit opens that rather than duplicating the fields. */
@@ -1598,6 +1599,22 @@ function buildReport(projectId) {
 
    It is derived entirely from the tasks, so it cannot disagree with the tables below it, and the
    same three blocks are produced for every project and every week. */
+/* The same task exists once per platform (SDK Set Up for Website and for Android), so the
+   summary names the platform in brackets. Only platform domains — not "All" or
+   "Communication Channels", which would add noise without telling two tasks apart. */
+const SUMMARY_PLATFORMS = ["website", "android", "ios", "web app", "rest api"];
+
+function summaryPlatformOf(task) {
+  const domain = String(task.domain || "").trim();
+  return SUMMARY_PLATFORMS.includes(domain.toLowerCase()) ? domain : "";
+}
+
+function summaryTaskLabel(task) {
+  const title = String(task.title || "").trim();
+  const platform = summaryPlatformOf(task);
+  return platform ? `${title} (${platform})` : title;
+}
+
 function buildExecutiveSummary(project, allWeeks, reportWeeks) {
   const current = reportWeeks.find((week) => week.tag === "current") || reportWeeks[reportWeeks.length - 1];
   const currentStart = current ? current.weekStart : "";
@@ -1639,9 +1656,10 @@ function buildExecutiveSummary(project, allWeeks, reportWeeks) {
         phaseOrder.push(phase);
       }
       if (task.status !== "completed") return;
-      const title = (task.title || "").trim();
+      if (!String(task.title || "").trim()) return;
+      const label = summaryTaskLabel(task);
       const list = completedByPhase.get(phase);
-      if (title && !list.includes(title)) list.push(title);
+      if (!list.includes(label)) list.push(label);
     });
   });
 
@@ -1661,15 +1679,18 @@ function buildExecutiveSummary(project, allWeeks, reportWeeks) {
   /* One entry per task, however many weeks it has been carried through: the copies are one piece
      of work. `overdue` means it was already scheduled before this week and is still not done. */
   const pending = new Map();
+  const finished = finishedChainTaskIds(allWeeks);
   weeksToDate.forEach((week) => {
     (week.tasks || []).forEach((task) => {
-      if (task.status === "completed") return;
+      if (task.status === "completed" || finished.has(task.id)) return;
       const title = (task.title || "").trim();
       if (!title) return;
       const owner = (task.owner || "").trim() || "Unassigned";
-      const key = `${owner}\u0000${title}`;
+      const platform = summaryPlatformOf(task);
+      /* Per platform as well: SDK Set Up on Website and on Android are two pieces of work. */
+      const key = `${owner}\u0000${title}\u0000${platform}`;
       if (!pending.has(key)) {
-        pending.set(key, { owner, title, note: "", blocked: false, overdue: false });
+        pending.set(key, { owner, title, platform, label: summaryTaskLabel(task), note: "", blocked: false, overdue: false });
       }
       const entry = pending.get(key);
       if (task.status === "blocked") entry.blocked = true;
@@ -1708,10 +1729,21 @@ function buildExecutiveSummary(project, allWeeks, reportWeeks) {
     reasons.push(`${carriedCount} task${carriedCount === 1 ? "" : "s"} carried over from ${allFromLastWeek ? "last week" : "earlier weeks"}`);
   }
 
+  /* The tasks behind "At risk", named on a line of their own: blocked first, then the ones
+     carried over from earlier weeks, each once. */
+  const atRisk = [];
+  [...pending.values()].filter((entry) => entry.blocked)
+    .concat([...pending.values()].filter((entry) => entry.overdue && !entry.blocked))
+    .forEach((entry) => {
+      const label = entry.blocked ? `${entry.label} – blocked` : entry.label;
+      if (!atRisk.includes(label)) atRisk.push(label);
+    });
+
   return {
     status: reasons.length
       ? { label: "At risk", tone: "risk", reason: reasons.join(", ") }
       : { label: "On track", tone: "good", reason: "" },
+    atRisk,
     completed,
     pendingGroups,
   };
@@ -1747,6 +1779,11 @@ function executiveSummaryLines(summary) {
     tone: summary.status.tone,
   }];
 
+  /* Which tasks the Status line is counting, so "7 tasks carried over" can be acted on. */
+  if (summary.atRisk && summary.atRisk.length) {
+    lines.push({ label: "At risk", value: summary.atRisk.join(", "), tone: "" });
+  }
+
   lines.push({
     label: "Completed till date",
     value: summary.completed.length ? summary.completed.join(" \u00b7 ") : "Nothing completed yet",
@@ -1759,11 +1796,13 @@ function executiveSummaryLines(summary) {
     tone: "",
     items: summary.pendingGroups.map((group) => {
       /* One bracket, not two: "(Blocked) (reason)" back to back reads as a stutter. */
+      /* Platform, Blocked and the comment share one bracket: "(Android – Blocked: reason)". */
       const tasks = group.tasks.map((task) => {
         const parts = [];
         if (task.blocked) parts.push("Blocked");
         if (task.note) parts.push(task.note);
-        return parts.length ? `${task.title} (${parts.join(": ")})` : task.title;
+        const detail = [task.platform, parts.join(": ")].filter(Boolean).join(" – ");
+        return detail ? `${task.title} (${detail})` : task.title;
       });
       return `${group.owner}: ${tasks.join(", ")}`;
     }),
@@ -2992,8 +3031,10 @@ function saveProjectScope(event) {
   if (!project) return;
 
   const picked = (container) => [...container.querySelectorAll("input:checked")].map((box) => box.value);
+  const before = JSON.stringify([project.platforms || [], project.channels || []]);
   project.platforms = picked(nodes.projPlatforms);
   project.channels = picked(nodes.projChannels);
+  const scopeChanged = before !== JSON.stringify([project.platforms, project.channels]);
   project.techTeam = nodes.projScopeTechTeam.value;
   project.vendorName = project.techTeam === "outsourced" ? nodes.projScopeVendor.value.trim() : "";
   project.dataRequirements = {
@@ -3002,11 +3043,141 @@ function saveProjectScope(event) {
     userIdentifier: nodes.projScopeIdentifier.value.trim(),
   };
 
+  /* Domains or channels changed: bring the weekly tasks in line (see syncProjectScope). */
+  const synced = scopeChanged ? syncProjectScope(project) : null;
+  if (synced) realignWeekOrder(project.id);
+
   project.updatedAt = new Date().toISOString();
   saveState();
   toggleProjectScope(false);
   renderAll();
-  showAppInfo("Integration scope updated. Weeks already generated keep their tasks — use “Add week from template” if new domains need new work.");
+  if (!synced) {
+    showAppInfo("Integration scope updated.");
+  } else {
+    const parts = [];
+    if (synced.added) parts.push(`${synced.added} task(s) added`);
+    if (synced.removed) parts.push(`${synced.removed} removed`);
+    if (synced.kept) parts.push(`${synced.kept} kept because they already had updates`);
+    showAppSuccess(`Integration scope updated${parts.length ? ` — ${parts.join(", ")}` : " — no task changes needed"}.`);
+  }
+}
+
+/* ---- Keep a project's tasks in step with its Integration Scope ---- */
+
+/* Asked for (Nov 2026): adding a domain or channel to a running project (iOS, CRM...) adds its
+   master-plan tasks to the right weeks; removing one removes them. Tasks are matched to the plan
+   by phase + title + domain, the way they were generated; hand-added tasks are never touched.
+   Removing work that already has updates (a status, comment, blocker or completion date) is
+   confirmed first. Returns { added, removed, kept }. */
+/* Title compared loosely (case, punctuation, "set up"/"setup"…) so a project created under
+   slightly different plan wording is not given a duplicate of a task it already has. */
+function scopeTaskKey(phase, title, domain) {
+  return [String(phase || "").trim().toLowerCase(), importWords(title), String(domain || "").trim().toLowerCase()].join("|");
+}
+
+function planTasksFor(project, { onlyMatching }) {
+  const list = [];
+  [...state.weekTemplates].sort((left, right) => left.week - right.week).forEach((stage) => {
+    const tasks = onlyMatching ? templateTasksForProject(stage.tasks || [], project) : (stage.tasks || []);
+    tasks.forEach((task) => {
+      const domain = (task.scope && task.scope === stage.label) ? "All" : (task.scope || "");
+      list.push({ task, phase: stage.label, key: scopeTaskKey(stage.label, task.title, domain) });
+    });
+  });
+  return list;
+}
+
+function taskHasWork(task) {
+  return (task.status && task.status !== "not started")
+    || ["comments", "blocker", "date"].some((field) => String(task[field] || "").trim());
+}
+
+/* `addOnly` + `onlyPlatforms`: the quiet variant used when a project is opened — add the tasks of
+   the given platforms, never remove anything, never ask. */
+function syncProjectScope(project, { addOnly = false, onlyPlatforms = null } = {}) {
+  /* Old audit names first, or the renamed plan tasks would look missing and be added twice. */
+  renameLegacyAuditTasks(project.id);
+  const weeks = projectWeeksSorted(project.id);
+  const result = { added: 0, removed: 0, kept: 0 };
+  if (!weeks.length) return result;
+
+  const wanted = planTasksFor(project, { onlyMatching: true })
+    .filter(({ task }) => !onlyPlatforms || (task.platforms || []).some((name) => onlyPlatforms.includes(name)));
+  const wantedKeys = new Set(wanted.map((item) => item.key));
+  const planKeys = new Set(planTasksFor(project, { onlyMatching: false }).map((item) => item.key));
+
+  /* Keyed lists, not single entries: the plan can hold the same task twice (two "Deeplinks"
+     rows for Android in staging), and each one counts. */
+  const existing = new Map();
+  weeks.forEach((week) => (week.tasks || []).forEach((task) => {
+    if (task.copiedFromTaskId) return;
+    const key = scopeTaskKey(task.phase, task.title, task.domain);
+    if (!existing.has(key)) existing.set(key, []);
+    existing.get(key).push({ task, week });
+  }));
+
+  /* Removed from scope: plan tasks no longer wanted. */
+  const leaving = addOnly ? [] : [...existing.entries()]
+    .filter(([key]) => planKeys.has(key) && !wantedKeys.has(key))
+    .flatMap(([, entries]) => entries);
+  const withWork = leaving.filter(({ task }) => taskHasWork(task));
+  let removeWorked = true;
+  if (withWork.length) {
+    removeWorked = confirm(`${withWork.length} task(s) for the domains/channels you removed already have updates `
+      + `(status, comments or dates):\n\n${withWork.slice(0, 8).map(({ task }) => `• ${task.title}${task.domain ? ` (${task.domain})` : ""}`).join("\n")}`
+      + `${withWork.length > 8 ? "\n…" : ""}\n\nOK = remove them too.  Cancel = keep those, remove only the untouched ones.`);
+  }
+  leaving.forEach(({ task, week }) => {
+    if (taskHasWork(task) && !removeWorked) {
+      result.kept += 1;
+      return;
+    }
+    const copies = new Set(taskContinuations(task, project.id).map((copy) => copy.id));
+    weeks.forEach((item) => {
+      if ((item.tasks || []).some((other) => copies.has(other.id))) item.tasks = item.tasks.filter((other) => !copies.has(other.id));
+    });
+    week.tasks = week.tasks.filter((other) => other.id !== task.id);
+    result.removed += 1;
+  });
+
+  /* Added to scope: wanted plan tasks the project does not have yet, filed into the week the
+     plan places them in (the last week if the project is shorter than that). */
+  const cycleWeeks = Math.min(Math.max(Number(project.cycleWeeks) || weeks.length || DEFAULT_CYCLE_WEEKS,
+    MIN_CYCLE_WEEKS), MAX_CYCLE_WEEKS);
+  const anchor = new Date(`${projectAnchorDate(project)}T00:00:00`);
+  /* As many of each as the plan has, minus those the project already holds. */
+  const have = new Map([...existing.entries()].map(([key, entries]) => [key, entries.length]));
+  wanted.forEach(({ task, phase, key }) => {
+    if ((have.get(key) || 0) > 0) {
+      have.set(key, have.get(key) - 1);
+      return;
+    }
+    const index = Math.min(PlanEngine.placementFor(task, cycleWeeks, 0, templateMeta), weeks.length - 1);
+    const week = weeks[index];
+    const due = Number.isNaN(anchor.getTime()) ? "" : toInputDate(shiftDays(anchor, resolveTaskOffset(task, cycleWeeks)));
+    week.tasks = week.tasks || [];
+    week.tasks.push(templateTaskToUpdateTask(task, week.weekStart, due, phase));
+    result.added += 1;
+  });
+
+  return result;
+}
+
+/* A platform in the project's scope with no tasks at all — ticked before scope changes synced
+   tasks (Nov 2026: iOS added to Livguard on the live site, no iOS work appeared) — gets its plan
+   tasks when the project is opened. Add-only; a platform that already has any task is left as
+   it is, so tasks someone deleted by hand do not come back. */
+const SCOPE_PLATFORM_DOMAINS = { "Website": "website", "Android": "android", "iOS": "ios", "Web App": "web app", "REST API": "rest api" };
+
+function fillMissingPlatformTasks(projectId) {
+  const project = state.projects.find((item) => item.id === projectId);
+  if (!project) return false;
+  const present = new Set(projectWeeksSorted(projectId)
+    .flatMap((week) => week.tasks || [])
+    .map((task) => String(task.domain || "").trim().toLowerCase()));
+  const missing = (project.platforms || []).filter((name) => SCOPE_PLATFORM_DOMAINS[name] && !present.has(SCOPE_PLATFORM_DOMAINS[name]));
+  if (!missing.length) return false;
+  return syncProjectScope(project, { addOnly: true, onlyPlatforms: missing }).added > 0;
 }
 
 function renderProjectPhases(project, updates) {
@@ -4717,6 +4888,476 @@ async function loadAdminUsage() {
   });
 }
 
+/* ---------- Import status from an existing Google Sheet / Excel report ---------- */
+
+/* People kept weekly reports in their own sheet layouts, so there is no template to rely on.
+   The import needs only two columns — task name and status — and treats everything else as
+   optional. It does not recreate the old sheet: the project is created with the standard plan
+   first, and the sheet brings that plan up to date (status, owner, comments, completed date).
+
+   1. Upload .xlsx / .xls / .csv (read in the browser; SheetJS is loaded only when needed)
+   2. Pick the tab (or all tabs, later tabs winning) and confirm the guessed columns
+   3. Each sheet row is matched to a task in the project by name; the person confirms or
+      corrects each match, or adds the row as a new task, or skips it
+   4. Apply — one ordinary edit, saved and synced like any other */
+
+const XLSX_URL = "https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js";
+
+const IMPORT_FIELDS = [
+  { key: "task", label: "Task", required: true, pattern: /task|activit|item|deliverable|description|particular|action|milestone/ },
+  { key: "status", label: "Status", required: true, pattern: /status|state|progress/ },
+  { key: "owner", label: "Owner", pattern: /owner|assignee|responsib|\bpoc\b|assigned|\bby\b/ },
+  { key: "comments", label: "Comments", pattern: /comment|remark|note|update|blocker|dependenc/ },
+  { key: "date", label: "Completed on", pattern: /complet|done on|date|\beta\b/ },
+  { key: "domain", label: "Domain / platform", pattern: /domain|platform|channel|module|scope|sdk/ },
+];
+
+let importState = null;
+
+function loadXlsxLibrary() {
+  if (window.XLSX) return Promise.resolve(window.XLSX);
+  return new Promise((resolve, reject) => {
+    const script = document.createElement("script");
+    script.src = XLSX_URL;
+    script.onload = () => (window.XLSX ? resolve(window.XLSX) : reject(new Error("library did not load")));
+    script.onerror = () => reject(new Error("could not download the spreadsheet reader — check your connection"));
+    document.head.append(script);
+  });
+}
+
+function openImportDialog() {
+  const projectId = uiState.projectId;
+  if (!projectId || !canEditProject(projectId)) {
+    showAppInfo("You need edit access to this project to import into it.");
+    return;
+  }
+  importState = { projectId, workbook: null, tab: "", headerRow: 0, mapping: {}, rows: [], matches: [] };
+  const project = state.projects.find((item) => item.id === projectId);
+  document.getElementById("importTitle").textContent = `Import status into “${project ? project.name : "project"}”`;
+  document.getElementById("importOverlay").hidden = false;
+  renderImportStep();
+}
+
+function closeImportDialog() {
+  document.getElementById("importOverlay").hidden = true;
+  importState = null;
+}
+
+/* ---- reading the file ---- */
+
+async function handleImportFile(file) {
+  const body = document.getElementById("importBody");
+  body.querySelector(".import-status").textContent = "Reading the file…";
+  try {
+    const XLSX = await loadXlsxLibrary();
+    const buffer = await file.arrayBuffer();
+    importState.workbook = XLSX.read(buffer, { type: "array", cellDates: false });
+    importState.fileName = file.name;
+    const tabs = importState.workbook.SheetNames;
+    /* Tabs are usually one per week, newest last — the latest status. */
+    importState.tab = tabs[tabs.length - 1];
+    prepareImportRows({ guess: true });
+    renderImportStep();
+  } catch (error) {
+    body.querySelector(".import-status").textContent = `Could not read that file (${error.message}).`;
+  }
+}
+
+function sheetRows(tabName) {
+  const sheet = importState.workbook.Sheets[tabName];
+  if (!sheet) return [];
+  return window.XLSX.utils.sheet_to_json(sheet, { header: 1, raw: true, defval: "", blankrows: false });
+}
+
+const normaliseHeader = (value) => String(value || "").toLowerCase().replace(/\s+/g, " ").trim();
+
+/* The header is the row, near the top, that names the most of the fields we know. */
+function findHeaderRow(rows) {
+  let best = 0;
+  let bestScore = 0;
+  rows.slice(0, 30).forEach((row, index) => {
+    const score = row.filter((cell) => {
+      const text = normaliseHeader(cell);
+      return text && text.length < 40 && IMPORT_FIELDS.some((field) => field.pattern.test(text));
+    }).length;
+    if (score > bestScore) {
+      best = index;
+      bestScore = score;
+    }
+  });
+  return best;
+}
+
+function guessMapping(headers) {
+  const mapping = {};
+  const taken = new Set();
+  /* Status before task: "Task status" is a status column, not the task name. */
+  ["status", "task", "owner", "comments", "date", "domain"].forEach((key) => {
+    const field = IMPORT_FIELDS.find((item) => item.key === key);
+    const index = headers.findIndex((header, position) => !taken.has(position) && field.pattern.test(normaliseHeader(header)));
+    if (index >= 0) {
+      mapping[key] = headers[index];
+      taken.add(index);
+    }
+  });
+  return mapping;
+}
+
+/* Rows from the chosen tab (or every tab, in order, so later tabs win), as objects keyed by
+   field, using the header *names* in the mapping so tabs with shifted columns still line up. */
+function prepareImportRows({ guess = false } = {}) {
+  const tabs = importState.tab === "*" ? importState.workbook.SheetNames : [importState.tab];
+  const rows = [];
+  let headersSeen = [];
+
+  tabs.forEach((tab) => {
+    const raw = sheetRows(tab);
+    if (!raw.length) return;
+    const headerIndex = findHeaderRow(raw);
+    const headers = raw[headerIndex].map((cell) => String(cell || "").trim());
+    headers.forEach((header) => { if (header && !headersSeen.includes(header)) headersSeen.push(header); });
+    if (guess && !Object.keys(importState.mapping).length) importState.mapping = guessMapping(headers);
+
+    raw.slice(headerIndex + 1).forEach((cells) => {
+      const pick = (key) => {
+        const header = importState.mapping[key];
+        if (!header) return "";
+        const index = headers.indexOf(header);
+        return index >= 0 ? cells[index] : "";
+      };
+      const task = String(pick("task") || "").trim();
+      if (!task) return;
+      rows.push({
+        tab,
+        task,
+        statusText: String(pick("status") || "").trim(),
+        owner: String(pick("owner") || "").trim(),
+        comments: String(pick("comments") || "").trim(),
+        date: parseImportDate(pick("date")),
+        domain: String(pick("domain") || "").trim(),
+      });
+    });
+  });
+
+  importState.headers = headersSeen;
+  importState.rows = rows;
+  importState.matches = rows.map((row) => suggestMatch(row));
+}
+
+/* ---- understanding the values ---- */
+
+/* The sheet's own words → the app's statuses. Negatives first ("not done" is not "done"). */
+function mapImportStatus(text) {
+  const value = String(text || "").toLowerCase().trim();
+  if (!value) return null;
+  if (/not\s*started|yet\s*to\s*start|\bna\b|\btbd\b|not\s*yet/.test(value)) return "not started";
+  if (/not\s*(done|complete)|incomplete|pending|to\s*do|todo|\bopen\b|await|waiting/.test(value)) return "pending";
+  if (/block|on\s*hold|\bhold\b|stuck/.test(value)) return "blocked";
+  if (/delay|overdue|\blate\b/.test(value)) return "delayed";
+  if (/progress|\bwip\b|ongoing|started|working|in-progress|partial/.test(value)) return "in progress";
+  if (/done|complete|closed|\byes\b|^y$|live|finish|deliver|✓|✔|true/.test(value)) return "completed";
+  return null;
+}
+
+/* Dates arrive as Excel serial numbers (date cells) or as text; text is read day-first
+   (12/11/2026 is 12 November), the way these sheets are written. */
+function parseImportDate(value) {
+  if (value === "" || value === null || value === undefined) return "";
+  if (typeof value === "number" && window.XLSX && window.XLSX.SSF) {
+    const parts = window.XLSX.SSF.parse_date_code(value);
+    if (parts && parts.y > 1990) return `${parts.y}-${String(parts.m).padStart(2, "0")}-${String(parts.d).padStart(2, "0")}`;
+    return "";
+  }
+  const text = String(value).trim();
+  let match = text.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+  if (match) return `${match[1]}-${match[2].padStart(2, "0")}-${match[3].padStart(2, "0")}`;
+  match = text.match(/^(\d{1,2})[/.-](\d{1,2})[/.-](\d{2,4})$/);
+  if (match) {
+    const year = match[3].length === 2 ? `20${match[3]}` : match[3];
+    return `${year}-${match[2].padStart(2, "0")}-${match[1].padStart(2, "0")}`;
+  }
+  const months = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"];
+  match = text.toLowerCase().match(/(\d{1,2})(?:st|nd|rd|th)?[\s-]*([a-z]{3})[a-z]*[\s,-]*(\d{4})?/)
+    || null;
+  if (match && months.includes(match[2])) {
+    const year = match[3] || String(new Date().getFullYear());
+    return `${year}-${String(months.indexOf(match[2]) + 1).padStart(2, "0")}-${match[1].padStart(2, "0")}`;
+  }
+  match = text.toLowerCase().match(/([a-z]{3})[a-z]*\s+(\d{1,2})(?:st|nd|rd|th)?,?\s*(\d{4})?/);
+  if (match && months.includes(match[1])) {
+    const year = match[3] || String(new Date().getFullYear());
+    return `${year}-${String(months.indexOf(match[1]) + 1).padStart(2, "0")}-${match[2].padStart(2, "0")}`;
+  }
+  return "";
+}
+
+/* ---- matching sheet rows to the project's tasks ---- */
+
+/* Words people use for the same task: "SDK integration" is the plan's "SDK Set Up", and
+   "finalisation" / "finalised" / "finalized" are one word. */
+const IMPORT_SYNONYMS = { integration: "setup", integrate: "setup", integrated: "setup", implementation: "setup",
+  configuration: "setup", configure: "setup", config: "setup", installation: "setup", install: "setup",
+  kickoff: "kick", kick: "kick", meeting: "call", call: "call" };
+const importStem = (word) => {
+  if (IMPORT_SYNONYMS[word]) return IMPORT_SYNONYMS[word];
+  return word.length > 5 ? word.replace(/(isation|ization|ised|ized|ise|ize|ation|ing|ed|es)$/, "") : word;
+};
+const importWords = (text) => String(text || "").toLowerCase().replace(/&/g, " and ")
+  .replace(/set\s*-?\s*up/g, "setup").replace(/kick\s*-?\s*off/g, "kickoff")
+  .replace(/[^a-z0-9]+/g, " ").trim()
+  .split(" ").filter(Boolean).map(importStem).join(" ");
+
+/* The project's own tasks, one per real task: forwarded copies are continuations of a task,
+   not tasks of their own, so they are never import targets. */
+function importTargets(projectId) {
+  const weeks = projectWeeksSorted(projectId);
+  const targets = [];
+  weeks.forEach((week, index) => {
+    (week.tasks || []).forEach((task) => {
+      if (task.copiedFromTaskId) return;
+      targets.push({ task, week, weekNumber: index + 1, words: importWords(task.title), domain: importWords(task.domain) });
+    });
+  });
+  return targets;
+}
+
+function similarity(left, right) {
+  if (!left || !right) return 0;
+  if (left === right || left.replace(/ /g, "") === right.replace(/ /g, "")) return 1;
+  if (left.includes(right) || right.includes(left)) return 0.85;
+  const a = new Set(left.split(" ").filter((word) => word.length > 1));
+  const b = new Set(right.split(" ").filter((word) => word.length > 1));
+  if (!a.size || !b.size) return 0;
+  const shared = [...a].filter((word) => b.has(word)).length;
+  return shared / new Set([...a, ...b]).size;
+}
+
+/* A suggestion is a list of task ids (several when one title exists per domain and the sheet
+   does not say which), how sure it is, and "skip" when nothing comes close. */
+function suggestMatch(row) {
+  const targets = importTargets(importState.projectId);
+  const words = importWords(row.task);
+  const domain = importWords(row.domain);
+
+  let best = 0;
+  targets.forEach((target) => { best = Math.max(best, similarity(words, target.words)); });
+  if (best < 0.5) return { value: "skip", confidence: 0 };
+
+  const top = targets.filter((target) => similarity(words, target.words) === best);
+  let chosen = top;
+  if (domain) {
+    const byDomain = top.filter((target) => target.domain && (target.domain.includes(domain) || domain.includes(target.domain)));
+    if (byDomain.length) chosen = byDomain;
+  }
+  const value = chosen.length === 1 ? chosen[0].task.id : `title:${chosen[0].words}`;
+  return { value, confidence: best };
+}
+
+function importOptionsHtml(selected) {
+  const targets = importTargets(importState.projectId);
+  const byTitle = new Map();
+  targets.forEach((target) => {
+    if (!byTitle.has(target.words)) byTitle.set(target.words, []);
+    byTitle.get(target.words).push(target);
+  });
+
+  const options = [
+    `<option value="skip" ${selected === "skip" ? "selected" : ""}>— Skip this row —</option>`,
+    `<option value="new" ${selected === "new" ? "selected" : ""}>+ Add as a new task</option>`,
+  ];
+  [...byTitle.values()].forEach((group) => {
+    if (group.length > 1) {
+      const value = `title:${group[0].words}`;
+      const where = group.map((item) => [item.task.phase, item.task.domain].filter(Boolean).join(" / ") || `Week ${item.weekNumber}`);
+      options.push(`<option value="${escapeHtml(value)}" ${selected === value ? "selected" : ""}>${escapeHtml(group[0].task.title)} — all ${group.length} (${escapeHtml(where.join("; "))})</option>`);
+    }
+    group.forEach((target) => {
+      const where = [target.task.phase, target.task.domain].filter(Boolean).join(" / ");
+      const label = `${target.task.title}${where ? ` — ${where}` : ""} · Week ${target.weekNumber}`;
+      options.push(`<option value="${escapeHtml(target.task.id)}" ${selected === target.task.id ? "selected" : ""}>${escapeHtml(label)}</option>`);
+    });
+  });
+  return options.join("");
+}
+
+/* ---- the dialog ---- */
+
+function renderImportStep() {
+  const body = document.getElementById("importBody");
+  const apply = document.getElementById("importApply");
+
+  if (!importState.workbook) {
+    apply.hidden = true;
+    body.innerHTML = `
+      <p class="muted import-intro">Upload your existing weekly report — download it from Google Sheets with
+        <strong>File → Download → Microsoft Excel (.xlsx)</strong> or CSV. Any layout works: it only needs a
+        column of task names and a column of statuses. Nothing changes until you press Apply.</p>
+      <label class="import-drop">
+        <input type="file" id="importFile" accept=".xlsx,.xls,.csv" />
+        <span>Choose a .xlsx or .csv file</span>
+      </label>
+      <p class="muted import-status"></p>`;
+    body.querySelector("#importFile").addEventListener("change", (event) => {
+      if (event.target.files && event.target.files[0]) handleImportFile(event.target.files[0]);
+    });
+    return;
+  }
+
+  const tabs = importState.workbook.SheetNames;
+  const fieldSelect = (field) => `
+    <label class="import-map-field">${field.label}${field.required ? " *" : ""}
+      <select data-import-field="${field.key}">
+        <option value="">${field.required ? "— choose —" : "— none —"}</option>
+        ${importState.headers.map((header) => `<option value="${escapeHtml(header)}" ${importState.mapping[field.key] === header ? "selected" : ""}>${escapeHtml(header)}</option>`).join("")}
+      </select>
+    </label>`;
+
+  const ready = importState.mapping.task && importState.mapping.status;
+  const rows = importState.rows;
+  const counts = { matched: 0, check: 0, skipped: 0 };
+  importState.matches.forEach((match) => {
+    if (match.value === "skip") counts.skipped += 1;
+    else if (match.value !== "new" && match.confidence < 0.85) counts.check += 1;
+    else counts.matched += 1;
+  });
+
+  const previewRows = rows.map((row, index) => {
+    const match = importState.matches[index];
+    const status = mapImportStatus(row.statusText);
+    const badge = match.value === "skip" ? `<span class="import-badge is-skip">Skip</span>`
+      : match.value === "new" ? `<span class="import-badge is-new">New</span>`
+        : match.confidence < 0.85 ? `<span class="import-badge is-check">Check</span>`
+          : `<span class="import-badge is-ok">Matched</span>`;
+    return `
+      <tr class="${match.value === "skip" ? "is-skipped" : ""}">
+        <td>${badge}</td>
+        <td><strong>${escapeHtml(row.task)}</strong>${row.domain ? `<br><span class="muted">${escapeHtml(row.domain)}</span>` : ""}</td>
+        <td>${escapeHtml(row.statusText || "—")}${status ? `<br><span class="muted">→ ${escapeHtml(status.charAt(0).toUpperCase() + status.slice(1))}</span>` : row.statusText ? `<br><span class="muted">→ unchanged</span>` : ""}</td>
+        <td>${escapeHtml(row.owner || "—")}</td>
+        <td class="import-comment">${escapeHtml(row.comments || "")}</td>
+        <td><select class="import-target" data-import-row="${index}">${importOptionsHtml(match.value)}</select></td>
+      </tr>`;
+  }).join("");
+
+  body.innerHTML = `
+    <div class="import-toolbar">
+      <span class="muted">${escapeHtml(importState.fileName || "")}</span>
+      ${tabs.length > 1 ? `
+        <label class="import-map-field">Tab
+          <select id="importTab">
+            ${tabs.map((tab) => `<option value="${escapeHtml(tab)}" ${importState.tab === tab ? "selected" : ""}>${escapeHtml(tab)}</option>`).join("")}
+            <option value="*" ${importState.tab === "*" ? "selected" : ""}>All tabs (later tabs win)</option>
+          </select>
+        </label>` : ""}
+      <button type="button" id="importRestart" class="ghost-button small-button">Choose another file</button>
+    </div>
+    <div class="import-map">${IMPORT_FIELDS.map(fieldSelect).join("")}</div>
+    ${ready ? `
+      <p class="import-counts">
+        <span class="import-badge is-ok">${counts.matched} matched</span>
+        <span class="import-badge is-check">${counts.check} to check</span>
+        <span class="import-badge is-skip">${counts.skipped} skipped</span>
+        <span class="muted">— ${rows.length} rows. Change any “Apply to” before importing.</span>
+      </p>
+      <div class="import-table-wrap">
+        <table class="import-table">
+          <thead><tr><th></th><th>In the sheet</th><th>Status</th><th>Owner</th><th>Comments</th><th>Apply to</th></tr></thead>
+          <tbody>${previewRows || `<tr><td colspan="6" class="muted">No rows with a task name under the header.</td></tr>`}</tbody>
+        </table>
+      </div>` : `<p class="muted">Choose which columns hold the <strong>Task</strong> and the <strong>Status</strong> to see the preview.</p>`}`;
+
+  apply.hidden = false;
+  apply.disabled = !ready || counts.matched + counts.check + importState.matches.filter((m) => m.value === "new").length === 0;
+
+  body.querySelectorAll("[data-import-field]").forEach((select) => {
+    select.addEventListener("change", () => {
+      importState.mapping[select.dataset.importField] = select.value;
+      prepareImportRows();
+      renderImportStep();
+    });
+  });
+  const tabSelect = body.querySelector("#importTab");
+  if (tabSelect) tabSelect.addEventListener("change", () => {
+    importState.tab = tabSelect.value;
+    prepareImportRows();
+    renderImportStep();
+  });
+  body.querySelector("#importRestart").addEventListener("click", () => {
+    importState = { projectId: importState.projectId, workbook: null, tab: "", mapping: {}, rows: [], matches: [] };
+    renderImportStep();
+  });
+  body.querySelectorAll(".import-target").forEach((select) => {
+    select.addEventListener("change", () => {
+      importState.matches[Number(select.dataset.importRow)] = { value: select.value, confidence: 1 };
+      renderImportStep();
+    });
+  });
+}
+
+/* ---- applying ---- */
+
+function applyImport() {
+  const { projectId, rows, matches } = importState;
+  const targets = importTargets(projectId);
+  const byId = new Map(targets.map((target) => [target.task.id, target]));
+  const touched = new Set();
+  let added = 0;
+
+  const update = (task, row) => {
+    const status = mapImportStatus(row.statusText);
+    if (status) {
+      task.status = status;
+      if (status === "completed") {
+        if (row.date) task.date = row.date;
+      } else {
+        task.date = "";
+      }
+    }
+    if (row.owner) task.owner = row.owner;
+    if (row.comments) task.comments = row.comments;
+    touched.add(task.id);
+  };
+
+  /* In sheet order, so a later row (or a later tab) wins over an earlier one. */
+  rows.forEach((row, index) => {
+    const value = matches[index].value;
+    if (value === "skip") return;
+
+    if (value === "new") {
+      const weeks = projectWeeksSorted(projectId);
+      const today = toInputDate(new Date());
+      const week = [...weeks].reverse().find((item) => item.weekStart <= today) || weeks[0];
+      if (!week) return;
+      const task = templateTaskToUpdateTask({ title: row.task, scope: row.domain, owner: row.owner }, week.weekStart, null, "");
+      week.tasks = week.tasks || [];
+      week.tasks.push(task);
+      update(task, row);
+      added += 1;
+      return;
+    }
+
+    const list = value.startsWith("title:")
+      ? targets.filter((target) => target.words === value.slice(6))
+      : [byId.get(value)].filter(Boolean);
+    list.forEach((target) => update(target.task, row));
+  });
+
+  stampProjectActivity(projectId);
+  saveState();
+  closeImportDialog();
+  renderAll();
+  showAppSuccess(`Imported: ${touched.size - added} task(s) updated${added ? `, ${added} added` : ""}. Check the weekly reports, then share the report as usual.`);
+}
+
+function wireImportControls() {
+  const open = document.getElementById("importSheetBtn");
+  if (open) open.addEventListener("click", () => openImportDialog());
+  const close = document.getElementById("importClose");
+  if (close) close.addEventListener("click", () => closeImportDialog());
+  const apply = document.getElementById("importApply");
+  if (apply) apply.addEventListener("click", () => applyImport());
+}
+
 /* ---------- Re-apply template wording to existing projects ---------- */
 
 /* Tasks are copied into a project when it is created, so later edits to the template do not
@@ -5799,6 +6440,9 @@ function handleReportsIndexInput(event) {
          the next one. This replaced Pending's earlier behaviour of *moving* a carried task into
          the week being triaged: one status cannot both move a task and copy it. */
       if (FORWARDING_STATUSES.includes(field.value)) forwardTaskToNextWeek(task, update);
+      /* Rule: a completed task cannot be in a later week. Copies already forwarded are removed
+         (their comments kept on this task), instead of being carried on week after week. */
+      if (field.value === "completed") removeLaterCopies(task, update.projectId);
 
       /* Then rebuild the whole list. Whether a task counts as carried is read off its status,
          and every *later* week shows it — so patching only this week's summary left finished
@@ -5919,6 +6563,111 @@ function forwardTaskToNextWeek(task, editingWeek, { auto = false } = {}) {
    advances one week per real week, rather than a single click filling weeks 3 to 12 at once.
    Weeks are walked in order, so work stranded several weeks back steps forward through each of
    them and every week it was open in keeps a record of it. */
+/* ---- A task and its forwarded copies are one job ---- */
+
+/* Every later copy of a task (copies of copies included), found through copiedFromTaskId. */
+function taskContinuations(task, projectId) {
+  const all = projectWeeksSorted(projectId).flatMap((week) => week.tasks || []);
+  const found = [];
+  let frontier = [task.id];
+  while (frontier.length) {
+    const next = all.filter((item) => frontier.includes(item.copiedFromTaskId) && !found.includes(item));
+    found.push(...next);
+    frontier = next.map((item) => item.id);
+  }
+  return found;
+}
+
+/* Rule (asked for explicitly): once a task is marked completed it cannot be in any later week.
+   Its forwarded copies — and copies of those — are removed from the later weeks. Anything typed
+   only on a copy (a comment, an owner) is kept on the completed task first, so nothing is lost.
+   Earlier links are left as they were: they record what that week actually looked like.
+   Returns how many copies were removed. */
+function removeLaterCopies(task, projectId) {
+  const copies = taskContinuations(task, projectId);
+  if (!copies.length) return 0;
+
+  copies.forEach((copy) => {
+    if (!String(task.comments || "").trim() && String(copy.comments || "").trim()) task.comments = copy.comments;
+    if (!String(task.blocker || "").trim() && String(copy.blocker || "").trim()) task.blocker = copy.blocker;
+    if (!String(task.owner || "").trim() && String(copy.owner || "").trim()) task.owner = copy.owner;
+    if (!task.date && copy.status === "completed" && copy.date) task.date = copy.date;
+  });
+
+  const ids = new Set(copies.map((copy) => copy.id));
+  projectWeeksSorted(projectId).forEach((week) => {
+    if ((week.tasks || []).some((item) => ids.has(item.id))) {
+      week.tasks = week.tasks.filter((item) => !ids.has(item.id));
+    }
+  });
+  /* Nothing left downstream: let a later reopen forward afresh. */
+  delete task.forwardedToWeek;
+  return copies.length;
+}
+
+/* Data saved before the rule: a completed task that still has copies in later weeks. */
+function completeFinishedChains(projectId) {
+  let removed = 0;
+  projectWeeksSorted(projectId).forEach((week) => {
+    [...(week.tasks || [])].forEach((task) => {
+      if (task.status === "completed") removed += removeLaterCopies(task, projectId);
+    });
+  });
+  return removed > 0;
+}
+
+/* The ids of tasks whose job is finished: every link of a chain (original and copies) in
+   which any link is completed. The summary uses it so an earlier "in progress" link of work
+   completed later is not listed as pending or carried over. */
+function finishedChainTaskIds(weeks) {
+  const all = weeks.flatMap((week) => week.tasks || []);
+  const byId = new Map(all.map((task) => [task.id, task]));
+  const rootOf = (task) => {
+    let current = task;
+    const seen = new Set();
+    while (current.copiedFromTaskId && byId.has(current.copiedFromTaskId) && !seen.has(current.id)) {
+      seen.add(current.id);
+      current = byId.get(current.copiedFromTaskId);
+    }
+    return current.id;
+  };
+  const doneRoots = new Set(all.filter((task) => task.status === "completed").map(rootOf));
+  return new Set(all.filter((task) => doneRoots.has(rootOf(task))).map((task) => task.id));
+}
+
+/* ---- Audit task names (Nov 2026) ---- */
+
+/* The plan renamed "Users and Events Audit" to "<Platform> Staging/Production Audit" and the
+   REST API "Data Validation" to "CRM Staging/Production Audit". Tasks are copied into a project
+   when it is created, so projects made before keep the old names until renamed here. Status,
+   owner, comments and dates are untouched — it is a rename only. Returns how many changed. */
+const AUDIT_RENAME_PLATFORMS = { "website": "Website", "web app": "Web App", "android": "Android", "ios": "iOS" };
+
+function renamedAuditTitle(task) {
+  const phase = String(task.phase || "");
+  const stage = /^staging/i.test(phase) ? "Staging" : /^production/i.test(phase) ? "Production" : "";
+  if (!stage) return "";
+  const domain = String(task.domain || "").trim().toLowerCase();
+  const title = String(task.title || "").trim().toLowerCase();
+  if (title === "users and events audit" && AUDIT_RENAME_PLATFORMS[domain]) return `${AUDIT_RENAME_PLATFORMS[domain]} ${stage} Audit`;
+  if (title === "data validation" && domain === "rest api") return `CRM ${stage} Audit`;
+  return "";
+}
+
+function renameLegacyAuditTasks(projectId) {
+  let changed = 0;
+  projectWeeksSorted(projectId).forEach((week) => {
+    (week.tasks || []).forEach((task) => {
+      const renamed = renamedAuditTitle(task);
+      if (renamed && renamed !== task.title) {
+        task.title = renamed;
+        changed += 1;
+      }
+    });
+  });
+  return changed > 0;
+}
+
 /* ---- Keep each week in plan order: arrivals at the end ---- */
 
 /* The master-plan week a task belongs to, as a 0-based index into the project's weeks, or null
@@ -5950,10 +6699,15 @@ function realignWeekOrder(projectId) {
   const project = state.projects.find((item) => item.id === projectId);
   if (!project || !canEditProject(projectId)) return false;
 
+  /* Same pass, same moments: renames from the plan first (so the plan lookup below finds the
+     tasks), then chains saved before the "completed is never in a later week" rule. */
+  let changed = renameLegacyAuditTasks(projectId);
+  changed = completeFinishedChains(projectId) || changed;
+  changed = fillMissingPlatformTasks(projectId) || changed;
+
   const weeks = projectWeeksSorted(projectId);
   const cycleWeeks = Math.min(Math.max(Number(project.cycleWeeks) || weeks.length || DEFAULT_CYCLE_WEEKS,
     MIN_CYCLE_WEEKS), MAX_CYCLE_WEEKS);
-  let changed = false;
 
   weeks.forEach((week, index) => {
     const tasks = week.tasks || [];

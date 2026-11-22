@@ -102,6 +102,30 @@ inputs inert and hides edit/add/delete controls), the owner line, and the Share 
 Not shared: the master plan (`state.weekTemplates`) and settings stay per browser.
 `build-standalone.py` strips the supabase-js tag; the single file is always local-only.
 
+## Import from sheet (existing weekly reports)
+
+Project page → **⬆ Import from sheet** (`openImportDialog`, editors only). **Switched off for now** (the button carries `hidden` in `index.html`) until it has been tried on real sheets — remove the attribute to turn it on. People kept weekly
+reports in their own sheet layouts — **there is no template, by the user's decision; this tool is
+the standard** — so the import needs only a task column and a status column, and does not
+recreate the old sheet: the project is created with the standard plan first, and the sheet
+updates that plan's tasks (status, owner, comments, completed date).
+
+- Reads .xlsx/.xls/.csv in the browser with SheetJS, **loaded on demand** from cdnjs
+  (`XLSX_URL`, ~880 KB) so normal page loads do not pay for it. Not in `sw.js` ASSETS.
+- Header row = the row in the first 30 that names the most known fields; columns are guessed
+  by `IMPORT_FIELDS` patterns (status guessed before task, so "Task status" is status) and kept
+  by **header name**, so "All tabs" lines up tabs whose columns moved. Default tab = the last
+  one (newest week); "All tabs" applies rows in order, later tabs winning.
+- Status words → app statuses in `mapImportStatus` (negatives first: "not done" ≠ "done");
+  unknown words leave the status unchanged. Dates: Excel serials, ISO, day-first d/m/y, "12th Nov".
+- Matching (`suggestMatch`): normalised words with stems and synonyms (`IMPORT_SYNONYMS`:
+  integration/config/install → setup, meeting → call), exact/contains/word-overlap, ≥0.5 to
+  suggest, <0.85 flagged "Check"; domain column narrows ties. A title that exists in several
+  places (SDK Set Up per platform, Email setup in staging and production) is offered as one
+  "all N" option plus each individually. Forwarded copies are never targets.
+- Unmatched rows are skipped by default; "+ Add as a new task" appends to the current week.
+  Apply is one ordinary edit (`saveState`), synced like any other.
+
 ## Master plan and cycle length
 
 `week-templates.json` carries a `version`, mirrored by `WEEK_TEMPLATE_VERSION` in `app.js`.
@@ -189,6 +213,14 @@ full plan.
 
 The 14 **Web App** tasks are not in the sheet — they mirror the Website tasks with Android/iOS
 timing, per the team's instruction. Regenerate them if the sheet gains a Web App domain.
+
+**Audit task names (Nov 2026, asked for).** The sheet's per-platform "Users and Events Audit" is
+named "<Platform> Staging Audit" / "<Platform> Production Audit" (Website, Web App, Android,
+iOS), and REST API's "Data Validation" (WebEngage OBM) is "CRM Staging/Production Audit" — CRM is
+the REST API domain (`PLATFORM_SHORT`). Applied by `audit_title()` in `tools/import-sheet.py`, so a
+re-import keeps them; plan version `2026-11-20-audit-names`. Projects created before are renamed
+in place by `renameLegacyAuditTasks()` (inside `realignWeekOrder`) — title only. WebPush Audit,
+Onsite Notification Audit and the "Fixes as per Audit Report" tasks keep their names.
 
 Known data slip in the sheet, imported as written rather than silently corrected: the five
 *Production* channel-setup rows (Email/SMS/WhatsApp/RCS/IVR) are due at N+10 in the Week 6 tab
@@ -306,8 +338,14 @@ The rules, and why they are what they are:
   with a counted reason. It says "from last week" only when that is literally true, and "from
   earlier weeks" otherwise. It never reads the project's own stage: that is an internal judgement
   and was deliberately kept out of this report.
-- **Blocked and a comment share one bracket** — `(Blocked: reason)`. Two adjacent bracket groups
-  read as a stutter.
+- **Platform in brackets** (Nov 2026, asked for): the same task exists once per platform, so
+  completed, at-risk and pending tasks name it — `SDK Set Up (Android)`. Only platform domains
+  (`SUMMARY_PLATFORMS`: Website, Android, iOS, Web App, Rest API); "All" and "Communication
+  Channels" get no bracket. Pending entries are now per owner + title + platform.
+- **An "At risk" line follows Status** whenever anything is blocked or carried over, naming the
+  tasks the Status count refers to: blocked first (`– blocked`), then carried-over, each once.
+- **Platform, Blocked and a comment share one bracket** — `(Android – Blocked: reason)`. Two
+  adjacent bracket groups read as a stutter.
 
 Earlier versions of this block listed every completed and incomplete task by name under a
 progress percentage, then became four lines ending in a "Next" line. Both were replaced; the
@@ -481,8 +519,17 @@ every one of its tasks is, active when it holds this week's work or anything alr
 pending otherwise. Editing phases means editing the plan, so its Edit button goes to Templates.
 
 Integration Scope is editable in place — platforms, channels, technical team, historical
-migration and user identifier. Changing them does **not** regenerate existing weeks, which would
-discard entered status; new domains need "Add week from template".
+migration and user identifier. Changing platforms or channels **updates the weekly tasks** (`syncProjectScope`, asked for in
+Nov 2026): master-plan tasks for an added domain/channel are filed into the week the plan places
+them in; tasks for a removed one are deleted with their forwarded copies. Tasks are matched to the
+plan by phase + loosely-compared title + domain (`scopeTaskKey`), counted per key because the plan
+repeats some tasks (two "Deeplinks" rows for Android in staging). Removing tasks that already
+have updates (status, comments, blocker, date) is confirmed first — Cancel keeps those. Hand-added
+tasks are never touched. Verified: a project synced up or down ends with the same task count as a
+fresh project generated with that scope. Platforms ticked **before** this existed (iOS on Livguard) are
+caught on open by `fillMissingPlatformTasks()` (inside `realignWeekOrder`): a platform in scope
+with **no** tasks at all gets its plan tasks, add-only, never a removal or a prompt; a platform
+that has any task is left alone, so hand-deleted tasks do not return.
 
 
 The project page holds two views of one project, toggled by `setProjectView()`: **details**
@@ -648,6 +695,14 @@ Rules that keep it from running away:
   moved task's dates are rewritten; tasks not in the plan are never moved. Stable and idempotent.
   Runs on load, after the shared projects load (so fixes sync for editable projects), when a
   project is opened, and when the reports screen opens — always before a render, never inside one.
+- **Rule: a completed task is never in a later week** (Nov 2026, the user's rule, after a bug:
+  SDK Set Up was marked completed in week 2 after the sweep had forwarded it to week 3, and the
+  copy kept being carried). Setting a task to completed calls `removeLaterCopies()`, which
+  **deletes** every later link of its chain (`copiedFromTaskId`) — the one deliberate exception
+  to "nothing is auto-deleted" below. Text typed only on a copy (comments, blocker, owner, a
+  completion date) is moved onto the completed task first. Earlier links keep their status as
+  history. `completeFinishedChains()` applies the rule to older data inside `realignWeekOrder()`.
+  The summary also treats a chain as one job (`finishedChainTaskIds`).
 - **Nothing is ever auto-deleted.** Completing a task stops *further* copies but leaves the ones
   already made, because someone may have typed into them. The brief asked for completion to
   "remove it from future weeks"; that cannot hold alongside copies being independently editable

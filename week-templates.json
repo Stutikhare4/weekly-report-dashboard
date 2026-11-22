@@ -5,7 +5,7 @@
     "6": "Week 6",
     "12": "Week 12"
   },
-  "version": "2026-09-07-fixed-weeks",
+  "version": "2026-11-20-audit-names",
   "baseCycleWeeks": 4,
   "cycleWeeksWithData": [
     4,
@@ -611,7 +611,7 @@
         },
         {
           "scope": "Website",
-          "title": "Users and Events Audit",
+          "title": "Website Staging Audit",
           "owner": "Webengage OBM",
           "priority": "medium",
           "platforms": [
@@ -627,7 +627,7 @@
         },
         {
           "scope": "Web App",
-          "title": "Users and Events Audit",
+          "title": "Web App Staging Audit",
           "owner": "Webengage OBM",
           "priority": "medium",
           "platforms": [
@@ -749,7 +749,7 @@
         },
         {
           "scope": "Android",
-          "title": "Users and Events Audit",
+          "title": "Android Staging Audit",
           "owner": "Webengage OBM",
           "priority": "medium",
           "platforms": [
@@ -833,7 +833,7 @@
         },
         {
           "scope": "iOS",
-          "title": "Users and Events Audit",
+          "title": "iOS Staging Audit",
           "owner": "Webengage OBM",
           "priority": "medium",
           "platforms": [
@@ -917,7 +917,7 @@
         },
         {
           "scope": "Rest API",
-          "title": "Data Validation",
+          "title": "CRM Staging Audit",
           "owner": "Webengage OBM",
           "priority": "medium",
           "platforms": [
@@ -1204,7 +1204,7 @@
         },
         {
           "scope": "Website",
-          "title": "Users and Events Audit",
+          "title": "Website Production Audit",
           "owner": "Webengage OBM",
           "priority": "medium",
           "platforms": [
@@ -1220,7 +1220,7 @@
         },
         {
           "scope": "Web App",
-          "title": "Users and Events Audit",
+          "title": "Web App Production Audit",
           "owner": "Webengage OBM",
           "priority": "medium",
           "platforms": [
@@ -1342,7 +1342,7 @@
         },
         {
           "scope": "Android",
-          "title": "Users and Events Audit",
+          "title": "Android Production Audit",
           "owner": "Webengage OBM",
           "priority": "medium",
           "platforms": [
@@ -1426,7 +1426,7 @@
         },
         {
           "scope": "iOS",
-          "title": "Users and Events Audit",
+          "title": "iOS Production Audit",
           "owner": "Webengage OBM",
           "priority": "medium",
           "platforms": [
@@ -1510,7 +1510,7 @@
         },
         {
           "scope": "Rest API",
-          "title": "Data Validation",
+          "title": "CRM Production Audit",
           "owner": "Webengage OBM",
           "priority": "medium",
           "platforms": [

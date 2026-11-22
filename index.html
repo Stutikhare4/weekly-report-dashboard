@@ -79,6 +79,23 @@
       </div>
     </div>
 
+    <!-- Import an existing weekly-report sheet into the open project (see openImportDialog). -->
+    <div id="importOverlay" class="modal-overlay" hidden>
+      <div class="modal-card import-card" role="dialog" aria-modal="true" aria-labelledby="importTitle">
+        <div class="modal-head">
+          <div>
+            <p class="eyebrow">Import from sheet</p>
+            <h2 id="importTitle">Import status</h2>
+          </div>
+          <button type="button" id="importClose" class="ghost-button">Close</button>
+        </div>
+        <div class="modal-body import-body" id="importBody"></div>
+        <div class="import-foot">
+          <button type="button" id="importApply" class="primary-button report-action" hidden>Apply to project</button>
+        </div>
+      </div>
+    </div>
+
     <div id="debugPanel" class="debug-panel" hidden>
       <div class="debug-head">
         <strong>Debug</strong>
@@ -324,6 +341,9 @@
               <div class="project-view-actions">
                 <button id="addWeekFromTemplate" class="overview-action" type="button">+ Add week from template</button>
                 <button id="openWeeklyReport" class="overview-action is-primary" type="button">📊 View Report</button>
+                <!-- Sheet import is built but switched off until it has been tried on real sheets:
+                     remove `hidden` to turn it on. -->
+                <button id="importSheetBtn" class="overview-action" type="button" hidden>⬆ Import from sheet</button>
                 <button id="editWeeklyReports" class="overview-action" type="button">Edit weekly reports</button>
               </div>
             </div>
